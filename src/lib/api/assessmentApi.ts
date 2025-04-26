@@ -1,4 +1,3 @@
-
 export interface Question {
   id: string;
   questionText: string;
@@ -53,7 +52,19 @@ export interface ResponseGroup {
   updatedAt: string;
 }
 
-// Mock API functions that will be replaced with real API calls in the future
+export interface UserResponse {
+  id: string;
+  userId: string;
+  questionId: string;
+  responseGroupId: string;
+  optionId?: string;
+  answerText?: string;
+  answerNumber?: number;
+  answerBoolean?: boolean;
+  answerMetadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
 
 import { mockQuestions, mockAssessmentResult } from '../mock/mockData';
 
