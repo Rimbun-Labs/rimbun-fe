@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Question, UserAnswer } from "@/lib/api/assessmentApi";
+import { Info, AlertCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface QuestionCardProps {
   question: Question;
@@ -13,6 +15,7 @@ interface QuestionCardProps {
   onNext: () => void;
   currentAnswer?: string | number | boolean;
   isLastQuestion: boolean;
+  error?: string;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -20,16 +23,23 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onAnswer,
   onNext,
   currentAnswer,
-  isLastQuestion
+  isLastQuestion,
+  error
 }) => {
   const [answer, setAnswer] = React.useState<string | number | boolean>(
     currentAnswer ?? (question.questionType === 'number' ? 0 : '')
   );
-  const [error, setError] = React.useState<string | null>(null);
+  const [validationError, setValidationError] = React.useState<string | null>(error || null);
+
+  React.useEffect(() => {
+    if (currentAnswer !== undefined) {
+      setAnswer(currentAnswer);
+    }
+  }, [currentAnswer]);
 
   const handleSubmit = () => {
-    if (answer === '') {
-      setError('Please provide an answer');
+    if (question.required && (answer === '' || answer === undefined)) {
+      setValidationError('Please provide an answer');
       return;
     }
 
@@ -38,6 +48,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       answer: answer,
     });
     
+    setValidationError(null);
     onNext();
   };
 
@@ -49,9 +60,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             value={answer as string}
             onValueChange={(value) => {
               setAnswer(value);
-              setError(null);
+              setValidationError(null);
             }}
             className="space-y-3"
+            aria-label={question.questionText}
           >
             {question.options?.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
@@ -74,9 +86,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               value={answer as number || ''}
               onChange={(e) => {
                 setAnswer(Number(e.target.value));
-                setError(null);
+                setValidationError(null);
               }}
               className="w-full"
+              placeholder={question.placeholder}
+              aria-invalid={!!validationError}
+              aria-describedby={validationError ? `error-${question.id}` : undefined}
             />
           </div>
         );
@@ -87,9 +102,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             value={String(answer)}
             onValueChange={(value) => {
               setAnswer(value === 'true');
-              setError(null);
+              setValidationError(null);
             }}
             className="space-y-3"
+            aria-label={question.questionText}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="true" id={`${question.id}-yes`} />
@@ -114,21 +130,47 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   return (
     <Card className="w-full max-w-3xl mx-auto animate-fade-in shadow-lg">
       <CardHeader>
-        <div className="text-sm font-medium text-primary mb-2">
-          {question.category.name}
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium text-primary mb-2">
+            {question.category.name}
+            {question.required && <span className="text-red-500 ml-1">*</span>}
+          </div>
+          {question.whyWeAsk && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Info className="h-4 w-4" />
+                    <span className="sr-only">Why we ask</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{question.whyWeAsk}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <CardTitle className="text-2xl">{question.questionText}</CardTitle>
         <CardDescription>{question.category.description}</CardDescription>
       </CardHeader>
       <CardContent>
         {renderAnswerInput()}
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        {validationError && (
+          <div className="mt-2 flex items-center text-sm text-destructive" id={`error-${question.id}`}>
+            <AlertCircle className="h-4 w-4 mr-1" />
+            <span>{validationError}</span>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="text-sm text-muted-foreground">
           Answer carefully - your financial profile depends on it
         </div>
-        <Button onClick={handleSubmit}>
+        <Button 
+          onClick={handleSubmit}
+          aria-label={isLastQuestion ? "Complete assessment" : "Next question"}
+        >
           {isLastQuestion ? "Complete" : "Next"}
         </Button>
       </CardFooter>
