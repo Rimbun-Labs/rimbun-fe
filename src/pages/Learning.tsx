@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ModuleCard from '@/components/learning/ModuleCard';
 import { mockLearningModules } from '@/lib/mock/mockData';
@@ -56,13 +55,22 @@ const Learning: React.FC = () => {
             {filteredModules.map((module) => (
               <ModuleCard
                 key={module.id}
-                id={module.id}
-                title={module.title}
-                description={module.description}
-                progress={module.progress}
-                totalLessons={module.totalLessons}
-                completedLessons={module.completedLessons}
-                imageUrl={module.imageUrl}
+                module={{
+                  id: module.id,
+                  title: module.title,
+                  description: module.description,
+                  duration: module.duration || 0,
+                  difficulty: module.difficulty || 'BEGINNER',
+                  progress: module.progress,
+                  isLocked: module.isLocked || false,
+                  imageUrl: module.imageUrl,
+                  totalLessons: module.totalLessons,
+                  completedLessons: module.completedLessons
+                }}
+                onStart={() => {
+                  // Handle module start
+                  console.log('Starting module:', module.id);
+                }}
               />
             ))}
           </div>
@@ -86,13 +94,22 @@ const Learning: React.FC = () => {
               .map((module) => (
                 <ModuleCard
                   key={module.id}
-                  id={module.id}
-                  title={module.title}
-                  description={module.description}
-                  progress={module.progress}
-                  totalLessons={module.totalLessons}
-                  completedLessons={module.completedLessons}
-                  imageUrl={module.imageUrl}
+                  module={{
+                    id: module.id,
+                    title: module.title,
+                    description: module.description,
+                    duration: module.duration || 0,
+                    difficulty: module.difficulty || 'BEGINNER',
+                    progress: module.progress,
+                    isLocked: module.isLocked || false,
+                    imageUrl: module.imageUrl,
+                    totalLessons: module.totalLessons,
+                    completedLessons: module.completedLessons
+                  }}
+                  onStart={() => {
+                    // Handle module start
+                    console.log('Starting module:', module.id);
+                  }}
                 />
               ))}
           </div>
@@ -116,13 +133,22 @@ const Learning: React.FC = () => {
               .map((module) => (
                 <ModuleCard
                   key={module.id}
-                  id={module.id}
-                  title={module.title}
-                  description={module.description}
-                  progress={module.progress}
-                  totalLessons={module.totalLessons}
-                  completedLessons={module.completedLessons}
-                  imageUrl={module.imageUrl}
+                  module={{
+                    id: module.id,
+                    title: module.title,
+                    description: module.description,
+                    duration: module.duration || 0,
+                    difficulty: module.difficulty || 'BEGINNER',
+                    progress: module.progress,
+                    isLocked: module.isLocked || false,
+                    imageUrl: module.imageUrl,
+                    totalLessons: module.totalLessons,
+                    completedLessons: module.completedLessons
+                  }}
+                  onStart={() => {
+                    // Handle module start
+                    console.log('Starting module:', module.id);
+                  }}
                 />
               ))}
           </div>
@@ -146,13 +172,22 @@ const Learning: React.FC = () => {
               .map((module) => (
                 <ModuleCard
                   key={module.id}
-                  id={module.id}
-                  title={module.title}
-                  description={module.description}
-                  progress={module.progress}
-                  totalLessons={module.totalLessons}
-                  completedLessons={module.completedLessons}
-                  imageUrl={module.imageUrl}
+                  module={{
+                    id: module.id,
+                    title: module.title,
+                    description: module.description,
+                    duration: module.duration || 0,
+                    difficulty: module.difficulty || 'BEGINNER',
+                    progress: module.progress,
+                    isLocked: module.isLocked || false,
+                    imageUrl: module.imageUrl,
+                    totalLessons: module.totalLessons,
+                    completedLessons: module.completedLessons
+                  }}
+                  onStart={() => {
+                    // Handle module start
+                    console.log('Starting module:', module.id);
+                  }}
                 />
               ))}
           </div>

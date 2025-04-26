@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -60,13 +59,13 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result }) => {
             <CardDescription>Overview of your investing preferences</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
-            <RiskProfileChart data={[
-              { attribute: "Risk", value: result.riskProfile },
-              { attribute: "Knowledge", value: result.knowledgeLevel },
-              { attribute: "Leverage", value: result.leverageAptitude },
-              { attribute: "Decision", value: result.decisionStyleScore },
-              { attribute: "Personality", value: result.personalityScore }
-            ]} />
+            <RiskProfileChart data={{
+              riskProfile: result.riskProfile,
+              knowledgeLevel: result.knowledgeLevel,
+              leverageAptitude: result.leverageAptitude,
+              decisionStyleScore: result.decisionStyleScore,
+              personalityScore: result.personalityScore
+            }} />
           </CardContent>
         </Card>
       </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
@@ -15,13 +14,13 @@ const Dashboard: React.FC = () => {
   const recommendations = mockRecommendations;
   
   // Convert assessment result to radar chart data format
-  const radarData = [
-    { attribute: "Risk", value: assessmentResult.riskProfile },
-    { attribute: "Knowledge", value: assessmentResult.knowledgeLevel },
-    { attribute: "Leverage", value: assessmentResult.leverageAptitude },
-    { attribute: "Decision", value: assessmentResult.decisionStyleScore },
-    { attribute: "Personality", value: assessmentResult.personalityScore },
-  ];
+  const radarData = {
+    riskProfile: assessmentResult.riskProfile,
+    knowledgeLevel: assessmentResult.knowledgeLevel,
+    leverageAptitude: assessmentResult.leverageAptitude,
+    decisionStyleScore: assessmentResult.decisionStyleScore,
+    personalityScore: assessmentResult.personalityScore
+  };
   
   return (
     <div className="space-y-8">
@@ -111,7 +110,10 @@ const Dashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PortfolioAllocation data={portfolioAllocation} />
+            <PortfolioAllocation 
+              allocations={portfolioAllocation}
+              recommendedMetrics={portfolioAllocation.recommendedMetrics}
+            />
           </CardContent>
         </Card>
         
