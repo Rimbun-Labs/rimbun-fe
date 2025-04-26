@@ -1,5 +1,5 @@
 
-import { ResponsiveRadar } from '@nivo/radar';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
 
 interface DataItem {
   attribute: string;
@@ -13,42 +13,19 @@ interface RiskProfileChartProps {
 const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data }) => {
   return (
     <div className="h-[300px] w-full">
-      <ResponsiveRadar
-        data={data}
-        keys={['value']}
-        indexBy="attribute"
-        maxValue={10}
-        margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
-        borderColor={{ from: 'color' }}
-        gridLabelOffset={15}
-        dotSize={8}
-        dotColor={{ theme: 'background' }}
-        dotBorderWidth={2}
-        colors={{ scheme: 'blues' }}
-        blendMode="multiply"
-        motionConfig="gentle"
-        legends={[
-          {
-            anchor: 'top-left',
-            direction: 'column',
-            translateX: -40,
-            translateY: -40,
-            itemWidth: 80,
-            itemHeight: 20,
-            itemTextColor: '#999',
-            symbolSize: 12,
-            symbolShape: 'circle',
-            effects: [
-              {
-                on: 'hover',
-                style: {
-                  itemTextColor: '#000'
-                }
-              }
-            ]
-          }
-        ]}
-      />
+      <ResponsiveContainer width="100%" height="100%">
+        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+          <PolarGrid />
+          <PolarAngleAxis dataKey="attribute" />
+          <Radar
+            name="Risk Profile"
+            dataKey="value"
+            stroke="#8884d8"
+            fill="#8884d8"
+            fillOpacity={0.6}
+          />
+        </RadarChart>
+      </ResponsiveContainer>
     </div>
   );
 };

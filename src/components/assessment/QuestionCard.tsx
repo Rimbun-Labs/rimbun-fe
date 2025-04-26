@@ -11,7 +11,7 @@ interface QuestionCardProps {
   question: Question;
   onAnswer: (answer: UserAnswer) => void;
   onNext: () => void;
-  currentAnswer?: string | string[] | number | boolean;
+  currentAnswer?: string | number | boolean;
   isLastQuestion: boolean;
 }
 
@@ -22,13 +22,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   currentAnswer,
   isLastQuestion
 }) => {
-  const [answer, setAnswer] = React.useState<string | number | boolean | undefined>(
-    currentAnswer !== undefined ? currentAnswer : undefined
+  const [answer, setAnswer] = React.useState<string | number | boolean>(
+    currentAnswer ?? (question.questionType === 'number' ? 0 : '')
   );
   const [error, setError] = React.useState<string | null>(null);
 
   const handleSubmit = () => {
-    if (answer === undefined) {
+    if (answer === '') {
       setError('Please provide an answer');
       return;
     }

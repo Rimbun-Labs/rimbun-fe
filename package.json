@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@nivo/core": "^0.89.1",
     "@nivo/pie": "^0.89.1",
+    "@nivo/radar": "^0.85.1",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
