@@ -5,6 +5,7 @@ export const mockQuestions: Question[] = [
   {
     id: "q1",
     questionText: "What is your primary investment goal?",
+    whyWeAsk: "This helps us understand your financial objectives and tailor recommendations accordingly.",
     questionType: "multiple_choice",
     category: {
       id: "cat1",
@@ -17,11 +18,13 @@ export const mockQuestions: Question[] = [
       { id: "q1-opt3", text: "Balanced growth" },
       { id: "q1-opt4", text: "Aggressive growth" },
       { id: "q1-opt5", text: "Speculation" }
-    ]
+    ],
+    required: true
   },
   {
     id: "q2",
     questionText: "How long do you plan to invest your money before you need it?",
+    whyWeAsk: "Your time horizon impacts which investment strategies may be most appropriate for you.",
     questionType: "multiple_choice",
     category: {
       id: "cat2",
@@ -34,11 +37,13 @@ export const mockQuestions: Question[] = [
       { id: "q2-opt3", text: "3-5 years" },
       { id: "q2-opt4", text: "5-10 years" },
       { id: "q2-opt5", text: "More than 10 years" }
-    ]
+    ],
+    required: true
   },
   {
     id: "q3",
     questionText: "How would you react if your investment portfolio lost 20% of its value in a month?",
+    whyWeAsk: "This helps us gauge your emotional response to market volatility.",
     questionType: "multiple_choice",
     category: {
       id: "cat3",
@@ -51,11 +56,13 @@ export const mockQuestions: Question[] = [
       { id: "q3-opt3", text: "Do nothing and wait for recovery" },
       { id: "q3-opt4", text: "Buy more while prices are lower" },
       { id: "q3-opt5", text: "Significantly increase investment amount" }
-    ]
+    ],
+    required: true
   },
   {
     id: "q4",
     questionText: "How much investing experience do you have?",
+    whyWeAsk: "Your experience level helps us provide appropriate educational content.",
     questionType: "multiple_choice",
     category: {
       id: "cat4",
@@ -68,17 +75,21 @@ export const mockQuestions: Question[] = [
       { id: "q4-opt3", text: "Moderate" },
       { id: "q4-opt4", text: "Experienced" },
       { id: "q4-opt5", text: "Very experienced" }
-    ]
+    ],
+    required: true
   },
   {
     id: "q5",
     questionText: "What percentage of your monthly income can you save for investing?",
+    whyWeAsk: "This helps us understand your capacity to invest regularly.",
     questionType: "number",
     category: {
       id: "cat5",
       name: "Financial Capacity",
       description: "Understanding your ability to invest"
-    }
+    },
+    required: true,
+    placeholder: "Enter percentage (0-100)"
   }
 ];
 
@@ -89,7 +100,15 @@ export const mockAssessmentResult: AssessmentResult = {
   decisionStyleScore: 8.1,
   personalityScore: 7.5,
   finalScore: 7.0,
-  profile: "Growth-oriented investor"
+  profile: "Growth-oriented investor",
+  confidenceMetrics: {
+    riskProfileConfidence: 0.85,
+    knowledgeLevelConfidence: 0.78,
+    leverageAptitudeConfidence: 0.72,
+    decisionStyleConfidence: 0.88,
+    personalityConfidence: 0.76,
+    riskCapacityConfidence: 0.81
+  }
 };
 
 export const mockPortfolioAllocation = [

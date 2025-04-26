@@ -6,7 +6,8 @@ import {
   fetchQuestions, 
   submitAnswer, 
   getAssessmentResults, 
-  UserAnswer 
+  UserAnswer,
+  Question
 } from '@/lib/api/assessmentApi';
 import { mockQuestions, mockAssessmentResult } from '@/lib/mock/mockData';
 import QuestionCard from '@/components/assessment/QuestionCard';
@@ -37,7 +38,9 @@ const Assessment: React.FC = () => {
   const createSessionMutation = useMutation({
     mutationFn: createSession,
     onSuccess: (data) => {
-      setSessionId(data.id);
+      if (data && data.id) {
+        setSessionId(data.id);
+      }
     }
   });
   
@@ -62,7 +65,7 @@ const Assessment: React.FC = () => {
       // For development, use mock data
       return Promise.resolve(mockAssessmentResult);
       // In production, fetch from API
-      // return getAssessmentResults(sessionId!);
+      // return sessionId ? getAssessmentResults(sessionId) : Promise.reject('No session ID');
     },
     enabled: isComplete && !!sessionId,
   });
@@ -128,41 +131,49 @@ const Assessment: React.FC = () => {
     return results && <AssessmentComplete result={results} />;
   }
   
+  // Guard against missing questions
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold mb-8 text-center">Error Loading Assessment</h1>
+        <p className="text-center">Unable to load assessment questions. Please try again later.</p>
+      </div>
+    );
+  }
+  
   // Show current question
+  const currentQuestion = questions[currentQuestionIndex];
+  
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8 text-center">Investment Profile Assessment</h1>
       
-      {questions && (
-        <>
-          <ProgressBar 
-            currentStep={currentQuestionIndex + 1} 
-            totalSteps={questions.length} 
-          />
-          
-          {currentQuestionIndex > 0 && (
-            <div className="max-w-3xl mx-auto mb-4">
-              <Button 
-                variant="ghost" 
-                onClick={handlePrevious} 
-                className="flex items-center gap-1"
-                disabled={submitAnswerMutation.isPending}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Previous Question
-              </Button>
-            </div>
-          )}
-          
-          <QuestionCard 
-            question={questions[currentQuestionIndex]}
-            onAnswer={handleAnswer}
-            onNext={handleNext}
-            currentAnswer={userAnswers[questions[currentQuestionIndex].id]}
-            isLastQuestion={currentQuestionIndex === questions.length - 1}
-          />
-        </>
+      <ProgressBar 
+        currentStep={currentQuestionIndex + 1} 
+        totalSteps={questions.length} 
+      />
+      
+      {currentQuestionIndex > 0 && (
+        <div className="max-w-3xl mx-auto mb-4">
+          <Button 
+            variant="ghost" 
+            onClick={handlePrevious} 
+            className="flex items-center gap-1"
+            disabled={submitAnswerMutation.isPending}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Previous Question
+          </Button>
+        </div>
       )}
+      
+      <QuestionCard 
+        question={currentQuestion}
+        onAnswer={handleAnswer}
+        onNext={handleNext}
+        currentAnswer={userAnswers[currentQuestion.id]}
+        isLastQuestion={currentQuestionIndex === questions.length - 1}
+      />
     </div>
   );
 };

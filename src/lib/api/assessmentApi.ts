@@ -52,3 +52,59 @@ export interface ResponseGroup {
   createdAt: string;
   updatedAt: string;
 }
+
+// Mock API functions that will be replaced with real API calls in the future
+
+import { mockQuestions, mockAssessmentResult } from '../mock/mockData';
+
+/**
+ * Fetches questions for the assessment
+ * @returns Promise resolving to an array of Questions
+ */
+export const fetchQuestions = async (): Promise<Question[]> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  return mockQuestions;
+};
+
+/**
+ * Creates a new assessment session
+ * @returns Promise resolving to session data with an ID
+ */
+export const createSession = async (): Promise<{ id: string }> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return {
+    id: `session-${Date.now()}`
+  };
+};
+
+/**
+ * Submits an answer for a specific question in the assessment
+ * @param sessionId The ID of the current assessment session
+ * @param answer The user's answer data
+ * @returns Promise resolving to the stored answer
+ */
+export const submitAnswer = async (
+  sessionId: string,
+  answer: UserAnswer
+): Promise<UserAnswer> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  console.log(`Answer submitted for session ${sessionId}:`, answer);
+  return answer;
+};
+
+/**
+ * Gets the assessment results for a completed session
+ * @param sessionId The ID of the assessment session
+ * @returns Promise resolving to the assessment results
+ */
+export const getAssessmentResults = async (
+  sessionId: string
+): Promise<AssessmentResult> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log(`Getting results for session ${sessionId}`);
+  return mockAssessmentResult;
+};

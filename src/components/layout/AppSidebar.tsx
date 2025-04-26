@@ -35,7 +35,7 @@ const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/dashboard")}>
+                <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
                   <Link to="/dashboard">
                     <LayoutDashboard />
                     <span>Dashboard</span>
@@ -44,7 +44,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/assessment")}>
+                <SidebarMenuButton asChild isActive={isActive("/assessment")}>
                   <Link to="/assessment">
                     <BarChart />
                     <span>Assessment</span>
@@ -53,7 +53,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/learning")}>
+                <SidebarMenuButton asChild isActive={isActive("/learning")}>
                   <Link to="/learning">
                     <BookOpen />
                     <span>Learning</span>
@@ -69,7 +69,7 @@ const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/portfolio")}>
+                <SidebarMenuButton asChild isActive={isActive("/portfolio")}>
                   <Link to="/portfolio">
                     <PieChart />
                     <span>Portfolio</span>
@@ -78,7 +78,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/recommendations")}>
+                <SidebarMenuButton asChild isActive={isActive("/recommendations")}>
                   <Link to="/recommendations">
                     <Star />
                     <span>Recommendations</span>
@@ -87,7 +87,7 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               
               <SidebarMenuItem>
-                <SidebarMenuButton asChild active={isActive("/help")}>
+                <SidebarMenuButton asChild isActive={isActive("/help")}>
                   <Link to="/help">
                     <HelpCircle />
                     <span>Help & FAQ</span>
