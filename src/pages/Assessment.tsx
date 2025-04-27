@@ -5,13 +5,14 @@ import {
   createSession, 
   fetchQuestions, 
   submitAnswer, 
-  getAssessmentResults, 
+  getAssessmentResults,
   UserAnswer,
   Question
 } from '@/lib/api/assessmentApi';
-import { mockQuestions, mockAssessmentResult } from '@/lib/mock/mockData';
+import { mockQuestions } from '@/lib/mock/mockQuestions';
 import QuestionCard from '@/components/assessment/QuestionCard';
 import ProgressBar from '@/components/assessment/ProgressBar';
+import CategoryHeader from '@/components/assessment/CategoryHeader';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -23,18 +24,13 @@ const Assessment: React.FC = () => {
   const [userAnswers, setUserAnswers] = React.useState<Record<string, any>>({});
   const [isComplete, setIsComplete] = React.useState(false);
   
-  // Fetch questions from API or use mock data
+  // Fetch questions
   const { data: questions, isPending: questionsLoading } = useQuery({
     queryKey: ['assessment-questions'],
-    queryFn: () => {
-      // For development, use mock data
-      return Promise.resolve(mockQuestions);
-      // In production, fetch from API
-      // return fetchQuestions();
-    }
+    queryFn: () => Promise.resolve(mockQuestions)
   });
   
-  // Create a session when the component mounts
+  // Create session
   const createSessionMutation = useMutation({
     mutationFn: createSession,
     onSuccess: (data) => {
@@ -45,39 +41,28 @@ const Assessment: React.FC = () => {
   });
   
   React.useEffect(() => {
-    // Create a session when the component mounts
     createSessionMutation.mutate();
   }, []);
   
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
     mutationFn: ({ sessionId, answer }: { sessionId: string, answer: UserAnswer }) => 
-      submitAnswer(sessionId, answer),
-    onError: (error) => {
-      console.error('Error submitting answer:', error);
-    }
+      submitAnswer(sessionId, answer)
   });
   
-  // Get assessment results query
+  // Get results query
   const { data: results, isPending: resultsLoading } = useQuery({
     queryKey: ['assessment-results', sessionId],
-    queryFn: () => {
-      // For development, use mock data
-      return Promise.resolve(mockAssessmentResult);
-      // In production, fetch from API
-      // return sessionId ? getAssessmentResults(sessionId) : Promise.reject('No session ID');
-    },
+    queryFn: () => sessionId ? getAssessmentResults(sessionId) : Promise.reject('No session ID'),
     enabled: isComplete && !!sessionId,
   });
   
   const handleAnswer = (answer: UserAnswer) => {
-    // Store answer locally
     setUserAnswers((prev) => ({
       ...prev,
       [answer.questionId]: answer.answer
     }));
     
-    // Submit answer to API if we have a session
     if (sessionId) {
       submitAnswerMutation.mutate({
         sessionId,
@@ -100,7 +85,6 @@ const Assessment: React.FC = () => {
     }
   };
   
-  // Show loading state
   if (questionsLoading) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -114,7 +98,6 @@ const Assessment: React.FC = () => {
     );
   }
   
-  // Show results when assessment is complete
   if (isComplete) {
     if (resultsLoading) {
       return (
@@ -131,7 +114,6 @@ const Assessment: React.FC = () => {
     return results && <AssessmentComplete result={results} />;
   }
   
-  // Guard against missing questions
   if (!questions || questions.length === 0) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -141,8 +123,13 @@ const Assessment: React.FC = () => {
     );
   }
   
-  // Show current question
   const currentQuestion = questions[currentQuestionIndex];
+  const questionsInCurrentCategory = questions.filter(
+    q => q.category.id === currentQuestion.category.id
+  );
+  const currentQuestionInCategory = questionsInCurrentCategory.findIndex(
+    q => q.id === currentQuestion.id
+  ) + 1;
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -150,14 +137,21 @@ const Assessment: React.FC = () => {
       
       <ProgressBar 
         currentStep={currentQuestionIndex + 1} 
-        totalSteps={questions.length} 
+        totalSteps={questions.length}
+        category={currentQuestion.category.name}
+      />
+      
+      <CategoryHeader 
+        category={currentQuestion.category}
+        questionCount={questionsInCurrentCategory.length}
+        currentQuestion={currentQuestionInCategory}
       />
       
       {currentQuestionIndex > 0 && (
         <div className="max-w-3xl mx-auto mb-4">
           <Button 
             variant="ghost" 
-            onClick={handlePrevious} 
+            onClick={handlePrevious}
             className="flex items-center gap-1"
             disabled={submitAnswerMutation.isPending}
           >
