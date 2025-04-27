@@ -47,9 +47,24 @@ const Dashboard = () => {
   const currentModule = learningModules?.find(m => m.progress > 0 && m.progress < 100);
   
   const achievements = [
-    { id: "ach1", name: "Risk Profile Complete", unlocked: true },
-    { id: "ach2", name: "First Module Completed", unlocked: completedModules > 0 },
-    { id: "ach3", name: "Portfolio Strategy Defined", unlocked: true }
+    { 
+      id: "ach1", 
+      name: "Risk Profile Complete", 
+      description: "Completed the risk assessment questionnaire",
+      unlocked: true 
+    },
+    { 
+      id: "ach2", 
+      name: "First Module Completed", 
+      description: "Finished your first learning module",
+      unlocked: completedModules > 0 
+    },
+    { 
+      id: "ach3", 
+      name: "Portfolio Strategy Defined", 
+      description: "Defined your initial portfolio strategy",
+      unlocked: true 
+    }
   ];
   
   return (
@@ -137,7 +152,13 @@ const Dashboard = () => {
               </div>
             ))
           ) : mockRecommendations.map((rec) => (
-            <RecommendationCard key={rec.id} recommendation={rec} />
+            <RecommendationCard 
+              key={rec.id} 
+              title={rec.title}
+              description={rec.description}
+              priority={rec.priority}
+              category={rec.category}
+            />
           ))}
         </div>
       </div>
