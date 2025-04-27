@@ -66,56 +66,162 @@ export interface UserResponse {
   updatedAt: string;
 }
 
+export interface CreateResponseGroupRequest {
+  questionnaireType: "ONBOARDING";
+  userId?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface QuestionsWithAnswersResponse {
+  responseGroupId: string;
+  questionsWithAnswers: Array<{
+    id: string;
+    text: string;
+    questionType: string;
+    category: {
+      id: string;
+      name: string;
+    };
+    answer: {
+      id: string;
+      value?: string;
+      selectedOption?: {
+        id: string;
+        text: string;
+      };
+    };
+    optionMetadata?: {
+      points: number;
+      profileType: number;
+      decisionStyle: number;
+      confidenceScore: number;
+    };
+  }>;
+}
+
+export interface RecommendationResult {
+  assetAllocations: Record<string, number>;
+  recommendedMetrics: {
+    [key: string]: {
+      weight: number;
+      description: string;
+    };
+  };
+}
+
+export interface SaveUserResponsesBulkRequest {
+  responseGroupId: string;
+  responses: Array<{
+    questionId: string;
+    answer: {
+      value?: string;
+      selectedOption?: { id: string };
+      answerNumber?: number;
+      answerBoolean?: boolean;
+    };
+  }>;
+}
+
 import { mockQuestions, mockAssessmentResult } from '../mock/mockData';
 
 /**
- * Fetches questions for the assessment
- * @returns Promise resolving to an array of Questions
- */
-export const fetchQuestions = async (): Promise<Question[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return mockQuestions;
-};
-
-/**
  * Creates a new assessment session
- * @returns Promise resolving to session data with an ID
  */
-export const createSession = async (): Promise<{ id: string }> => {
-  // Simulate network delay
+export const createSession = async (data?: CreateResponseGroupRequest): Promise<ResponseGroup> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   return {
-    id: `session-${Date.now()}`
+    id: `response-group-${Date.now()}`,
+    userId: data?.userId || "mock-user-id",
+    questionnaireType: data?.questionnaireType || "ONBOARDING",
+    isCompleted: false,
+    metadata: data?.metadata || {},
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 };
 
 /**
- * Submits an answer for a specific question in the assessment
- * @param sessionId The ID of the current assessment session
- * @param answer The user's answer data
- * @returns Promise resolving to the stored answer
+ * Submits multiple answers for an assessment
  */
-export const submitAnswer = async (
-  sessionId: string,
-  answer: UserAnswer
-): Promise<UserAnswer> => {
-  // Simulate network delay
+export const saveUserResponsesBulk = async (data: SaveUserResponsesBulkRequest): Promise<UserResponse[]> => {
   await new Promise(resolve => setTimeout(resolve, 300));
-  console.log(`Answer submitted for session ${sessionId}:`, answer);
-  return answer;
+  return data.responses.map(response => ({
+    id: `response-${Date.now()}-${Math.random()}`,
+    userId: "mock-user-id",
+    questionId: response.questionId,
+    responseGroupId: data.responseGroupId,
+    optionId: response.answer.selectedOption?.id,
+    answerText: response.answer.value,
+    answerNumber: response.answer.answerNumber,
+    answerBoolean: response.answer.answerBoolean,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
 };
 
 /**
- * Gets the assessment results for a completed session
- * @param sessionId The ID of the assessment session
- * @returns Promise resolving to the assessment results
+ * Gets all answered questions for a response group
  */
-export const getAssessmentResults = async (
-  sessionId: string
-): Promise<AssessmentResult> => {
-  // Simulate network delay
+export const getQuestionsWithAnswers = async (responseGroupId: string): Promise<QuestionsWithAnswersResponse> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return {
+    responseGroupId,
+    questionsWithAnswers: mockQuestions.map(q => ({
+      id: q.id,
+      text: q.questionText,
+      questionType: q.questionType,
+      category: {
+        id: q.category.id,
+        name: q.category.name
+      },
+      answer: {
+        id: `answer-${q.id}`,
+        value: q.questionType === "number" ? "1000" : undefined,
+        selectedOption: q.questionType === "multiple_choice" && q.options?.length > 0
+          ? { id: q.options[0].id, text: q.options[0].text }
+          : undefined
+      },
+      optionMetadata: q.questionType === "multiple_choice"
+        ? {
+            points: 70,
+            profileType: 70,
+            decisionStyle: 75,
+            confidenceScore: 85
+          }
+        : undefined
+    }))
+  };
+};
+
+/**
+ * Gets assessment results for a response group
+ */
+export const getAssessmentResults = async (responseGroupId: string): Promise<AssessmentResult> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
-  console.log(`Getting results for session ${sessionId}`);
   return mockAssessmentResult;
+};
+
+/**
+ * Gets recommendations based on assessment results
+ */
+export const getRecommendations = async (responseGroupId: string): Promise<RecommendationResult> => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  return {
+    assetAllocations: {
+      EQUITIES: 60,
+      BONDS: 20,
+      REAL_ESTATE: 10,
+      CASH: 10
+    },
+    recommendedMetrics: {
+      "Risk-Adjusted Return": {
+        weight: 0.8,
+        description: "Measure of return relative to risk taken"
+      },
+      "Sharpe Ratio": {
+        weight: 0.7,
+        description: "Risk-adjusted return metric"
+      }
+    }
+  };
 };
