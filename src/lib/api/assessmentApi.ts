@@ -66,6 +66,33 @@ export interface UserResponse {
   updatedAt: string;
 }
 
+export interface SubmitAnswerRequest {
+  responseGroupId: string;
+  questionId: string;
+  answer: {
+    value?: string;
+    selectedOption?: { id: string };
+    answerNumber?: number;
+    answerBoolean?: boolean;
+  };
+}
+
+export const submitAnswer = async (data: SubmitAnswerRequest): Promise<UserResponse> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return {
+    id: `response-${Date.now()}-${Math.random()}`,
+    userId: "mock-user-id",
+    questionId: data.questionId,
+    responseGroupId: data.responseGroupId,
+    optionId: data.answer.selectedOption?.id,
+    answerText: data.answer.value,
+    answerNumber: data.answer.answerNumber,
+    answerBoolean: data.answer.answerBoolean,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
 export interface CreateResponseGroupRequest {
   questionnaireType: "ONBOARDING";
   userId?: string;
