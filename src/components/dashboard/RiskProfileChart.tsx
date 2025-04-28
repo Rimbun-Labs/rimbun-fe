@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   ResponsiveContainer, 
@@ -36,7 +35,6 @@ interface RiskProfileChartProps {
 }
 
 const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMetrics }) => {
-  // Transform the data for the radar chart
   const chartData = [
     { 
       attribute: "Risk Tolerance",
@@ -96,53 +94,53 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
       config={chartConfig} 
       className="w-full h-full"
     >
-      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-        <PolarGrid stroke="#e5e7eb" />
-        <PolarAngleAxis 
-          dataKey="attribute" 
-          tick={{ fill: "#64748b", fontSize: 12 }} 
-        />
-        {/* Main Profile Radar */}
-        <Radar
-          name="Your Profile"
-          dataKey="value"
-          stroke="#8884d8"
-          fill="#8884d8"
-          fillOpacity={0.6}
-          animationDuration={1000}
-          animationEasing="ease-in-out"
-        />
-        {/* Confidence Interval Visualization */}
-        {confidenceMetrics && (
+      <>
+        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+          <PolarGrid stroke="#e5e7eb" />
+          <PolarAngleAxis 
+            dataKey="attribute" 
+            tick={{ fill: "#64748b", fontSize: 12 }} 
+          />
           <Radar
-            name="Confidence Range"
+            name="Your Profile"
             dataKey="value"
-            stroke="rgba(136, 132, 216, 0.4)"
-            fill="rgba(136, 132, 216, 0.2)"
-            fillOpacity={0.3}
-            strokeDasharray="5 5"
+            stroke="#8884d8"
+            fill="#8884d8"
+            fillOpacity={0.6}
             animationDuration={1000}
-            animationBegin={500}
             animationEasing="ease-in-out"
           />
-        )}
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Legend />
-      </RadarChart>
+          {confidenceMetrics && (
+            <Radar
+              name="Confidence Range"
+              dataKey="value"
+              stroke="rgba(136, 132, 216, 0.4)"
+              fill="rgba(136, 132, 216, 0.2)"
+              fillOpacity={0.3}
+              strokeDasharray="5 5"
+              animationDuration={1000}
+              animationBegin={500}
+              animationEasing="ease-in-out"
+            />
+          )}
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Legend />
+        </RadarChart>
 
-      {confidenceMetrics && (
-        <div className="mt-4 space-y-2">
-          <h4 className="font-medium text-sm">Confidence Analysis</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {chartData.map((item) => (
-              <div key={item.attribute} className="flex items-center text-sm">
-                <span>{item.attribute}</span>
-                {getConfidenceBadge(item.confidence)}
-              </div>
-            ))}
+        {confidenceMetrics && (
+          <div className="mt-4 space-y-2">
+            <h4 className="font-medium text-sm">Confidence Analysis</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {chartData.map((item) => (
+                <div key={item.attribute} className="flex items-center text-sm">
+                  <span>{item.attribute}</span>
+                  {getConfidenceBadge(item.confidence)}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </>
     </ChartContainer>
   );
 };
