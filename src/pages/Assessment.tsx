@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
@@ -16,8 +15,9 @@ import CategoryHeader from '@/components/assessment/CategoryHeader';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from "sonner";
+import { useNavigate } from 'react-router-dom';
 
 interface AssessmentState {
   currentQuestionIndex: number;
@@ -33,6 +33,7 @@ interface AssessmentState {
 }
 
 const Assessment: React.FC = () => {
+  const navigate = useNavigate();
   const [state, setState] = React.useState<AssessmentState>({
     currentQuestionIndex: 0,
     currentCategory: '',
@@ -48,6 +49,7 @@ const Assessment: React.FC = () => {
   
   const [sessionId, setSessionId] = React.useState<string | null>(null);
   const [isComplete, setIsComplete] = React.useState(false);
+  const [retryCount, setRetryCount] = React.useState(0);
   
   // Fetch questions
   const { data: questions, isPending: questionsLoading } = useQuery({
@@ -61,16 +63,42 @@ const Assessment: React.FC = () => {
     onSuccess: (data) => {
       if (data && data.id) {
         setSessionId(data.id);
+        setRetryCount(0);
+        // Store session ID in localStorage for persistence
+        localStorage.setItem('assessmentSessionId', data.id);
       }
     },
     onError: () => {
       toast.error("Failed to create assessment session");
+      if (retryCount < 3) {
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => {
+          createSessionMutation.mutate();
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+      } else {
+        toast.error("Unable to start assessment. Please try again later.");
+      }
     }
   });
   
+  // Load existing session on mount
   React.useEffect(() => {
-    createSessionMutation.mutate();
+    const savedSessionId = localStorage.getItem('assessmentSessionId');
+    if (savedSessionId) {
+      setSessionId(savedSessionId);
+    } else {
+      createSessionMutation.mutate();
+    }
   }, []);
+  
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (sessionId) {
+        localStorage.removeItem('assessmentSessionId');
+      }
+    };
+  }, [sessionId]);
   
   React.useEffect(() => {
     if (questions && questions.length > 0) {
@@ -104,6 +132,11 @@ const Assessment: React.FC = () => {
     },
     onError: () => {
       toast.error("Failed to save your answer");
+      setState(prev => ({
+        ...prev,
+        isSubmitting: false,
+        error: "Failed to save your answer. Please try again."
+      }));
     }
   });
   
@@ -114,7 +147,7 @@ const Assessment: React.FC = () => {
     enabled: isComplete && !!sessionId,
   });
   
-  const handleAnswer = (answer: UserAnswer) => {
+  const handleAnswer = async (answer: UserAnswer) => {
     const { questionId } = answer;
     
     setState(prev => ({
@@ -123,7 +156,8 @@ const Assessment: React.FC = () => {
         ...prev.answers,
         [questionId]: answer.answer
       },
-      error: null
+      error: null,
+      isSubmitting: true
     }));
     
     if (sessionId) {
@@ -147,7 +181,19 @@ const Assessment: React.FC = () => {
         submitData.answer.answerBoolean = answerValue as boolean;
       }
       
-      submitAnswerMutation.mutate(submitData);
+      try {
+        await submitAnswerMutation.mutateAsync(submitData);
+        setState(prev => ({
+          ...prev,
+          isSubmitting: false
+        }));
+      } catch (error) {
+        setState(prev => ({
+          ...prev,
+          isSubmitting: false,
+          error: "Failed to save your answer. Please try again."
+        }));
+      }
     }
   };
   
@@ -194,6 +240,8 @@ const Assessment: React.FC = () => {
       }));
     } else {
       setIsComplete(true);
+      // Navigate to results page
+      navigate(`/assessment/results/${sessionId}`);
     }
   };
   
@@ -226,6 +274,11 @@ const Assessment: React.FC = () => {
       },
       error: null
     }));
+  };
+
+  const handleRetry = () => {
+    setRetryCount(0);
+    createSessionMutation.mutate();
   };
   
   if (questionsLoading) {
@@ -261,7 +314,13 @@ const Assessment: React.FC = () => {
     return (
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">Error Loading Assessment</h1>
-        <p className="text-center">Unable to load assessment questions. Please try again later.</p>
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Unable to load assessment questions.</p>
+          <Button onClick={handleRetry} className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -296,7 +355,7 @@ const Assessment: React.FC = () => {
             variant="ghost" 
             onClick={handlePrevious}
             className="flex items-center gap-1"
-            disabled={submitAnswerMutation.isPending}
+            disabled={state.isSubmitting}
           >
             <ArrowLeft className="h-4 w-4" />
             Previous Question

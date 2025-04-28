@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -30,6 +29,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     currentAnswer ?? (question.questionType === 'number' ? 0 : '')
   );
   const [validationError, setValidationError] = React.useState<string | null>(error || null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     if (currentAnswer !== undefined) {
@@ -37,19 +37,51 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   }, [currentAnswer]);
 
-  const handleSubmit = () => {
-    if (question.required && (answer === '' || answer === undefined)) {
-      setValidationError('Please provide an answer');
+  React.useEffect(() => {
+    if (error) {
+      setValidationError(error);
+    }
+  }, [error]);
+
+  const validateAnswer = (): boolean => {
+    if (question.required) {
+      if (answer === '' || answer === undefined || answer === null) {
+        setValidationError('Please provide an answer');
+        return false;
+      }
+      if (question.questionType === 'number' && (isNaN(Number(answer)) || Number(answer) < 0)) {
+        setValidationError('Please enter a valid number');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setValidationError(null);
+
+    if (!validateAnswer()) {
+      setIsSubmitting(false);
       return;
     }
 
-    onAnswer({
-      questionId: question.id,
-      answer: answer,
-    });
-    
+    try {
+      await onAnswer({
+        questionId: question.id,
+        answer: answer,
+      });
+      onNext();
+    } catch (err) {
+      setValidationError('Failed to save your answer. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAnswerChange = (value: string | number | boolean) => {
+    setAnswer(value);
     setValidationError(null);
-    onNext();
   };
 
   const renderAnswerInput = () => {
@@ -58,10 +90,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         return (
           <RadioGroup
             value={answer as string}
-            onValueChange={(value) => {
-              setAnswer(value);
-              setValidationError(null);
-            }}
+            onValueChange={handleAnswerChange}
             className="space-y-3"
             aria-label={question.questionText}
           >
@@ -84,10 +113,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               id={`number-${question.id}`}
               type="number"
               value={answer as number || ''}
-              onChange={(e) => {
-                setAnswer(Number(e.target.value));
-                setValidationError(null);
-              }}
+              onChange={(e) => handleAnswerChange(Number(e.target.value))}
               className="w-full"
               placeholder={question.placeholder}
               aria-invalid={!!validationError}
@@ -100,10 +126,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         return (
           <RadioGroup
             value={String(answer)}
-            onValueChange={(value) => {
-              setAnswer(value === 'true');
-              setValidationError(null);
-            }}
+            onValueChange={(value) => handleAnswerChange(value === 'true')}
             className="space-y-3"
             aria-label={question.questionText}
           >
@@ -169,9 +192,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
         <Button 
           onClick={handleSubmit}
+          disabled={isSubmitting}
           aria-label={isLastQuestion ? "Complete assessment" : "Next question"}
         >
-          {isLastQuestion ? "Complete" : "Next"}
+          {isSubmitting ? "Saving..." : isLastQuestion ? "Complete" : "Next"}
         </Button>
       </CardFooter>
     </Card>
