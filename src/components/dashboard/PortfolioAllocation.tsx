@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
-import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Sector, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, Sector, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PortfolioAllocationProps {
   allocations: {
@@ -20,6 +22,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({ allocations, recommendedMetrics }) => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
+  const [view, setView] = useState<'pie' | 'details'>('pie');
   
   const data = Object.entries(allocations).map(([name, value], index) => ({
     name,
@@ -54,17 +57,30 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({ allocations, 
     );
   };
 
+  // Configure chart colors
+  const chartConfig = Object.fromEntries(
+    data.map((entry, index) => [
+      entry.name,
+      { color: entry.color }
+    ])
+  );
+
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
-        <CardTitle>Recommended Portfolio Allocation</CardTitle>
-        <CardDescription>
-          Based on your risk profile and investment goals
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-full">
+      <Tabs
+        value={view}
+        onValueChange={(v) => setView(v as 'pie' | 'details')}
+        className="w-full"
+      >
+        <div className="flex justify-end mb-4">
+          <TabsList className="mb-2">
+            <TabsTrigger value="pie">Chart View</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="pie" className="mt-0">
+          <ChartContainer config={chartConfig} className="h-[240px] w-full">
             <PieChart>
               <Pie
                 activeIndex={activeIndex}
@@ -91,43 +107,68 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({ allocations, 
                   />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value: number) => [`${value}%`, 'Allocation']}
-                contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)' }}
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value: number) => [`${value}%`, 'Allocation']}
+                  />
+                }
               />
-              <Legend layout="horizontal" verticalAlign="bottom" align="center" />
             </PieChart>
-          </ResponsiveContainer>
-        </div>
+          </ChartContainer>
+        </TabsContent>
 
-        {recommendedMetrics && (
-          <div className="mt-6 space-y-4">
-            <h4 className="font-medium">Asset Class Insights</h4>
-            <div className="space-y-3">
-              {data.map((item, index) => (
-                <div key={index} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div 
-                        className="h-3 w-3 rounded-full mr-2" 
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="font-medium">{item.name}</span>
-                    </div>
-                    <span>{item.value}%</span>
-                  </div>
-                  {item.description && (
-                    <p className="text-xs text-muted-foreground pl-5">
-                      {item.description}
-                    </p>
-                  )}
+        <TabsContent value="details" className="mt-0 space-y-4">
+          {data.map((item, index) => (
+            <div key={index} className="space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div 
+                    className="h-3 w-3 rounded-full mr-2" 
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="font-medium">{item.name}</span>
                 </div>
-              ))}
+                <span className="font-semibold">{item.value}%</span>
+              </div>
+              <div className="ml-5 w-full bg-secondary h-2 rounded-full overflow-hidden">
+                <div 
+                  className="h-full rounded-full" 
+                  style={{ 
+                    width: `${item.value}%`,
+                    backgroundColor: item.color
+                  }}
+                />
+              </div>
+              {item.description && (
+                <p className="text-xs text-muted-foreground pl-5 mt-1">
+                  {item.description}
+                </p>
+              )}
             </div>
+          ))}
+        </TabsContent>
+      </Tabs>
+
+      {recommendedMetrics && view === 'pie' && (
+        <div className="mt-6 space-y-1">
+          <h4 className="font-medium text-sm">Key Metrics</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(recommendedMetrics).map(([key, metric], idx) => (
+              <div key={idx} className="text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{key}</span>
+                  <span className="text-primary">{metric.weight.toFixed(1)}</span>
+                </div>
+                <p className="text-muted-foreground text-xs mt-0.5">
+                  {metric.description}
+                </p>
+              </div>
+            ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };
 

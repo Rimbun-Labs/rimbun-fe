@@ -12,6 +12,8 @@ import LearningProgress from '@/components/dashboard/LearningProgress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { mockAssessmentResult, mockPortfolioAllocation, mockLearningModules, mockRecommendations } from '@/lib/mock/mockData';
 import { getRecommendations } from '@/lib/api/assessmentApi';
+import MetricsOverview from '@/components/dashboard/MetricsOverview';
+import AchievementGrid from '@/components/dashboard/AchievementGrid';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -79,6 +81,9 @@ const Dashboard = () => {
         </Button>
       </div>
       
+      {/* Analytics Overview */}
+      <MetricsOverview className="mb-8" />
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Risk Profile Section */}
         <Card>
@@ -137,6 +142,9 @@ const Dashboard = () => {
         </Card>
       </div>
       
+      {/* Achievements Section */}
+      <AchievementGrid className="mb-8" />
+      
       {/* Recommendations Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -156,7 +164,7 @@ const Dashboard = () => {
               key={rec.id} 
               title={rec.title}
               description={rec.description}
-              priority={rec.priority}
+              priority={rec.priority as "High" | "Medium" | "Low"}
               category={rec.category}
             />
           ))}

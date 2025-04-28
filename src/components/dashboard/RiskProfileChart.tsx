@@ -12,6 +12,11 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { 
+  ChartContainer, 
+  ChartTooltip,
+  ChartTooltipContent
+} from '@/components/ui/chart';
 
 interface RiskProfileChartProps {
   data: {
@@ -81,54 +86,64 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
     );
   };
 
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Risk Profile Analysis</CardTitle>
-        <CardDescription>
-          Your investment profile scores across five key dimensions
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-              <PolarGrid stroke="#e5e7eb" />
-              <PolarAngleAxis dataKey="attribute" tick={{ fill: "#64748b", fontSize: 12 }} />
-              <Radar
-                name="Your Profile"
-                dataKey="value"
-                stroke="#8884d8"
-                fill="#8884d8"
-                fillOpacity={0.6}
-                animationDuration={1000}
-                animationEasing="ease-in-out"
-              />
-              <Tooltip 
-                formatter={(value: number) => [value.toFixed(1), "Score"]} 
-                labelFormatter={(label) => `${label}`}
-                contentStyle={{ background: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)' }}
-              />
-              <Legend />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+  const chartConfig = {
+    profile: { color: "#8884d8" },
+    confidence: { color: "rgba(136, 132, 216, 0.2)" },
+  };
 
+  return (
+    <ChartContainer 
+      config={chartConfig} 
+      className="w-full h-full"
+    >
+      <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+        <PolarGrid stroke="#e5e7eb" />
+        <PolarAngleAxis 
+          dataKey="attribute" 
+          tick={{ fill: "#64748b", fontSize: 12 }} 
+        />
+        {/* Main Profile Radar */}
+        <Radar
+          name="Your Profile"
+          dataKey="value"
+          stroke="#8884d8"
+          fill="#8884d8"
+          fillOpacity={0.6}
+          animationDuration={1000}
+          animationEasing="ease-in-out"
+        />
+        {/* Confidence Interval Visualization */}
         {confidenceMetrics && (
-          <div className="mt-4 space-y-2">
-            <h4 className="font-medium text-sm">Confidence Analysis</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {chartData.map((item) => (
-                <div key={item.attribute} className="flex items-center text-sm">
-                  <span>{item.attribute}</span>
-                  {getConfidenceBadge(item.confidence)}
-                </div>
-              ))}
-            </div>
-          </div>
+          <Radar
+            name="Confidence Range"
+            dataKey="value"
+            stroke="rgba(136, 132, 216, 0.4)"
+            fill="rgba(136, 132, 216, 0.2)"
+            fillOpacity={0.3}
+            strokeDasharray="5 5"
+            animationDuration={1000}
+            animationBegin={500}
+            animationEasing="ease-in-out"
+          />
         )}
-      </CardContent>
-    </Card>
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Legend />
+      </RadarChart>
+
+      {confidenceMetrics && (
+        <div className="mt-4 space-y-2">
+          <h4 className="font-medium text-sm">Confidence Analysis</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {chartData.map((item) => (
+              <div key={item.attribute} className="flex items-center text-sm">
+                <span>{item.attribute}</span>
+                {getConfidenceBadge(item.confidence)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </ChartContainer>
   );
 };
 
