@@ -1,3 +1,4 @@
+
 import { AssessmentResult } from '../api/assessmentApi';
 import { mockQuestions } from './mockQuestions';
 
@@ -18,6 +19,47 @@ export const mockAssessmentResult: AssessmentResult = {
     decisionStyleConfidence: 0.90,
     personalityConfidence: 0.85,
     riskCapacityConfidence: 0.95
+  },
+  categoryScores: {
+    "Risk Tolerance": {
+      score: 35,
+      maxScore: 50,
+      percentage: 70,
+      confidence: 0.85,
+      description: "Measures your comfort level with investment volatility"
+    },
+    "Market Knowledge": {
+      score: 32,
+      maxScore: 50,
+      percentage: 64,
+      confidence: 0.80,
+      description: "Evaluates your understanding of investment markets"
+    },
+    "Financial Goals": {
+      score: 40,
+      maxScore: 50,
+      percentage: 80,
+      confidence: 0.92,
+      description: "Assesses your financial objectives"
+    },
+    "Investment Experience": {
+      score: 28,
+      maxScore: 40,
+      percentage: 70,
+      confidence: 0.75,
+      description: "Gauges your previous investment experience"
+    },
+    "Decision Making": {
+      score: 38,
+      maxScore: 50,
+      percentage: 76,
+      confidence: 0.88,
+      description: "Analyzes your investment decision-making process"
+    }
+  },
+  directInputs: {
+    riskCapacity: 7,
+    investmentHorizon: 10
   }
 };
 

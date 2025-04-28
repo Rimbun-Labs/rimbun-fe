@@ -41,6 +41,19 @@ export interface AssessmentResult {
     personalityConfidence: number;
     riskCapacityConfidence: number;
   };
+  categoryScores?: {
+    [category: string]: {
+      score: number;
+      maxScore: number;
+      percentage: number;
+      confidence: number;
+      description?: string;
+    };
+  };
+  directInputs?: {
+    riskCapacity: number;
+    investmentHorizon: number;
+  };
 }
 
 export interface ResponseGroup {
