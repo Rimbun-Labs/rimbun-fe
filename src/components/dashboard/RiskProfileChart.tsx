@@ -1,21 +1,10 @@
+
 import React from 'react';
-import { 
-  ResponsiveContainer, 
-  RadarChart, 
-  PolarGrid, 
-  PolarAngleAxis, 
-  Radar, 
-  Tooltip,
-  Legend
-} from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { 
-  ChartContainer, 
-  ChartTooltip,
-  ChartTooltipContent
-} from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
+import { transformRiskProfileData } from '@/utils/chartUtils';
+import RiskRadarChart from './RiskRadarChart';
+import ConfidenceBadge from './ConfidenceBadge';
 
 interface RiskProfileChartProps {
   data: {
@@ -35,55 +24,8 @@ interface RiskProfileChartProps {
 }
 
 const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMetrics }) => {
-  const chartData = [
-    { 
-      attribute: "Risk Tolerance",
-      value: data.riskProfile,
-      confidence: confidenceMetrics?.riskProfileConfidence || null,
-      fullMark: 10,
-    },
-    { 
-      attribute: "Knowledge",
-      value: data.knowledgeLevel,
-      confidence: confidenceMetrics?.knowledgeLevelConfidence || null,
-      fullMark: 10,
-    },
-    { 
-      attribute: "Leverage",
-      value: data.leverageAptitude,
-      confidence: confidenceMetrics?.leverageAptitudeConfidence || null,
-      fullMark: 10,
-    },
-    { 
-      attribute: "Decision",
-      value: data.decisionStyleScore,
-      confidence: confidenceMetrics?.decisionStyleConfidence || null,
-      fullMark: 10,
-    },
-    { 
-      attribute: "Personality",
-      value: data.personalityScore,
-      confidence: confidenceMetrics?.personalityConfidence || null,
-      fullMark: 10,
-    },
-  ];
-
-  const getConfidenceBadge = (confidence: number | null | undefined) => {
-    if (confidence === null || confidence === undefined) return null;
-    
-    let color = "bg-gray-200 text-gray-800";
-    if (confidence >= 0.8) color = "bg-green-100 text-green-800";
-    else if (confidence >= 0.6) color = "bg-blue-100 text-blue-800";
-    else if (confidence >= 0.4) color = "bg-yellow-100 text-yellow-800";
-    else color = "bg-red-100 text-red-800";
-
-    return (
-      <Badge variant="outline" className={cn("ml-2 text-xs font-normal", color)}>
-        {Math.round(confidence * 100)}% confidence
-      </Badge>
-    );
-  };
-
+  const chartData = transformRiskProfileData(data, confidenceMetrics);
+  
   const chartConfig = {
     profile: { color: "#8884d8" },
     confidence: { color: "rgba(136, 132, 216, 0.2)" },
@@ -95,37 +37,10 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
       className="w-full h-full"
     >
       <>
-        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-          <PolarGrid stroke="#e5e7eb" />
-          <PolarAngleAxis 
-            dataKey="attribute" 
-            tick={{ fill: "#64748b", fontSize: 12 }} 
-          />
-          <Radar
-            name="Your Profile"
-            dataKey="value"
-            stroke="#8884d8"
-            fill="#8884d8"
-            fillOpacity={0.6}
-            animationDuration={1000}
-            animationEasing="ease-in-out"
-          />
-          {confidenceMetrics && (
-            <Radar
-              name="Confidence Range"
-              dataKey="value"
-              stroke="rgba(136, 132, 216, 0.4)"
-              fill="rgba(136, 132, 216, 0.2)"
-              fillOpacity={0.3}
-              strokeDasharray="5 5"
-              animationDuration={1000}
-              animationBegin={500}
-              animationEasing="ease-in-out"
-            />
-          )}
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <Legend />
-        </RadarChart>
+        <RiskRadarChart 
+          data={chartData} 
+          showConfidence={!!confidenceMetrics} 
+        />
 
         {confidenceMetrics && (
           <div className="mt-4 space-y-2">
@@ -134,7 +49,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               {chartData.map((item) => (
                 <div key={item.attribute} className="flex items-center text-sm">
                   <span>{item.attribute}</span>
-                  {getConfidenceBadge(item.confidence)}
+                  <ConfidenceBadge confidence={item.confidence} />
                 </div>
               ))}
             </div>
