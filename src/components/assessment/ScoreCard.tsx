@@ -66,7 +66,7 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
               <span className="text-sm text-muted-foreground">Score</span>
               <span className="text-sm font-medium">{percentage}%</span>
             </div>
-            <Progress value={percentage} className="h-2.5" indicatorClassName={getProgressColor()} />
+            <Progress value={percentage} className={cn("h-2.5", getProgressColor())} />
           </div>
           
           <p className="text-sm text-muted-foreground">{description}</p>

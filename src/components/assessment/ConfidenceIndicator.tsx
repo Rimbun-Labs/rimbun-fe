@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { InfoCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -56,7 +56,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <InfoCircle size={size === 'sm' ? 14 : size === 'md' ? 16 : 18} className="text-muted-foreground" />
+                <Info size={size === 'sm' ? 14 : size === 'md' ? 16 : 18} className="text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">{tooltipContent()}</p>
@@ -72,8 +72,7 @@ const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
       </div>
       <Progress 
         value={confidencePercentage} 
-        className="h-2 bg-muted"
-        indicatorClassName={progressColor()}
+        className={cn("h-2 bg-muted", progressColor())}
       />
     </div>
   );
