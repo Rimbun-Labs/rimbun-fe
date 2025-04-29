@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AssessmentResult } from '@/lib/api/types/assessment';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -42,7 +43,7 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onClose }
   };
 
   const getMetricInsights = (metric: string) => {
-    const insights = {
+    const insights: Record<string, any> = {
       riskProfile: {
         title: "Risk Profile Insights",
         description: "Your risk tolerance level compared to other investors",
@@ -65,7 +66,7 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onClose }
         recommendation: "Your decision-making style is well-balanced"
       }
     };
-    return insights[metric as keyof typeof insights];
+    return insights[metric] || null;
   };
 
   return (
@@ -164,6 +165,8 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onClose }
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {['riskProfile', 'knowledgeLevel', 'decisionStyle'].map((metric) => {
                   const insights = getMetricInsights(metric);
+                  if (!insights) return null;
+                  
                   return (
                     <Dialog key={metric}>
                       <DialogTrigger asChild>

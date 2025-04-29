@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Question, UserAnswer } from "@/lib/api/types/assessment";
 import { QuestionHeader } from './question/QuestionHeader';
@@ -24,19 +24,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   isLastQuestion,
   error
 }) => {
-  const [answer, setAnswer] = React.useState<string | number | boolean>(
+  const [answer, setAnswer] = useState<string | number | boolean>(
     currentAnswer ?? (question.questionType === 'number' ? 0 : '')
   );
-  const [validationError, setValidationError] = React.useState<string | null>(error || null);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [validationError, setValidationError] = useState<string | null>(error || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentAnswer !== undefined) {
       setAnswer(currentAnswer);
     }
   }, [currentAnswer]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       setValidationError(error);
     }
@@ -45,7 +45,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const validateAnswer = (): boolean => {
     if (question.required) {
       if (answer === '' || answer === undefined || answer === null) {
-        setValidationError('Please provide an answer');
+        setValidationError('This question requires an answer');
         return false;
       }
       if (question.questionType === 'number' && (isNaN(Number(answer)) || Number(answer) < 0)) {
@@ -69,6 +69,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       await onAnswer({
         questionId: question.id,
         answer: answer,
+        questionType: question.questionType
       });
       onNext();
     } catch (err) {

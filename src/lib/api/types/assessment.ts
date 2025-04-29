@@ -1,9 +1,8 @@
-
 export interface Question {
   id: string;
   questionText: string;
   whyWeAsk: string;
-  questionType: 'multiple_choice' | 'number' | 'boolean';
+  questionType: 'multiple_choice' | 'number' | 'boolean' | 'select';
   category: {
     id: string;
     name: string;
@@ -23,6 +22,7 @@ export interface Question {
 export interface UserAnswer {
   questionId: string;
   answer: string | number | boolean;
+  questionType?: 'multiple_choice' | 'number' | 'boolean' | 'select';
 }
 
 export interface AssessmentResult {
