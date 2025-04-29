@@ -1,5 +1,4 @@
-
-import { Question } from '../api/assessmentApi';
+import { Question } from '../api/types/assessment';
 
 export const mockQuestions: Question[] = [
   {
@@ -11,7 +10,8 @@ export const mockQuestions: Question[] = [
       name: "Getting to Know You",
       description: "Basic information about you to personalize your experience."
     },
-    required: true
+    required: true,
+    whyWeAsk: "We need to understand your age to tailor investment recommendations to your life stage."
   },
   {
     id: "c0189e87-8c22-4350-aed2-4bd9c4b96cb2",
@@ -315,4 +315,3 @@ export const mockQuestions: Question[] = [
     placeholder: "Enter amount in dollars"
   }
 ];
-
