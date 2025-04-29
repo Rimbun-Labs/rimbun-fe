@@ -11,6 +11,7 @@ import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
 import { AssessmentError } from '@/components/assessment/AssessmentError';
 import { AssessmentContainer } from '@/components/assessment/AssessmentContainer';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
+import { mockAssessmentResult } from '@/lib/mock/mockData';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const Assessment: React.FC = () => {
   // Get results query (activated when assessment completes)
   const { data: results, isPending: resultsLoading } = useQuery({
     queryKey: ['assessment-results', sessionId],
-    queryFn: () => sessionId ? Promise.resolve({ profile: "MODERATE", riskProfile: 70 }) : Promise.reject('No session ID'),
+    queryFn: () => sessionId ? Promise.resolve(mockAssessmentResult) : Promise.reject('No session ID'),
     enabled: isComplete && !!sessionId,
   });
   

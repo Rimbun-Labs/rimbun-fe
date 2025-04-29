@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { getAssessmentResults } from '@/lib/api/resultsApi';
 import AssessmentResults from '@/components/assessment/AssessmentResults';
 import { Skeleton } from '@/components/ui/skeleton';
+import { mockAssessmentResult } from '@/lib/mock/mockData';
 
 const AssessmentResultsPage = () => {
   const { sessionId = 'current-session' } = useParams();
