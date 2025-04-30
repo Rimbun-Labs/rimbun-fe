@@ -61,7 +61,7 @@ const Assessment: React.FC = () => {
     
     const currentQuestion = questions[currentQuestionIndex];
     
-    // Validate current answer
+    // Validate current answer with improved validation
     if (!validateCurrentAnswer(currentQuestion)) {
       return;
     }

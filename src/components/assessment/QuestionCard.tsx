@@ -24,18 +24,26 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   isLastQuestion,
   error
 }) => {
-  const [answer, setAnswer] = useState<string | number | boolean>(
-    currentAnswer ?? (question.questionType === 'number' ? 0 : '')
-  );
+  // Initialize with currentAnswer if provided, otherwise use appropriate default
+  const getInitialAnswer = () => {
+    if (currentAnswer !== undefined) return currentAnswer;
+    if (question.questionType === 'number') return 0;
+    if (question.questionType === 'boolean') return false;
+    return '';
+  };
+
+  const [answer, setAnswer] = useState<string | number | boolean>(getInitialAnswer());
   const [validationError, setValidationError] = useState<string | null>(error || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Update answer state when currentAnswer prop changes
   useEffect(() => {
     if (currentAnswer !== undefined) {
       setAnswer(currentAnswer);
     }
   }, [currentAnswer]);
 
+  // Update validation error when error prop changes
   useEffect(() => {
     if (error) {
       setValidationError(error);
@@ -66,11 +74,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
 
     try {
+      // Send the answer to the parent component
       await onAnswer({
         questionId: question.id,
         answer: answer,
         questionType: question.questionType
       });
+      
+      // Move to next question
       onNext();
     } catch (err) {
       setValidationError('Failed to save your answer. Please try again.');

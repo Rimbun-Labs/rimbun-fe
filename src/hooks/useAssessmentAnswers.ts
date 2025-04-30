@@ -24,6 +24,7 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
   const handleAnswer = async (answer: UserAnswer) => {
     const { questionId } = answer;
     
+    // Update answers state immediately before submission
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer.answer
@@ -55,10 +56,10 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
       
       try {
         await submitAnswerMutation.mutateAsync(submitData);
-        setIsSubmitting(false);
       } catch (error) {
-        setIsSubmitting(false);
         setError("Failed to save your answer. Please try again.");
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       setIsSubmitting(false);
@@ -66,18 +67,22 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
   };
 
   const validateCurrentAnswer = (question: Question): boolean => {
-    if (question.required && !answers[question.id]) {
+    // Get the current answer for this question
+    const currentAnswer = answers[question.id];
+    
+    // If the question is required and there's no answer
+    if (question.required && (currentAnswer === undefined || currentAnswer === null || currentAnswer === '')) {
       setError("This question requires an answer");
       toast.error("Please answer this question before continuing");
       return false;
     }
     
-    if (question.questionType === 'number' && (
-      isNaN(Number(answers[question.id])) || 
-      Number(answers[question.id]) < 0
-    )) {
-      setError("Please enter a valid number");
-      return false;
+    // Specific validation for number type
+    if (question.questionType === 'number' && currentAnswer !== undefined) {
+      if (isNaN(Number(currentAnswer)) || Number(currentAnswer) < 0) {
+        setError("Please enter a valid number");
+        return false;
+      }
     }
     
     return true;
