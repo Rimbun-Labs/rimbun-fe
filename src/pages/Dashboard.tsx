@@ -70,71 +70,79 @@ const Dashboard = () => {
   ];
   
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+    <div className="container mx-auto py-8 px-4 space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
         <div>
           <h1 className="text-3xl font-bold">Your Financial Dashboard</h1>
           <p className="text-muted-foreground">Track your progress and portfolio insights</p>
         </div>
-        <Button className="mt-4 md:mt-0" onClick={() => navigate('/assessment')}>
+        <Button onClick={() => navigate('/assessment')}>
           Retake Assessment
         </Button>
       </div>
       
       {/* Analytics Overview */}
-      <MetricsOverview className="mb-8" />
+      <MetricsOverview />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Risk Profile Section */}
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Your Risk Profile</CardTitle>
             <CardDescription>Based on your assessment responses</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            {profileLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Skeleton className="h-full w-full" />
-              </div>
-            ) : profile ? (
-              <RiskProfileChart data={profile} confidenceMetrics={profile.confidenceMetrics} />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p>No risk profile data available</p>
-              </div>
-            )}
+          <CardContent>
+            <div className="h-[320px]">
+              {profileLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <Skeleton className="h-full w-full" />
+                </div>
+              ) : profile ? (
+                <RiskProfileChart data={profile} confidenceMetrics={profile.confidenceMetrics} />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p>No risk profile data available</p>
+                </div>
+              )}
+            </div>
           </CardContent>
-          <CardFooter>
-            <p className="text-sm text-muted-foreground">
-              Profile: <span className="font-medium">{profile?.profile || 'Unknown'}</span> • 
-              Final Score: <span className="font-medium">{profile?.finalScore || 'N/A'}</span>
-            </p>
-          </CardFooter>
+          {profile && (
+            <CardFooter className="border-t border-border/40 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Profile: <span className="font-medium">{profile?.profile || 'Unknown'}</span> • 
+                Final Score: <span className="font-medium">{profile?.finalScore || 'N/A'}</span>
+              </p>
+            </CardFooter>
+          )}
         </Card>
         
         {/* Portfolio Allocation Section */}
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Recommended Portfolio</CardTitle>
             <CardDescription>Optimal asset allocation based on your profile</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            {portfolioLoading || recommendationsLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Skeleton className="h-full w-full" />
-              </div>
-            ) : (portfolioData && recommendationsData) ? (
-              <PortfolioAllocation 
-                allocations={portfolioData} 
-                recommendedMetrics={recommendationsData.recommendedMetrics}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p>No portfolio data available</p>
-              </div>
-            )}
+          <CardContent>
+            <div className="h-[320px]">
+              {portfolioLoading || recommendationsLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <Skeleton className="h-full w-full" />
+                </div>
+              ) : (portfolioData && recommendationsData) ? (
+                <PortfolioAllocation 
+                  allocations={portfolioData} 
+                  recommendedMetrics={recommendationsData.recommendedMetrics}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p>No portfolio data available</p>
+                </div>
+              )}
+            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="border-t border-border/40 pt-4">
             <Button variant="link" className="ml-auto flex items-center gap-1 p-0">
               Customize Portfolio <CircleChevronRight className="h-4 w-4" />
             </Button>
@@ -143,16 +151,16 @@ const Dashboard = () => {
       </div>
       
       {/* Achievements Section */}
-      <AchievementGrid className="mb-8" />
+      <AchievementGrid />
       
       {/* Recommendations Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div>
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Personalized Recommendations</h2>
           <Button variant="outline" size="sm">View All</Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {recommendationsLoading ? (
             Array(3).fill(0).map((_, i) => (
               <div key={i} className="h-[160px]">
@@ -173,7 +181,7 @@ const Dashboard = () => {
       
       {/* Learning Progress Section */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Learning Progress</h2>
           <Button variant="outline" size="sm" onClick={() => navigate('/learning')}>
             View Courses

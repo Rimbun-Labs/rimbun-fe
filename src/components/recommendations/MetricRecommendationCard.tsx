@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
@@ -26,10 +26,10 @@ const MetricRecommendationCard: React.FC<MetricRecommendationProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
+    <Card className="hover:shadow-md transition-shadow h-full">
+      <CardHeader className="pb-2 space-y-1.5">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
+          <div className="flex items-center gap-2 font-medium text-base">
             {name}
             <TooltipProvider>
               <Tooltip>
@@ -41,11 +41,12 @@ const MetricRecommendationCard: React.FC<MetricRecommendationProps> = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </CardTitle>
-          <span className="text-sm font-semibold">
+          </div>
+          <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
             {(weight * 100).toFixed(0)}%
           </span>
         </div>
+        <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
       </CardHeader>
       <CardContent>
         <Progress value={weight * 100} className="h-2" />
