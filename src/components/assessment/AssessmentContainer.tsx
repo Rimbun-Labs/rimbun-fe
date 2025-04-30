@@ -15,7 +15,7 @@ interface AssessmentContainerProps {
   answers: Record<string, any>;
   error: string | null;
   isSubmitting: boolean;
-  onAnswer: (answer: UserAnswer) => void;
+  onAnswer: (answer: UserAnswer) => Promise<any>;
   onNext: () => void;
   onPrevious: () => void;
 }

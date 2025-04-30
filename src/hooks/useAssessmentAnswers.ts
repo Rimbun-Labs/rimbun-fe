@@ -24,7 +24,7 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
   const handleAnswer = async (answer: UserAnswer) => {
     const { questionId } = answer;
     
-    // Update answers state immediately before submission
+    // Update answers state immediately
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer.answer
@@ -64,11 +64,14 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
     } else {
       setIsSubmitting(false);
     }
+    
+    // Return the answer for immediate validation
+    return answer.answer;
   };
 
-  const validateCurrentAnswer = (question: Question): boolean => {
-    // Get the current answer for this question
-    const currentAnswer = answers[question.id];
+  const validateCurrentAnswer = (question: Question, immediateAnswer?: any): boolean => {
+    // Use immediate answer if provided (for synchronous validation), otherwise use from state
+    const currentAnswer = immediateAnswer !== undefined ? immediateAnswer : answers[question.id];
     
     // If the question is required and there's no answer
     if (question.required && (currentAnswer === undefined || currentAnswer === null || currentAnswer === '')) {

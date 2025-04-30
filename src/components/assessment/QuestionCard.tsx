@@ -9,7 +9,7 @@ import { QuestionFooter } from './question/QuestionFooter';
 
 interface QuestionCardProps {
   question: Question;
-  onAnswer: (answer: UserAnswer) => void;
+  onAnswer: (answer: UserAnswer) => Promise<any>;
   onNext: () => void;
   currentAnswer?: string | number | boolean;
   isLastQuestion: boolean;
@@ -74,15 +74,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
 
     try {
-      // Send the answer to the parent component
-      await onAnswer({
+      // Send the answer to the parent component and wait for processing
+      const result = await onAnswer({
         questionId: question.id,
         answer: answer,
         questionType: question.questionType
       });
       
-      // Move to next question
-      onNext();
+      // If answer submission was successful, move to next question
+      if (result !== undefined) {
+        onNext();
+      }
     } catch (err) {
       setValidationError('Failed to save your answer. Please try again.');
     } finally {

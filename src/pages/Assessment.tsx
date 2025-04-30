@@ -56,15 +56,9 @@ const Assessment: React.FC = () => {
     enabled: isComplete && !!sessionId,
   });
   
-  const handleNextQuestion = () => {
+  // Directly progress to next question - called after answer has been processed
+  const moveToNextQuestion = () => {
     if (!questions) return;
-    
-    const currentQuestion = questions[currentQuestionIndex];
-    
-    // Validate current answer with improved validation
-    if (!validateCurrentAnswer(currentQuestion)) {
-      return;
-    }
     
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
     
@@ -79,12 +73,24 @@ const Assessment: React.FC = () => {
     setError(null);
   };
 
-  // Handle user's answer to current question
+  // Handle user's answer to current question and then validate
   const handleUserAnswer = async (answer: UserAnswer) => {
-    await handleAnswer({
+    if (!questions) return;
+    
+    // Process and save the answer
+    const answerResult = await handleAnswer({
       ...answer,
-      questionType: questions?.[currentQuestionIndex].questionType
+      questionType: questions[currentQuestionIndex].questionType
     });
+    
+    // Validate the answer immediately with the new value
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!validateCurrentAnswer(currentQuestion, answerResult)) {
+      return undefined;
+    }
+    
+    // Return the answer to indicate success
+    return answerResult;
   };
   
   if (questionsLoading || isCreatingSession) {
@@ -119,7 +125,7 @@ const Assessment: React.FC = () => {
       error={error}
       isSubmitting={isSubmitting}
       onAnswer={handleUserAnswer}
-      onNext={handleNextQuestion}
+      onNext={moveToNextQuestion}
       onPrevious={handlePrevious}
     />
   );
