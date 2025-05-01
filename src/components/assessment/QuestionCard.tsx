@@ -74,12 +74,23 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
 
     try {
+      console.log({
+        questionId: question.id,
+        answer: answer,
+        questionType: question.questionType
+      })
       // Send the answer to the parent component and wait for processing
       const result = await onAnswer({
         questionId: question.id,
         answer: answer,
         questionType: question.questionType
       });
+
+      console.log({
+        questionId: question.id,
+        answer: answer,
+        questionType: question.questionType
+      })
       
       // If answer submission was successful, move to next question
       if (result !== undefined) {

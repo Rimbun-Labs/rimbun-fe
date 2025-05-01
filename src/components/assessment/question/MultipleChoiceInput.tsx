@@ -26,7 +26,7 @@ export const MultipleChoiceInput: React.FC<MultipleChoiceInputProps> = ({
         <div key={option.id} className="flex items-center space-x-2">
           <RadioGroupItem value={option.id} id={option.id} />
           <Label htmlFor={option.id} className="text-base cursor-pointer">
-            {option.text}
+            {option.optionLabel}
           </Label>
         </div>
       ))}

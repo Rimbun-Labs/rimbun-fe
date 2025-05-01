@@ -1,15 +1,9 @@
 import axios from 'axios';
 import { CreateResponseGroupRequest, ResponseGroup } from './types/assessment';
-
-const API_BASE_URL = 'http://localhost:3001/api/v1';
-
-const isMockEnvironment = () => {
-  const host = window.location.hostname;
-  return host.includes('lovable') || host.includes('preview');
-};
+import { config } from './config';
 
 const createMockSession = async (data?: CreateResponseGroupRequest): Promise<ResponseGroup> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 500)); // Add delay to simulate network
   return {
     id: `response-group-${Date.now()}`,
     userId: data?.userId || "mock-user-id",
@@ -22,13 +16,13 @@ const createMockSession = async (data?: CreateResponseGroupRequest): Promise<Res
 };
 
 export const createSession = async (data?: CreateResponseGroupRequest): Promise<ResponseGroup> => {
-  if (isMockEnvironment()) {
+  if (config.isMock) {
     return createMockSession(data);
   }
 
   try {
     const response = await axios.post<ResponseGroup>(
-      `${API_BASE_URL}/user-responses/session`,
+      `${config.API_BASE_URL}/user-responses/session`,
       {
         userId: data?.userId || "175041a5-5b00-40d7-993b-300f03b2b479", // Default user ID if not provided
         questionnaireType: data?.questionnaireType || "ONBOARDING",

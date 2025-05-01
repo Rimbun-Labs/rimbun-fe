@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Question } from "@/lib/api/types/assessment";
 import { MultipleChoiceInput } from './MultipleChoiceInput';
 import { NumberInput } from './NumberInput';
 import { BooleanInput } from './BooleanInput';
+import { SelectInput } from './SelectInput';
 
 interface AnswerInputsProps {
   question: Question;
@@ -22,6 +22,15 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
     case 'multiple_choice':
       return (
         <MultipleChoiceInput
+          question={question}
+          value={answer as string}
+          onChange={onAnswerChange}
+        />
+      );
+
+    case 'select':
+      return (
+        <SelectInput
           question={question}
           value={answer as string}
           onChange={onAnswerChange}

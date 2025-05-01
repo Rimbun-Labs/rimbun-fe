@@ -1,17 +1,61 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { AssessmentResult } from '@/lib/api/types/assessment';
 import { Button } from '@/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import ProfileDetermination from './ProfileDetermination';
 import { ResultsTabs } from './results/ResultsTabs';
+import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AssessmentResultsProps {
-  result: AssessmentResult;
+  result?: AssessmentResult;
   onClose?: () => void;
 }
 
-const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onClose }) => {
+const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResult, onClose }) => {
+  const { sessionId } = useParams<{ sessionId: string }>();
+
+  // Only fetch if we don't have results from props and have a sessionId
+  const { data: fetchedResult, isLoading } = useQuery({
+    queryKey: ['assessmentResults', sessionId],
+    queryFn: () => getAssessmentResults(sessionId!),
+    enabled: !propResult && !!sessionId,
+  });
+
+  // Use prop result if available, otherwise use fetched result
+  const result = propResult || fetchedResult;
+
+  console.log("results", result);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
+        <Skeleton className="h-12 w-1/3" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Skeleton className="h-[400px] w-full" />
+          </div>
+          <Skeleton className="h-[300px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!result) {
+    return (
+      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
+        <div className="p-4 bg-destructive/10 text-destructive rounded-md">
+          No assessment results found. Please complete the assessment first.
+        </div>
+      </div>
+    );
+  }
+
+  const scoreData = result.scoreData;
+
   return (
     <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -53,14 +97,14 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result, onClose }
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ResultsTabs result={result} />
+          <ResultsTabs result={scoreData} />
         </div>
 
         <div>
           <ProfileDetermination 
-            profile={result.profile}
-            finalScore={result.finalScore}
-            confidenceMetrics={result.confidenceMetrics}
+            profile={scoreData.profile}
+            finalScore={scoreData.finalScore}
+            confidenceMetrics={scoreData.confidenceMetrics}
           />
         </div>
       </div>

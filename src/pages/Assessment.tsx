@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { mockQuestions } from '@/lib/mock/mockQuestions';
-import { UserAnswer, Question } from '@/lib/api/assessmentApi';
+import { UserAnswer, Question } from '@/lib/api/types/assessment';
 import { useAssessmentProgress } from '@/hooks/useAssessmentProgress';
 import { useAssessmentAnswers } from '@/hooks/useAssessmentAnswers';
 import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
@@ -12,6 +11,7 @@ import AssessmentComplete from '@/components/assessment/AssessmentComplete';
 import AssessmentContextDialog from '@/components/assessment/AssessmentContextDialog';
 import { mockAssessmentResult } from '@/lib/mock/mockData';
 import { createSession } from '@/lib/api/sessionApi';
+import { getQuestions } from '@/lib/api/questionnaireApi';
 import { useSession } from '@/contexts/SessionContext';
 import { toast } from 'sonner';
 
@@ -37,9 +37,9 @@ const Assessment: React.FC = () => {
   });
   
   // Fetch questions
-  const { data: questions, isPending: questionsLoading } = useQuery({
+  const { data: questions, isPending: questionsLoading, error: questionsError } = useQuery({
     queryKey: ['assessment-questions'],
-    queryFn: () => Promise.resolve(mockQuestions),
+    queryFn: getQuestions,
     enabled: hasStarted, // Only fetch questions after user starts the assessment
   });
   
@@ -102,14 +102,13 @@ const Assessment: React.FC = () => {
   const handleUserAnswer = async (answer: UserAnswer) => {
     if (!questions) return;
     
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    console.log("userAnswer", answer)
     // Process and save the answer
-    const answerResult = await handleAnswer({
-      ...answer,
-      questionType: questions[currentQuestionIndex].questionType
-    });
+    const answerResult = await handleAnswer(answer, currentQuestion);
     
     // Validate the answer immediately with the new value
-    const currentQuestion = questions[currentQuestionIndex];
     if (!validateCurrentAnswer(currentQuestion, answerResult)) {
       return undefined;
     }
@@ -131,6 +130,17 @@ const Assessment: React.FC = () => {
   
   if (createSessionMutation.isPending || questionsLoading) {
     return <AssessmentLoading />;
+  }
+
+  if (questionsError) {
+    return (
+      <AssessmentError 
+        onRetry={() => {
+          setHasStarted(false);
+          setShowContextDialog(true);
+        }}
+      />
+    );
   }
   
   if (isComplete) {
@@ -154,7 +164,7 @@ const Assessment: React.FC = () => {
         onRetry={() => {
           setHasStarted(false);
           setShowContextDialog(true);
-        }} 
+        }}
       />
     );
   }

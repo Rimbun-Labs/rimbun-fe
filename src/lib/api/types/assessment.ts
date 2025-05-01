@@ -10,7 +10,7 @@ export interface Question {
   };
   options?: Array<{
     id: string;
-    text: string;
+    optionLabel: string;
   }>;
   visibilityRules?: {
     showToLevels: string[];
@@ -26,34 +26,40 @@ export interface UserAnswer {
 }
 
 export interface AssessmentResult {
-  riskProfile: number;
-  knowledgeLevel: number;
-  leverageAptitude: number;
-  decisionStyleScore: number;
-  personalityScore: number;
-  finalScore: number;
-  profile: string;
-  confidenceMetrics: {
-    riskProfileConfidence: number;
-    knowledgeLevelConfidence: number;
-    leverageAptitudeConfidence: number;
-    decisionStyleConfidence: number;
-    personalityConfidence: number;
-    riskCapacityConfidence: number;
-  };
-  categoryScores?: {
-    [category: string]: {
-      score: number;
-      maxScore: number;
-      percentage: number;
-      confidence: number;
-      description?: string;
+  id: string;
+  responseGroupId: string;
+  scoreData: {
+    profile: string;
+    finalScore: number;
+    riskProfile: number;
+    directInputs: {
+      age: number;
+      riskCapacity: number;
+      totalSavings: string;
+      financialGoal: string;
+      monthlyIncome: string;
+      investmentHorizon: number;
     };
-  };
-  directInputs?: {
     riskCapacity: number;
+    knowledgeLevel: number;
+    leverageAptitude: number;
+    personalityScore: number;
+    confidenceMetrics: {
+      personalityConfidence: number;
+      riskProfileConfidence: number;
+      riskCapacityConfidence: number;
+      decisionStyleConfidence: number;
+      knowledgeLevelConfidence: number;
+      leverageAptitudeConfidence: number;
+    };
     investmentHorizon: number;
+    overallConfidence: number;
+    decisionStyleScore: number;
+    personalityDeviation: number;
+    decisionStyleDeviation: number;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ResponseGroup {
@@ -147,3 +153,5 @@ export interface SaveUserResponsesBulkRequest {
     };
   }>;
 }
+
+export type AssessmentResults = AssessmentResult;

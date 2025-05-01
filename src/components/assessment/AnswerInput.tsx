@@ -8,7 +8,7 @@ import { AlertCircle } from "lucide-react";
 
 interface AnswerInputProps {
   type: 'multiple_choice' | 'number' | 'boolean';
-  options?: Array<{ id: string; text: string; }>;
+  options?: Array<{ id: string; optionLabel: string; }>;
   value: any;
   onChange: (value: any) => void;
   placeholder?: string;
@@ -38,7 +38,7 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
               <div key={option.id} className="flex items-center space-x-2">
                 <RadioGroupItem value={option.id} id={option.id} />
                 <Label htmlFor={option.id} className="text-base cursor-pointer">
-                  {option.text}
+                  {option.optionLabel}
                 </Label>
               </div>
             ))}

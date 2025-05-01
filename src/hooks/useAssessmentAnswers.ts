@@ -1,72 +1,57 @@
-
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { submitAnswer, UserAnswer, SubmitAnswerRequest, Question } from '@/lib/api/assessmentApi';
+import { Question, UserAnswer } from '@/lib/api/types/assessment';
+import { userResponsesApi } from '@/lib/api/userResponsesApi';
 import { toast } from "sonner";
 
 export const useAssessmentAnswers = (sessionId: string | null) => {
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
-    mutationFn: (data: SubmitAnswerRequest) => submitAnswer(data),
-    onSuccess: () => {
-      // Handle success if needed
-    },
+    mutationFn: userResponsesApi.submitAnswer,
     onError: () => {
       toast.error("Failed to save your answer");
       setError("Failed to save your answer. Please try again.");
     }
   });
 
-  const handleAnswer = async (answer: UserAnswer) => {
-    const { questionId } = answer;
+  const handleAnswer = async (answer: UserAnswer, question: Question) => {
+    if (!sessionId) return;
+    console.log("answerxx", answer)
+    const formattedAnswer = userResponsesApi.formatAnswerValue(answer.answer, question);
     
     // Update answers state immediately
     setAnswers(prev => ({
       ...prev,
-      [questionId]: answer.answer
+      [answer.questionId]: formattedAnswer
     }));
     
     setError(null);
     setIsSubmitting(true);
     
-    if (sessionId) {
-      let submitData: SubmitAnswerRequest = {
+    try {
+      console.log("mutation",{
         responseGroupId: sessionId,
         questionId: answer.questionId,
-        answer: {}
-      };
+        answer: formattedAnswer
+      })
+      await submitAnswerMutation.mutateAsync({
+        responseGroupId: sessionId,
+        questionId: answer.questionId,
+        answer: formattedAnswer
+      });
       
-      const answerValue = answer.answer;
-      
-      if (typeof answerValue === 'string') {
-        if (answer.questionType === 'multiple_choice') {
-          submitData.answer.selectedOption = { id: answerValue as string };
-        } else {
-          submitData.answer.value = answerValue as string;
-        }
-      } else if (typeof answerValue === 'number') {
-        submitData.answer.answerNumber = answerValue as number;
-      } else if (typeof answerValue === 'boolean') {
-        submitData.answer.answerBoolean = answerValue as boolean;
-      }
-      
-      try {
-        await submitAnswerMutation.mutateAsync(submitData);
-      } catch (error) {
-        setError("Failed to save your answer. Please try again.");
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
+      return formattedAnswer;
+    } catch (error) {
+      console.log(error)
+      setError("Failed to save your answer. Please try again.");
+      return undefined;
+    } finally {
       setIsSubmitting(false);
     }
-    
-    // Return the answer for immediate validation
-    return answer.answer;
   };
 
   const validateCurrentAnswer = (question: Question, immediateAnswer?: any): boolean => {
@@ -82,7 +67,8 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
     
     // Specific validation for number type
     if (question.questionType === 'number' && currentAnswer !== undefined) {
-      if (isNaN(Number(currentAnswer)) || Number(currentAnswer) < 0) {
+      const numValue = Number(currentAnswer);
+      if (isNaN(numValue) || numValue < 0) {
         setError("Please enter a valid number");
         return false;
       }

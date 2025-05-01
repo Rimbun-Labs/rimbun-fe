@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +12,7 @@ import { MetricDetails, getMetricInsights } from './MetricDetails';
 import { AssessmentResult } from '@/lib/api/types/assessment';
 
 interface OverviewTabProps {
-  result: AssessmentResult;
+  result: AssessmentResult['scoreData'];
 }
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
@@ -24,8 +23,29 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
     return "bg-red-100 text-red-800";
   };
 
-  const averageConfidence = Object.values(result.confidenceMetrics).reduce((a, b) => a + b, 0) / 
-    Object.values(result.confidenceMetrics).length;
+  const metrics = [
+    {
+      key: 'riskProfile',
+      title: 'Risk Profile',
+      description: 'Your risk tolerance and investment preferences',
+      score: result.riskProfile,
+      confidence: result.confidenceMetrics.riskProfileConfidence
+    },
+    {
+      key: 'knowledgeLevel',
+      title: 'Knowledge Level',
+      description: 'Your understanding of investment concepts',
+      score: result.knowledgeLevel,
+      confidence: result.confidenceMetrics.knowledgeLevelConfidence
+    },
+    {
+      key: 'decisionStyle',
+      title: 'Decision Style',
+      description: 'Your approach to making investment decisions',
+      score: result.decisionStyleScore,
+      confidence: result.confidenceMetrics.decisionStyleConfidence
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -36,8 +56,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
               <CardTitle>Risk Profile Visualization</CardTitle>
               <CardDescription>Your investment preferences and risk tolerance</CardDescription>
             </div>
-            <Badge variant="outline" className={getConfidenceColor(averageConfidence)}>
-              {Math.round(averageConfidence * 100)}% Confidence
+            <Badge variant="outline" className={getConfidenceColor(result.overallConfidence)}>
+              {Math.round(result.overallConfidence * 100)}% Confidence
             </Badge>
           </div>
         </CardHeader>
@@ -68,33 +88,28 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {['riskProfile', 'knowledgeLevel', 'decisionStyle'].map((metric) => {
-          const insights = getMetricInsights(metric);
-          if (!insights) return null;
-          
-          return (
-            <Dialog key={metric}>
-              <DialogTrigger asChild>
-                <div className="cursor-pointer">
-                  <ScoreCard
-                    title={insights.title}
-                    score={result[metric as keyof AssessmentResult] as number}
-                    maxScore={100}
-                    confidence={result.confidenceMetrics[`${metric}Confidence` as keyof typeof result.confidenceMetrics]}
-                    description={insights.description}
-                  />
-                </div>
-              </DialogTrigger>
-              <MetricDetails 
-                title={insights.title}
-                score={result[metric as keyof AssessmentResult] as number}
-                average={insights.average}
-                trend={insights.trend}
-                recommendation={insights.recommendation}
-              />
-            </Dialog>
-          );
-        })}
+        {metrics.map((metric) => (
+          <Dialog key={metric.key}>
+            <DialogTrigger asChild>
+              <div className="cursor-pointer">
+                <ScoreCard
+                  title={metric.title}
+                  score={metric.score}
+                  maxScore={100}
+                  confidence={metric.confidence}
+                  description={metric.description}
+                />
+              </div>
+            </DialogTrigger>
+            <MetricDetails 
+              title={metric.title}
+              score={metric.score}
+              average={75} // You might want to get this from somewhere
+              trend="increasing"
+              recommendation="Based on your profile, consider exploring more diversified investment options."
+            />
+          </Dialog>
+        ))}
       </div>
 
       <Card>
@@ -116,7 +131,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Based on your knowledge level, we recommend completing our investment basics modules
+                      Based on your knowledge level ({result.knowledgeLevel.toFixed(1)}), we recommend completing our investment basics modules
                     </p>
                   </div>
                 </div>

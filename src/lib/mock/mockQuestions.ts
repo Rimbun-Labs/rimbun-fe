@@ -24,10 +24,10 @@ export const mockQuestions: Question[] = [
       description: "Set your goals and timelines to bring your financial dreams to life."
     },
     options: [
-      { id: "3050281a-b1a0-4ce3-ba92-d19929ea128b", text: "Wealth" },
-      { id: "goal-2", text: "Home Purchase" },
-      { id: "goal-3", text: "Education" },
-      { id: "goal-4", text: "Retirement" }
+      { id: "2eb51e7e-ad6b-4172-b396-0f83ef814f6b", optionLabel: "retirement" },
+      { id: "65887a09-284a-4f9a-b873-59ebf799c763", optionLabel: "house" },
+      { id: "3050281a-b1a0-4ce3-ba92-d19929ea128b", optionLabel: "wealth" },
+      { id: "8e27a1e9-6e52-4f05-9b5c-8e9bb5aff956", optionLabel: "education" }
     ],
     required: true
   },
@@ -42,10 +42,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your current financial situation."
     },
     options: [
-      { id: "income-1", text: "Under $2,000" },
-      { id: "edd561be-0f3d-4622-b134-9091a704e29a", text: "$2,000 - $3,999" },
-      { id: "income-3", text: "$4,000 - $7,999" },
-      { id: "income-4", text: "$8,000+" }
+      { id: "income-1", optionLabel: "Under $2,000" },
+      { id: "edd561be-0f3d-4622-b134-9091a704e29a", optionLabel: "$2,000 - $3,999" },
+      { id: "income-3", optionLabel: "$4,000 - $7,999" },
+      { id: "income-4", optionLabel: "$8,000+" }
     ],
     required: true
   },
@@ -60,10 +60,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your approach to risk in financial decisions."
     },
     options: [
-      { id: "store-1", text: "Shop only at Store A - I'll take the risk for big discounts" },
-      { id: "store-2", text: "Buy most items at Store A, but important ones at Store B" },
-      { id: "6d8ea8f7-70fa-404e-ab17-7160ee5a1e4c", text: "Shop only at Store B - I don't want to risk defective items" },
-      { id: "store-4", text: "Compare each item individually based on price vs. quality" }
+      { id: "store-1", optionLabel: "Shop only at Store A - I'll take the risk for big discounts" },
+      { id: "store-2", optionLabel: "Buy most items at Store A, but important ones at Store B" },
+      { id: "6d8ea8f7-70fa-404e-ab17-7160ee5a1e4c", optionLabel: "Shop only at Store B - I don't want to risk defective items" },
+      { id: "store-4", optionLabel: "Compare each item individually based on price vs. quality" }
     ],
     required: true
   },
@@ -78,10 +78,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your approach to risk in financial decisions."
     },
     options: [
-      { id: "coins-1", text: "Keep all 1000 coins in Safe Box" },
-      { id: "60b56ba3-37cf-4696-883a-63caf1d911df", text: "Keep 800 coins safe, try 200 in Adventure Mode" },
-      { id: "coins-3", text: "Split 50/50 between Safe Box and Adventure" },
-      { id: "coins-4", text: "Put most coins in Adventure Mode for maximum growth" }
+      { id: "coins-1", optionLabel: "Keep all 1000 coins in Safe Box" },
+      { id: "60b56ba3-37cf-4696-883a-63caf1d911df", optionLabel: "Keep 800 coins safe, try 200 in Adventure Mode" },
+      { id: "coins-3", optionLabel: "Split 50/50 between Safe Box and Adventure" },
+      { id: "coins-4", optionLabel: "Put most coins in Adventure Mode for maximum growth" }
     ],
     required: true
   },
@@ -96,10 +96,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your approach to risk in financial decisions."
     },
     options: [
-      { id: "unexpected-1", text: "Put it all in high-yield savings" },
-      { id: "2aeba28e-5adf-421c-b031-6a513427235d", text: "Invest 50% in stocks, 50% in savings" },
-      { id: "unexpected-3", text: "Put it all in growth stocks" },
-      { id: "unexpected-4", text: "Try speculative investments for maximum return" }
+      { id: "unexpected-1", optionLabel: "Put it all in high-yield savings" },
+      { id: "2aeba28e-5adf-421c-b031-6a513427235d", optionLabel: "Invest 50% in stocks, 50% in savings" },
+      { id: "unexpected-3", optionLabel: "Put it all in growth stocks" },
+      { id: "unexpected-4", optionLabel: "Try speculative investments for maximum return" }
     ],
     required: true
   },
@@ -114,10 +114,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "pizza-1", text: "Focus on one popular recipe and perfect it" },
-      { id: "c30b1d2a-046f-4b00-9a71-22987f6bee66", text: "Split money between different recipes and marketing" },
-      { id: "pizza-3", text: "Invest in unique ingredients for premium pizzas" },
-      { id: "pizza-4", text: "Save most of it for future upgrades" }
+      { id: "pizza-1", optionLabel: "Focus on one popular recipe and perfect it" },
+      { id: "c30b1d2a-046f-4b00-9a71-22987f6bee66", optionLabel: "Split money between different recipes and marketing" },
+      { id: "pizza-3", optionLabel: "Invest in unique ingredients for premium pizzas" },
+      { id: "pizza-4", optionLabel: "Save most of it for future upgrades" }
     ],
     required: true
   },
@@ -132,10 +132,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "bank-1", text: "Put all coins in Safe Bank" },
-      { id: "bank-2", text: "Put all coins in Growth Bank" },
-      { id: "4cb9f270-ca63-4a97-a304-3c34b538eb62", text: "Try Growth Bank with a small amount first" },
-      { id: "bank-4", text: "Split coins equally between both banks" }
+      { id: "bank-1", optionLabel: "Put all coins in Safe Bank" },
+      { id: "bank-2", optionLabel: "Put all coins in Growth Bank" },
+      { id: "4cb9f270-ca63-4a97-a304-3c34b538eb62", optionLabel: "Try Growth Bank with a small amount first" },
+      { id: "bank-4", optionLabel: "Split coins equally between both banks" }
     ],
     required: true
   },
@@ -150,10 +150,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "1a04e417-d966-48af-95d6-bf37450047a1", text: "Keep collecting coins as usual" },
-      { id: "inflation-2", text: "Find ways to collect more coins" },
-      { id: "inflation-3", text: "Use coins quickly before prices rise more" },
-      { id: "inflation-4", text: "Find investments that grow faster than prices" }
+      { id: "1a04e417-d966-48af-95d6-bf37450047a1", optionLabel: "Keep collecting coins as usual" },
+      { id: "inflation-2", optionLabel: "Find ways to collect more coins" },
+      { id: "inflation-3", optionLabel: "Use coins quickly before prices rise more" },
+      { id: "inflation-4", optionLabel: "Find investments that grow faster than prices" }
     ],
     required: true
   },
@@ -168,10 +168,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "storm-1", text: "Save all coins" },
-      { id: "storm-2", text: "Spend half on an umbrella" },
-      { id: "ed2b5bfd-1f9f-4cc5-8051-3e400b93cc5a", text: "Buy a fancy coat" },
-      { id: "storm-4", text: "Ignore the storm" }
+      { id: "storm-1", optionLabel: "Save all coins" },
+      { id: "storm-2", optionLabel: "Spend half on an umbrella" },
+      { id: "ed2b5bfd-1f9f-4cc5-8051-3e400b93cc5a", optionLabel: "Buy a fancy coat" },
+      { id: "storm-4", optionLabel: "Ignore the storm" }
     ],
     required: true
   },
@@ -186,10 +186,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "3f52e40c-23a7-4d34-9179-4d99d69f16b0", text: "Focus on popular items for quick gains" },
-      { id: "collection-2", text: "Stick with common items for stability" },
-      { id: "collection-3", text: "Try new items with growth potential" },
-      { id: "collection-4", text: "Diversify across all three types" }
+      { id: "3f52e40c-23a7-4d34-9179-4d99d69f16b0", optionLabel: "Focus on popular items for quick gains" },
+      { id: "collection-2", optionLabel: "Stick with common items for stability" },
+      { id: "collection-3", optionLabel: "Try new items with growth potential" },
+      { id: "collection-4", optionLabel: "Diversify across all three types" }
     ],
     required: true
   },
@@ -204,10 +204,10 @@ export const mockQuestions: Question[] = [
       description: "Testing your understanding of key financial concepts."
     },
     options: [
-      { id: "pet-1", text: "Focus on upgrading current services" },
-      { id: "57bf9d9c-91bb-4af1-a1d2-e2cfa31aabc2", text: "Balance upgrades with new services, test partnerships" },
-      { id: "pet-3", text: "Mainly add new services and test trends" },
-      { id: "pet-4", text: "Focus on trending services for rapid growth" }
+      { id: "pet-1", optionLabel: "Focus on upgrading current services" },
+      { id: "57bf9d9c-91bb-4af1-a1d2-e2cfa31aabc2", optionLabel: "Balance upgrades with new services, test partnerships" },
+      { id: "pet-3", optionLabel: "Mainly add new services and test trends" },
+      { id: "pet-4", optionLabel: "Focus on trending services for rapid growth" }
     ],
     required: true
   },
@@ -222,10 +222,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your approach to using debt and leverage."
     },
     options: [
-      { id: "phone-1", text: "Save until I can pay in full" },
-      { id: "e6a543ae-d150-47ce-a980-29f1b0d13211", text: "Save most of it, use small installment for remainder" },
-      { id: "phone-3", text: "Use interest-free installment plan" },
-      { id: "phone-4", text: "Use credit card and pay over time" }
+      { id: "phone-1", optionLabel: "Save until I can pay in full" },
+      { id: "e6a543ae-d150-47ce-a980-29f1b0d13211", optionLabel: "Save most of it, use small installment for remainder" },
+      { id: "phone-3", optionLabel: "Use interest-free installment plan" },
+      { id: "phone-4", optionLabel: "Use credit card and pay over time" }
     ],
     required: true
   },
@@ -240,10 +240,10 @@ export const mockQuestions: Question[] = [
       description: "Understanding your approach to using debt and leverage."
     },
     options: [
-      { id: "reno-1", text: "Save and renovate in parts" },
-      { id: "reno-2", text: "Take a home improvement loan" },
-      { id: "3bef2e29-1069-48d7-97f1-8f99abf7ebc5", text: "Use 0% credit cards and pay within promo period" },
-      { id: "reno-4", text: "Mix savings with a small loan" }
+      { id: "reno-1", optionLabel: "Save and renovate in parts" },
+      { id: "reno-2", optionLabel: "Take a home improvement loan" },
+      { id: "3bef2e29-1069-48d7-97f1-8f99abf7ebc5", optionLabel: "Use 0% credit cards and pay within promo period" },
+      { id: "reno-4", optionLabel: "Mix savings with a small loan" }
     ],
     required: true
   },
@@ -258,10 +258,10 @@ export const mockQuestions: Question[] = [
       description: "Assess your market knowledge and decision-making approach."
     },
     options: [
-      { id: "seasons-1", text: "Focus only on the current season" },
-      { id: "c87daf13-c879-4051-9a63-382126439ba0", text: "Focus on current season but keep some variety" },
-      { id: "seasons-3", text: "Equal mix all year round" },
-      { id: "seasons-4", text: "Stock up before each seasonal change" }
+      { id: "seasons-1", optionLabel: "Focus only on the current season" },
+      { id: "c87daf13-c879-4051-9a63-382126439ba0", optionLabel: "Focus on current season but keep some variety" },
+      { id: "seasons-3", optionLabel: "Equal mix all year round" },
+      { id: "seasons-4", optionLabel: "Stock up before each seasonal change" }
     ],
     required: true
   },
@@ -276,10 +276,10 @@ export const mockQuestions: Question[] = [
       description: "Assess your market knowledge and decision-making approach."
     },
     options: [
-      { id: "26a9a2b7-34d6-4526-8ec1-1ed447f7e691", text: "Invest heavily in star players" },
-      { id: "team-2", text: "Focus on young talents with potential" },
-      { id: "team-3", text: "Mostly experienced players for stability" },
-      { id: "team-4", text: "Mix of all types for balance" }
+      { id: "26a9a2b7-34d6-4526-8ec1-1ed447f7e691", optionLabel: "Invest heavily in star players" },
+      { id: "team-2", optionLabel: "Focus on young talents with potential" },
+      { id: "team-3", optionLabel: "Mostly experienced players for stability" },
+      { id: "team-4", optionLabel: "Mix of all types for balance" }
     ],
     required: true
   },
@@ -294,10 +294,10 @@ export const mockQuestions: Question[] = [
       description: "Assess your market knowledge and decision-making approach."
     },
     options: [
-      { id: "farm-1", text: "Sell crops now for quick cash" },
-      { id: "farm-2", text: "Wait for harvest for bigger profit" },
-      { id: "e98aeea0-3cf8-41ea-80b0-dbf63fe1796f", text: "Sell half now, half later" },
-      { id: "farm-4", text: "Try a trendy crop" }
+      { id: "farm-1", optionLabel: "Sell crops now for quick cash" },
+      { id: "farm-2", optionLabel: "Wait for harvest for bigger profit" },
+      { id: "e98aeea0-3cf8-41ea-80b0-dbf63fe1796f", optionLabel: "Sell half now, half later" },
+      { id: "farm-4", optionLabel: "Try a trendy crop" }
     ],
     required: true
   },
