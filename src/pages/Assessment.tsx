@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -11,11 +10,14 @@ import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
 import { AssessmentError } from '@/components/assessment/AssessmentError';
 import { AssessmentContainer } from '@/components/assessment/AssessmentContainer';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
+import AssessmentContextDialog from '@/components/assessment/AssessmentContextDialog';
 import { mockAssessmentResult } from '@/lib/mock/mockData';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const [isComplete, setIsComplete] = useState(false);
+  const [showContextDialog, setShowContextDialog] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
   
   // Initialize session
   const { 
@@ -27,7 +29,8 @@ const Assessment: React.FC = () => {
   // Fetch questions
   const { data: questions, isPending: questionsLoading } = useQuery({
     queryKey: ['assessment-questions'],
-    queryFn: () => Promise.resolve(mockQuestions)
+    queryFn: () => Promise.resolve(mockQuestions),
+    enabled: hasStarted, // Only fetch questions after user starts the assessment
   });
   
   // Setup assessment progress state management
@@ -55,6 +58,16 @@ const Assessment: React.FC = () => {
     queryFn: () => sessionId ? Promise.resolve(mockAssessmentResult) : Promise.reject('No session ID'),
     enabled: isComplete && !!sessionId,
   });
+  
+  const handleStartAssessment = () => {
+    setShowContextDialog(false);
+    setHasStarted(true);
+  };
+
+  const handleCloseContextDialog = () => {
+    setShowContextDialog(false);
+    navigate(-1); // Go back if user cancels
+  };
   
   // Directly progress to next question - called after answer has been processed
   const moveToNextQuestion = () => {
@@ -92,6 +105,17 @@ const Assessment: React.FC = () => {
     // Return the answer to indicate success
     return answerResult;
   };
+
+  // Show context dialog if assessment hasn't started
+  if (!hasStarted) {
+    return (
+      <AssessmentContextDialog
+        isOpen={showContextDialog}
+        onStart={handleStartAssessment}
+        onClose={handleCloseContextDialog}
+      />
+    );
+  }
   
   if (questionsLoading || isCreatingSession) {
     return <AssessmentLoading />;
