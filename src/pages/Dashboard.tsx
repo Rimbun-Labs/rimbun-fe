@@ -1,23 +1,18 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CircleChevronRight } from "lucide-react";
 import { useQuery } from '@tanstack/react-query';
-import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
-import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
-import RecommendationCard from '@/components/dashboard/RecommendationCard';
-import LearningProgress from '@/components/dashboard/LearningProgress';
-import { Skeleton } from '@/components/ui/skeleton';
 import { mockAssessmentResult, mockPortfolioAllocation, mockLearningModules, mockRecommendations } from '@/lib/mock/mockData';
 import { getRecommendations } from '@/lib/api/assessmentApi';
+
+// Component imports
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import MetricsOverview from '@/components/dashboard/MetricsOverview';
+import MainContent from '@/components/dashboard/MainContent';
 import AchievementGrid from '@/components/dashboard/AchievementGrid';
+import RecommendationsSection from '@/components/dashboard/RecommendationsSection';
+import LearningSection from '@/components/dashboard/LearningSection';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  
   // Mock session ID for API calls
   const sessionId = "mock-session-id";
   
@@ -72,137 +67,38 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-        <div>
-          <h1 className="text-3xl font-bold">Your Financial Dashboard</h1>
-          <p className="text-muted-foreground">Track your progress and portfolio insights</p>
-        </div>
-        <Button onClick={() => navigate('/assessment')}>
-          Retake Assessment
-        </Button>
-      </div>
+      <DashboardHeader />
       
       {/* Analytics Overview */}
       <MetricsOverview />
       
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Risk Profile Section */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>Your Risk Profile</CardTitle>
-            <CardDescription>Based on your assessment responses</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[320px]">
-              {profileLoading ? (
-                <div className="h-full flex items-center justify-center">
-                  <Skeleton className="h-full w-full" />
-                </div>
-              ) : profile ? (
-                <RiskProfileChart data={profile} confidenceMetrics={profile.confidenceMetrics} />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <p>No risk profile data available</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          {profile && (
-            <CardFooter className="border-t border-border/40 pt-4">
-              <p className="text-sm text-muted-foreground">
-                Profile: <span className="font-medium">{profile?.profile || 'Unknown'}</span> • 
-                Final Score: <span className="font-medium">{profile?.finalScore || 'N/A'}</span>
-              </p>
-            </CardFooter>
-          )}
-        </Card>
-        
-        {/* Portfolio Allocation Section */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>Recommended Portfolio</CardTitle>
-            <CardDescription>Optimal asset allocation based on your profile</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[320px]">
-              {portfolioLoading || recommendationsLoading ? (
-                <div className="h-full flex items-center justify-center">
-                  <Skeleton className="h-full w-full" />
-                </div>
-              ) : (portfolioData && recommendationsData) ? (
-                <PortfolioAllocation 
-                  allocations={portfolioData} 
-                  recommendedMetrics={recommendationsData.recommendedMetrics}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <p>No portfolio data available</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="border-t border-border/40 pt-4">
-            <Button variant="link" className="ml-auto flex items-center gap-1 p-0">
-              Customize Portfolio <CircleChevronRight className="h-4 w-4" />
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
+      {/* Main Content Grid - Risk Profile and Portfolio */}
+      <MainContent 
+        profile={profile}
+        portfolioData={portfolioData}
+        recommendationsData={recommendationsData}
+        profileLoading={profileLoading}
+        portfolioLoading={portfolioLoading}
+        recommendationsLoading={recommendationsLoading}
+      />
       
       {/* Achievements Section */}
       <AchievementGrid />
       
       {/* Recommendations Section */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Personalized Recommendations</h2>
-          <Button variant="outline" size="sm">View All</Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {recommendationsLoading ? (
-            Array(3).fill(0).map((_, i) => (
-              <div key={i} className="h-[160px]">
-                <Skeleton className="h-full w-full" />
-              </div>
-            ))
-          ) : mockRecommendations.map((rec) => (
-            <RecommendationCard 
-              key={rec.id} 
-              title={rec.title}
-              description={rec.description}
-              priority={rec.priority as "High" | "Medium" | "Low"}
-              category={rec.category}
-            />
-          ))}
-        </div>
-      </div>
+      <RecommendationsSection 
+        recommendations={mockRecommendations} 
+        loading={recommendationsLoading} 
+      />
       
       {/* Learning Progress Section */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Learning Progress</h2>
-          <Button variant="outline" size="sm" onClick={() => navigate('/learning')}>
-            View Courses
-          </Button>
-        </div>
-        
-        {learningLoading ? (
-          <Skeleton className="h-[200px] w-full" />
-        ) : (
-          <LearningProgress 
-            completedModules={completedModules}
-            totalModules={learningModules?.length || 0}
-            currentModule={currentModule && {
-              id: currentModule.id,
-              name: currentModule.title,
-              progress: currentModule.progress
-            }}
-            achievements={achievements}
-          />
-        )}
-      </div>
+      <LearningSection 
+        completedModules={completedModules}
+        totalModules={learningModules?.length || 0}
+        currentModule={currentModule}
+        achievements={achievements}
+        loading={learningLoading}
+      />
     </div>
   );
 };
