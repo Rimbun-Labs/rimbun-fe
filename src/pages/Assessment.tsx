@@ -3,7 +3,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { mockQuestions } from '@/lib/mock/mockQuestions';
 import { UserAnswer, Question } from '@/lib/api/assessmentApi';
-import { useAssessmentSession } from '@/hooks/useAssessmentSession';
 import { useAssessmentProgress } from '@/hooks/useAssessmentProgress';
 import { useAssessmentAnswers } from '@/hooks/useAssessmentAnswers';
 import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
@@ -21,14 +20,7 @@ const Assessment: React.FC = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [showContextDialog, setShowContextDialog] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
-  const { setSessionId } = useSession();
-  
-  // Initialize session
-  const { 
-    sessionId, 
-    isCreatingSession, 
-    handleRetry: retrySessionCreation 
-  } = useAssessmentSession();
+  const { sessionId, setSessionId } = useSession();
   
   // Create session mutation
   const createSessionMutation = useMutation({
@@ -137,7 +129,7 @@ const Assessment: React.FC = () => {
     );
   }
   
-  if (questionsLoading || isCreatingSession || createSessionMutation.isPending) {
+  if (createSessionMutation.isPending || questionsLoading) {
     return <AssessmentLoading />;
   }
   
@@ -157,7 +149,14 @@ const Assessment: React.FC = () => {
   }
   
   if (!questions || questions.length === 0) {
-    return <AssessmentError onRetry={retrySessionCreation} />;
+    return (
+      <AssessmentError 
+        onRetry={() => {
+          setHasStarted(false);
+          setShowContextDialog(true);
+        }} 
+      />
+    );
   }
   
   return (

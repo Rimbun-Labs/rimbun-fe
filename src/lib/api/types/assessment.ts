@@ -95,6 +95,7 @@ export interface CreateResponseGroupRequest {
   questionnaireType: "ONBOARDING";
   userId?: string;
   metadata?: Record<string, any>;
+  description?: string;
 }
 
 export interface QuestionsWithAnswersResponse {
