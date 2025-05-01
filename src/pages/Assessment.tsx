@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { mockQuestions } from '@/lib/mock/mockQuestions';
 import { UserAnswer, Question } from '@/lib/api/assessmentApi';
@@ -12,12 +12,16 @@ import { AssessmentContainer } from '@/components/assessment/AssessmentContainer
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
 import AssessmentContextDialog from '@/components/assessment/AssessmentContextDialog';
 import { mockAssessmentResult } from '@/lib/mock/mockData';
+import { createSession } from '@/lib/api/sessionApi';
+import { useSession } from '@/contexts/SessionContext';
+import { toast } from 'sonner';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const [isComplete, setIsComplete] = useState(false);
   const [showContextDialog, setShowContextDialog] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
+  const { setSessionId } = useSession();
   
   // Initialize session
   const { 
@@ -25,6 +29,20 @@ const Assessment: React.FC = () => {
     isCreatingSession, 
     handleRetry: retrySessionCreation 
   } = useAssessmentSession();
+  
+  // Create session mutation
+  const createSessionMutation = useMutation({
+    mutationFn: createSession,
+    onSuccess: (response) => {
+      setSessionId(response.id);
+      setShowContextDialog(false);
+      setHasStarted(true);
+    },
+    onError: (error) => {
+      toast.error('Failed to start assessment session. Please try again.');
+      console.error('Session creation error:', error);
+    }
+  });
   
   // Fetch questions
   const { data: questions, isPending: questionsLoading } = useQuery({
@@ -60,8 +78,10 @@ const Assessment: React.FC = () => {
   });
   
   const handleStartAssessment = () => {
-    setShowContextDialog(false);
-    setHasStarted(true);
+    createSessionMutation.mutate({
+      questionnaireType: "ONBOARDING",
+      description: "Investment Profile Assessment"
+    });
   };
 
   const handleCloseContextDialog = () => {
@@ -117,7 +137,7 @@ const Assessment: React.FC = () => {
     );
   }
   
-  if (questionsLoading || isCreatingSession) {
+  if (questionsLoading || isCreatingSession || createSessionMutation.isPending) {
     return <AssessmentLoading />;
   }
   
