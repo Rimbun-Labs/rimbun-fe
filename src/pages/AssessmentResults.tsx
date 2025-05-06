@@ -68,6 +68,8 @@ const AssessmentResults: React.FC = () => {
 
   if (!results) return null;
 
+  console.log(results)
+
   const scoreCategories = [
     { label: 'Risk Profile', value: results.scoreData.riskProfile, confidence: results.scoreData.confidenceMetrics.riskProfileConfidence },
     { label: 'Knowledge Level', value: results.scoreData.knowledgeLevel, confidence: results.scoreData.confidenceMetrics.knowledgeLevelConfidence },

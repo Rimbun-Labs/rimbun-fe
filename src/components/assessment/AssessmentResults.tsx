@@ -17,7 +17,7 @@ interface AssessmentResultsProps {
 
 const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResult, onClose }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
-
+  propResult = null 
   // Only fetch if we don't have results from props and have a sessionId
   const { data: fetchedResult, isLoading } = useQuery({
     queryKey: ['assessmentResults', sessionId],

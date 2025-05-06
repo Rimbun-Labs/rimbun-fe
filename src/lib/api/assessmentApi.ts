@@ -67,6 +67,7 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
         }
       }
     );
+    console.log("res", response.data)
     return response.data;
   } catch (error) {
     console.error('Failed to fetch assessment results:', error);

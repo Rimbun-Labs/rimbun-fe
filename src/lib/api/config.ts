@@ -5,5 +5,5 @@ export const isMockEnvironment = () => {
 
 export const config = {
   API_BASE_URL: 'http://localhost:3001/api/v1',
-  isMock: true
+  isMock: false
 }; 
