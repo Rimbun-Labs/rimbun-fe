@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Question } from '@/lib/api/types/assessment';
 import { ValidationError } from './ValidationError';
 import { Label } from '@/components/ui/label';
-import { InfoCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 
 interface TextInputProps {
@@ -30,15 +30,15 @@ export const TextInput: React.FC<TextInputProps> = ({
           {question.questionText}
         </Label>
         
-        {question.helpText && (
+        {question.whyWeAsk && (
           <HoverCard>
             <HoverCardTrigger asChild>
               <div className="cursor-help">
-                <InfoCircle className="h-4 w-4 text-muted-foreground" />
+                <Info className="h-4 w-4 text-muted-foreground" />
               </div>
             </HoverCardTrigger>
             <HoverCardContent className="w-80 p-3">
-              <p className="text-sm text-muted-foreground">{question.helpText}</p>
+              <p className="text-sm text-muted-foreground">{question.whyWeAsk}</p>
             </HoverCardContent>
           </HoverCard>
         )}
