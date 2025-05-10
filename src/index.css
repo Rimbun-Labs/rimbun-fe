@@ -133,5 +133,64 @@
   .finance-card {
     @apply rounded-xl border p-4 shadow-sm;
   }
+
+  /* New animation classes */
+  .fade-in {
+    @apply animate-fade-in;
+  }
+  
+  .scale-in {
+    @apply animate-scale-in;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  /* New card variants */
+  .card-primary {
+    @apply bg-primary/5 border-primary/10 hover:border-primary/30 transition-colors;
+  }
+  
+  .card-success {
+    @apply bg-green-50 border-green-100 dark:bg-green-900/10 dark:border-green-900/20;
+  }
+  
+  .card-warning {
+    @apply bg-yellow-50 border-yellow-100 dark:bg-yellow-900/10 dark:border-yellow-900/20;
+  }
+  
+  .card-danger {
+    @apply bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/20;
+  }
+  
+  /* Form element enhancements */
+  .input-focused {
+    @apply focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200;
+  }
+  
+  .label-animated {
+    @apply transform transition-all duration-200 origin-left;
+  }
 }
 
+/* Add keyframes for animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out forwards;
+  }
+}
