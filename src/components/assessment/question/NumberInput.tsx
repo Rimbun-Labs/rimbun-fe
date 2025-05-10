@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,22 +17,29 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   validationError
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(Number(e.target.value));
+    const newValue = e.target.value === '' ? 0 : Number(e.target.value);
+    onChange(newValue);
   };
   
   return (
     <div className="space-y-2">
-      <Label htmlFor={`number-${question.id}`}>Enter a number</Label>
+      <Label htmlFor={`number-${question.id}`}>{question.questionText}</Label>
       <Input
         id={`number-${question.id}`}
         type="number"
-        value={value || ''}
+        value={value === 0 ? '' : value}
         onChange={handleChange}
         className="w-full"
-        placeholder={question.placeholder}
+        placeholder={question.placeholder || 'Enter a number'}
+        min={0}
         aria-invalid={!!validationError}
         aria-describedby={validationError ? `error-${question.id}` : undefined}
       />
+      {validationError && (
+        <div className="text-sm text-red-500" id={`error-${question.id}`}>
+          {validationError}
+        </div>
+      )}
     </div>
   );
 };
