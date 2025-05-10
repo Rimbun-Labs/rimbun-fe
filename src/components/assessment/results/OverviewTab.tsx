@@ -53,7 +53,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Risk Profile Visualization</CardTitle>
+              <CardTitle>Investment Profile Visualization</CardTitle>
               <CardDescription>Your investment preferences and risk tolerance</CardDescription>
             </div>
             <Badge variant="outline" className={getConfidenceColor(result.overallConfidence)}>
@@ -62,19 +62,19 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
           </div>
         </CardHeader>
         <CardContent className="pt-2">
-          <div className="h-[350px]">
+          <div className="h-[400px] w-full">
             <RiskProfileChart 
               data={{
-                riskProfile: result.riskProfile / 10,
-                knowledgeLevel: result.knowledgeLevel / 10,
-                leverageAptitude: result.leverageAptitude / 10,
-                decisionStyleScore: result.decisionStyleScore / 10,
-                personalityScore: result.personalityScore / 10
+                riskProfile: result.riskProfile,
+                knowledgeLevel: result.knowledgeLevel,
+                leverageAptitude: result.leverageAptitude,
+                decisionStyleScore: result.decisionStyleScore,
+                personalityScore: result.personalityScore
               }}
               confidenceMetrics={result.confidenceMetrics}
             />
           </div>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-6 flex justify-center gap-4">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Compare with Others
@@ -104,7 +104,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
             <MetricDetails 
               title={metric.title}
               score={metric.score}
-              average={75} // You might want to get this from somewhere
+              average={75}
               trend="increasing"
               recommendation="Based on your profile, consider exploring more diversified investment options."
             />
@@ -130,7 +130,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
                       <h4 className="font-medium">Complete Learning Modules</h4>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Based on your knowledge level ({result.knowledgeLevel.toFixed(1)}), we recommend completing our investment basics modules
                     </p>
                   </div>
