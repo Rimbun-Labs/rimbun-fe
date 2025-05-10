@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Question, UserAnswer } from "@/lib/api/types/assessment";
+import { Question, UserAnswer, QuestionType } from "@/lib/api/types/assessment";
 import { QuestionHeader } from './question/QuestionHeader';
 import { AnswerInputs } from './question/AnswerInputs';
 import { ValidationError } from './question/ValidationError';
@@ -27,9 +26,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   // Initialize with currentAnswer if provided, otherwise use appropriate default
   const getInitialAnswer = () => {
     if (currentAnswer !== undefined) return currentAnswer;
-    if (question.questionType === 'number') return 0;
-    if (question.questionType === 'boolean') return false;
-    return '';
+    switch (question.questionType) {
+      case 'number':
+        return 0;
+      case 'boolean':
+        return false;
+      case 'multiple_choice':
+      case 'select':
+      case 'single_text':
+      default:
+        return '';
+    }
   };
 
   const [answer, setAnswer] = useState<string | number | boolean>(getInitialAnswer());
@@ -56,9 +63,34 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         setValidationError('This question requires an answer');
         return false;
       }
-      if (question.questionType === 'number' && (isNaN(Number(answer)) || Number(answer) < 0)) {
-        setValidationError('Please enter a valid number');
-        return false;
+
+      switch (question.questionType) {
+        case 'number':
+          const numValue = Number(answer);
+          if (isNaN(numValue)) {
+            setValidationError('Please enter a valid number');
+            return false;
+          }
+          if (numValue < 0) {
+            setValidationError('Please enter a positive number');
+            return false;
+          }
+          break;
+
+        case 'multiple_choice':
+        case 'select':
+          if (!answer || typeof answer !== 'string') {
+            setValidationError('Please select an option');
+            return false;
+          }
+          break;
+
+        case 'single_text':
+          if (!answer || typeof answer !== 'string' || answer.trim() === '') {
+            setValidationError('Please enter your answer');
+            return false;
+          }
+          break;
       }
     }
     return true;
@@ -74,23 +106,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
 
     try {
-      console.log({
-        questionId: question.id,
-        answer: answer,
-        questionType: question.questionType
-      })
       // Send the answer to the parent component and wait for processing
       const result = await onAnswer({
         questionId: question.id,
         answer: answer,
         questionType: question.questionType
       });
-
-      console.log({
-        questionId: question.id,
-        answer: answer,
-        questionType: question.questionType
-      })
       
       // If answer submission was successful, move to next question
       if (result !== undefined) {
@@ -109,22 +130,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto animate-fade-in shadow-lg">
-      <QuestionHeader question={question} />
-      <CardContent>
-        <AnswerInputs
-          question={question}
-          answer={answer}
-          onAnswerChange={handleAnswerChange}
-          validationError={validationError}
-        />
-        <ValidationError error={validationError || ''} questionId={question.id} />
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardContent className="p-6 space-y-6">
+        <QuestionHeader question={question} />
+        <div>
+          <AnswerInputs
+            question={question}
+            answer={answer}
+            onAnswerChange={handleAnswerChange}
+            validationError={validationError}
+          />
+        </div>
+        <div className="pt-4 border-t">
+          <QuestionFooter
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            isLastQuestion={isLastQuestion}
+          />
+        </div>
       </CardContent>
-      <QuestionFooter 
-        isSubmitting={isSubmitting}
-        isLastQuestion={isLastQuestion}
-        onSubmit={handleSubmit}
-      />
     </Card>
   );
 };
