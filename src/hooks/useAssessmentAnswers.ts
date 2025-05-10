@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Question, UserAnswer } from '@/lib/api/types/assessment';
+import { Question, UserAnswer, SaveUserResponseRequest } from '@/lib/api/types/assessment';
 import { userResponsesApi } from '@/lib/api/userResponsesApi';
 import { toast } from "sonner";
 
@@ -12,42 +12,44 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
   // Submit answer mutation
   const submitAnswerMutation = useMutation({
     mutationFn: userResponsesApi.submitAnswer,
-    onError: () => {
-      toast.error("Failed to save your answer");
-      setError("Failed to save your answer. Please try again.");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to save your answer");
+      setError(error.message || "Failed to save your answer. Please try again.");
     }
   });
 
   const handleAnswer = async (answer: UserAnswer, question: Question) => {
-    if (!sessionId) return;
-    console.log("answerxx", answer)
-    const formattedAnswer = userResponsesApi.formatAnswerValue(answer.answer, question);
-    
-    // Update answers state immediately
-    setAnswers(prev => ({
-      ...prev,
-      [answer.questionId]: formattedAnswer
-    }));
-    
-    setError(null);
-    setIsSubmitting(true);
-    
+    if (!sessionId) {
+      throw new Error('No session ID available');
+    }
+
     try {
-      console.log("mutation",{
+      // Format the answer according to the question type
+      const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, question.questionType);
+      
+      // Create the request object
+      const request: SaveUserResponseRequest = {
         responseGroupId: sessionId,
         questionId: answer.questionId,
         answer: formattedAnswer
-      })
-      await submitAnswerMutation.mutateAsync({
-        responseGroupId: sessionId,
-        questionId: answer.questionId,
-        answer: formattedAnswer
-      });
+      };
+
+      // Update answers state immediately
+      setAnswers(prev => ({
+        ...prev,
+        [answer.questionId]: formattedAnswer
+      }));
+      
+      setError(null);
+      setIsSubmitting(true);
+      
+      // Submit the answer
+      await submitAnswerMutation.mutateAsync(request);
       
       return formattedAnswer;
     } catch (error) {
-      console.log(error)
-      setError("Failed to save your answer. Please try again.");
+      console.error('Error handling answer:', error);
+      setError(error instanceof Error ? error.message : "Failed to save your answer. Please try again.");
       return undefined;
     } finally {
       setIsSubmitting(false);
