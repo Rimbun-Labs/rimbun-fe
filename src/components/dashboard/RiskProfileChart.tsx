@@ -34,7 +34,6 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
   const [activeMetric, setActiveMetric] = useState<string | null>(null);
   const chartData = transformRiskProfileData(data, confidenceMetrics);
   
-  // Enhanced color scheme with gradients
   const colors = {
     primary: {
       stroke: '#6366f1', // Indigo
@@ -55,10 +54,27 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return "bg-green-100 text-green-800";
-    if (confidence >= 0.6) return "bg-blue-100 text-blue-800";
-    if (confidence >= 0.4) return "bg-yellow-100 text-yellow-800";
+    if (confidence >= 80) return "bg-green-100 text-green-800";
+    if (confidence >= 60) return "bg-blue-100 text-blue-800";
+    if (confidence >= 40) return "bg-yellow-100 text-yellow-800";
     return "bg-red-100 text-red-800";
+  };
+
+  const getMetricDescription = (label: string): string => {
+    switch (label) {
+      case "Risk Profile":
+        return "Your risk tolerance and investment preferences";
+      case "Knowledge":
+        return "Your understanding of investment concepts";
+      case "Leverage":
+        return "Your comfort level with using leverage";
+      case "Decision Style":
+        return "Your approach to making investment decisions";
+      case "Personality":
+        return "How your personality traits influence your investment style";
+      default:
+        return "";
+    }
   };
 
   return (
@@ -95,7 +111,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               fontWeight: 500,
             }}
             tickLine={false}
-            onClick={(data) => setActiveMetric(data.value)}
+            onClick={(data: any) => setActiveMetric(data.value)}
             style={{ cursor: 'pointer' }}
           />
           
@@ -108,7 +124,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             animationDuration={1000}
             animationEasing="ease-in-out"
             strokeWidth={2}
-            onClick={(data) => setActiveMetric(data.attribute)}
+            onClick={(data: any) => setActiveMetric(data.attribute)}
             style={{ cursor: 'pointer' }}
           />
           
@@ -130,8 +146,8 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
           <Tooltip 
             content={({ active, payload, label }) => {
               if (active && payload && payload.length) {
-                const score = payload[0].value;
-                const confidence = payload[1]?.value;
+                const score = Number(payload[0].value);
+                const confidence = payload[1]?.value ? Number(payload[1].value) : null;
                 
                 return (
                   <div className="bg-white p-4 rounded-lg shadow-lg border border-border">
@@ -139,22 +155,18 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Score:</span>
-                        <span className="font-medium">{score}/10</span>
+                        <span className="font-medium">{score}/100</span>
                       </div>
                       {confidence && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">Confidence:</span>
                           <Badge variant="outline" className={getConfidenceColor(confidence)}>
-                            {Math.round(confidence * 100)}%
+                            {confidence}%
                           </Badge>
                         </div>
                       )}
                       <div className="text-xs text-muted-foreground mt-2">
-                        {label === "Risk Profile" && "Your risk tolerance and investment preferences"}
-                        {label === "Knowledge" && "Your understanding of investment concepts"}
-                        {label === "Leverage" && "Your comfort level with using leverage"}
-                        {label === "Decision Style" && "Your approach to making investment decisions"}
-                        {label === "Personality" && "How your personality traits influence your investment style"}
+                        {getMetricDescription(label)}
                       </div>
                     </div>
                   </div>
