@@ -1,187 +1,108 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { UserAnswer, Question } from '@/lib/api/types/assessment';
-import { useAssessmentProgress } from '@/hooks/useAssessmentProgress';
-import { useAssessmentAnswers } from '@/hooks/useAssessmentAnswers';
-import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
-import { AssessmentError } from '@/components/assessment/AssessmentError';
-import { AssessmentContainer } from '@/components/assessment/AssessmentContainer';
-import AssessmentComplete from '@/components/assessment/AssessmentComplete';
-import AssessmentContextDialog from '@/components/assessment/AssessmentContextDialog';
-import { mockAssessmentResult } from '@/lib/mock/mockData';
-import { createSession } from '@/lib/api/sessionApi';
-import { getQuestions } from '@/lib/api/questionnaireApi';
-import { useSession } from '@/contexts/SessionContext';
-import { toast } from 'sonner';
+export * from './types/assessment';
+export * from './sessionApi';
+export * from './responseApi';
+export * from './resultsApi';
 
-const Assessment: React.FC = () => {
-  const navigate = useNavigate();
-  const [isComplete, setIsComplete] = useState(false);
-  const [showContextDialog, setShowContextDialog] = useState(true);
-  const [hasStarted, setHasStarted] = useState(false);
-  const { sessionId, setSessionId } = useSession();
-  
-  // Create session mutation
-  const createSessionMutation = useMutation({
-    mutationFn: createSession,
-    onSuccess: (response) => {
-      setSessionId(response.id);
-      setShowContextDialog(false);
-      setHasStarted(true);
+import { AssessmentResults } from './types/assessment';
+import axios from 'axios';
+import { config } from './config';
+import { AssessmentResult, UserAnswer, SaveUserResponseRequest } from './types/assessment';
+import { userResponsesApi } from './userResponsesApi';
+
+const createMockAssessmentResult = (sessionId: string): AssessmentResult => {
+  return {
+    id: `result-${Date.now()}`,
+    responseGroupId: sessionId,
+    scoreData: {
+      profile: "Balanced Growth",
+      finalScore: 75,
+      riskProfile: 65,
+      directInputs: {
+        age: 30,
+        riskCapacity: 70,
+        totalSavings: "50000",
+        financialGoal: "Retirement",
+        monthlyIncome: "5000",
+        investmentHorizon: 10
+      },
+      riskCapacity: 70,
+      knowledgeLevel: 80,
+      leverageAptitude: 60,
+      personalityScore: 72,
+      confidenceMetrics: {
+        personalityConfidence: 0.85,
+        riskProfileConfidence: 0.78,
+        riskCapacityConfidence: 0.82,
+        decisionStyleConfidence: 0.75,
+        knowledgeLevelConfidence: 0.88,
+        leverageAptitudeConfidence: 0.76
+      },
+      investmentHorizon: 10,
+      overallConfidence: 0.82,
+      decisionStyleScore: 68,
+      personalityDeviation: 0.15,
+      decisionStyleDeviation: 0.12
     },
-    onError: (error) => {
-      toast.error('Failed to start assessment session. Please try again.');
-      console.error('Session creation error:', error);
-    }
-  });
-  
-  // Fetch questions
-  const { data: questions, isPending: questionsLoading, error: questionsError } = useQuery({
-    queryKey: ['assessment-questions'],
-    queryFn: getQuestions,
-    enabled: hasStarted, // Only fetch questions after user starts the assessment
-  });
-  
-  // Setup assessment progress state management
-  const { 
-    currentQuestionIndex, 
-    currentCategory,
-    progress, 
-    handleNext,
-    handlePrevious
-  } = useAssessmentProgress(questions);
-  
-  // Setup answer handling
-  const {
-    answers,
-    isSubmitting,
-    error,
-    handleAnswer,
-    validateCurrentAnswer,
-    setError
-  } = useAssessmentAnswers(sessionId);
-  
-  // Get results query (activated when assessment completes)
-  const { data: results, isPending: resultsLoading } = useQuery({
-    queryKey: ['assessment-results', sessionId],
-    queryFn: () => sessionId ? Promise.resolve(mockAssessmentResult) : Promise.reject('No session ID'),
-    enabled: isComplete && !!sessionId,
-  });
-  
-  const handleStartAssessment = () => {
-    createSessionMutation.mutate({
-      questionnaireType: "ONBOARDING",
-      description: "Investment Profile Assessment"
-    });
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
-
-  const handleCloseContextDialog = () => {
-    setShowContextDialog(false);
-    navigate(-1); // Go back if user cancels
-  };
-  
-  // Directly progress to next question - called after answer has been processed
-  const moveToNextQuestion = () => {
-    if (!questions) return;
-    
-    const isLastQuestion = currentQuestionIndex === questions.length - 1;
-    
-    if (!isLastQuestion) {
-      handleNext();
-    } else {
-      setIsComplete(true);
-      // Navigate to results page
-      navigate(`/assessment/results/${sessionId}`);
-    }
-    
-    setError(null);
-  };
-
-  // Handle user's answer to current question and then validate
-  const handleUserAnswer = async (answer: UserAnswer) => {
-    if (!questions) return;
-    
-    const currentQuestion = questions[currentQuestionIndex];
-    
-    console.log("userAnswer", answer)
-    // Process and save the answer
-    const answerResult = await handleAnswer(answer, currentQuestion);
-    
-    // Validate the answer immediately with the new value
-    if (!validateCurrentAnswer(currentQuestion, answerResult)) {
-      return undefined;
-    }
-    
-    // Return the answer to indicate success
-    return answerResult;
-  };
-
-  // Show context dialog if assessment hasn't started
-  if (!hasStarted) {
-    return (
-      <AssessmentContextDialog
-        isOpen={showContextDialog}
-        onStart={handleStartAssessment}
-        onClose={handleCloseContextDialog}
-      />
-    );
-  }
-  
-  if (createSessionMutation.isPending || questionsLoading) {
-    return <AssessmentLoading />;
-  }
-
-  if (questionsError) {
-    return (
-      <AssessmentError 
-        onRetry={() => {
-          setHasStarted(false);
-          setShowContextDialog(true);
-        }}
-      />
-    );
-  }
-  
-  if (isComplete) {
-    if (resultsLoading) {
-      return (
-        <div className="container mx-auto py-8 px-4">
-          <h1 className="text-3xl font-bold mb-8 text-center">Processing Your Results</h1>
-          <div className="max-w-3xl mx-auto space-y-4">
-            <AssessmentLoading />
-          </div>
-        </div>
-      );
-    }
-    
-    return results && <AssessmentComplete result={results} />;
-  }
-  
-  if (!questions || questions.length === 0) {
-    return (
-      <AssessmentError 
-        onRetry={() => {
-          setHasStarted(false);
-          setShowContextDialog(true);
-        }}
-      />
-    );
-  }
-  
-  return (
-    <AssessmentContainer
-      questions={questions}
-      currentQuestionIndex={currentQuestionIndex}
-      progress={progress}
-      answers={answers}
-      error={error}
-      isSubmitting={isSubmitting}
-      onAnswer={handleUserAnswer}
-      onNext={moveToNextQuestion}
-      onPrevious={handlePrevious}
-    />
-  );
 };
 
-export default Assessment;
+const mockSubmitAnswer = async (sessionId: string, answer: UserAnswer): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 200)); // Simulate network delay
+  console.log('Mock submit answer:', { sessionId, answer });
+};
+
+export const getAssessmentResults = async (sessionId: string): Promise<AssessmentResult> => {
+  try {
+    const response = await axios.get<AssessmentResult>(
+      `${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`,
+      {
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch assessment results:', error);
+    throw new Error('Failed to fetch assessment results');
+  }
+};
+
+export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promise<void> => {
+  try {
+    // Format the answer according to the question type
+    const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text');
+    
+    // Create the request object
+    const request: SaveUserResponseRequest = {
+      responseGroupId: sessionId,
+      questionId: answer.questionId,
+      answer: formattedAnswer
+    };
+
+    // Use the userResponsesApi to submit the answer
+    await userResponsesApi.submitAnswer(request);
+  } catch (error) {
+    console.error('Failed to submit answer:', error);
+    throw new Error('Failed to submit answer');
+  }
+};
+
+export const submitAnswersBulk = async (sessionId: string, answers: UserAnswer[]): Promise<void> => {
+  try {
+    // Format all answers
+    const formattedRequests = answers.map(answer => ({
+      responseGroupId: sessionId,
+      questionId: answer.questionId,
+      answer: userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text')
+    }));
+
+    // Submit each answer individually
+    await Promise.all(formattedRequests.map(request => userResponsesApi.submitAnswer(request)));
+  } catch (error) {
+    console.error('Failed to submit answers in bulk:', error);
+    throw new Error('Failed to submit answers in bulk');
+  }
+};
