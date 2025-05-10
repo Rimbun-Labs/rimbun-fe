@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Question, UserAnswer, SaveUserResponseRequest } from '@/lib/api/types/assessment';
@@ -27,7 +28,7 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
       // Format the answer according to the question type
       const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, question.questionType);
       
-      // Create the request object
+      // Create the request object with a properly formatted string answer
       const request: SaveUserResponseRequest = {
         responseGroupId: sessionId,
         questionId: answer.questionId,

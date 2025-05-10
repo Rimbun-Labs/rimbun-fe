@@ -1,3 +1,4 @@
+
 import { Question, QuestionType, SaveUserResponseRequest } from './types/assessment';
 
 const API_BASE_URL = 'http://localhost:3001/api/v1';
@@ -92,6 +93,20 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
   try {
     // Validate the request before sending
     validateRequest(response);
+
+    // Ensure the answer is a string and not wrapped in an object
+    if (typeof response.answer === 'object' && response.answer !== null) {
+      if ('value' in response.answer) {
+        response.answer = String(response.answer.value);
+      } else {
+        response.answer = JSON.stringify(response.answer);
+      }
+    }
+
+    // Always ensure answer is a string
+    if (typeof response.answer !== 'string') {
+      response.answer = String(response.answer);
+    }
 
     const res = await fetch(`${API_BASE_URL}/user-responses/answer`, {
       method: 'POST',

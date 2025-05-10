@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Question, UserAnswer, QuestionType } from "@/lib/api/types/assessment";
@@ -106,7 +107,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
 
     try {
-      // Send the answer to the parent component and wait for processing
+      // Send the direct answer value to the parent component (not wrapped in any object)
       const result = await onAnswer({
         questionId: question.id,
         answer: answer,

@@ -159,7 +159,7 @@ export interface SaveUserResponsesBulkRequest {
 export interface SaveUserResponseRequest {
   responseGroupId: string;
   questionId: string;
-  answer: string;
+  answer: string; // Enforce string type here
   metadata?: Record<string, any>;
 }
 
