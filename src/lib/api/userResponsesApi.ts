@@ -96,16 +96,17 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
 
     // Ensure the answer is a string and not wrapped in an object
     if (typeof response.answer === 'object' && response.answer !== null) {
-      if ('value' in response.answer) {
-        response.answer = String(response.answer.value);
+      const answerObj = response.answer as any;
+      if ('value' in answerObj) {
+        response.answer = String(answerObj.value);
       } else {
-        response.answer = JSON.stringify(response.answer);
+        response.answer = JSON.stringify(answerObj);
       }
     }
 
     // Always ensure answer is a string
     if (typeof response.answer !== 'string') {
-      response.answer = String(response.answer);
+      response.answer = String(response.answer || '');
     }
 
     const res = await fetch(`${API_BASE_URL}/user-responses/answer`, {

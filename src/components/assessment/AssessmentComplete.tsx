@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,21 +29,21 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result }) => {
           </CardHeader>
           <CardContent>
             <div className="text-center mb-4">
-              <span className="block text-4xl font-bold text-primary">{result.profile}</span>
+              <span className="block text-4xl font-bold text-primary">{result.scoreData.profile}</span>
               <span className="text-sm text-muted-foreground">Overall Profile</span>
             </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span>Risk Tolerance:</span>
-                <span className="font-semibold">{result.riskProfile}/10</span>
+                <span className="font-semibold">{result.scoreData.riskProfile}/10</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Knowledge Level:</span>
-                <span className="font-semibold">{result.knowledgeLevel}/10</span>
+                <span className="font-semibold">{result.scoreData.knowledgeLevel}/10</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Decision Style:</span>
-                <span className="font-semibold">{result.decisionStyleScore}/10</span>
+                <span className="font-semibold">{result.scoreData.decisionStyleScore}/10</span>
               </div>
             </div>
           </CardContent>
@@ -60,11 +61,11 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result }) => {
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <RiskProfileChart data={{
-              riskProfile: result.riskProfile,
-              knowledgeLevel: result.knowledgeLevel,
-              leverageAptitude: result.leverageAptitude,
-              decisionStyleScore: result.decisionStyleScore,
-              personalityScore: result.personalityScore
+              riskProfile: result.scoreData.riskProfile,
+              knowledgeLevel: result.scoreData.knowledgeLevel,
+              leverageAptitude: result.scoreData.leverageAptitude,
+              decisionStyleScore: result.scoreData.decisionStyleScore,
+              personalityScore: result.scoreData.personalityScore
             }} />
           </CardContent>
         </Card>

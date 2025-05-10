@@ -55,7 +55,7 @@ export const getQuestionsWithAnswers = async (responseGroupId: string): Promise<
         id: `answer-${q.id}`,
         value: q.questionType === "number" ? "1000" : undefined,
         selectedOption: q.questionType === "multiple_choice" && q.options?.length > 0
-          ? { id: q.options[0].id, text: q.options[0].text }
+          ? { id: q.options[0].id, text: q.options[0].optionLabel }
           : undefined
       },
       optionMetadata: q.questionType === "multiple_choice"
