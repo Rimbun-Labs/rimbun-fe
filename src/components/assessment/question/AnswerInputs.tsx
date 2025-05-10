@@ -1,9 +1,15 @@
 import React from 'react';
-import { Question } from "@/lib/api/types/assessment";
+import { Question, QuestionType } from "@/lib/api/types/assessment";
 import { MultipleChoiceInput } from './MultipleChoiceInput';
 import { NumberInput } from './NumberInput';
 import { BooleanInput } from './BooleanInput';
 import { SelectInput } from './SelectInput';
+import { TextInput } from './TextInput';
+
+interface Option {
+  id: string;
+  optionLabel: string;
+}
 
 interface AnswerInputsProps {
   question: Question;
@@ -24,7 +30,11 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <MultipleChoiceInput
           question={question}
           value={answer as string}
-          onChange={onAnswerChange}
+          onChange={(value: string | Option) => {
+            // Ensure we're passing the option ID as a string
+            const optionId = typeof value === 'object' && value !== null ? value.id : value;
+            onAnswerChange(optionId as string);
+          }}
         />
       );
 
@@ -33,7 +43,11 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <SelectInput
           question={question}
           value={answer as string}
-          onChange={onAnswerChange}
+          onChange={(value: string | Option) => {
+            // Ensure we're passing the option ID as a string
+            const optionId = typeof value === 'object' && value !== null ? value.id : value;
+            onAnswerChange(optionId as string);
+          }}
         />
       );
 
@@ -42,7 +56,11 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <NumberInput
           question={question}
           value={answer as number}
-          onChange={onAnswerChange}
+          onChange={(value: number | string) => {
+            // Ensure we're passing a number
+            const numValue = typeof value === 'string' ? parseFloat(value) : value;
+            onAnswerChange(numValue);
+          }}
           validationError={validationError}
         />
       );
@@ -52,11 +70,28 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <BooleanInput
           question={question}
           value={answer as boolean}
-          onChange={onAnswerChange}
+          onChange={(value: boolean | string) => {
+            // Ensure we're passing a boolean
+            const boolValue = typeof value === 'string' ? value === 'true' : value;
+            onAnswerChange(boolValue);
+          }}
+        />
+      );
+
+    case 'single_text':
+      return (
+        <TextInput
+          question={question}
+          value={answer as string}
+          onChange={(value: string) => {
+            onAnswerChange(value);
+          }}
+          validationError={validationError}
         />
       );
 
     default:
+      console.warn(`Unsupported question type: ${question.questionType}`);
       return null;
   }
 };
