@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { mockAssessmentResult, mockPortfolioAllocation, mockLearningModules, mockRecommendations } from '@/lib/mock/mockData';
@@ -6,10 +7,9 @@ import { getRecommendations } from '@/lib/api/assessmentApi';
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import MetricsOverview from '@/components/dashboard/MetricsOverview';
-import MainContent from '@/components/dashboard/MainContent';
-import AchievementGrid from '@/components/dashboard/AchievementGrid';
-import RecommendationsSection from '@/components/dashboard/RecommendationsSection';
-import LearningSection from '@/components/dashboard/LearningSection';
+import EducationalInsights from '@/components/dashboard/EducationalInsights';
+import ActionItems from '@/components/dashboard/ActionItems';
+import LearningProgressBar from '@/components/dashboard/LearningProgressBar';
 
 const Dashboard = () => {
   // Mock session ID for API calls
@@ -40,28 +40,12 @@ const Dashboard = () => {
   });
   
   const completedModules = learningModules?.filter(m => m.progress === 100).length || 0;
-  const currentModule = learningModules?.find(m => m.progress > 0 && m.progress < 100);
+  const totalModules = learningModules?.length || 0;
   
-  const achievements = [
-    { 
-      id: "ach1", 
-      name: "Risk Profile Complete", 
-      description: "Completed the risk assessment questionnaire",
-      unlocked: true 
-    },
-    { 
-      id: "ach2", 
-      name: "First Module Completed", 
-      description: "Finished your first learning module",
-      unlocked: completedModules > 0 
-    },
-    { 
-      id: "ach3", 
-      name: "Portfolio Strategy Defined", 
-      description: "Defined your initial portfolio strategy",
-      unlocked: true 
-    }
-  ];
+  // Filter recommendations to only show high priority ones for the dashboard
+  const topRecommendations = mockRecommendations
+    .filter(rec => rec.priority === "High")
+    .slice(0, 2);
   
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
@@ -71,33 +55,32 @@ const Dashboard = () => {
       {/* Analytics Overview */}
       <MetricsOverview />
       
-      {/* Main Content Grid - Risk Profile and Portfolio */}
-      <MainContent 
-        profile={profile}
-        portfolioData={portfolioData}
-        recommendationsData={recommendationsData}
-        profileLoading={profileLoading}
-        portfolioLoading={portfolioLoading}
-        recommendationsLoading={recommendationsLoading}
-      />
-      
-      {/* Achievements Section */}
-      <AchievementGrid />
-      
-      {/* Recommendations Section */}
-      <RecommendationsSection 
-        recommendations={mockRecommendations} 
-        loading={recommendationsLoading} 
-      />
-      
-      {/* Learning Progress Section */}
-      <LearningSection 
-        completedModules={completedModules}
-        totalModules={learningModules?.length || 0}
-        currentModule={currentModule}
-        achievements={achievements}
-        loading={learningLoading}
-      />
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Educational Insights */}
+        <EducationalInsights 
+          profile={profile}
+          portfolioData={portfolioData}
+          profileLoading={profileLoading}
+          portfolioLoading={portfolioLoading}
+        />
+        
+        {/* Right Column: Action Items and Learning Progress */}
+        <div className="space-y-6">
+          {/* Action Items Section */}
+          <ActionItems 
+            recommendations={topRecommendations} 
+            loading={recommendationsLoading} 
+          />
+          
+          {/* Learning Progress Bar */}
+          <LearningProgressBar 
+            completedModules={completedModules}
+            totalModules={totalModules}
+            loading={learningLoading}
+          />
+        </div>
+      </div>
     </div>
   );
 };
