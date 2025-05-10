@@ -6,7 +6,8 @@ export * from './resultsApi';
 import { AssessmentResults } from './types/assessment';
 import axios from 'axios';
 import { config } from './config';
-import { AssessmentResult, UserAnswer } from './types/assessment';
+import { AssessmentResult, UserAnswer, SaveUserResponseRequest } from './types/assessment';
+import { userResponsesApi } from './userResponsesApi';
 
 const createMockAssessmentResult = (sessionId: string): AssessmentResult => {
   return {
@@ -53,11 +54,6 @@ const mockSubmitAnswer = async (sessionId: string, answer: UserAnswer): Promise<
 };
 
 export const getAssessmentResults = async (sessionId: string): Promise<AssessmentResult> => {
-  if (config.isMock) {
-    await new Promise(resolve => setTimeout(resolve, 500)); // Add delay to simulate network
-    return createMockAssessmentResult(sessionId);
-  }
-
   try {
     const response = await axios.get<AssessmentResult>(
       `${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`,
@@ -67,7 +63,6 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
         }
       }
     );
-    console.log("res", response.data)
     return response.data;
   } catch (error) {
     console.error('Failed to fetch assessment results:', error);
@@ -76,28 +71,19 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
 };
 
 export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promise<void> => {
-  if (config.isMock) {
-    return mockSubmitAnswer(sessionId, answer);
-  }
-
   try {
-    await axios.post(
-      `${config.API_BASE_URL}/assessment/response-group/${sessionId}/response`,
-      {
-        questionId: answer.questionId,
-        answer: {
-          value: typeof answer.answer === 'string' ? answer.answer : undefined,
-          answerNumber: typeof answer.answer === 'number' ? answer.answer : undefined,
-          answerBoolean: typeof answer.answer === 'boolean' ? answer.answer : undefined
-        }
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      }
-    );
+    // Format the answer according to the question type
+    const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text');
+    
+    // Create the request object
+    const request: SaveUserResponseRequest = {
+      responseGroupId: sessionId,
+      questionId: answer.questionId,
+      answer: formattedAnswer
+    };
+
+    // Use the userResponsesApi to submit the answer
+    await userResponsesApi.submitAnswer(request);
   } catch (error) {
     console.error('Failed to submit answer:', error);
     throw new Error('Failed to submit answer');
@@ -105,34 +91,16 @@ export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promi
 };
 
 export const submitAnswersBulk = async (sessionId: string, answers: UserAnswer[]): Promise<void> => {
-  if (config.isMock) {
-    for (const answer of answers) {
-      await mockSubmitAnswer(sessionId, answer);
-    }
-    return;
-  }
-
   try {
-    await axios.post(
-      `${config.API_BASE_URL}/assessment/response-group/${sessionId}/responses/bulk`,
-      {
-        responseGroupId: sessionId,
-        responses: answers.map(answer => ({
-          questionId: answer.questionId,
-          answer: {
-            value: typeof answer.answer === 'string' ? answer.answer : undefined,
-            answerNumber: typeof answer.answer === 'number' ? answer.answer : undefined,
-            answerBoolean: typeof answer.answer === 'boolean' ? answer.answer : undefined
-          }
-        }))
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      }
-    );
+    // Format all answers
+    const formattedRequests = answers.map(answer => ({
+      responseGroupId: sessionId,
+      questionId: answer.questionId,
+      answer: userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text')
+    }));
+
+    // Submit each answer individually
+    await Promise.all(formattedRequests.map(request => userResponsesApi.submitAnswer(request)));
   } catch (error) {
     console.error('Failed to submit answers in bulk:', error);
     throw new Error('Failed to submit answers in bulk');
