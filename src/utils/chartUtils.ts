@@ -18,50 +18,46 @@ export const transformRiskProfileData = (data: {
   decisionStyleConfidence: number;
   personalityConfidence: number;
 }): ChartDataPoint[] => {
-  // Normalize values from 0-100 to 0-10 scale
-  const normalizeValue = (value: number): number => {
-    return Math.round((value / 100) * 10);
-  };
-
+  // Keep values in 0-100 range for better precision
   const getConfidenceValue = (metric: string): number | null => {
     if (!confidenceMetrics) return null;
     const confidenceKey = `${metric}Confidence` as keyof typeof confidenceMetrics;
     const confidence = confidenceMetrics[confidenceKey];
     if (confidence === undefined) return null;
-    // Scale confidence to match the value range (0-10)
-    return Math.round(confidence * 10);
+    // Convert confidence to percentage (0-100)
+    return Math.round(confidence * 100);
   };
 
   return [
     { 
       attribute: "Risk Profile",
-      value: normalizeValue(data.riskProfile),
+      value: data.riskProfile,
       confidence: getConfidenceValue('riskProfile'),
-      fullMark: 10,
+      fullMark: 100,
     },
     { 
       attribute: "Knowledge",
-      value: normalizeValue(data.knowledgeLevel),
+      value: data.knowledgeLevel,
       confidence: getConfidenceValue('knowledgeLevel'),
-      fullMark: 10,
+      fullMark: 100,
     },
     { 
       attribute: "Leverage",
-      value: normalizeValue(data.leverageAptitude),
+      value: data.leverageAptitude,
       confidence: getConfidenceValue('leverageAptitude'),
-      fullMark: 10,
+      fullMark: 100,
     },
     { 
       attribute: "Decision Style",
-      value: normalizeValue(data.decisionStyleScore),
+      value: data.decisionStyleScore,
       confidence: getConfidenceValue('decisionStyle'),
-      fullMark: 10,
+      fullMark: 100,
     },
     { 
       attribute: "Personality",
-      value: normalizeValue(data.personalityScore),
+      value: data.personalityScore,
       confidence: getConfidenceValue('personality'),
-      fullMark: 10,
+      fullMark: 100,
     },
   ];
 };
