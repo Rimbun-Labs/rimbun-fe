@@ -28,7 +28,7 @@ export const TextInput: React.FC<TextInputProps> = ({
         className={validationError ? "border-destructive" : ""}
         aria-invalid={validationError ? "true" : "false"}
       />
-      {validationError && <ValidationError message={validationError} />}
+      {validationError && <ValidationError error={validationError} questionId={question.id} />}
     </div>
   );
 };

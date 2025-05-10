@@ -1,66 +1,43 @@
-
 import { AssessmentResult } from '../api/assessmentApi';
 import { mockQuestions } from './mockQuestions';
 
 export { mockQuestions };
 
 export const mockAssessmentResult: AssessmentResult = {
-  riskProfile: 75,
-  knowledgeLevel: 65,
-  leverageAptitude: 70,
-  decisionStyleScore: 80,
-  personalityScore: 85,
-  finalScore: 75,
-  profile: "MODERATE",
-  confidenceMetrics: {
-    riskProfileConfidence: 0.85,
-    knowledgeLevelConfidence: 0.80,
-    leverageAptitudeConfidence: 0.75,
-    decisionStyleConfidence: 0.90,
-    personalityConfidence: 0.85,
-    riskCapacityConfidence: 0.95
-  },
-  categoryScores: {
-    "Risk Tolerance": {
-      score: 35,
-      maxScore: 50,
-      percentage: 70,
-      confidence: 0.85,
-      description: "Measures your comfort level with investment volatility"
+  id: `result-${Date.now()}`,
+  responseGroupId: "mock-session-id",
+  scoreData: {
+    profile: "MODERATE",
+    finalScore: 75,
+    riskProfile: 75,
+    knowledgeLevel: 65,
+    leverageAptitude: 70,
+    decisionStyleScore: 80,
+    personalityScore: 85,
+    directInputs: {
+      age: 30,
+      riskCapacity: 70,
+      totalSavings: "50000",
+      financialGoal: "Retirement",
+      monthlyIncome: "5000",
+      investmentHorizon: 10
     },
-    "Market Knowledge": {
-      score: 32,
-      maxScore: 50,
-      percentage: 64,
-      confidence: 0.80,
-      description: "Evaluates your understanding of investment markets"
-    },
-    "Financial Goals": {
-      score: 40,
-      maxScore: 50,
-      percentage: 80,
-      confidence: 0.92,
-      description: "Assesses your financial objectives"
-    },
-    "Investment Experience": {
-      score: 28,
-      maxScore: 40,
-      percentage: 70,
-      confidence: 0.75,
-      description: "Gauges your previous investment experience"
-    },
-    "Decision Making": {
-      score: 38,
-      maxScore: 50,
-      percentage: 76,
-      confidence: 0.88,
-      description: "Analyzes your investment decision-making process"
+    riskCapacity: 70,
+    investmentHorizon: 10,
+    overallConfidence: 0.82,
+    personalityDeviation: 0.15,
+    decisionStyleDeviation: 0.12,
+    confidenceMetrics: {
+      riskProfileConfidence: 0.85,
+      knowledgeLevelConfidence: 0.80,
+      leverageAptitudeConfidence: 0.75,
+      decisionStyleConfidence: 0.90,
+      personalityConfidence: 0.85,
+      riskCapacityConfidence: 0.95
     }
   },
-  directInputs: {
-    riskCapacity: 7,
-    investmentHorizon: 10
-  }
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
 };
 
 export const mockPortfolioAllocation = {
