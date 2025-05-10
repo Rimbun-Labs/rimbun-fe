@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
@@ -44,47 +43,49 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
     <div className="container mx-auto py-8 px-4 animate-fade-in">
       <h1 className="text-3xl font-bold mb-8 text-center">Investment Profile Assessment</h1>
       
-      <ProgressBar 
-        currentStep={progress.current} 
-        totalSteps={progress.total}
-        category={currentQuestion.category.name}
-      />
-      
-      <CategoryHeader 
-        category={currentQuestion.category}
-        questionCount={questionsInCurrentCategory.length}
-        currentQuestion={currentQuestionInCategory}
-      />
-      
-      {currentQuestionIndex > 0 && (
-        <div className="max-w-3xl mx-auto mb-4">
-          <Button 
-            variant="ghost" 
-            onClick={onPrevious}
-            className="flex items-center gap-1"
-            disabled={isSubmitting}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Previous Question
-          </Button>
-        </div>
-      )}
-      
-      {error && (
-        <div className="max-w-3xl mx-auto mb-4 p-3 bg-destructive/10 text-destructive rounded-md flex items-center">
-          <AlertCircle className="h-4 w-4 mr-2" />
-          <span>{error}</span>
-        </div>
-      )}
-      
-      <QuestionCard 
-        question={currentQuestion}
-        onAnswer={onAnswer}
-        onNext={onNext}
-        currentAnswer={answers[currentQuestion.id]}
-        isLastQuestion={currentQuestionIndex === questions.length - 1}
-        error={error || undefined}
-      />
+      <div className="max-w-6xl mx-auto space-y-6">
+        <ProgressBar 
+          currentStep={progress.current} 
+          totalSteps={progress.total}
+          category={currentQuestion.category.name}
+        />
+        
+        <CategoryHeader 
+          category={currentQuestion.category}
+          questionCount={questionsInCurrentCategory.length}
+          currentQuestion={currentQuestionInCategory}
+        />
+        
+        {currentQuestionIndex > 0 && (
+          <div>
+            <Button 
+              variant="ghost" 
+              onClick={onPrevious}
+              className="flex items-center gap-1"
+              disabled={isSubmitting}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Previous Question
+            </Button>
+          </div>
+        )}
+        
+        {error && (
+          <div className="p-3 bg-destructive/10 text-destructive rounded-md flex items-center">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <span>{error}</span>
+          </div>
+        )}
+        
+        <QuestionCard 
+          question={currentQuestion}
+          onAnswer={onAnswer}
+          onNext={onNext}
+          currentAnswer={answers[currentQuestion.id]}
+          isLastQuestion={currentQuestionIndex === questions.length - 1}
+          error={error || undefined}
+        />
+      </div>
     </div>
   );
 };
