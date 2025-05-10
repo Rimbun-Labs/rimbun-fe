@@ -1,8 +1,10 @@
+export type QuestionType = 'number' | 'multiple_choice' | 'select' | 'boolean' | 'single_text';
+
 export interface Question {
   id: string;
+  questionType: QuestionType;
   questionText: string;
   whyWeAsk: string;
-  questionType: 'multiple_choice' | 'number' | 'boolean' | 'select';
   category: {
     id: string;
     name: string;
@@ -22,7 +24,7 @@ export interface Question {
 export interface UserAnswer {
   questionId: string;
   answer: string | number | boolean;
-  questionType?: 'multiple_choice' | 'number' | 'boolean' | 'select';
+  questionType?: QuestionType;
 }
 
 export interface AssessmentResult {
@@ -152,6 +154,13 @@ export interface SaveUserResponsesBulkRequest {
       answerBoolean?: boolean;
     };
   }>;
+}
+
+export interface SaveUserResponseRequest {
+  responseGroupId: string;
+  questionId: string;
+  answer: string;
+  metadata?: Record<string, any>;
 }
 
 export type AssessmentResults = AssessmentResult;
