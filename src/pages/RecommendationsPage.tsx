@@ -1,18 +1,20 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { mockRecommendations } from '@/lib/mock/mockData';
-import { getRecommendations } from '@/lib/api/resultsApi';
+import { useSession } from '@/contexts/SessionContext';
+import { getRecommendations } from '@/lib/api/recommendationApi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import RecommendationCard from '@/components/dashboard/RecommendationCard';
 import RecommendationsDashboard from '@/components/recommendations/RecommendationsDashboard';
 
 const RecommendationsPage = () => {
-  // Using the same API structure
+  const { session } = useSession();
+  
+  // Using the real API
   const { data: recommendationsData, isLoading } = useQuery({
-    queryKey: ['recommendations'],
-    queryFn: () => getRecommendations('current-session')
+    queryKey: ['recommendations', session?.id],
+    queryFn: () => getRecommendations(session?.id || ''),
+    enabled: !!session?.id
   });
 
   return (
@@ -41,15 +43,21 @@ const RecommendationsPage = () => {
                   <Skeleton className="h-full w-full" />
                 </div>
               ))
-            ) : mockRecommendations.map((rec) => (
-              <RecommendationCard 
-                key={rec.id} 
-                title={rec.title}
-                description={rec.description}
-                priority={rec.priority as "High" | "Medium" | "Low"}
-                category={rec.category}
-              />
-            ))}
+            ) : recommendationsData?.recommendedMetrics ? (
+              Object.entries(recommendationsData.recommendedMetrics).map(([key, metric]) => (
+                <RecommendationCard 
+                  key={key}
+                  title={key}
+                  description={metric.description}
+                  priority={metric.weight >= 0.8 ? "High" : metric.weight >= 0.6 ? "Medium" : "Low"}
+                  category="Investment Metrics"
+                />
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-muted-foreground">
+                No recommendations available
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

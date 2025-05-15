@@ -36,27 +36,41 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
   
   const colors = {
     primary: {
-      stroke: '#6366f1', // Indigo
-      fill: 'rgba(99, 102, 241, 0.6)',
-      gradient: 'linear-gradient(180deg, rgba(99, 102, 241, 0.8) 0%, rgba(99, 102, 241, 0.4) 100%)',
+      stroke: '#4f46e5', // Brighter indigo
+      fill: 'rgba(79, 70, 229, 0.7)', // More opaque fill
+      gradient: 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(79, 70, 229, 0.5) 100%)',
     },
     confidence: {
-      stroke: 'rgba(99, 102, 241, 0.4)',
-      fill: 'rgba(99, 102, 241, 0.1)',
-      gradient: 'linear-gradient(180deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.05) 100%)',
+      high: {
+        stroke: 'rgba(34, 197, 94, 0.6)', // More visible green
+        fill: 'rgba(34, 197, 94, 0.2)',
+      },
+      medium: {
+        stroke: 'rgba(234, 179, 8, 0.6)', // More visible yellow
+        fill: 'rgba(234, 179, 8, 0.2)',
+      },
+      low: {
+        stroke: 'rgba(239, 68, 68, 0.6)', // More visible red
+        fill: 'rgba(239, 68, 68, 0.2)',
+      }
     },
-    grid: '#e2e8f0', // Slate
-    text: '#475569', // Slate
+    grid: '#94a3b8', // Darker slate for better contrast
+    text: '#1e293b', // Darker text for better readability
     active: {
-      stroke: '#4f46e5', // Indigo darker
-      fill: 'rgba(79, 70, 229, 0.8)',
+      stroke: '#3730a3', // Darker indigo for active state
+      fill: 'rgba(55, 48, 163, 0.9)',
     },
   };
 
   const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 80) return colors.confidence.high;
+    if (confidence >= 60) return colors.confidence.medium;
+    return colors.confidence.low;
+  };
+
+  const getConfidenceBadgeColor = (confidence: number) => {
     if (confidence >= 80) return "bg-green-100 text-green-800";
-    if (confidence >= 60) return "bg-blue-100 text-blue-800";
-    if (confidence >= 40) return "bg-yellow-100 text-yellow-800";
+    if (confidence >= 60) return "bg-yellow-100 text-yellow-800";
     return "bg-red-100 text-red-800";
   };
 
@@ -88,27 +102,23 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(99, 102, 241, 0.8)" />
-              <stop offset="100%" stopColor="rgba(99, 102, 241, 0.4)" />
-            </linearGradient>
-            <linearGradient id="confidenceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(99, 102, 241, 0.2)" />
-              <stop offset="100%" stopColor="rgba(99, 102, 241, 0.05)" />
+              <stop offset="0%" stopColor="rgba(79, 70, 229, 0.9)" />
+              <stop offset="100%" stopColor="rgba(79, 70, 229, 0.5)" />
             </linearGradient>
           </defs>
           
           <PolarGrid 
             stroke={colors.grid} 
             strokeDasharray="3 3"
-            strokeOpacity={0.5}
+            strokeOpacity={0.7}
           />
           
           <PolarAngleAxis 
             dataKey="attribute" 
             tick={{ 
               fill: colors.text, 
-              fontSize: 12,
-              fontWeight: 500,
+              fontSize: 13,
+              fontWeight: 600,
             }}
             tickLine={false}
             onClick={(data: any) => setActiveMetric(data.value)}
@@ -120,10 +130,10 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             dataKey="value"
             stroke={colors.primary.stroke}
             fill="url(#scoreGradient)"
-            fillOpacity={0.8}
+            fillOpacity={0.9}
             animationDuration={1000}
             animationEasing="ease-in-out"
-            strokeWidth={2}
+            strokeWidth={2.5}
             onClick={(data: any) => setActiveMetric(data.attribute)}
             style={{ cursor: 'pointer' }}
           />
@@ -132,14 +142,14 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             <Radar
               name="Confidence Range"
               dataKey="confidence"
-              stroke={colors.confidence.stroke}
-              fill="url(#confidenceGradient)"
-              fillOpacity={0.3}
+              stroke={colors.confidence.medium.stroke}
+              fill={colors.confidence.medium.fill}
+              fillOpacity={0.4}
               strokeDasharray="5 5"
               animationDuration={1000}
               animationBegin={500}
               animationEasing="ease-in-out"
-              strokeWidth={1.5}
+              strokeWidth={2}
             />
           )}
           
@@ -160,7 +170,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
                       {confidence && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">Confidence:</span>
-                          <Badge variant="outline" className={getConfidenceColor(confidence)}>
+                          <Badge variant="outline" className={getConfidenceBadgeColor(confidence)}>
                             {confidence}%
                           </Badge>
                         </div>
@@ -183,7 +193,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               paddingTop: '20px',
             }}
             formatter={(value) => (
-              <span className="text-sm text-muted-foreground">{value}</span>
+              <span className="text-sm font-medium text-gray-700">{value}</span>
             )}
           />
         </RadarChart>

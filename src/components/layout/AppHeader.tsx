@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -17,10 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from '@/hooks/useTheme';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
+import { useSession } from '@/contexts/SessionContext';
 
 const AppHeader: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const { toggleMobileMenu } = useMobileMenu();
+  const { session } = useSession();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,7 +46,7 @@ const AppHeader: React.FC = () => {
               <Link to="/assessment">Assessment</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}>Dashboard</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/learning">Learning</Link>

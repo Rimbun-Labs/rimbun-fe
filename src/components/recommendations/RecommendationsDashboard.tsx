@@ -1,16 +1,20 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from '@tanstack/react-query';
-import { getRecommendations } from '@/lib/api/resultsApi';
+import { useSession } from '@/contexts/SessionContext';
+import { getRecommendations } from '@/lib/api/recommendationApi';
 import MetricRecommendationCard from './MetricRecommendationCard';
 import PortfolioAllocation from '../dashboard/PortfolioAllocation';
 import { Skeleton } from "@/components/ui/skeleton";
+import { AssetClass } from '@/lib/api/types/metrics';
 
 const RecommendationsDashboard: React.FC = () => {
+  const { session } = useSession();
+  
   const { data: recommendations, isLoading } = useQuery({
-    queryKey: ['recommendations'],
-    queryFn: () => getRecommendations('current-session'),
+    queryKey: ['recommendations', session?.id],
+    queryFn: () => getRecommendations(session?.id || ''),
+    enabled: !!session?.id
   });
 
   if (isLoading) {
@@ -42,34 +46,31 @@ const RecommendationsDashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Portfolio Allocation Section */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>Recommended Portfolio Allocation</CardTitle>
-          <CardDescription>
-            Optimal asset distribution based on your risk profile and market conditions
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="h-[320px]">
-            <PortfolioAllocation
-              allocations={recommendations.assetAllocations}
-              recommendedMetrics={recommendations.recommendedMetrics}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <PortfolioAllocation
+        allocations={recommendations.adjustedAllocations}
+        recommendedMetrics={recommendations.recommendedMetrics}
+      />
 
       {/* Metric Recommendations Section */}
       <div>
         <h3 className="text-lg font-semibold mb-4 px-1">Key Investment Metrics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {Object.entries(recommendations.recommendedMetrics).map(([key, metric]) => (
-            <MetricRecommendationCard
-              key={key}
-              name={key}
-              weight={metric.weight}
-              description={metric.description}
-            />
+        <div className="space-y-6">
+          {Object.entries(recommendations.recommendedMetrics).map(([assetClass, metrics]) => (
+            <div key={assetClass}>
+              <h4 className="text-md font-medium mb-3 px-1">{assetClass}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {Object.entries(metrics).map(([key, metric]) => (
+                  <MetricRecommendationCard
+                    key={key}
+                    name={metric.name}
+                    category={metric.category}
+                    weight={metric.weight}
+                    priority={metric.priority}
+                    assetClass={assetClass as AssetClass}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>

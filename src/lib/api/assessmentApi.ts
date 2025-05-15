@@ -19,11 +19,9 @@ const createMockAssessmentResult = (sessionId: string): AssessmentResult => {
       riskProfile: 65,
       directInputs: {
         age: 30,
-        riskCapacity: 70,
-        totalSavings: "50000",
         financialGoal: "Retirement",
         monthlyIncome: "5000",
-        investmentHorizon: 10
+        totalSavings: "50000"
       },
       riskCapacity: 70,
       knowledgeLevel: 80,
@@ -55,6 +53,8 @@ const mockSubmitAnswer = async (sessionId: string, answer: UserAnswer): Promise<
 
 export const getAssessmentResults = async (sessionId: string): Promise<AssessmentResult> => {
   try {
+    console.log('Fetching assessment results for session:', sessionId);
+    
     const response = await axios.get<AssessmentResult>(
       `${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`,
       {
@@ -63,9 +63,38 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
         }
       }
     );
+    
+    // Log the raw response for debugging
+    console.log('Raw API response:', response);
+    console.log('Response data:', response.data);
+    
+    // Validate the response structure
+    if (!response.data) {
+      throw new Error('No data received from the API');
+    }
+
+    if (!response.data.scoreData) {
+      throw new Error('Missing scoreData in response');
+    }
+
+    // Check for required fields in scoreData
+    const requiredFields = ['riskProfile', 'knowledgeLevel', 'leverageAptitude', 'riskCapacity', 
+                          'investmentHorizon', 'finalScore', 'profile', 'overallConfidence'];
+    
+    const missingFields = requiredFields.filter(field => !(field in response.data.scoreData));
+    if (missingFields.length > 0) {
+      console.error('Missing required fields in scoreData:', missingFields);
+      throw new Error(`Missing required fields in scoreData: ${missingFields.join(', ')}`);
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Failed to fetch assessment results:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error headers:', error.response?.headers);
+    }
     throw new Error('Failed to fetch assessment results');
   }
 };

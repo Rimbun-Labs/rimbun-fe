@@ -2,46 +2,33 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { AssessmentResult } from '@/lib/api/types/assessment';
+import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
+import { AssessmentError } from '@/components/assessment/AssessmentError';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 const AssessmentResults: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
 
-  console.log(sessionId)
-
-  const { data: results, isLoading, error } = useQuery({
-    queryKey: ['assessmentResults', sessionId],
-    queryFn: () => {
-      if (!sessionId) throw new Error('No session ID provided');
-      return getAssessmentResults(sessionId);
-    },
-    enabled: !!sessionId,
-    retry: 1, // Only retry once if there's an error
+  const { data: results, isPending: resultsLoading, error: resultsError } = useQuery<AssessmentResult>({
+    queryKey: ['assessment-results', sessionId],
+    queryFn: () => getAssessmentResults(sessionId!),
+    enabled: !!sessionId
   });
 
   const handleBack = () => {
     navigate('/assessment');
   };
 
-  console.log(results)
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-[400px] w-full" />
-        </div>
-      </div>
-    );
+  if (resultsLoading) {
+    return <AssessmentLoading />;
   }
 
-  if (error || !sessionId) {
+  if (resultsError || !sessionId) {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto space-y-4">
@@ -68,15 +55,13 @@ const AssessmentResults: React.FC = () => {
 
   if (!results) return null;
 
-  console.log(results)
-
   const scoreCategories = [
-    { label: 'Risk Profile', value: results.scoreData.riskProfile, confidence: results.scoreData.confidenceMetrics.riskProfileConfidence },
-    { label: 'Knowledge Level', value: results.scoreData.knowledgeLevel, confidence: results.scoreData.confidenceMetrics.knowledgeLevelConfidence },
-    { label: 'Leverage Aptitude', value: results.scoreData.leverageAptitude, confidence: results.scoreData.confidenceMetrics.leverageAptitudeConfidence },
-    { label: 'Risk Capacity', value: results.scoreData.riskCapacity, confidence: results.scoreData.confidenceMetrics.riskCapacityConfidence },
-    { label: 'Decision Style', value: results.scoreData.decisionStyleScore, confidence: results.scoreData.confidenceMetrics.decisionStyleConfidence },
-    { label: 'Personality', value: results.scoreData.personalityScore, confidence: results.scoreData.confidenceMetrics.personalityConfidence },
+    { label: 'Risk Profile', value: results.scoreData.riskProfile, confidence: results.scoreData.confidenceMetrics?.riskProfileConfidence ?? 0 },
+    { label: 'Knowledge Level', value: results.scoreData.knowledgeLevel, confidence: results.scoreData.confidenceMetrics?.knowledgeLevelConfidence ?? 0 },
+    { label: 'Leverage Aptitude', value: results.scoreData.leverageAptitude, confidence: results.scoreData.confidenceMetrics?.leverageAptitudeConfidence ?? 0 },
+    { label: 'Risk Capacity', value: results.scoreData.riskCapacity, confidence: results.scoreData.confidenceMetrics?.riskCapacityConfidence ?? 0 },
+    { label: 'Decision Style', value: results.scoreData.decisionStyleScore, confidence: results.scoreData.confidenceMetrics?.decisionStyleConfidence ?? 0 },
+    { label: 'Personality', value: results.scoreData.personalityScore, confidence: results.scoreData.confidenceMetrics?.personalityConfidence ?? 0 }
   ];
 
   return (
@@ -123,7 +108,7 @@ const AssessmentResults: React.FC = () => {
               <div className="mt-8">
                 <h3 className="text-lg font-semibold mb-4">Direct Inputs</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(results.scoreData.directInputs).map(([key, value]) => (
+                  {Object.entries(results.scoreData.directInputs || {}).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
                       <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
                       <span className="font-medium">{value}</span>

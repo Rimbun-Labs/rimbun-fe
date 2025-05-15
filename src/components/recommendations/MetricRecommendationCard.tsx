@@ -1,28 +1,59 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MetricCategory, MetricPriority, AssetClass } from '@/lib/api/types/metrics';
 
 interface MetricRecommendationProps {
   name: string;
+  category: MetricCategory;
   weight: number;
-  description: string;
-  confidence?: number;
+  priority: MetricPriority;
+  assetClass?: AssetClass;
 }
 
 const MetricRecommendationCard: React.FC<MetricRecommendationProps> = ({
   name,
+  category,
   weight,
-  description,
-  confidence
+  priority,
+  assetClass
 }) => {
-  const getConfidenceColor = (score: number) => {
-    if (score >= 0.8) return "bg-green-500";
-    if (score >= 0.6) return "bg-blue-500";
-    if (score >= 0.4) return "bg-yellow-500";
-    return "bg-red-500";
+  const getPriorityColor = (priority: MetricPriority) => {
+    switch (priority) {
+      case 'Primary':
+        return "bg-blue-100 text-blue-800";
+      case 'Secondary':
+        return "bg-purple-100 text-purple-800";
+      case 'Tertiary':
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getCategoryColor = (category: MetricCategory) => {
+    switch (category) {
+      case 'Growth':
+        return "bg-green-100 text-green-800";
+      case 'Risk':
+        return "bg-red-100 text-red-800";
+      case 'Income':
+        return "bg-yellow-100 text-yellow-800";
+      case 'Valuation':
+        return "bg-indigo-100 text-indigo-800";
+      case 'Return':
+        return "bg-emerald-100 text-emerald-800";
+      case 'Cost':
+        return "bg-orange-100 text-orange-800";
+      case 'ETF Liquidity':
+      case 'Liquidity':
+        return "bg-cyan-100 text-cyan-800";
+      case 'Performance':
+        return "bg-violet-100 text-violet-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
@@ -37,7 +68,10 @@ const MetricRecommendationCard: React.FC<MetricRecommendationProps> = ({
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="max-w-xs">{description}</p>
+                  <p className="max-w-xs">
+                    {assetClass && <span className="font-medium">{assetClass}: </span>}
+                    {category} metric
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -46,20 +80,17 @@ const MetricRecommendationCard: React.FC<MetricRecommendationProps> = ({
             {(weight * 100).toFixed(0)}%
           </span>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className={getPriorityColor(priority)}>
+            {priority}
+          </Badge>
+          <Badge variant="outline" className={getCategoryColor(category)}>
+            {category}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <Progress value={weight * 100} className="h-2" />
-        {confidence && (
-          <div className="mt-2 flex items-center gap-2">
-            <div className="text-xs text-muted-foreground">Confidence:</div>
-            <div 
-              className={`px-2 py-0.5 rounded-full text-xs text-white ${getConfidenceColor(confidence)}`}
-            >
-              {(confidence * 100).toFixed(0)}%
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

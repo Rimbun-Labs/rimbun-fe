@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { UserAnswer, Question } from '@/lib/api/types/assessment';
@@ -14,13 +14,14 @@ import { getQuestions } from '@/lib/api/questionnaireApi';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { useSession } from '@/contexts/SessionContext';
 import { toast } from 'sonner';
+import { getRecommendations } from '@/lib/api/recommendationApi';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
   const [isComplete, setIsComplete] = useState(false);
   const [showContextDialog, setShowContextDialog] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
-  const { sessionId, setSessionId } = useSession();
+  const { sessionId, setSessionId, setSession } = useSession();
   
   // Create session mutation
   const createSessionMutation = useMutation({
@@ -63,12 +64,82 @@ const Assessment: React.FC = () => {
   } = useAssessmentAnswers(sessionId);
   
   // Get results query (activated when assessment completes)
-  const { data: results, isPending: resultsLoading } = useQuery({
+  const { data: results, isPending: resultsLoading, error: resultsError } = useQuery({
     queryKey: ['assessment-results', sessionId],
-    queryFn: () => sessionId ? getAssessmentResults(sessionId) : Promise.reject('No session ID'),
+    queryFn: async () => {
+      if (!sessionId) throw new Error('No session ID');
+      
+      // Add initial delay to allow backend processing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Add retry logic
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (attempts < maxAttempts) {
+        try {
+          const result = await getAssessmentResults(sessionId);
+          console.log('Received results:', result);
+          
+          // Validate required fields
+          if (!result?.scoreData?.finalScore) {
+            throw new Error('Invalid results structure');
+          }
+          
+          return result;
+        } catch (error) {
+          console.error(`Attempt ${attempts + 1} failed:`, error);
+          attempts++;
+          if (attempts === maxAttempts) throw error;
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+      
+      throw new Error('Failed to fetch results after multiple attempts');
+    },
     enabled: isComplete && !!sessionId,
+    retry: false // We handle retries manually
   });
   
+  // Handle results success in useEffect
+  useEffect(() => {
+    if (results && sessionId) {
+      console.log('Setting session with results:', results);
+      
+      // Set session with the nested structure
+      setSession({
+        id: sessionId,
+        userId: results.responseGroupId,
+        questionnaireType: "ONBOARDING",
+        isCompleted: true,
+        metadata: {
+          score: results.scoreData.finalScore,
+          profile: results.scoreData.profile,
+          riskProfile: results.scoreData.riskProfile,
+          knowledgeLevel: results.scoreData.knowledgeLevel,
+          leverageAptitude: results.scoreData.leverageAptitude,
+          riskCapacity: results.scoreData.riskCapacity,
+          investmentHorizon: results.scoreData.investmentHorizon,
+          overallConfidence: results.scoreData.overallConfidence
+        },
+        createdAt: results.createdAt,
+        updatedAt: results.updatedAt
+      });
+      
+      // Navigate directly to dashboard with session ID
+      navigate(`/dashboard/${sessionId}`);
+    }
+  }, [results, sessionId, navigate]);
+
+  // Handle errors in useEffect
+  useEffect(() => {
+    if (resultsError) {
+      console.error('Failed to fetch results:', resultsError);
+      toast.error('Failed to load results. Please try again.');
+    }
+  }, [resultsError]);
+
   const handleStartAssessment = () => {
     createSessionMutation.mutate({
       questionnaireType: "ONBOARDING",
@@ -82,7 +153,7 @@ const Assessment: React.FC = () => {
   };
   
   // Directly progress to next question - called after answer has been processed
-  const moveToNextQuestion = () => {
+  const moveToNextQuestion = async () => {
     if (!questions) return;
     
     const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -91,8 +162,8 @@ const Assessment: React.FC = () => {
       handleNext();
     } else {
       setIsComplete(true);
-      // Navigate to results page
-      navigate(`/assessment/results/${sessionId}`);
+      // Show loading state immediately
+      toast.info('Processing your assessment results...');
     }
     
     setError(null);
@@ -154,8 +225,32 @@ const Assessment: React.FC = () => {
         </div>
       );
     }
-    
-    return results && <AssessmentComplete result={results} />;
+
+    if (resultsError) {
+      return (
+        <div className="container mx-auto py-8 px-4">
+          <h1 className="text-3xl font-bold mb-8 text-center">Error Loading Results</h1>
+          <div className="max-w-3xl mx-auto space-y-4">
+            <AssessmentError 
+              onRetry={() => {
+                setIsComplete(false);
+                // Retry the query
+              }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Do not render results here; navigation will occur in useEffect
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold mb-8 text-center">Redirecting to Dashboard...</h1>
+        <div className="max-w-3xl mx-auto space-y-4">
+          <AssessmentLoading />
+        </div>
+      </div>
+    );
   }
   
   if (!questions || questions.length === 0) {

@@ -1,106 +1,103 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
+import { Skeleton } from "@/components/ui/skeleton";
 import RiskProfileChart from './RiskProfileChart';
-import { ChevronRight } from 'lucide-react';
 
-interface EducationalInsightsProps {
-  profile: any;
-  portfolioData: any;
-  profileLoading: boolean;
-  portfolioLoading: boolean;
+interface ProfileData {
+  profile: string;
+  finalScore: number;
+  riskProfile: number;
+  knowledgeLevel: number;
+  leverageAptitude: number;
+  decisionStyleScore: number;
+  personalityScore: number;
+  riskCapacity: number;
+  investmentHorizon: number;
+  confidenceMetrics?: {
+    riskProfileConfidence: number;
+    knowledgeLevelConfidence: number;
+    leverageAptitudeConfidence: number;
+    decisionStyleConfidence: number;
+    personalityConfidence: number;
+    riskCapacityConfidence: number;
+  };
 }
 
-const EducationalInsights: React.FC<EducationalInsightsProps> = ({
-  profile,
-  portfolioData,
-  profileLoading,
-  portfolioLoading
-}) => {
-  // Get risk profile readable name
-  const getReadableProfile = (profileType: string = ""): string => {
-    return profileType
-      .replace(/_/g, '-')
-      .toLowerCase()
-      .replace(/\b\w/g, char => char.toUpperCase());
+interface EducationalInsightsProps {
+  profile: ProfileData | undefined;
+  profileLoading: boolean;
+}
+
+const EducationalInsights: React.FC<EducationalInsightsProps> = ({ profile, profileLoading }) => {
+  if (profileLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-1/3" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[200px] w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
+  const getReadableProfile = (profile: string): string => {
+    return profile.split('_').map(word => 
+      word.charAt(0) + word.slice(1).toLowerCase()
+    ).join(' ');
   };
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle>Your Investment Profile</CardTitle>
-        <CardDescription>Key insights to guide your learning journey</CardDescription>
+        <CardDescription>
+          Based on your assessment results
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Risk Profile Visualization */}
-          <div className="h-[240px]">
-            {profileLoading ? (
-              <Skeleton className="h-full w-full" />
-            ) : profile ? (
-              <RiskProfileChart data={{
-                riskProfile: profile.scoreData.riskProfile,
-                knowledgeLevel: profile.scoreData.knowledgeLevel,
-                leverageAptitude: profile.scoreData.leverageAptitude,
-                decisionStyleScore: profile.scoreData.decisionStyleScore,
-                personalityScore: profile.scoreData.personalityScore
-              }} />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <p>No profile data available</p>
-              </div>
-            )}
-          </div>
-          
-          {/* Educational Explanation */}
-          <div className="pt-4">
-            <h3 className="text-lg font-semibold mb-3">What This Means</h3>
+          {/* Profile Summary */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Profile Summary</h3>
+            <div className="text-sm">
+              <p className="mb-2">
+                Your profile is classified as <span className="font-medium">{getReadableProfile(profile.profile)}</span>, with a 
+                risk tolerance score of <span className="font-medium">{profile.riskProfile}</span> and 
+                knowledge level of <span className="font-medium">{profile.knowledgeLevel}</span>.
+              </p>
+              <p>
+                This means you're likely comfortable with {profile.profile === "CONSERVATIVE" ? "lower" : 
+                  profile.profile === "AGGRESSIVE" ? "higher" : "moderate"} levels of investment risk.
+                Your learning recommendations are tailored to your current knowledge level.
+              </p>
+            </div>
             
-            {profileLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
+            <div className="flex flex-wrap gap-2 mt-4">
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
+                {profile.profile === "CONSERVATIVE" ? "Safety-focused" : 
+                  profile.profile === "AGGRESSIVE" ? "Growth-oriented" : "Balanced approach"}
               </div>
-            ) : profile ? (
-              <>
-                <div className="text-sm">
-                  <p className="mb-2">
-                    Your profile is classified as <span className="font-medium">{getReadableProfile(profile.scoreData.profile)}</span>, with a 
-                    risk tolerance score of <span className="font-medium">{profile.scoreData.riskProfile}</span> and 
-                    knowledge level of <span className="font-medium">{profile.scoreData.knowledgeLevel}</span>.
-                  </p>
-                  <p>
-                    This means you're likely comfortable with {profile.scoreData.profile === "CONSERVATIVE" ? "lower" : 
-                      profile.scoreData.profile === "AGGRESSIVE" ? "higher" : "moderate"} levels of investment risk.
-                    Your learning recommendations are tailored to your current knowledge level.
-                  </p>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                    {profile.scoreData.profile === "CONSERVATIVE" ? "Safety-focused" : 
-                      profile.scoreData.profile === "AGGRESSIVE" ? "Growth-oriented" : "Balanced approach"}
-                  </div>
-                  <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                    {profile.scoreData.knowledgeLevel < 40 ? "Beginner" : 
-                      profile.scoreData.knowledgeLevel < 70 ? "Intermediate" : "Advanced"} knowledge
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p>No profile data available</p>
-            )}
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
+                {profile.knowledgeLevel < 40 ? "Beginner" : 
+                  profile.knowledgeLevel < 70 ? "Intermediate" : "Advanced"} knowledge
+              </div>
+            </div>
           </div>
-          
-          <Button variant="ghost" size="sm" className="mt-2" asChild>
-            <Link to="/assessment/results">
-              View Full Profile <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+
+          {/* Risk Profile Chart */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Risk Profile Analysis</h3>
+            <RiskProfileChart 
+              data={profile}
+              confidenceMetrics={profile.confidenceMetrics}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

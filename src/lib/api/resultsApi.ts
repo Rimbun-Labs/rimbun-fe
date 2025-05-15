@@ -1,40 +1,9 @@
-
-import { AssessmentResult, RecommendationResult } from './types/assessment';
+import { AssessmentResult } from './types/assessment';
 import { mockAssessmentResult } from '../mock/mockData';
 
 export const getAssessmentResults = async (responseGroupId: string): Promise<AssessmentResult> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   return mockAssessmentResult;
-};
-
-export const getRecommendations = async (responseGroupId: string): Promise<RecommendationResult> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return {
-    assetAllocations: {
-      EQUITIES: 60,
-      BONDS: 20,
-      REAL_ESTATE: 10,
-      CASH: 10
-    },
-    recommendedMetrics: {
-      "Risk-Adjusted Return": {
-        weight: 0.8,
-        description: "Measure of return relative to risk taken"
-      },
-      "Sharpe Ratio": {
-        weight: 0.7,
-        description: "Risk-adjusted return metric"
-      },
-      "Volatility": {
-        weight: 0.6,
-        description: "Price variation over time"
-      },
-      "Diversification": {
-        weight: 0.9,
-        description: "Distribution across asset classes"
-      }
-    }
-  };
 };
 
 export const getPerformanceMetrics = async (userId: string): Promise<{
@@ -171,16 +140,6 @@ export const getAchievements = async (userId: string): Promise<Array<{
       target: 100,
       unlocked: false,
       icon: "chart"
-    },
-    {
-      id: "ach6",
-      name: "Financial Planner",
-      description: "Create a comprehensive financial plan",
-      category: "ASSESSMENT",
-      progress: 50,
-      target: 100,
-      unlocked: false,
-      icon: "award"
     }
   ];
 };

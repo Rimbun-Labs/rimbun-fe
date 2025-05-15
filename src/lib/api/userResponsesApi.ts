@@ -1,5 +1,5 @@
-
-import { Question, QuestionType, SaveUserResponseRequest } from './types/assessment';
+import { Question, QuestionType, SaveUserResponseRequest, UserSession } from './types/assessment';
+import { apiClient } from './client';
 
 const API_BASE_URL = 'http://localhost:3001/api/v1';
 
@@ -134,8 +134,29 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
   }
 };
 
+export const getUserSessions = async (responseGroupId: string): Promise<UserSession[]> => {
+  try {
+    console.log('Fetching user sessions for response group:', responseGroupId);
+    const response = await apiClient.get<UserSession[]>(
+      `/user-responses/response-group/${responseGroupId}/sessions`
+    );
+    console.log('User sessions response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch user sessions:', error);
+    if (error.response) {
+      console.error('Error response:', {
+        status: error.response.status,
+        data: error.response.data
+      });
+    }
+    throw new Error('Failed to fetch user sessions');
+  }
+};
+
 export const userResponsesApi = {
   submitAnswer,
   formatAnswerForApi,
   isValidUUID,
+  getUserSessions,
 }; 

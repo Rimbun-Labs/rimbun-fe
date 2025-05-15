@@ -31,34 +31,41 @@ export interface AssessmentResult {
   id: string;
   responseGroupId: string;
   scoreData: {
-    profile: string;
-    finalScore: number;
-    riskProfile: number;
-    directInputs: {
-      age: number;
-      riskCapacity: number;
-      totalSavings: string;
-      financialGoal: string;
-      monthlyIncome: string;
-      investmentHorizon: number;
+    // Primary Metrics (all numbers 0-100)
+    riskProfile: number;          // Risk tolerance score
+    knowledgeLevel: number;       // Financial knowledge score
+    leverageAptitude: number;     // Leverage comfort score
+    riskCapacity: number;         // Risk capacity score
+    investmentHorizon: number;    // Investment horizon score
+
+    // Style Scores
+    decisionStyleScore: number;   // Decision-making approach
+    decisionStyleDeviation: number; // Consistency in decision style
+    personalityScore: number;     // Personality traits
+    personalityDeviation: number; // Consistency in personality
+
+    // Optional Direct Inputs
+    directInputs?: {
+      age?: number;
+      financialGoal?: string;
+      monthlyIncome?: string;
+      totalSavings?: string;
     };
-    riskCapacity: number;
-    knowledgeLevel: number;
-    leverageAptitude: number;
-    personalityScore: number;
-    confidenceMetrics: {
-      personalityConfidence: number;
+
+    // Optional Confidence Metrics (all numbers 0-1)
+    confidenceMetrics?: {
       riskProfileConfidence: number;
-      riskCapacityConfidence: number;
-      decisionStyleConfidence: number;
       knowledgeLevelConfidence: number;
       leverageAptitudeConfidence: number;
+      decisionStyleConfidence: number;
+      personalityConfidence: number;
+      riskCapacityConfidence: number;
     };
-    investmentHorizon: number;
-    overallConfidence: number;
-    decisionStyleScore: number;
-    personalityDeviation: number;
-    decisionStyleDeviation: number;
+
+    // Final Results
+    finalScore: number;          // Final weighted score (0-100)
+    profile: string;             // One of: "Advanced Balanced Investor", "Balanced Investor", "Opportunistic Investor", "Conservative Investor"
+    overallConfidence: number;   // Overall confidence level (0-1)
   };
   createdAt: string;
   updatedAt: string;
@@ -164,3 +171,48 @@ export interface SaveUserResponseRequest {
 }
 
 export type AssessmentResults = AssessmentResult;
+
+export interface UserSession {
+  id: string;
+  userId: string;
+  questionnaireType: string;
+  description?: string;
+  createdAt: string;
+  scoreData?: {
+    profile: string;
+    finalScore: number;
+    // ... other score data
+  };
+}
+
+import { RecommendedMetricsWithWeights } from './metrics';
+
+export interface RecommendationResponse {
+  recommendationCalculationData: {
+    riskAssessment: number;
+    financialKnowledge: number;
+    investmentHorizon: number;
+    liquidityNeeds: number;
+    incomeNeeds: number;
+    behavioralStyle: number;
+    investmentGoal: {
+      EQUITIES: number;
+      BONDS: number;
+      REAL_ESTATE: number;
+      CASH: number;
+    };
+  };
+  initialAssetClassScores: {
+    EQUITIES: number;
+    BONDS: number;
+    REAL_ESTATE: number;
+    CASH: number;
+  };
+  adjustedAllocations: {
+    EQUITIES: number;
+    BONDS: number;
+    REAL_ESTATE: number;
+    CASH: number;
+  };
+  recommendedMetrics: RecommendedMetricsWithWeights;
+}

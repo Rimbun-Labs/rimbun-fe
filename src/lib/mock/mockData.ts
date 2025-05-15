@@ -4,40 +4,41 @@ import { mockQuestions } from './mockQuestions';
 export { mockQuestions };
 
 export const mockAssessmentResult: AssessmentResult = {
-  id: `result-${Date.now()}`,
-  responseGroupId: "mock-session-id",
-  scoreData: {
-    profile: "MODERATE",
-    finalScore: 75,
-    riskProfile: 75,
-    knowledgeLevel: 65,
-    leverageAptitude: 70,
-    decisionStyleScore: 80,
-    personalityScore: 85,
-    directInputs: {
-      age: 30,
-      riskCapacity: 70,
-      totalSavings: "50000",
-      financialGoal: "Retirement",
-      monthlyIncome: "5000",
-      investmentHorizon: 10
-    },
-    riskCapacity: 70,
-    investmentHorizon: 10,
-    overallConfidence: 0.82,
-    personalityDeviation: 0.15,
-    decisionStyleDeviation: 0.12,
-    confidenceMetrics: {
-      riskProfileConfidence: 0.85,
-      knowledgeLevelConfidence: 0.80,
-      leverageAptitudeConfidence: 0.75,
-      decisionStyleConfidence: 0.90,
-      personalityConfidence: 0.85,
-      riskCapacityConfidence: 0.95
-    }
+  // Primary Metrics
+  riskProfile: 75,
+  knowledgeLevel: 65,
+  leverageAptitude: 70,
+  riskCapacity: 70,
+  investmentHorizon: 10,
+
+  // Style Scores
+  decisionStyleScore: 80,
+  decisionStyleDeviation: 0.12,
+  personalityScore: 85,
+  personalityDeviation: 0.15,
+
+  // Direct Inputs
+  directInputs: {
+    age: 30,
+    financialGoal: "Retirement",
+    monthlyIncome: "5000",
+    totalSavings: "50000"
   },
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+
+  // Confidence Metrics
+  confidenceMetrics: {
+    riskProfileConfidence: 0.85,
+    knowledgeLevelConfidence: 0.80,
+    leverageAptitudeConfidence: 0.75,
+    decisionStyleConfidence: 0.90,
+    personalityConfidence: 0.85,
+    riskCapacityConfidence: 0.95
+  },
+
+  // Final Results
+  finalScore: 75,
+  profile: "Balanced Investor",
+  overallConfidence: 0.82
 };
 
 export const mockPortfolioAllocation = {
