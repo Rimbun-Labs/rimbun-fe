@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,10 @@ import RiskProfileChart from '../dashboard/RiskProfileChart';
 
 interface AssessmentCompleteProps {
   result: AssessmentResult;
+  session?: { id: string };
 }
 
-const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result }) => {
+const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session }) => {
   return (
     <div className="w-full max-w-4xl mx-auto animate-fade-in">
       <div className="mb-8 text-center">
@@ -49,7 +49,7 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result }) => {
           </CardContent>
           <CardFooter>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/dashboard">View Dashboard</Link>
+              <Link to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}>View Dashboard</Link>
             </Button>
           </CardFooter>
         </Card>

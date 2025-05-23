@@ -1,5 +1,5 @@
 import React from 'react';
-import ModuleCard from '@/components/learning/ModuleCard';
+import ModuleCard from '@/components/learning/paths/ModuleCard';
 import { mockLearningModules } from '@/lib/mock/mockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';

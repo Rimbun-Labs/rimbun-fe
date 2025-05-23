@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, BookOpen, Target } from "lucide-react";
 
@@ -18,6 +18,9 @@ interface ActionItemsProps {
 }
 
 const ActionItems: React.FC<ActionItemsProps> = ({ recommendations, loading }) => {
+  const navigate = useNavigate();
+  const { sessionId } = useParams<{ sessionId: string }>();
+
   if (loading) {
     return (
       <Card>
@@ -55,6 +58,16 @@ const ActionItems: React.FC<ActionItemsProps> = ({ recommendations, loading }) =
               <span className="text-muted-foreground">{percentage}%</span>
             </div>
           ))}
+          
+          <div className="pt-4 border-t">
+            <Button 
+              className="w-full"
+              onClick={() => navigate(`/learning-path/${sessionId}`)}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              View Learning Path
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

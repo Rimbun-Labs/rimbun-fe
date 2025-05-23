@@ -13,6 +13,8 @@ import Learning from "./pages/Learning";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RecommendationsPage from "./pages/RecommendationsPage";
+import LearningPaths from "./pages/LearningPaths";
+import LearningPathDetail from "./pages/LearningPathDetail";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
               <Route path="/assessment" element={<Assessment />} />
               <Route path="/dashboard/:sessionId" element={<Dashboard />} />
               <Route path="/learning" element={<Learning />} />
+              <Route path="/learning-path/:sessionId" element={<LearningPaths />} />
+              <Route path="/learning-path/:sessionId/:assetClass" element={<LearningPathDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/recommendations" element={<RecommendationsPage />} />
               <Route path="*" element={<NotFound />} />

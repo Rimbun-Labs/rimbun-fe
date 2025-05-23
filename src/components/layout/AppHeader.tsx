@@ -43,13 +43,13 @@ const AppHeader: React.FC = () => {
         <div className="flex-1 flex justify-end items-center space-x-4">
           <nav className="hidden md:flex items-center space-x-4">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/assessment">Assessment</Link>
+              <Link to="/assessment">Start Assessment</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
-              <Link to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}>Dashboard</Link>
+              <Link to="/learning">Learning Library</Link>
             </Button>
             <Button asChild variant="ghost" size="sm">
-              <Link to="/learning">Learning</Link>
+              <Link to={session?.id ? `/learning-path/${session.id}` : '/learning'}>Learning Paths</Link>
             </Button>
           </nav>
           

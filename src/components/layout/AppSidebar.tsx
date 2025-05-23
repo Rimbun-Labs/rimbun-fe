@@ -5,12 +5,10 @@ import {
   LayoutDashboard, 
   GraduationCap, 
   BookOpen, 
-  Target, 
-  HelpCircle,
   BarChart3,
-  LineChart,
-  PieChart
+  User
 } from 'lucide-react';
+import { useSession } from '@/contexts/SessionContext';
 
 const SidebarContent = React.forwardRef<
   HTMLDivElement,
@@ -28,6 +26,7 @@ const SidebarContent = React.forwardRef<
 SidebarContent.displayName = "SidebarContent";
 
 const AppSidebar: React.FC = () => {
+  const { session } = useSession();
   return (
     <SidebarContent>
       <nav className="space-y-6">
@@ -37,7 +36,7 @@ const AppSidebar: React.FC = () => {
             Overview
           </h3>
           <NavLink
-            to="/dashboard"
+            to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
@@ -77,10 +76,10 @@ const AppSidebar: React.FC = () => {
             }
           >
             <GraduationCap className="h-4 w-4" />
-            Learning Path
+            Learning Library
           </NavLink>
           <NavLink
-            to="/learning/modules"
+            to={session?.id ? `/learning-path/${session.id}` : '/learning'}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
@@ -89,29 +88,17 @@ const AppSidebar: React.FC = () => {
             }
           >
             <BookOpen className="h-4 w-4" />
-            Course Modules
-          </NavLink>
-          <NavLink
-            to="/learning/goals"
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-              )
-            }
-          >
-            <Target className="h-4 w-4" />
-            Learning Goals
+            Learning Paths
           </NavLink>
         </div>
 
-        {/* Help Section */}
+        {/* Profile Section */}
         <div className="space-y-2">
           <h3 className="px-2 text-sm font-semibold text-muted-foreground">
-            Support
+            Account
           </h3>
           <NavLink
-            to="/help"
+            to="/profile"
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
@@ -119,8 +106,8 @@ const AppSidebar: React.FC = () => {
               )
             }
           >
-            <HelpCircle className="h-4 w-4" />
-            Help & FAQ
+            <User className="h-4 w-4" />
+            Profile
           </NavLink>
         </div>
       </nav>

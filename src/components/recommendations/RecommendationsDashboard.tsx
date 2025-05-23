@@ -6,7 +6,7 @@ import { getRecommendations } from '@/lib/api/recommendationApi';
 import MetricRecommendationCard from './MetricRecommendationCard';
 import PortfolioAllocation from '../dashboard/PortfolioAllocation';
 import { Skeleton } from "@/components/ui/skeleton";
-import { AssetClass } from '@/lib/api/types/metrics';
+import { AssetClass, RecommendedMetric, RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
 
 const RecommendationsDashboard: React.FC = () => {
   const { session } = useSession();
@@ -59,7 +59,7 @@ const RecommendationsDashboard: React.FC = () => {
             <div key={assetClass}>
               <h4 className="text-md font-medium mb-3 px-1">{assetClass}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {Object.entries(metrics).map(([key, metric]) => (
+                {Object.entries(metrics as Record<string, RecommendedMetric>).map(([key, metric]) => (
                   <MetricRecommendationCard
                     key={key}
                     name={metric.name}
