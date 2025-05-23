@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createSession } from '@/lib/api/assessmentApi';
 import { toast } from "sonner";
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useAssessmentSession = () => {
+  const {user} = useAuth()
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   

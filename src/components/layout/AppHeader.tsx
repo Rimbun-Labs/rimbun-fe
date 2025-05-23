@@ -6,7 +6,8 @@ import {
   Sun,
   Moon,
   User,
-  Menu
+  Menu,
+  LogOut
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -17,11 +18,31 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from "@/components/ui/use-toast";
 
 const AppHeader: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const { toggleMobileMenu } = useMobileMenu();
   const { session } = useSession();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to log out",
+      });
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -106,10 +127,15 @@ const AppHeader: React.FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/profile">Profile</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>Help</DropdownMenuItem>
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
