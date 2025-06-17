@@ -1,31 +1,59 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useProfile } from '@/contexts/ProfileContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FinancialProfileCard = () => {
-  const { profile, isLoading } = useProfile();
+  const { profile, isLoading, error } = useProfile();
   
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-64" />
+          <CardTitle>Financial Profile</CardTitle>
+          <CardDescription>Based on your assessment results</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-full" />
+          <div className="flex flex-col items-center justify-center py-8">
+            <LoadingSpinner size="lg" variant="primary" />
+            <p className="text-sm text-muted-foreground mt-4">Loading your financial profile...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Financial Profile</CardTitle>
+          <CardDescription>Based on your assessment results</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center text-center space-y-4 py-8">
+            <div className="p-3 rounded-full bg-destructive/10">
+              <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
-          ))}
+            <div>
+              <h3 className="text-lg font-semibold">Error Loading Profile</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {error || "Failed to load financial profile"}
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

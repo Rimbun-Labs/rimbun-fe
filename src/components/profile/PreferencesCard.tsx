@@ -1,31 +1,60 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProfile } from '@/contexts/ProfileContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Label } from '@/components/ui/label';
-import { Moon, Sun, Palette, Globe } from 'lucide-react';
+import { Moon, Sun, Palette, Globe, AlertCircle } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { Button } from '@/components/ui/button';
 
 const PreferencesCard = () => {
-  const { profile, isLoading, updateProfileData, isEditing } = useProfile();
+  const { profile, isLoading, updateProfileData, isEditing, error } = useProfile();
   const { theme, setTheme } = useTheme();
   
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-64" />
+          <CardTitle>Preferences</CardTitle>
+          <CardDescription>Customize your app experience</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {[1, 2].map((i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-10 w-full" />
+          <div className="flex flex-col items-center justify-center py-8">
+            <LoadingSpinner size="lg" variant="primary" />
+            <p className="text-sm text-muted-foreground mt-4">Loading your preferences...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Preferences</CardTitle>
+          <CardDescription>Customize your app experience</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center text-center space-y-4 py-8">
+            <div className="p-3 rounded-full bg-destructive/10">
+              <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
-          ))}
+            <div>
+              <h3 className="text-lg font-semibold">Error Loading Preferences</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {error || "Failed to load preferences"}
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

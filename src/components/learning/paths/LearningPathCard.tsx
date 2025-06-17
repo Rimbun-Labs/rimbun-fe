@@ -29,7 +29,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
 
   useEffect(() => {
     // Load saved progress from localStorage
-    const savedProgress = localStorage.getItem(`learning-path-${assetClass.toLowerCase()}`);
+    const savedProgress = localStorage.getItem(`learning-path-${sessionId}-${assetClass.toLowerCase()}`);
     if (savedProgress) {
       try {
         const { completedSections: savedCompleted } = JSON.parse(savedProgress);
@@ -38,7 +38,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
         console.error('Error parsing saved progress:', error);
       }
     }
-  }, [assetClass]);
+  }, [assetClass, sessionId]);
 
   const handleClick = () => {
     navigate(`/learning-path/${sessionId}/${assetClass.toLowerCase()}`);

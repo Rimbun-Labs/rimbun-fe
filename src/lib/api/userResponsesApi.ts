@@ -11,15 +11,6 @@ const isValidUUID = (uuid: string): boolean => {
 };
 
 const validateRequest = (request: SaveUserResponseRequest): void => {
-  console.log('Validating request:', {
-    responseGroupId: request.responseGroupId,
-    questionId: request.questionId,
-    answer: request.answer,
-    isResponseGroupIdValid: isValidUUID(request.responseGroupId),
-    isQuestionIdValid: isValidUUID(request.questionId),
-    isAnswerString: typeof request.answer === 'string'
-  });
-
   if (!isValidUUID(request.responseGroupId)) {
     throw new Error('Invalid responseGroupId: Must be a valid UUID');
   }
@@ -32,12 +23,6 @@ const validateRequest = (request: SaveUserResponseRequest): void => {
 };
 
 const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
-  console.log('Formatting answer:', {
-    originalValue: value,
-    questionType,
-    valueType: typeof value
-  });
-
   if (value === null || value === undefined) return '';
 
   // Handle case where value is an object with a value property
@@ -75,21 +60,10 @@ const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
       formattedAnswer = String(value);
   }
 
-  console.log('Formatted answer:', {
-    originalValue: value,
-    formattedAnswer,
-    questionType
-  });
-
   return formattedAnswer;
 };
 
 const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> => {
-  console.log('Submitting answer to API:', {
-    request: response,
-    endpoint: `${API_BASE_URL}/user-responses/answer`
-  });
-  
   try {
     // Validate the request before sending
     validateRequest(response);
@@ -126,8 +100,6 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
       });
       throw new Error(errorData.message || 'Failed to submit answer');
     }
-
-    console.log('Answer submitted successfully:', response);
   } catch (error) {
     console.error('Error submitting answer:', error);
     throw error;
@@ -136,11 +108,9 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
 
 export const getUserSessions = async (responseGroupId: string): Promise<UserSession[]> => {
   try {
-    console.log('Fetching user sessions for response group:', responseGroupId);
     const response = await apiClient.get<UserSession[]>(
       `/user-responses/response-group/${responseGroupId}/sessions`
     );
-    console.log('User sessions response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch user sessions:', error);

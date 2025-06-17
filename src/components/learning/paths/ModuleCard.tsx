@@ -1,11 +1,18 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Lock, BookOpen } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { 
+  ChevronRight, 
+  BookOpen, 
+  Clock, 
+  Trophy,
+  Sparkles,
+  CheckCircle2
+} from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { MetricCategory } from '@/lib/api/types/metrics';
 
 interface ModuleCardProps {
   module: {
@@ -16,110 +23,153 @@ interface ModuleCardProps {
     difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
     progress: number;
     isLocked: boolean;
-    imageUrl?: string;
-    totalLessons?: number;
-    completedLessons?: number;
+    imageUrl: string;
+    totalLessons: number;
+    completedLessons: number;
+    metrics?: Array<{
+      name: string;
+      category: MetricCategory;
+      isRecommended: boolean;
+    }>;
+    isRecommended?: boolean;
   };
   onStart: () => void;
 }
 
-const ModuleCard: React.FC<ModuleCardProps> = ({
-  module,
-  onStart,
-}) => {
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h${mins > 0 ? ` ${mins}m` : ''}`;
-  };
-  
+const ModuleCard: React.FC<ModuleCardProps> = ({ module, onStart }) => {
   const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'BEGINNER': return "bg-green-100 text-green-800";
-      case 'INTERMEDIATE': return "bg-blue-100 text-blue-800";
-      case 'ADVANCED': return "bg-purple-100 text-purple-800";
-      default: return "bg-gray-100 text-gray-800";
+    switch (difficulty.toLowerCase()) {
+      case 'beginner':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'intermediate':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'advanced':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
+
+  const getCategoryColor = (category: MetricCategory) => {
+    switch (category) {
+      case 'Growth':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Risk':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'Income':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Value':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'Technical':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
 
   return (
-    <Card className={cn(
-      "h-full overflow-hidden flex flex-col transition-transform duration-200",
-      !module.isLocked && "hover:transform hover:scale-[1.02]",
-      module.isLocked && "opacity-75"
-    )}>
-      {/* Module Image */}
-      <div
-        className="h-40 bg-cover bg-center relative"
-        style={{ 
-          backgroundImage: module.imageUrl ? `url(${module.imageUrl})` : 'linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%)'
-        }}
-      >
-        {module.isLocked && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Lock className="h-10 w-10 text-white/80" />
+    <Card className="hover:shadow-lg transition-all duration-200">
+      <CardContent className="p-6">
+        <div className="flex flex-col h-full">
+          {/* Header with image and badges */}
+          <div className="relative h-40 mb-4 rounded-lg overflow-hidden">
+            <img 
+              src={module.imageUrl} 
+              alt={module.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute top-2 right-2 flex gap-2">
+              {module.isRecommended && (
+                <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Recommended
+                </Badge>
+              )}
+              <Badge variant="outline" className={getDifficultyColor(module.difficulty)}>
+                {module.difficulty}
+              </Badge>
+            </div>
           </div>
-        )}
-        
-        <Badge 
-          className={cn(
-            "absolute top-3 right-3 font-normal",
-            getDifficultyColor(module.difficulty)
+
+          {/* Title and Description */}
+          <div className="space-y-2 mb-4">
+            <h3 className="text-xl font-semibold text-slate-900">{module.title}</h3>
+            <p className="text-sm text-slate-600 line-clamp-2">{module.description}</p>
+          </div>
+
+          {/* Progress */}
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Progress</span>
+              <span className="font-medium">{module.progress}%</span>
+            </div>
+            <Progress value={module.progress} className="h-2" />
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>{module.completedLessons} of {module.totalLessons} lessons</span>
+              <span>{module.duration} mins</span>
+            </div>
+          </div>
+
+          {/* Metrics Preview */}
+          {module.metrics && module.metrics.length > 0 && (
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center text-sm text-slate-600">
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span>Key Metrics:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {module.metrics.slice(0, 3).map((metric, index) => (
+                  <Badge 
+                    key={index}
+                    variant="outline"
+                    className={cn(
+                      getCategoryColor(metric.category),
+                      metric.isRecommended && "border-emerald-200"
+                    )}
+                  >
+                    {metric.name}
+                    {metric.isRecommended && (
+                      <Sparkles className="h-3 w-3 ml-1 text-emerald-500" />
+                    )}
+                  </Badge>
+                ))}
+                {module.metrics.length > 3 && (
+                  <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                    +{module.metrics.length - 3} more
+                  </Badge>
+                )}
+              </div>
+            </div>
           )}
-        >
-          {module.difficulty.charAt(0) + module.difficulty.slice(1).toLowerCase()}
-        </Badge>
-      </div>
-      
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="line-clamp-1">{module.title}</CardTitle>
-        </div>
-        <CardDescription className="line-clamp-2">{module.description}</CardDescription>
-      </CardHeader>
-      
-      <CardContent className="flex-grow space-y-3">
-        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Clock className="h-3.5 w-3.5 mr-1" />
-            <span>{formatDuration(module.duration)}</span>
+
+          {/* Action Button */}
+          <div className="mt-auto">
+            <Button 
+              onClick={onStart}
+              className="w-full group"
+              variant={module.progress > 0 ? "outline" : "default"}
+            >
+              {module.progress === 100 ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Review
+                </>
+              ) : module.progress > 0 ? (
+                <>
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Continue
+                </>
+              ) : (
+                <>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Start Learning
+                </>
+              )}
+              <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
           </div>
-          <div className="flex items-center">
-            <BookOpen className="h-3.5 w-3.5 mr-1" />
-            <span>{module.totalLessons || 0} lessons</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progress</span>
-            <span className="font-medium">{module.progress}%</span>
-          </div>
-          <Progress value={module.progress} className="h-2" />
-          {module.totalLessons && module.completedLessons !== undefined && (
-            <p className="text-xs text-muted-foreground">
-              {module.completedLessons} of {module.totalLessons} lessons completed
-            </p>
-          )}
         </div>
       </CardContent>
-      
-      <CardFooter className="pt-0">
-        <Button 
-          className="w-full" 
-          disabled={module.isLocked}
-          onClick={onStart}
-          aria-label={`${module.isLocked ? 'Locked: ' : ''}${
-            module.progress === 0 ? 'Start' : module.progress === 100 ? 'Review' : 'Continue'
-          } ${module.title}`}
-        >
-          {module.isLocked ? 'Locked' : 
-            module.progress === 0 ? 'Start Learning' : 
-            module.progress === 100 ? 'Review Module' : 
-            'Continue Learning'}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

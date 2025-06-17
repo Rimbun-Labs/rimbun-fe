@@ -31,7 +31,6 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
   onPrevious
 }) => {
   const currentQuestion = questions[currentQuestionIndex];
-  console.log(currentQuestion)
   const questionsInCurrentCategory = questions.filter(
     q => q.category.id === currentQuestion.category.id
   );

@@ -1,7 +1,25 @@
+import { MetricExplanation } from './metricContent';
+
+/**
+ * Categories for investment metrics:
+ * - Growth: Metrics related to growth potential and historical growth
+ * - Value: Metrics used for valuation and price assessment
+ * - Income: Metrics related to income generation and yield
+ * - Risk: Metrics measuring risk and volatility
+ * - Technical: Technical analysis indicators
+ * - Valuation: Metrics used for asset valuation
+ * - Return: Metrics measuring returns and performance
+ * - Cost: Metrics related to costs and expenses
+ * - ETF Liquidity: Metrics specific to ETF trading and liquidity
+ * - Liquidity: General liquidity metrics
+ * - Performance: Overall performance metrics
+ */
 export type MetricCategory = 
-  | 'Growth'
-  | 'Risk'
-  | 'Income'
+  | 'Growth' 
+  | 'Value' 
+  | 'Income' 
+  | 'Risk' 
+  | 'Technical'
   | 'Valuation'
   | 'Return'
   | 'Cost'
@@ -11,18 +29,22 @@ export type MetricCategory =
 
 export type MetricPriority = 'Primary' | 'Secondary' | 'Tertiary';
 
-export type AssetClass = 'EQUITIES' | 'BONDS' | 'REAL_ESTATE' | 'CASH';
+export type AssetClass = 'equities' | 'bonds' | 'realEstate' | 'cash';
 
 export interface RecommendedMetric {
   name: string;
   category: MetricCategory;
   weight: number;
-  priority: MetricPriority;
+  priority?: MetricPriority;
+  description: string;
+  content?: MetricExplanation;
 }
 
 export interface RecommendedMetricsWithWeights {
-  [AssetClass.EQUITIES]?: Record<string, RecommendedMetric>;
-  [AssetClass.BONDS]?: Record<string, RecommendedMetric>;
-  [AssetClass.REAL_ESTATE]?: Record<string, RecommendedMetric>;
-  [AssetClass.CASH]?: Record<string, RecommendedMetric>;
+  [assetClass: string]: {
+    [metricName: string]: {
+      weight: number;
+      description: string;
+    }
+  }
 } 

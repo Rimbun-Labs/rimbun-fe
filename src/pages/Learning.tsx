@@ -1,205 +1,105 @@
 import React from 'react';
-import ModuleCard from '@/components/learning/paths/ModuleCard';
-import { mockLearningModules } from '@/lib/mock/mockData';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, BookOpen, GraduationCap, Lightbulb, Trophy, BarChart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { metricContent } from '@/lib/api/types/metricContent';
+
+interface LearningFolder {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  moduleCount: number;
+}
+
+const folders: LearningFolder[] = [
+  {
+    id: 'asset-classes',
+    title: 'Asset Classes',
+    description: 'Learn about different types of investments and their characteristics',
+    icon: <BookOpen className="h-6 w-6" />,
+    moduleCount: 4 // Equities, Bonds, Real Estate, Cash
+  },
+  {
+    id: 'metrics',
+    title: 'Investment Metrics',
+    description: 'Learn about key metrics used in investment analysis',
+    icon: <BarChart className="h-6 w-6" />,
+    moduleCount: Object.keys(metricContent).length
+  }
+  // We can add more folders here later
+];
 
 const Learning: React.FC = () => {
-  const modules = mockLearningModules;
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState('');
-  
-  const filteredModules = modules.filter(module => 
-    module.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    module.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+  const filteredFolders = folders.filter(folder =>
+    folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    folder.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
-  const completedModules = modules.filter(module => module.progress === 100);
-  const inProgressModules = modules.filter(module => module.progress > 0 && module.progress < 100);
-  const notStartedModules = modules.filter(module => module.progress === 0);
-  
+
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Learning Center</h1>
-        <p className="text-muted-foreground mb-6">
-          Expand your financial knowledge with our curated learning modules.
-        </p>
+    <div className="container max-w-7xl py-8">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Learning Library</h1>
+            <p className="text-muted-foreground mt-1">
+              Explore our comprehensive learning resources
+            </p>
+          </div>
+          <div className="relative w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search learning content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+        </div>
+
+        {/* Folders Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredFolders.map((folder) => (
+            <Card 
+              key={folder.id}
+              className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+              onClick={() => navigate(`/learning/${folder.id}`)}
+            >
+              <CardContent className="p-6">
+                <div className="flex flex-col h-full">
+                  {/* Folder Icon */}
+                  <div className="p-3 bg-primary/10 rounded-lg w-fit mb-4">
+                    {folder.icon}
+                  </div>
+
+                  {/* Folder Info */}
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold">{folder.title}</h3>
+                    <p className="text-sm text-muted-foreground">{folder.description}</p>
+                  </div>
+
+                  {/* Module Count */}
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    {folder.moduleCount} modules available
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredFolders.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-slate-500">No folders found matching your search.</p>
+          </div>
+        )}
       </div>
-      
-      {/* Search and Filters */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-        <Input 
-          placeholder="Search modules..." 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-      
-      {/* Module Tabs */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
-          <TabsTrigger value="all">All Modules</TabsTrigger>
-          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="not-started">Not Started</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-6">
-          {searchQuery && <p>Showing results for "{searchQuery}"</p>}
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredModules.map((module) => (
-              <ModuleCard
-                key={module.id}
-                module={{
-                  id: module.id,
-                  title: module.title,
-                  description: module.description,
-                  duration: module.duration || 0,
-                  difficulty: module.difficulty || 'BEGINNER',
-                  progress: module.progress,
-                  isLocked: module.isLocked || false,
-                  imageUrl: module.imageUrl,
-                  totalLessons: module.totalLessons,
-                  completedLessons: module.completedLessons
-                }}
-                onStart={() => {
-                  // Handle module start
-                  console.log('Starting module:', module.id);
-                }}
-              />
-            ))}
-          </div>
-          
-          {filteredModules.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium">No modules found</h3>
-              <p className="text-muted-foreground">Try adjusting your search terms</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="in-progress" className="space-y-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {inProgressModules
-              .filter(module => 
-                searchQuery === '' || 
-                module.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                module.description.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  module={{
-                    id: module.id,
-                    title: module.title,
-                    description: module.description,
-                    duration: module.duration || 0,
-                    difficulty: module.difficulty || 'BEGINNER',
-                    progress: module.progress,
-                    isLocked: module.isLocked || false,
-                    imageUrl: module.imageUrl,
-                    totalLessons: module.totalLessons,
-                    completedLessons: module.completedLessons
-                  }}
-                  onStart={() => {
-                    // Handle module start
-                    console.log('Starting module:', module.id);
-                  }}
-                />
-              ))}
-          </div>
-          
-          {inProgressModules.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium">No modules in progress</h3>
-              <p className="text-muted-foreground">Start learning to see modules here</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="completed" className="space-y-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {completedModules
-              .filter(module => 
-                searchQuery === '' || 
-                module.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                module.description.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  module={{
-                    id: module.id,
-                    title: module.title,
-                    description: module.description,
-                    duration: module.duration || 0,
-                    difficulty: module.difficulty || 'BEGINNER',
-                    progress: module.progress,
-                    isLocked: module.isLocked || false,
-                    imageUrl: module.imageUrl,
-                    totalLessons: module.totalLessons,
-                    completedLessons: module.completedLessons
-                  }}
-                  onStart={() => {
-                    // Handle module start
-                    console.log('Starting module:', module.id);
-                  }}
-                />
-              ))}
-          </div>
-          
-          {completedModules.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium">No completed modules</h3>
-              <p className="text-muted-foreground">Complete modules to see them here</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="not-started" className="space-y-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {notStartedModules
-              .filter(module => 
-                searchQuery === '' || 
-                module.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                module.description.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((module) => (
-                <ModuleCard
-                  key={module.id}
-                  module={{
-                    id: module.id,
-                    title: module.title,
-                    description: module.description,
-                    duration: module.duration || 0,
-                    difficulty: module.difficulty || 'BEGINNER',
-                    progress: module.progress,
-                    isLocked: module.isLocked || false,
-                    imageUrl: module.imageUrl,
-                    totalLessons: module.totalLessons,
-                    completedLessons: module.completedLessons
-                  }}
-                  onStart={() => {
-                    // Handle module start
-                    console.log('Starting module:', module.id);
-                  }}
-                />
-              ))}
-          </div>
-          
-          {notStartedModules.length === 0 && (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium">No modules available</h3>
-              <p className="text-muted-foreground">Check back later for new content</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

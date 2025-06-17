@@ -5,6 +5,7 @@ import { NumberInput } from './NumberInput';
 import { BooleanInput } from './BooleanInput';
 import { SelectInput } from './SelectInput';
 import { TextInput } from './TextInput';
+import { SliderInput } from './SliderInput';
 
 interface Option {
   id: string;
@@ -24,6 +25,20 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
   onAnswerChange,
   validationError
 }) => {
+  // Special handling for income question
+  if (question.id === "eabf99f8-9a79-4cbd-baad-a81f0c48a3c9") {
+    return (
+      <SliderInput
+        question={question}
+        value={answer as number}
+        onChange={(value: number) => {
+          onAnswerChange(value);
+        }}
+        validationError={validationError}
+      />
+    );
+  }
+
   switch (question.questionType) {
     case 'multiple_choice':
       return (
@@ -75,6 +90,18 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
             const boolValue = typeof value === 'string' ? value === 'true' : value;
             onAnswerChange(boolValue);
           }}
+        />
+      );
+
+    case 'slider':
+      return (
+        <SliderInput
+          question={question}
+          value={answer as number}
+          onChange={(value: number) => {
+            onAnswerChange(value);
+          }}
+          validationError={validationError}
         />
       );
 

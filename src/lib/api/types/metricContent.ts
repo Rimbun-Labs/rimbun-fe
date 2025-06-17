@@ -1,6 +1,9 @@
 import { MetricCategory } from './metrics';
 
-interface MetricExplanation {
+/**
+ * Structure for metric explanations including overview, details, and practice questions
+ */
+export interface MetricExplanation {
   overview: string;
   details: string;
   practiceQuestion: {
@@ -11,15 +14,21 @@ interface MetricExplanation {
   };
 }
 
-interface MetricContent {
-  [key: string]: {
-    [key in MetricCategory]?: MetricExplanation;
+/**
+ * Content structure for metrics
+ * Each metric must have exactly one category with its explanation
+ */
+export type MetricContent = {
+  [metricId: string]: {
+    category: MetricCategory;
+    content: MetricExplanation;
   };
-}
+};
 
 export const metricContent: MetricContent = {
   historicalReturn: {
-    Growth: {
+    category: 'Growth',
+    content: {
       overview: "Historical return shows how much a stock's value has grown in the past, helping you see its growth over time.",
       details: "Historical return measures the increase in a stock's value over a period, including any extra money paid out, like a bonus. For example, if a stock's value goes from $50 to $60 in a year and pays a $1 bonus, the return is 22%. It helps you understand how the stock did before, but the future might be different. Check past patterns to learn more, and we'll guide you as you go!",
       practiceQuestion: {
@@ -31,7 +40,8 @@ export const metricContent: MetricContent = {
     }
   },
   appreciation: {
-    Growth: {
+    category: 'Growth',
+    content: {
       overview: "Appreciation shows how much an investment's value has increased over time, helping you see its growth potential.",
       details: "Appreciation measures how much an investment's value has gone up over a period. For example, if an investment's value rises from $100 to $150 in three years, that's a 50% increase. It helps you understand how much the investment has grown, which can add to your overall gains. However, market changes can affect future growth. Compare it to other investments to understand its growth better. We'll explore more as you learn!",
       practiceQuestion: {
@@ -43,7 +53,8 @@ export const metricContent: MetricContent = {
     }
   },
   volatility: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Volatility tells you how much a stock's price moves up and down, helping you understand its risk level.",
       details: "Volatility measures how much a stock's price changes over time, showing how risky it might be. A stock that moves 25% in a month has high volatility, meaning bigger price swings, while one that moves 5% is more stable. Larger swings can mean higher risk but also a chance for bigger gains. Think about how comfortable you are with price changes as you choose stocks. Let's learn more about risk as we go!",
       practiceQuestion: {
@@ -55,7 +66,8 @@ export const metricContent: MetricContent = {
     }
   },
   beta: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Beta shows how much a stock moves with the overall market, helping you understand its risk compared to the market.",
       details: "Beta measures how a stock's price changes when the market changes. A value of 1 means it moves the same as the market, while 1.5 means it moves 50% more, making it riskier. A value of 0.5 means it moves less, suggesting lower risk. For example, if the market rises 10%, a stock with a beta of 1.5 might rise 15%. It helps you see how market changes affect the stock. We'll dive deeper as you learn!",
       practiceQuestion: {
@@ -67,7 +79,8 @@ export const metricContent: MetricContent = {
     }
   },
   sharpeRatio: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "The Sharpe Ratio shows if a stock's extra gains are worth the risk, helping you pick better options.",
       details: "The Sharpe Ratio compares a stock's extra gains to its risk, using a safe choice like a government bond as a baseline. For example, if a stock gains 10%, the safe choice is 2%, and its price swings 15%, the ratio is 0.53, meaning you get 0.53 units of extra gain per unit of risk. A higher number means better gains for the risk. Use it to compare stocks, but risk isn't fully captured. We'll guide you more as you go!",
       practiceQuestion: {
@@ -79,7 +92,8 @@ export const metricContent: MetricContent = {
     }
   },
   trackingError: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Tracking error shows how much a stock fund differs from its target, helping you see if it follows its goal.",
       details: "Tracking error measures how much a stock fund's gains differ from its target, like an index it's supposed to match. A 2% error means the fund might gain 8% when the target gains 10%. It helps you check if the fund sticks to its plan, though fees or market changes can affect it. For example, a fund with a 2% error might not match its target exactly. Use it to pick a fund that stays close to your goals. Let's learn more ahead!",
       practiceQuestion: {
@@ -91,7 +105,8 @@ export const metricContent: MetricContent = {
     }
   },
   expenseRatio: {
-    Cost: {
+    category: 'Cost',
+    content: {
       overview: "The expense ratio shows the yearly cost of owning a fund, helping you see how much you keep after fees.",
       details: "The expense ratio is the yearly fee you pay to own a fund, shown as a percentage of your investment. For example, a $10,000 fund with a 1% fee costs $100 a year, reducing what you keep. A lower fee means you keep more of your money over time. It's important to check this cost when choosing a fund, as small fees can add up. We'll help you save more as you learn!",
       practiceQuestion: {
@@ -103,7 +118,8 @@ export const metricContent: MetricContent = {
     }
   },
   peRatio: {
-    Valuation: {
+    category: 'Valuation',
+    content: {
       overview: "The P/E ratio helps you see if a stock's price matches the money it makes, showing if it's a good buy.",
       details: "The P/E ratio compares a stock's price to the money the company makes per share. For example, if a stock costs $150 and makes $6 per share, the ratio is 25, meaning you pay $25 for each $1 the company earns. A high number might mean people expect big growth, while a low number could suggest a better buy—but compare it to similar stocks. It helps you decide if the price is worth it. We'll guide you further as you learn!",
       practiceQuestion: {
@@ -115,7 +131,8 @@ export const metricContent: MetricContent = {
     }
   },
   creditRating: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Credit rating shows how safe a bond is, helping you see the risk of not getting your money back.",
       details: "Credit rating measures how likely a bond issuer is to pay you back, based on their financial health. Ratings range from high (like AAA, very safe) to low (like BB, more risky). A higher rating means less risk of losing money, but it might offer lower gains. For example, a bond with a BBB rating has more risk than an AA-rated bond. Use this to pick bonds that match your comfort with risk. We'll guide you as you learn!",
       practiceQuestion: {
@@ -127,7 +144,8 @@ export const metricContent: MetricContent = {
     }
   },
   duration: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Duration shows how much a bond's price might change if interest rates move, helping you understand its risk.",
       details: "Duration measures how sensitive a bond's price is to changes in interest rates. A duration of 5 means if rates rise by 1%, the bond's price might drop 5%. For example, a bond with a duration of 4 will lose more value than one with a duration of 2 if rates go up. It helps you see how risky a bond is to rate changes, so you can choose one that fits your plans. Let's learn more as we go!",
       practiceQuestion: {
@@ -139,7 +157,8 @@ export const metricContent: MetricContent = {
     }
   },
   ytm: {
-    Return: {
+    category: 'Return',
+    content: {
       overview: "Yield to Maturity (YTM) shows the total gain you might get from a bond if you hold it until it's due, helping you see its full return.",
       details: "Yield to Maturity (YTM) is the total yearly gain you might get from a bond if you keep it until it pays back your money, including interest payments and price changes. For example, a YTM of 5% on a $1,000 bond means you might earn $50 a year until it's due. It helps you compare bonds to see which gives the best return, but rates can change over time. We'll explore more as you learn!",
       practiceQuestion: {
@@ -151,7 +170,8 @@ export const metricContent: MetricContent = {
     }
   },
   couponRate: {
-    Income: {
+    category: 'Income',
+    content: {
       overview: "Coupon rate shows the yearly interest a bond pays, helping you see the income you'll get while holding it.",
       details: "Coupon rate is the yearly interest a bond pays, shown as a percentage of its starting value. For example, a $1,000 bond with a 4% coupon rate pays $40 each year in interest. It tells you how much steady income you'll get from the bond, which is useful if you want regular payments. The rate stays the same until the bond is due, but market changes might affect its price. We'll guide you as you go!",
       practiceQuestion: {
@@ -163,7 +183,8 @@ export const metricContent: MetricContent = {
     }
   },
   aum: {
-    'ETF Liquidity': {
+    category: 'ETF Liquidity',
+    content: {
       overview: "Assets Under Management (AUM) shows the total value of a fund, helping you see its size and stability.",
       details: "Assets Under Management (AUM) is the total money invested in a fund, showing how big it is. For example, a fund with $500 million AUM is larger than one with $50 million, often meaning it's more stable and easier to trade. A bigger AUM can mean lower costs and better access to your money, but very large funds might be less flexible. Use this to pick a fund that fits your needs. Let's explore more as you go!",
       practiceQuestion: {
@@ -175,7 +196,8 @@ export const metricContent: MetricContent = {
     }
   },
   tradingVolume: {
-    'ETF Liquidity': {
+    category: 'ETF Liquidity',
+    content: {
       overview: "Trading volume shows how many shares of a fund are bought and sold daily, helping you see how easy it is to trade.",
       details: "Trading volume measures how many shares of a fund people buy and sell each day. A fund with 1 million shares traded daily is easier to buy or sell than one with 100,000 shares, because more people are trading it. High trading volume often means lower costs when you trade, as it's more active. Use this to pick a fund you can trade without delays. We'll guide you further as you learn!",
       practiceQuestion: {
@@ -187,7 +209,8 @@ export const metricContent: MetricContent = {
     }
   },
   capRate: {
-    Valuation: {
+    category: 'Valuation',
+    content: {
       overview: "Cap rate shows the yearly return you might get from a real estate investment, helping you see its value.",
       details: "Cap rate, or capitalization rate, measures the yearly return from a real estate property based on its income and value. It's the income after expenses divided by the property's price. For example, if a property makes $10,000 a year after expenses and costs $100,000, the cap rate is 10%. A higher cap rate might mean a better return but could also mean more risk. Use it to compare properties and see if the return fits your goals. We'll guide you as you learn!",
       practiceQuestion: {
@@ -199,7 +222,8 @@ export const metricContent: MetricContent = {
     }
   },
   cashFlow: {
-    Income: {
+    category: 'Income',
+    content: {
       overview: "Cash flow shows the money you have left from a real estate investment each year, helping you see your actual income.",
       details: "Cash flow is the money you keep from a real estate property each year after paying all expenses, like maintenance or loans. For example, if a property earns $30,000 in rent but has $20,000 in expenses, your cash flow is $10,000. Positive cash flow means you're earning money, while negative means you're losing. It helps you understand if the property will bring in steady income. Let's explore more as you go!",
       practiceQuestion: {
@@ -211,7 +235,8 @@ export const metricContent: MetricContent = {
     }
   },
   noi: {
-    Income: {
+    category: 'Income',
+    content: {
       overview: "Net Operating Income (NOI) shows the yearly income a real estate property makes after expenses, helping you see its earning power.",
       details: "Net Operating Income (NOI) is the yearly income from a real estate property after subtracting operating expenses, like repairs or taxes, but before loan payments. For example, if a property earns $50,000 in rent and has $15,000 in expenses, the NOI is $35,000. It helps you see how much the property earns on its own, which is useful for comparing investments. Higher NOI means stronger earnings. We'll guide you further as you learn!",
       practiceQuestion: {
@@ -223,7 +248,8 @@ export const metricContent: MetricContent = {
     }
   },
   accessibility: {
-    Liquidity: {
+    category: 'Liquidity',
+    content: {
       overview: "Accessibility shows how easily you can get your money from a cash investment, helping you see how quickly you can use it.",
       details: "Accessibility measures how fast you can take your money out of a cash investment, like a savings account or money market fund. For example, a savings account might let you withdraw money anytime, while a certificate of deposit (CD) might lock it for a year. High accessibility means you can use your money quickly, but it might earn less. It helps you pick a cash option that fits your needs for quick access. We'll guide you as you learn!",
       practiceQuestion: {
@@ -235,7 +261,8 @@ export const metricContent: MetricContent = {
     }
   },
   interestRate: {
-    Return: {
+    category: 'Return',
+    content: {
       overview: "Interest rate shows the yearly gain you get from a cash investment, helping you see how much it will grow.",
       details: "Interest rate is the yearly percentage you earn on a cash investment, like a savings account or certificate of deposit (CD). For example, a $10,000 investment with a 2% interest rate earns $200 a year. It helps you understand how much your money will grow over time, but rates can change with the market. Higher rates mean more gains, but they might come with restrictions. We'll explore more as you go!",
       practiceQuestion: {
@@ -247,7 +274,8 @@ export const metricContent: MetricContent = {
     }
   },
   inflationRisk: {
-    Risk: {
+    category: 'Risk',
+    content: {
       overview: "Inflation risk shows how much a cash investment might lose value over time, helping you understand its real growth.",
       details: "Inflation risk measures the chance that a cash investment's gains won't keep up with rising prices, called inflation. For example, if your investment earns 2% a year but inflation is 3%, your money's value drops by 1% in real terms. It helps you see if your cash will still buy as much in the future. Higher inflation means more risk of losing value. Let's learn more about protecting your money as we go!",
       practiceQuestion: {
@@ -259,7 +287,8 @@ export const metricContent: MetricContent = {
     }
   },
   dividendYield: {
-    Income: {
+    category: 'Income',
+    content: {
       overview: "Dividend yield shows how much a company pays in dividends compared to its stock price, helping you see your potential income.",
       details: "Dividend yield is the yearly dividend payment divided by the stock's price, shown as a percentage. For example, if a stock costs $100 and pays $3 in yearly dividends, the yield is 3%. A higher yield means more income, but it's important to check if the company can keep paying dividends. Some companies, like utilities, often have higher yields (e.g., 4-5%), while growth companies might pay less or no dividends. Use this to find stocks that provide steady income. We'll guide you as you learn!",
       practiceQuestion: {

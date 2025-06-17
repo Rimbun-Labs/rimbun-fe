@@ -8,12 +8,15 @@ import { Icons } from "@/components/ui/icons";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
 import { userService } from '@/lib/api/userService';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { AlertCircle } from 'lucide-react';
 
 const Signup = () => {
   const { signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -25,13 +28,10 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Passwords do not match",
-      });
+      setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
@@ -40,13 +40,12 @@ const Signup = () => {
       // First, sign up with Supabase
       const supabaseUser = await signUp(formData.email, formData.password, formData.fullName);
 
-      console.log("ssss",supabaseUser)
       // Then, register the user in our backend
       await userService.registerUser({
         displayName: formData.fullName,
         email: supabaseUser.email,
-        username: supabaseUser.email,
-        authproviderId:supabaseUser.id
+        username: formData.username,
+        authproviderId: supabaseUser.id
       });
 
       toast({
@@ -56,10 +55,12 @@ const Signup = () => {
 
       navigate('/home');
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create account";
+      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create account",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -68,14 +69,17 @@ const Signup = () => {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await signInWithGoogle();
       navigate('/home');
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
+      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to sign in with Google",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -119,14 +123,29 @@ const Signup = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
+              {error && (
+                <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-3 rounded-md">
+                  <AlertCircle className="h-4 w-4" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
               >
-                <Icons.google className="mr-2 h-4 w-4" />
-                Continue with Google
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" variant="default" />
+                    <span>Signing in with Google...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Icons.google className="mr-2 h-4 w-4" />
+                    Continue with Google
+                  </>
+                )}
               </Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -205,7 +224,14 @@ const Signup = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create account"}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" variant="default" />
+                      <span>Creating account...</span>
+                    </div>
+                  ) : (
+                    "Create account"
+                  )}
                 </Button>
               </form>
             </CardContent>

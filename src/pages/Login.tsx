@@ -7,11 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Icons } from "@/components/ui/icons";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { AlertCircle } from 'lucide-react';
 
 const Login = () => {
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,15 +26,18 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       await signInWithEmail(formData.email, formData.password);
       navigate(from, { replace: true });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
+      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to sign in",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -40,14 +46,17 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await signInWithGoogle();
       navigate(from, { replace: true });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
+      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to sign in with Google",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -91,14 +100,29 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
+              {error && (
+                <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-3 rounded-md">
+                  <AlertCircle className="h-4 w-4" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
               >
-                <Icons.google className="mr-2 h-4 w-4" />
-                Continue with Google
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" variant="default" />
+                    <span>Signing in with Google...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Icons.google className="mr-2 h-4 w-4" />
+                    Continue with Google
+                  </>
+                )}
               </Button>
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -141,7 +165,14 @@ const Login = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" variant="default" />
+                      <span>Signing in...</span>
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </form>
             </CardContent>

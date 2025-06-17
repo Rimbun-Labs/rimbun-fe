@@ -1,10 +1,17 @@
-export type QuestionType = 'number' | 'multiple_choice' | 'select' | 'boolean' | 'single_text';
+export type QuestionType = 'number' | 'multiple_choice' | 'select' | 'boolean' | 'single_text' | 'slider';
+
+export interface SliderConfig {
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  format: 'currency' | 'percentage' | 'number';
+}
 
 export interface Question {
   id: string;
+  text: string;
   questionType: QuestionType;
-  questionText: string;
-  whyWeAsk: string;
   category: {
     id: string;
     name: string;
@@ -14,11 +21,11 @@ export interface Question {
     id: string;
     optionLabel: string;
   }>;
-  visibilityRules?: {
-    showToLevels: string[];
-  };
   required: boolean;
-  placeholder?: string;
+  answer?: {
+    value: number | string | boolean;
+    text?: string;
+  };
 }
 
 export interface UserAnswer {
@@ -50,6 +57,9 @@ export interface AssessmentResult {
       financialGoal?: string;
       monthlyIncome?: string;
       totalSavings?: string;
+      targetAmount?: number;
+      monthlyInvestable?: number;
+      investmentHorizon?: number;
     };
 
     // Optional Confidence Metrics (all numbers 0-1)
@@ -60,6 +70,7 @@ export interface AssessmentResult {
       decisionStyleConfidence: number;
       personalityConfidence: number;
       riskCapacityConfidence: number;
+      investmentProfileConfidence: number;
     };
 
     // Final Results
@@ -140,34 +151,67 @@ export interface QuestionsWithAnswersResponse {
   }>;
 }
 
-export interface RecommendationResult {
-  assetAllocations: Record<string, number>;
-  recommendedMetrics: {
-    [key: string]: {
-      weight: number;
-      description: string;
+export interface AssetAllocations {
+  equities: number;
+  bonds: number;
+  realEstate: number;
+  cash: number;
+}
+
+export interface RecommendationResponse {
+  recommendationCalculationData: {
+    riskAssessment: number;
+    financialKnowledge: number;
+    investmentHorizon: number;
+    liquidityNeeds: number;
+    incomeNeeds: number;
+    behavioralStyle: number;
+    investmentGoal: AssetAllocations;
+    goalGapInsights?: {
+      currentGap: number;
+      requiredMonthlySavings: number;
+      currentSavingsRate: number;
+      projectedTimeToGoal: number;
+      goalAchievabilityScore: number;
+      recommendations: {
+        primaryAction: 'increase_savings' | 'adjust_strategy' | 'extend_timeline' | 'on_track';
+        message: string;
+        suggestedMonthlySavings?: number;
+        suggestedStrategy?: 'more_aggressive' | 'more_conservative' | 'maintain';
+      };
+      investmentScenarios?: {
+        conservative: {
+          name: string;
+          baseAmount: number;
+          monthlyContribution: number;
+          projectedAmount: number;
+          timeToGoal: number;
+          isRealistic: boolean;
+          requiredMonthlySavings?: number;
+          currentSavingsRate?: number;
+        };
+        aggressive: {
+          name: string;
+          baseAmount: number;
+          monthlyContribution: number;
+          projectedAmount: number;
+          timeToGoal: number;
+          isRealistic: boolean;
+          requiredMonthlySavings?: number;
+          currentSavingsRate?: number;
+        };
+      };
     };
   };
-}
-
-export interface SaveUserResponsesBulkRequest {
-  responseGroupId: string;
-  responses: Array<{
-    questionId: string;
-    answer: {
-      value?: string;
-      selectedOption?: { id: string };
-      answerNumber?: number;
-      answerBoolean?: boolean;
-    };
-  }>;
-}
-
-export interface SaveUserResponseRequest {
-  responseGroupId: string;
-  questionId: string;
-  answer: string; // Enforce string type here
-  metadata?: Record<string, any>;
+  initialAssetClassScores: AssetAllocations;
+  adjustedAllocations: AssetAllocations;
+  recommendedMetrics: RecommendedMetricsWithWeights;
+  diversificationAnalysis?: {
+    diversificationScore: number;      // 0-1
+    riskAdjustedVolatility: number;
+    recommendations: string[];
+    correlationMatrix: Record<string, Record<string, number>>;
+  };
 }
 
 export type AssessmentResults = AssessmentResult;
@@ -187,32 +231,22 @@ export interface UserSession {
 
 import { RecommendedMetricsWithWeights } from './metrics';
 
-export interface RecommendationResponse {
-  recommendationCalculationData: {
-    riskAssessment: number;
-    financialKnowledge: number;
-    investmentHorizon: number;
-    liquidityNeeds: number;
-    incomeNeeds: number;
-    behavioralStyle: number;
-    investmentGoal: {
-      EQUITIES: number;
-      BONDS: number;
-      REAL_ESTATE: number;
-      CASH: number;
+export interface SaveUserResponsesBulkRequest {
+  responseGroupId: string;
+  responses: Array<{
+    questionId: string;
+    answer: {
+      value?: string;
+      selectedOption?: { id: string };
+      answerNumber?: number;
+      answerBoolean?: boolean;
     };
-  };
-  initialAssetClassScores: {
-    EQUITIES: number;
-    BONDS: number;
-    REAL_ESTATE: number;
-    CASH: number;
-  };
-  adjustedAllocations: {
-    EQUITIES: number;
-    BONDS: number;
-    REAL_ESTATE: number;
-    CASH: number;
-  };
-  recommendedMetrics: RecommendedMetricsWithWeights;
+  }>;
+}
+
+export interface SaveUserResponseRequest {
+  responseGroupId: string;
+  questionId: string;
+  answer: string; // Enforce string type here
+  metadata?: Record<string, any>;
 }

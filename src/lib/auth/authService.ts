@@ -61,8 +61,19 @@ export const authService = {
   },
 
   async signOut(): Promise<{ error: Error | null }> {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear any local storage or session data
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('supabase.auth.token');
+      
+      return { error: null };
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      return { error: error as Error };
+    }
   },
 
   async getCurrentUser(): Promise<User | null> {

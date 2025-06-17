@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { UserAnswer, Question } from '@/lib/api/types/assessment';
 import { useAssessmentProgress } from '@/hooks/useAssessmentProgress';
 import { useAssessmentAnswers } from '@/hooks/useAssessmentAnswers';
-import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
 import { AssessmentError } from '@/components/assessment/AssessmentError';
 import { AssessmentContainer } from '@/components/assessment/AssessmentContainer';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
@@ -15,6 +14,7 @@ import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { useSession } from '@/contexts/SessionContext';
 import { toast } from 'sonner';
 import { getRecommendations } from '@/lib/api/recommendationApi';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
@@ -79,7 +79,6 @@ const Assessment: React.FC = () => {
       while (attempts < maxAttempts) {
         try {
           const result = await getAssessmentResults(sessionId);
-          console.log('Received results:', result);
           
           // Validate required fields
           if (!result?.scoreData?.finalScore) {
@@ -88,7 +87,6 @@ const Assessment: React.FC = () => {
           
           return result;
         } catch (error) {
-          console.error(`Attempt ${attempts + 1} failed:`, error);
           attempts++;
           if (attempts === maxAttempts) throw error;
           // Wait before retrying
@@ -105,8 +103,6 @@ const Assessment: React.FC = () => {
   // Handle results success in useEffect
   useEffect(() => {
     if (results && sessionId) {
-      console.log('Setting session with results:', results);
-      
       // Set session with the nested structure
       setSession({
         id: sessionId,
@@ -135,7 +131,6 @@ const Assessment: React.FC = () => {
   // Handle errors in useEffect
   useEffect(() => {
     if (resultsError) {
-      console.error('Failed to fetch results:', resultsError);
       toast.error('Failed to load results. Please try again.');
     }
   }, [resultsError]);
@@ -175,7 +170,6 @@ const Assessment: React.FC = () => {
     
     const currentQuestion = questions[currentQuestionIndex];
     
-    console.log("userAnswer", answer)
     // Process and save the answer
     const answerResult = await handleAnswer(answer, currentQuestion);
     
@@ -200,7 +194,12 @@ const Assessment: React.FC = () => {
   }
   
   if (createSessionMutation.isPending || questionsLoading) {
-    return <AssessmentLoading />;
+    return <LoadingState 
+      variant="expanded"
+      showTitle
+      showSubtitle
+      lines={3}
+    />;
   }
 
   if (questionsError) {
@@ -217,11 +216,13 @@ const Assessment: React.FC = () => {
   if (isComplete) {
     if (resultsLoading) {
       return (
-        <div className="container mx-auto py-8 px-4">
-          <h1 className="text-3xl font-bold mb-8 text-center">Processing Your Results</h1>
-          <div className="max-w-3xl mx-auto space-y-4">
-            <AssessmentLoading />
-          </div>
+        <div className="container max-w-4xl py-8">
+          <LoadingState 
+            variant="expanded"
+            showTitle
+            showSubtitle
+            lines={3}
+          />
         </div>
       );
     }
@@ -247,7 +248,12 @@ const Assessment: React.FC = () => {
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">Redirecting to Dashboard...</h1>
         <div className="max-w-3xl mx-auto space-y-4">
-          <AssessmentLoading />
+          <LoadingState 
+            variant="expanded"
+            showTitle
+            showSubtitle
+            lines={3}
+          />
         </div>
       </div>
     );

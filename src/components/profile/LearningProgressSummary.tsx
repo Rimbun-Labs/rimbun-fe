@@ -1,31 +1,60 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BookOpen, CheckCircle } from 'lucide-react';
+import { BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Badge } from '@/components/ui/badge';
 
 const LearningProgressSummary = () => {
-  const { profile, isLoading } = useProfile();
+  const { profile, isLoading, error } = useProfile();
   
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-64" />
+          <CardTitle>Learning Progress</CardTitle>
+          <CardDescription>Track your financial education journey</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-20 w-full" />
+          <div className="flex flex-col items-center justify-center py-8">
+            <LoadingSpinner size="lg" variant="primary" />
+            <p className="text-sm text-muted-foreground mt-4">Loading your learning progress...</p>
+          </div>
         </CardContent>
-        <CardFooter>
-          <Skeleton className="h-10 w-full" />
-        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Learning Progress</CardTitle>
+          <CardDescription>Track your financial education journey</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center text-center space-y-4 py-8">
+            <div className="p-3 rounded-full bg-destructive/10">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Error Loading Progress</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {error || "Failed to load learning progress"}
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     );
   }

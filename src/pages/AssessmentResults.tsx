@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { AssessmentResult } from '@/lib/api/types/assessment';
-import { AssessmentLoading } from '@/components/assessment/AssessmentLoading';
-import { AssessmentError } from '@/components/assessment/AssessmentError';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -25,7 +24,16 @@ const AssessmentResults: React.FC = () => {
   };
 
   if (resultsLoading) {
-    return <AssessmentLoading />;
+    return (
+      <div className="container max-w-4xl py-8">
+        <LoadingState 
+          variant="expanded"
+          showTitle
+          showSubtitle
+          lines={3}
+        />
+      </div>
+    );
   }
 
   if (resultsError || !sessionId) {

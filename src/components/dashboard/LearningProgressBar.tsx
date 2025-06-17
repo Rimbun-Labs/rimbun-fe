@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -25,10 +24,12 @@ const LearningProgressBar: React.FC<LearningProgressBarProps> = ({
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>Learning Progress</CardTitle>
-            <CardDescription>Track your education journey</CardDescription>
+            <CardTitle className="text-foreground">Learning Progress</CardTitle>
+            <CardDescription className="text-muted-foreground dark:text-[hsl(var(--card-description))]">
+              Track your education journey
+            </CardDescription>
           </div>
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
             <BookOpen className="h-5 w-5 text-primary" />
           </div>
         </div>
@@ -42,11 +43,16 @@ const LearningProgressBar: React.FC<LearningProgressBarProps> = ({
         ) : (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Progress</span>
-              <span className="font-medium">{progressPercentage}%</span>
+              <span className="text-sm text-muted-foreground dark:text-[hsl(var(--progress-text))]">
+                Progress
+              </span>
+              <span className="font-medium text-foreground">{progressPercentage}%</span>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground pt-1">
+            <Progress 
+              value={progressPercentage} 
+              className="h-2 bg-muted dark:bg-muted/50" 
+            />
+            <div className="flex justify-between text-xs text-muted-foreground dark:text-[hsl(var(--progress-text))] pt-1">
               <span>{completedModules} of {totalModules} modules completed</span>
               <span>{totalModules - completedModules} remaining</span>
             </div>

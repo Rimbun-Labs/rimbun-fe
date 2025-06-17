@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ResponsivePie } from '@nivo/pie';
 import { Skeleton } from "@/components/ui/skeleton";
-import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
+import { RecommendedMetricsWithWeights, AssetClass } from '@/lib/api/types/metrics';
+import { getAssetClassDisplayName, getMetricDisplayName } from '@/lib/constants/displayNames';
 
 interface AssetAllocations {
-  EQUITIES: number;
-  BONDS: number;
-  REAL_ESTATE: number;
-  CASH: number;
+  equities: number;
+  bonds: number;
+  realEstate: number;
+  cash: number;
 }
 
 interface PortfolioAllocationProps {
@@ -40,7 +41,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
 
   const data = Object.entries(allocations).map(([id, value]) => ({
     id,
-    label: id,
+    label: getAssetClassDisplayName(id as AssetClass),
     value: value || 0,
     color: getAssetColor(id)
   }));
@@ -78,21 +79,39 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
           <div className="h-[400px]">
             <ResponsivePie
               data={data}
-              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
               innerRadius={0.5}
               padAngle={0.7}
               cornerRadius={3}
               activeOuterRadiusOffset={8}
-              colors={{ scheme: 'category10' }}
               borderWidth={1}
               borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-              enableArcLinkLabels={true}
               arcLinkLabelsSkipAngle={10}
               arcLinkLabelsTextColor="#333333"
               arcLinkLabelsThickness={2}
               arcLinkLabelsColor={{ from: 'color' }}
               arcLabelsSkipAngle={10}
               arcLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
+              defs={[
+                {
+                  id: 'dots',
+                  type: 'patternDots',
+                  background: 'inherit',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  size: 4,
+                  padding: 1,
+                  stagger: true
+                },
+                {
+                  id: 'lines',
+                  type: 'patternLines',
+                  background: 'inherit',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  rotation: -45,
+                  lineWidth: 6,
+                  spacing: 10
+                }
+              ]}
               legends={[
                 {
                   anchor: 'bottom',
@@ -116,16 +135,16 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
           <div className="space-y-4">
             {recommendedMetrics && Object.entries(recommendedMetrics).map(([assetClass, metrics]) => (
               <div key={assetClass} className="space-y-2">
-                <h4 className="font-medium text-sm">{assetClass}</h4>
+                <h4 className="font-medium text-sm">{getAssetClassDisplayName(assetClass as AssetClass)}</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(metrics).map(([key, metric]) => (
                     <div key={key} className="text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{metric.name}</span>
+                        <span className="font-medium">{getMetricDisplayName(key)}</span>
                         <span className="text-primary">{(metric.weight * 100).toFixed(0)}%</span>
                       </div>
                       <p className="text-muted-foreground text-xs mt-0.5">
-                        {metric.category} - {metric.priority}
+                        {metric.description}
                       </p>
                     </div>
                   ))}
@@ -141,13 +160,13 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
 
 const getAssetColor = (assetClass: string): string => {
   switch (assetClass) {
-    case 'EQUITIES':
+    case 'equities':
       return '#4f46e5';
-    case 'BONDS':
+    case 'bonds':
       return '#10b981';
-    case 'REAL_ESTATE':
+    case 'realEstate':
       return '#f59e0b';
-    case 'CASH':
+    case 'cash':
       return '#6b7280';
     default:
       return '#94a3b8';

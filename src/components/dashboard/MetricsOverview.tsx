@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -36,26 +35,29 @@ const MetricCard: React.FC<MetricCardProps> = ({
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
-              <div className={cn("rounded-full p-2 bg-primary/10 text-primary")}>
+              <div className={cn("rounded-full p-2 bg-primary/10 text-primary dark:bg-primary/20")}>
                 {icon}
               </div>
-              <p className="text-sm font-medium">{title}</p>
+              <p className="text-sm font-medium text-foreground">{title}</p>
             </div>
             {loading ? (
               <Skeleton className="h-8 w-24 mt-1" />
             ) : (
-              <h3 className="text-2xl font-bold mt-2">{formatter(value)}</h3>
+              <h3 className="text-2xl font-bold mt-2 text-foreground">{formatter(value)}</h3>
             )}
           </div>
         </div>
         
         {progressValue !== undefined && !loading && (
           <div className="mt-2">
-            <Progress value={progressValue} className="h-1.5" />
+            <Progress 
+              value={progressValue} 
+              className="h-1.5 bg-muted dark:bg-muted/50" 
+            />
           </div>
         )}
         
-        <p className="text-xs text-muted-foreground mt-3">
+        <p className="text-xs text-muted-foreground dark:text-[hsl(var(--card-description))] mt-3">
           {description}
         </p>
       </CardContent>
@@ -98,7 +100,7 @@ const MetricsOverview: React.FC<MetricsOverviewProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <h2 className="text-2xl font-bold mb-4">Your Learning Journey</h2>
+      <h2 className="text-2xl font-bold mb-4 text-foreground">Your Learning Journey</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Learning Progress"

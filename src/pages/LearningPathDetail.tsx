@@ -27,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useQuery } from '@tanstack/react-query';
 import { getRecommendations } from '@/lib/api/recommendationApi';
-import MetricLearningSection from '@/components/learning/metrics/MetricLearningSection';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -37,12 +36,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ArrowLeftIcon, ShareIcon } from 'lucide-react';
 import MetricOverviewSection from '@/components/learning/metrics/MetricOverviewSection';
 import GuidedMetricLearning from '@/components/learning/metrics/GuidedMetricLearning';
-
-interface MetricLearningSectionProps {
-  assetClass: string;
-  onBack: () => void;
-  onComplete: () => void;
-}
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import QuizSection from '@/components/learning/quiz/QuizSection';
 
 const LearningPathDetail: React.FC = () => {
   const { sessionId, assetClass } = useParams<{ sessionId: string; assetClass: string }>();
@@ -57,6 +52,9 @@ const LearningPathDetail: React.FC = () => {
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [completedMetrics, setCompletedMetrics] = useState<string[]>([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [showFinalActions, setShowFinalActions] = useState(false);
+  const [isFullyCompleted, setIsFullyCompleted] = useState(false);
   
   const { data: recommendations } = useQuery({
     queryKey: ['recommendations', sessionId],
@@ -99,89 +97,51 @@ const LearningPathDetail: React.FC = () => {
 
   // Load saved progress on mount
   useEffect(() => {
-    const savedProgress = localStorage.getItem(`learning-path-${assetClass}`);
-    console.log('Loading saved progress:', savedProgress);
+    const savedProgress = localStorage.getItem(`learning-path-${sessionId}-${assetClass}`);
     if (savedProgress) {
       try {
         const { completedSections: savedCompleted, lastViewedSection } = JSON.parse(savedProgress);
-        console.log('Parsed saved progress:', { savedCompleted, lastViewedSection });
         setCompletedSections(savedCompleted);
         if (lastViewedSection !== undefined) {
           setExpandedSections([lastViewedSection]);
         }
       } catch (error) {
-        console.error('Error parsing saved progress:', error);
+        toast.error("Error loading saved progress");
       }
     }
-  }, [assetClass]); // Only run on mount and when assetClass changes
+  }, [assetClass, sessionId]);
 
   // Save progress when it changes
   useEffect(() => {
     const saveProgress = () => {
-      console.log('Saving progress:', {
-        completedSections,
-        lastViewedSection: expandedSections[0]
-      });
-      localStorage.setItem(`learning-path-${assetClass}`, JSON.stringify({
+      localStorage.setItem(`learning-path-${sessionId}-${assetClass}`, JSON.stringify({
         completedSections,
         lastViewedSection: expandedSections[0]
       }));
     };
 
-    // Only save if we have actual changes
     if (completedSections.length > 0 || expandedSections.length > 0) {
       saveProgress();
     }
 
     window.addEventListener('beforeunload', saveProgress);
     return () => window.removeEventListener('beforeunload', saveProgress);
-  }, [assetClass, completedSections, expandedSections]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        const currentIndex = expandedSections[0];
-        const nextIndex = e.key === 'ArrowDown' 
-          ? Math.min(currentIndex + 1, totalSections - 1)
-          : Math.max(currentIndex - 1, 0);
-        
-        setExpandedSections([nextIndex]);
-        document.getElementById(`section-${nextIndex}`)?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [expandedSections, totalSections]);
+  }, [assetClass, sessionId, completedSections, expandedSections]);
   
   const toggleSection = (index: number) => {
-    console.log('Toggle section called for index:', index);
-    console.log('Current expanded sections:', expandedSections);
     setExpandedSections(prev => {
       const newSections = prev.includes(index) 
         ? prev.filter(i => i !== index)
         : [...prev, index];
-      console.log('New expanded sections:', newSections);
       return newSections;
     });
   };
 
   const toggleSectionCompletion = (index: number) => {
-    console.log('Toggling completion for section:', index);
-    console.log('Current completed sections:', completedSections);
-    
     setCompletedSections(prev => {
       const newCompleted = prev.includes(index)
         ? prev.filter(i => i !== index)
         : [...prev, index];
-      
-      console.log('New completed sections:', newCompleted);
-      console.log('Total sections:', totalSections);
       
       if (!prev.includes(index)) {
         setLastCompletedSection(index);
@@ -189,22 +149,30 @@ const LearningPathDetail: React.FC = () => {
           description: "Great job! Keep up the good work.",
         });
 
-        // Check if all sections for this asset class are completed
         if (newCompleted.length === totalSections) {
-          console.log('All sections completed!');
           setShowCompletionMessage(true);
           toast.success("Asset Class Completed! 🎉", {
             description: "Ready to learn about the key metrics for this asset class?",
           });
         }
       } else {
-        // If uncompleting a section, hide the completion message
-        setShowCompletionMessage(false);
+        if (newCompleted.length < totalSections) {
+          setShowCompletionMessage(false);
+        }
       }
       
       return newCompleted;
     });
   };
+
+  // Add effect to check completion on mount and when sections change
+  useEffect(() => {
+    if (completedSections.length === totalSections && totalSections > 0) {
+      setShowCompletionMessage(true);
+    } else {
+      setShowCompletionMessage(false);
+    }
+  }, [completedSections.length, totalSections]);
 
   const toggleBookmark = (index: number) => {
     setBookmarkedSections(prev =>
@@ -245,44 +213,108 @@ const LearningPathDetail: React.FC = () => {
     setSelectedMetric(null);
   };
 
-  const handleCompleteMetric = (metricName: string) => {
-    if (!completedMetrics.includes(metricName)) {
-      const newCompletedMetrics = [...completedMetrics, metricName];
-      setCompletedMetrics(newCompletedMetrics);
-      
-      // Check if all metrics for current asset class are completed
-      const allMetricsCompleted = content.keyMetrics.every(metric => 
-        newCompletedMetrics.includes(metric)
-      );
+  // Add state persistence for metrics with validation
+  useEffect(() => {
+    // Only proceed if we have valid recommendations (meaning assessment is completed)
+    if (!recommendations?.recommendedMetrics[assetClass]) {
+      console.log('No recommendations found for asset class - new user or invalid session:', {
+        sessionId,
+        assetClass,
+        hasRecommendations: !!recommendations,
+        recommendedMetrics: recommendations?.recommendedMetrics[assetClass]
+      });
+      // Clear any existing progress for this session
+      localStorage.removeItem(`metrics-progress-${sessionId}-${assetClass}`);
+      setCompletedMetrics([]);
+      setShowFinalActions(false);
+      return;
+    }
 
-      if (allMetricsCompleted) {
-        // Find next recommended asset class
-        const nextAssetClass = Object.entries(recommendations?.adjustedAllocations || {})
-          .filter(([assetClass, allocation]) => 
-            allocation > 0 && 
-            assetClass.toLowerCase() !== assetClass?.toLowerCase()
-          )
-          .sort((a, b) => b[1] - a[1])[0];
-
-        if (nextAssetClass) {
-          toast.success("Congratulations! 🎉", {
-            description: `You've completed ${assetClass}! Moving on to ${nextAssetClass[0].toLowerCase()}...`,
-          });
-          // Navigate to next asset class
-          navigate(`/learning-path/${sessionId}/${nextAssetClass[0].toLowerCase()}`);
-        } else {
-          toast.success("Congratulations! 🎉", {
-            description: "You've completed all recommended asset classes!",
-          });
-          // Navigate to learning library
-          navigate(`/learning-path/${sessionId}`);
-        }
-      } else {
-        toast.success("Metric completed! 🎉", {
-          description: "Great job understanding this metric!",
+    // Only load saved progress if we have valid recommendations
+    const savedProgress = localStorage.getItem(`metrics-progress-${sessionId}-${assetClass}`);
+    if (savedProgress) {
+      try {
+        const { completedMetrics: savedMetrics, showFinalActions: savedFinalActions } = JSON.parse(savedProgress);
+        // Verify the saved metrics match the recommended metrics
+        const recommendedMetrics = Object.keys(recommendations.recommendedMetrics[assetClass]);
+        const validMetrics = savedMetrics.filter(metric => recommendedMetrics.includes(metric));
+        
+        console.log('Validating saved metrics progress:', {
+          savedMetrics,
+          recommendedMetrics,
+          validMetrics,
+          isValid: validMetrics.length === savedMetrics.length
         });
+
+        setCompletedMetrics(validMetrics);
+        setShowFinalActions(savedFinalActions && validMetrics.length === recommendedMetrics.length);
+      } catch (error) {
+        console.error('Error loading metrics progress:', error);
+        // Clear invalid progress
+        localStorage.removeItem(`metrics-progress-${sessionId}-${assetClass}`);
+        setCompletedMetrics([]);
+        setShowFinalActions(false);
       }
     }
+  }, [assetClass, sessionId, recommendations]);
+
+  // Update handleMetricComplete to prevent duplicates and validate metrics
+  const handleMetricComplete = (metric: string) => {
+    console.log('Attempting to complete metric:', metric);
+    setCompletedMetrics(prev => {
+      // Only add if not already completed
+      if (prev.includes(metric)) {
+        console.log('Metric already completed:', metric);
+        return prev;
+      }
+
+      // Verify this is a valid metric for this asset class
+      const metricsForThisAssetClass = recommendations?.recommendedMetrics[assetClass] || {};
+      const availableMetrics = Object.keys(metricsForThisAssetClass);
+      
+      console.log('Validating metric:', {
+        metric,
+        assetClass,
+        availableMetrics,
+        hasRecommendations: !!recommendations,
+        recommendationsData: recommendations?.recommendedMetrics[assetClass]
+      });
+
+      if (!(metric in metricsForThisAssetClass)) {
+        console.error('Invalid metric for asset class:', { 
+          metric, 
+          assetClass, 
+          availableMetrics,
+          recommendationsData: recommendations?.recommendedMetrics[assetClass]
+        });
+        return prev;
+      }
+      
+      const newCompleted = [...prev, metric];
+      console.log('Updated completed metrics:', {
+        newCompleted,
+        totalCompleted: newCompleted.length,
+        totalAvailable: availableMetrics.length
+      });
+      
+      // Check if all metrics for current asset class are completed
+      const allMetricsCompleted = availableMetrics.every(m => newCompleted.includes(m));
+      
+      console.log('Metrics completion check:', {
+        metric,
+        availableMetrics,
+        newCompleted,
+        allMetricsCompleted,
+        assetClassCompleted: completedSections.length === totalSections
+      });
+      
+      // Only show final actions if asset class learning is also completed
+      const assetClassCompleted = completedSections.length === totalSections;
+      const shouldShowFinalActions = allMetricsCompleted && assetClassCompleted;
+      
+      setShowFinalActions(shouldShowFinalActions);
+      return newCompleted;
+    });
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -384,28 +416,40 @@ const LearningPathDetail: React.FC = () => {
     );
   };
 
-  // Add function to handle returning to asset classes
-  const handleBackToAssetClasses = () => {
+  // Add function to handle returning to learning paths list
+  const handleBackToLearningPaths = () => {
     navigate(`/learning-path/${sessionId}`);
   };
 
-  // Add console log to track completion state
-  useEffect(() => {
-    console.log('Completion state:', {
-      completedSections,
-      totalSections,
-      showCompletionMessage,
-      progressPercentage
-    });
-  }, [completedSections, totalSections, showCompletionMessage, progressPercentage]);
+  // Add function to handle returning to asset classes (for metrics view)
+  const handleBackToAssetClasses = () => {
+    // Hide metrics view and return to asset class learning
+    setShowQuiz(false);
+    setSelectedMetric(null);
+    setShowMetrics(false);
+  };
 
-  // Add effect to check completion on mount
-  useEffect(() => {
-    if (completedSections.length === totalSections) {
-      console.log('All sections already completed on mount');
-      setShowCompletionMessage(true);
-    }
-  }, [completedSections.length, totalSections]);
+  const handleGoToInvestmentExplorer = () => {
+    // Save current state before navigating
+    localStorage.setItem(`metrics-progress-${sessionId}-${assetClass}`, JSON.stringify({
+      completedMetrics,
+      showFinalActions
+    }));
+    navigate(`/investment-explorer/${sessionId}`, { replace: true });
+  };
+
+  const handleSectionClick = (index: number) => {
+    setExpandedSections([index]);
+    document.getElementById(`section-${index}`)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleBookmarkClick = (index: number) => {
+    toggleBookmark(index);
+  };
+
+  const handleCompletionClick = (index: number) => {
+    toggleSectionCompletion(index);
+  };
 
   const getCompletionMessage = () => {
     const baseMessage = {
@@ -465,36 +509,200 @@ const LearningPathDetail: React.FC = () => {
       }));
   };
 
+  // Update effect to check completion for current asset class only
+  useEffect(() => {
+    if (!recommendations?.recommendedMetrics[assetClass]) {
+      console.log('No recommendations found for asset class:', assetClass);
+      return;
+    }
+    
+    // Check completion for current asset class only
+    const assetClassCompleted = completedSections.length === totalSections;
+    const metricsForThisAssetClass = recommendations.recommendedMetrics[assetClass] || {};
+    const allMetricsForAssetClass = Object.keys(metricsForThisAssetClass);
+    
+    // Check if ALL metrics for this asset class are completed
+    const metricsCompleted = allMetricsForAssetClass.every(metric => 
+      completedMetrics.includes(metric)
+    );
+    
+    console.log('Completion Status:', {
+      assetClass,
+      assetClassCompleted,
+      totalSections,
+      completedSectionsCount: completedSections.length,
+      allMetricsForAssetClass,
+      completedMetrics,
+      metricsCompleted,
+      isFullyCompleted: assetClassCompleted && metricsCompleted
+    });
+    
+    // Update states based on current asset class completion
+    setIsFullyCompleted(assetClassCompleted && metricsCompleted);
+    setShowFinalActions(assetClassCompleted && metricsCompleted);
+  }, [completedSections, completedMetrics, totalSections, recommendations, assetClass]);
+
+  // Save metrics progress when it changes
+  useEffect(() => {
+    if (!recommendations?.recommendedMetrics[assetClass]) {
+      return; // Don't save if we don't have valid recommendations
+    }
+
+    if (completedMetrics.length > 0 || showFinalActions) {
+      const metricsToSave = completedMetrics.filter(metric => 
+        recommendations.recommendedMetrics[assetClass][metric]
+      );
+      
+      localStorage.setItem(`metrics-progress-${sessionId}-${assetClass}`, JSON.stringify({
+        completedMetrics: metricsToSave,
+        showFinalActions: showFinalActions && 
+          metricsToSave.length === Object.keys(recommendations.recommendedMetrics[assetClass]).length
+      }));
+    }
+  }, [completedMetrics, showFinalActions, assetClass, sessionId, recommendations]);
+
+  const handleStartQuiz = () => {
+    if (!recommendations?.recommendedMetrics[assetClass]) {
+      console.error('Cannot start quiz - no valid recommendations');
+      return;
+    }
+
+    // Save current state before showing quiz
+    const metricsToSave = completedMetrics.filter(metric => 
+      recommendations.recommendedMetrics[assetClass][metric]
+    );
+    
+    localStorage.setItem(`metrics-progress-${sessionId}-${assetClass}`, JSON.stringify({
+      completedMetrics: metricsToSave,
+      showFinalActions: showFinalActions && 
+        metricsToSave.length === Object.keys(recommendations.recommendedMetrics[assetClass]).length
+    }));
+    setShowQuiz(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="sticky top-0 z-50 bg-background border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBackToAssetClasses}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              <Button
+                variant="outline"
+                onClick={showMetrics ? handleBackToAssetClasses : handleBackToLearningPaths}
+                className="inline-flex items-center text-slate-600 hover:text-slate-900"
               >
-                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Back to Learning Paths
-              </button>
-              {showMetrics && (
-                <div className="flex items-center text-gray-500">
-                  <span className="mx-2">/</span>
-                  <span className="font-medium">Learning Metrics</span>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {showMetrics ? "Back to Asset Classes" : "Back to Learning Paths"}
+              </Button>
+              
+            <div className="flex items-center space-x-4">
+                {showCompletionMessage && !showMetrics && (
+              <Button
+                    onClick={handleStartMetrics}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    Learn Key Metrics
+                    <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+                )}
+              </div>
+            </div>
+
+            {/* What's Next section - only show when current asset class is fully completed */}
+            {isFullyCompleted && (
+              <div className="container mx-auto px-4 py-8">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl p-8 border border-emerald-200">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-emerald-100 rounded-xl">
+                          <Trophy className="h-6 w-6 text-emerald-600" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-slate-900">What's Next?</h2>
+                          <p className="text-slate-600">Continue your learning journey</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Investment Explorer */}
+                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                          <CardContent className="p-6">
+                            <div className="space-y-4">
+                              <div className="p-2 bg-blue-50 rounded-lg w-fit">
+                                <Sparkles className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-slate-900">Investment Explorer</h3>
+                                <p className="text-sm text-slate-600 mt-1">
+                                  Explore real investment opportunities using your new knowledge
+                                </p>
+                              </div>
+                              <Button
+                                onClick={handleGoToInvestmentExplorer}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                              >
+                                Start Exploring
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* More Learning Paths */}
+                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                          <CardContent className="p-6">
+                            <div className="space-y-4">
+                              <div className="p-2 bg-purple-50 rounded-lg w-fit">
+                                <BookOpen className="h-5 w-5 text-purple-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-slate-900">More Learning Paths</h3>
+                                <p className="text-sm text-slate-600 mt-1">
+                                  Explore other asset classes and expand your investment knowledge
+                                </p>
+                              </div>
+                              <Button
+                                onClick={() => navigate(`/learning-path/${sessionId}`)}
+                                className="w-full bg-purple-600 hover:bg-purple-700"
+                              >
+                                View Learning Paths
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Back to Learning Paths */}
+                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                          <CardContent className="p-6">
+                            <div className="space-y-4">
+                              <div className="p-2 bg-slate-50 rounded-lg w-fit">
+                                <ArrowLeft className="h-5 w-5 text-slate-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-slate-900">Back to Learning Paths</h3>
+                                <p className="text-sm text-slate-600 mt-1">
+                                  Return to your learning dashboard
+                                </p>
+                              </div>
+                              <Button
+                                onClick={handleBackToLearningPaths}
+                                className="w-full bg-slate-600 hover:bg-slate-700"
+                              >
+                                Go Back
+                                <ArrowLeft className="ml-2 h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={shareProgress}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <ShareIcon className="h-4 w-4 mr-2" />
-                Share Progress
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -513,79 +721,47 @@ const LearningPathDetail: React.FC = () => {
                 Back to Overview
               </Button>
               <GuidedMetricLearning
-                metrics={content.keyMetrics.reduce((acc, metric) => {
-                  const recommendedMetric = recommendations?.recommendedMetrics[assetClass]?.[metric];
+                metrics={{
+                  [selectedMetric]: {
+                    name: selectedMetric,
+                    category: metricContent[selectedMetric]?.category || 'Growth',
+                    weight: recommendations?.recommendedMetrics[assetClass]?.[selectedMetric]?.weight || 1,
+                    description: recommendations?.recommendedMetrics[assetClass]?.[selectedMetric]?.description || '',
+                    content: metricContent[selectedMetric]?.content
+                  }
+                }}
+                assetClass={assetClass || ''}
+                onBack={handleBackToOverview}
+                onComplete={() => {
+                  handleMetricComplete(selectedMetric);
+                  handleBackToOverview();
+                }}
+                sessionId={sessionId}
+              />
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <MetricOverviewSection
+                metrics={Object.entries(recommendations?.recommendedMetrics[assetClass] || {}).reduce((acc, [metric, recommendedMetric]) => {
                   const metricInfo = metricContent[metric];
-                  const category = metricInfo ? Object.keys(metricInfo)[0] as MetricCategory : 'Growth';
+                  const category = metricInfo?.category || 'Growth';
                   
                   return {
                     ...acc,
                     [metric]: {
                       name: metric,
                       category,
-                      weight: recommendedMetric?.weight || 1,
-                      priority: recommendedMetric?.priority || 'Secondary'
+                      weight: recommendedMetric.weight,
+                      description: recommendedMetric.description,
+                      content: metricInfo?.content
                     }
                   };
                 }, {})}
                 assetClass={assetClass || ''}
-                onBack={handleBackToOverview}
-                onComplete={() => {
-                  // Check if all metrics are completed
-                  const allMetricsCompleted = content.keyMetrics.every(metric => 
-                    completedMetrics.includes(metric)
-                  );
-
-                  if (allMetricsCompleted) {
-                    // Find next recommended asset class
-                    const allocations = recommendations?.recommendedMetrics || {};
-                    const nextAssetClass = Object.entries(allocations)
-                      .filter(([class_, metrics]) => 
-                        class_ !== assetClass && 
-                        Object.keys(metrics).length > 0
-                      )
-                      .sort((a, b) => 
-                        Object.keys(b[1]).length - Object.keys(a[1]).length
-                      )[0]?.[0];
-
-                    if (nextAssetClass) {
-                      toast.success("Great job! 🎉", {
-                        description: `You've completed all metrics for ${assetClass}. Let's move on to ${nextAssetClass}!`,
-                      });
-                      navigate(`/learning/${nextAssetClass}`);
-                    } else {
-                      toast.success("Congratulations! 🎉", {
-                        description: "You've completed all recommended metrics!",
-                      });
-                      navigate('/learning');
-                    }
-                  } else {
-                    handleCompleteMetric(selectedMetric);
-                  }
-                }}
+                onSelectMetric={handleSelectMetric}
+                completedMetrics={completedMetrics}
               />
             </div>
-          ) : (
-            <MetricOverviewSection
-              metrics={content.keyMetrics.reduce((acc, metric) => {
-                const recommendedMetric = recommendations?.recommendedMetrics[assetClass]?.[metric];
-                const metricInfo = metricContent[metric];
-                const category = metricInfo ? Object.keys(metricInfo)[0] as MetricCategory : 'Growth';
-                
-                return {
-                  ...acc,
-                  [metric]: {
-                    name: metric,
-                    category,
-                    weight: recommendedMetric?.weight || 1,
-                    priority: recommendedMetric?.priority || 'Secondary'
-                  }
-                };
-              }, {})}
-              assetClass={assetClass || ''}
-              onSelectMetric={handleSelectMetric}
-              completedMetrics={completedMetrics}
-            />
           )
         ) : (
           <>
@@ -620,27 +796,6 @@ const LearningPathDetail: React.FC = () => {
                         <span>{totalSections - completedCount} remaining</span>
                       </div>
                     </div>
-
-                    {/* Completion Message and Start Metrics Button */}
-                    {showCompletionMessage && (
-                      <div className="mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <h3 className="font-medium text-emerald-900">Asset Class Completed! 🎉</h3>
-                            <p className="text-sm text-emerald-700">
-                              {getCompletionMessage().description}
-                            </p>
-                          </div>
-                          <Button
-                            onClick={handleStartMetrics}
-                            className="bg-emerald-600 hover:bg-emerald-700"
-                          >
-                            Learn Key Metrics
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -688,7 +843,6 @@ const LearningPathDetail: React.FC = () => {
                             <div 
                               className="p-4 bg-white rounded-lg border border-slate-200 cursor-pointer"
                               onClick={(e) => {
-                                console.log('Section header clicked:', index);
                                 e.preventDefault();
                                 e.stopPropagation();
                                 toggleSection(index);
@@ -717,7 +871,6 @@ const LearningPathDetail: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={(e) => {
-                                      console.log('Bookmark button clicked:', index);
                                       e.preventDefault();
                                       e.stopPropagation();
                                       toggleBookmark(index);
@@ -735,7 +888,6 @@ const LearningPathDetail: React.FC = () => {
                                   </button>
                                   <button
                                     onClick={(e) => {
-                                      console.log('Completion button clicked:', index);
                                       e.preventDefault();
                                       e.stopPropagation();
                                       toggleSectionCompletion(index);
@@ -811,104 +963,6 @@ const LearningPathDetail: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Completion Message */}
-            {showCompletionMessage && (
-              <div className="mt-8 bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-8">
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
-                      <Trophy className="h-8 w-8 text-emerald-600" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {getCompletionMessage().title}
-                    </h3>
-                    <p className="text-lg text-gray-600 mb-4">
-                      {getCompletionMessage().subtitle}
-                    </p>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
-                      {getCompletionMessage().description}
-                    </p>
-                  </div>
-
-                  {/* Learning Library Section */}
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h4 className="text-xl font-semibold text-gray-900">
-                          Learning Library
-                        </h4>
-                        <p className="text-gray-600 mt-1">
-                          {getCompletionMessage().nextSteps}
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => navigate(`/learning`)}
-                        className="bg-primary hover:bg-primary/90"
-                      >
-                        Explore Library
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {/* Non-recommended paths section */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {getNonRecommendedPaths().map((path) => (
-                        <Card key={path.id} className="hover:shadow-lg transition-shadow">
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="space-y-2">
-                                <h4 className="font-semibold">{path.title}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {path.description}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <Badge
-                                    variant="outline"
-                                    className={cn(
-                                      "text-xs",
-                                      getDifficultyColor(path.difficulty)
-                                    )}
-                                  >
-                                    {path.difficulty}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground">
-                                    {path.sections.length} sections
-                                  </span>
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/learning-path/${sessionId}/${path.id}`)}
-                              >
-                                Start Learning
-                                <ChevronRight className="ml-2 h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center space-x-4 mt-8">
-                    <Button
-                      onClick={() => setShowMetrics(true)}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      Learn Key Metrics
-                    </Button>
-                    <Button
-                      onClick={handleBackToAssetClasses}
-                      variant="outline"
-                    >
-                      Back to Learning Paths
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
@@ -966,6 +1020,17 @@ const LearningPathDetail: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Quiz Dialog */}
+      <Dialog open={showQuiz} onOpenChange={setShowQuiz}>
+        <DialogContent className="max-w-2xl">
+          <QuizSection
+            assetClass={assetClass || ''}
+            responseGroupId={sessionId || ''}
+            onClose={() => setShowQuiz(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -9,13 +9,6 @@ interface RegisterUserData {
 
 export const userService = {
   async registerUser(data: RegisterUserData) {
-    console.log({
-      displayName: data.displayName,
-      authProviderUid: data.authproviderId,
-      email: data.email,
-      username: data.username,
-      authProviderId: 'supabase', // Since 
-    })
     try {
       const response = await fetch('http://localhost:3001/api/v1/users/register', {
         method: 'POST',
@@ -27,7 +20,7 @@ export const userService = {
           authProviderUid: data.authproviderId,
           email: data.email,
           username: data.username,
-          authProviderType: 'supabase', // Since we're using Supabase as our auth provider
+          authProviderType: 'supabase',
         }),
       });
 

@@ -14,12 +14,15 @@ import Dashboard from "./pages/Dashboard";
 import Learning from "./pages/Learning";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import RecommendationsPage from "./pages/RecommendationsPage";
 import LearningPaths from "./pages/LearningPaths";
 import LearningPathDetail from "./pages/LearningPathDetail";
+import LearningLibraryDetail from "./pages/LearningLibraryDetail";
+import MetricLibraryDetail from "./components/learning/library/MetricLibraryDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { useAuth } from "./contexts/AuthContext";
+import InvestmentExplorer from "./pages/InvestmentExplorer";
+import LearningFolderView from "./pages/LearningFolderView";
 
 const queryClient = new QueryClient();
 
@@ -48,12 +51,20 @@ const AppRoutes = () => {
         <Route path="/home" element={<Index />} />
         <Route path="/assessment" element={<Assessment />} />
         <Route path="/dashboard/:sessionId" element={<Dashboard />} />
+        
+        {/* Learning Library Routes */}
         <Route path="/learning" element={<Learning />} />
+        <Route path="/learning/:folderId" element={<LearningFolderView />} />
+        <Route path="/learning/asset-classes/:assetClass" element={<LearningLibraryDetail />} />
+        <Route path="/learning/metrics/:metricId" element={<MetricLibraryDetail />} />
+        
+        {/* Learning Paths Routes */}
         <Route path="/learning-path/:sessionId" element={<LearningPaths />} />
         <Route path="/learning-path/:sessionId/:assetClass" element={<LearningPathDetail />} />
+        
         <Route path="/profile" element={<Profile />} />
-        <Route path="/recommendations" element={<RecommendationsPage />} />
         <Route path="/assessment-results" element={<AssessmentResultsPage />} />
+        <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
       </Route>
 
       {/* 404 route */}

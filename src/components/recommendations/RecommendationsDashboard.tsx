@@ -5,6 +5,7 @@ import { useSession } from '@/contexts/SessionContext';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import MetricRecommendationCard from './MetricRecommendationCard';
 import PortfolioAllocation from '../dashboard/PortfolioAllocation';
+import DiversificationAnalysis from './DiversificationAnalysis';
 import { Skeleton } from "@/components/ui/skeleton";
 import { AssetClass, RecommendedMetric, RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
 
@@ -50,6 +51,16 @@ const RecommendationsDashboard: React.FC = () => {
         allocations={recommendations.adjustedAllocations}
         recommendedMetrics={recommendations.recommendedMetrics}
       />
+
+      {/* Diversification Analysis Section */}
+      {recommendations.diversificationAnalysis && (
+        <DiversificationAnalysis
+          diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
+          riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
+          recommendations={recommendations.diversificationAnalysis.recommendations}
+          correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
+        />
+      )}
 
       {/* Metric Recommendations Section */}
       <div>

@@ -1,6 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface RecommendationCardProps {
   title: string;
@@ -18,13 +18,13 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const getPriorityColor = () => {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+        return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200";
       case "Low":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+        return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
 
@@ -33,12 +33,16 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-          <Badge className={getPriorityColor()}>{priority}</Badge>
+          <Badge className={cn(getPriorityColor(), "font-medium")}>{priority}</Badge>
         </div>
-        <CardDescription>{category}</CardDescription>
+        <CardDescription className="text-muted-foreground dark:text-[hsl(var(--card-description))]">
+          {category}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">{description}</p>
+        <p className="text-sm text-muted-foreground dark:text-[hsl(var(--card-description))]">
+          {description}
+        </p>
       </CardContent>
     </Card>
   );

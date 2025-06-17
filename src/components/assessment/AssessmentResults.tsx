@@ -28,8 +28,6 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
   // Use prop result if available, otherwise use fetched result
   const result = propResult || fetchedResult;
 
-  console.log("results", result);
-
   if (isLoading) {
     return (
       <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">

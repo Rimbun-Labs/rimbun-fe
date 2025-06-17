@@ -19,12 +19,14 @@ import { metricContent } from '@/lib/api/types/metricContent';
 import { cn } from "@/lib/utils";
 import { getCategoryColor, getPriorityColor } from '@/utils/metrics';
 import { toast } from "sonner";
+import { PracticeQuestion } from '../quiz/PracticeQuestion';
 
 interface GuidedMetricLearningProps {
   metrics: Record<string, RecommendedMetric>;
   assetClass: string;
   onBack: () => void;
   onComplete: () => void;
+  sessionId?: string;
 }
 
 type MetricState = {
@@ -37,7 +39,8 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   metrics,
   assetClass,
   onBack,
-  onComplete
+  onComplete,
+  sessionId
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
@@ -48,14 +51,16 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   const metricEntries = Object.entries(metrics);
   const currentMetric = metricEntries[currentStep];
   const [metricName, metric] = currentMetric;
-  const content = metricContent[metricName]?.[metric.category];
+  const content = metric.content;
 
   const totalSteps = metricEntries.length;
   const progress = (completedSteps.length / totalSteps) * 100;
 
   // Load saved progress on mount
   useEffect(() => {
-    const savedProgress = localStorage.getItem(`metric-progress-${assetClass}`);
+    if (!sessionId) return;
+    
+    const savedProgress = localStorage.getItem(`metric-progress-${sessionId}-${assetClass}`);
     if (savedProgress) {
       try {
         const { completedSteps: savedCompleted, currentStep: savedStep } = JSON.parse(savedProgress);
@@ -65,12 +70,14 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
         console.error('Error parsing saved progress:', error);
       }
     }
-  }, [assetClass]);
+  }, [assetClass, sessionId]);
 
   // Save progress when it changes
   useEffect(() => {
+    if (!sessionId) return;
+    
     const saveProgress = () => {
-      localStorage.setItem(`metric-progress-${assetClass}`, JSON.stringify({
+      localStorage.setItem(`metric-progress-${sessionId}-${assetClass}`, JSON.stringify({
         completedSteps,
         currentStep
       }));
@@ -79,7 +86,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
     if (completedSteps.length > 0 || currentStep > 0) {
       saveProgress();
     }
-  }, [assetClass, completedSteps, currentStep]);
+  }, [assetClass, sessionId, completedSteps, currentStep]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -98,6 +105,8 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   };
 
   const handleCompleteStep = () => {
+    if (!sessionId) return;
+    
     if (!completedSteps.includes(metricName)) {
       setCompletedSteps(prev => [...prev, metricName]);
       setMetricStates(prev => ({
@@ -108,21 +117,36 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
         }
       }));
 
-      // Save individual metric progress
-      localStorage.setItem(`metric-progress-${metricName}`, JSON.stringify({
+      // Save individual metric progress with answers and practice data
+      localStorage.setItem(`metric-progress-${sessionId}-${metricName}`, JSON.stringify({
         progress: 100,
-        completed: true
+        completed: true,
+        answers: userAnswers[metricName],
+        practiceAttempts: metricStates[metricName]?.practiceAttempts || 0,
+        lastPracticeScore: metricStates[metricName]?.lastPracticeScore,
+        completedAt: new Date().toISOString()
       }));
 
-      toast.success("Metric completed! 🎉", {
-        description: "Great job understanding this metric!",
-      });
+      // Check if all metrics are completed
+      const allMetricsCompleted = metricEntries.every(([name]) => 
+        [...completedSteps, metricName].includes(name)
+      );
+
+      if (allMetricsCompleted) {
+        toast.success("All Metrics Completed! 🎉", {
+          description: "You're ready to test your knowledge!",
+        });
+      } else {
+        toast.success("Metric completed! 🎉", {
+          description: "Great job understanding this metric!",
+        });
+      }
+
+      onComplete();
     }
   };
 
-  const handlePracticeComplete = () => {
-    const isCorrect = userAnswers[metricName] === content?.practiceQuestion?.options[content.practiceQuestion.correct];
-    
+  const handlePracticeComplete = (isCorrect: boolean) => {
     setMetricStates(prev => ({
       ...prev,
       [metricName]: {
@@ -264,32 +288,14 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
           ) : (
             <div className="space-y-6">
               {/* Practice Section */}
-              <div className="bg-slate-50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-4">Practice Question</h3>
-                {content?.practiceQuestion && (
-                  <div className="space-y-4">
-                    <p className="text-slate-700">{content.practiceQuestion.question}</p>
-                    <div className="space-y-2">
-                      {content.practiceQuestion.options.map((option, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start",
-                            userAnswers[metricName] === option && "bg-slate-100"
-                          )}
-                          onClick={() => setUserAnswers(prev => ({
-                            ...prev,
-                            [metricName]: option
-                          }))}
-                        >
-                          {option}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {content?.practiceQuestion && (
+                <PracticeQuestion
+                  data={content.practiceQuestion}
+                  mode="learning"
+                  onComplete={handlePracticeComplete}
+                  allowRetry={true}
+                />
+              )}
 
               {/* Navigation */}
               <div className="flex justify-between pt-4">
@@ -299,14 +305,6 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   Back to Learning
-                </Button>
-                <Button
-                  onClick={handlePracticeComplete}
-                  disabled={!userAnswers[metricName]}
-                  className="gap-2"
-                >
-                  Check Answer
-                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
