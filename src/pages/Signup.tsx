@@ -45,7 +45,7 @@ const Signup = () => {
         displayName: formData.fullName,
         email: supabaseUser.email,
         username: formData.username,
-        authproviderId: supabaseUser.id
+        authProviderId: supabaseUser.id
       });
 
       toast({

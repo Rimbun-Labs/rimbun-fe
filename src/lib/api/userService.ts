@@ -2,7 +2,7 @@ import { supabase } from '../supabase/client';
 import { config } from './config';
 
 interface RegisterUserData {
-  authproviderId:string;
+  authProviderId:string;
   displayName: string;
   email: string;
   username: string;
@@ -18,7 +18,7 @@ export const userService = {
         },
         body: JSON.stringify({
           displayName: data.displayName,
-          authProviderUid: data.authproviderId,
+          authProviderUid: data.authProviderId,
           email: data.email,
           username: data.username,
           authProviderType: 'supabase',
