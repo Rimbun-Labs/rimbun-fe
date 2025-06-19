@@ -13,6 +13,7 @@ import { getQuestions } from '@/lib/api/questionnaireApi';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { useSession } from '@/contexts/SessionContext';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 
@@ -22,6 +23,7 @@ const Assessment: React.FC = () => {
   const [showContextDialog, setShowContextDialog] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const { sessionId, setSessionId, setSession } = useSession();
+  const { userRegistrationComplete } = useAuth();
   
   // Create session mutation
   const createSessionMutation = useMutation({
@@ -136,6 +138,13 @@ const Assessment: React.FC = () => {
   }, [resultsError]);
 
   const handleStartAssessment = () => {
+    if (!userRegistrationComplete) {
+      toast.error('Please wait while we set up your account...');
+      console.log('❌ Assessment: User registration not complete yet');
+      return;
+    }
+    
+    console.log('✅ Assessment: User registration complete, creating session');
     createSessionMutation.mutate({
       questionnaireType: "ONBOARDING",
       description: "Investment Profile Assessment"

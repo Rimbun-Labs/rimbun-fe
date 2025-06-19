@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  userRegistrationComplete: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<any>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,12 +27,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authService.getCurrentUser().then((user) => {
       setUser(user);
       setLoading(false);
+      // Check if user already has database ID stored
+      if (user && userService.getDatabaseUserId()) {
+        setUserRegistrationComplete(true);
+        console.log('✅ AuthContext: User already has database ID stored');
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = authService.onAuthStateChange(async (user) => {
       setUser(user);
       setLoading(false);
+      setUserRegistrationComplete(false); // Reset on auth change
       
       // If user signed in (especially via Google OAuth), ensure they exist in backend
       if (user) {
@@ -40,11 +48,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: user.email 
           });
           
-          await userService.ensureUserExists({
+          const result = await userService.ensureUserExists({
             authProviderId: user.id,
             displayName: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
             email: user.email || '',
           });
+          
+          setUserRegistrationComplete(true); // Mark as complete
+          console.log('✅ AuthContext: User registration completed:', result);
         } catch (backendError) {
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
           // Don't throw here - user is still authenticated with Supabase
@@ -63,11 +74,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       // Ensure user exists in backend
       try {
+        setUserRegistrationComplete(false); // Reset before registration
         await userService.ensureUserExists({
           authProviderId: user.id,
           displayName: user.user_metadata?.full_name || email.split('@')[0],
           email: user.email || email,
         });
+        setUserRegistrationComplete(true); // Mark as complete
       } catch (backendError) {
         console.error('Failed to ensure user exists in backend:', backendError);
         // Don't throw here - user is still authenticated with Supabase
@@ -95,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Clear the database user ID when signing out
     userService.clearDatabaseUserId();
+    setUserRegistrationComplete(false); // Reset registration state
     
     navigate('/login');
   };
@@ -102,6 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     loading,
+    userRegistrationComplete,
     signInWithEmail,
     signInWithGoogle,
     signUp,
