@@ -15,8 +15,17 @@ interface EnsureUserData {
   username?: string;
 }
 
+interface UserRegistrationResponse {
+  data: {
+    id: string; // Database user ID
+    displayName: string;
+    email: string;
+    authProviderId: string;
+  };
+}
+
 export const userService = {
-  async registerUser(data: RegisterUserData) {
+  async registerUser(data: RegisterUserData): Promise<UserRegistrationResponse> {
     try {
       console.log('🔵 userService.registerUser called with:', { ...data, authProviderId: data.authProviderId.substring(0, 8) + '...' });
       
@@ -42,6 +51,13 @@ export const userService = {
 
       const result = await response.json();
       console.log('✅ userService.registerUser successful:', result);
+      
+      // Store the database user ID in localStorage for session creation
+      if (result.data?.id) {
+        localStorage.setItem('databaseUserId', result.data.id);
+        console.log('🔵 Stored database user ID:', result.data.id);
+      }
+      
       return result;
     } catch (error) {
       console.error('❌ userService.registerUser error:', error);
@@ -49,7 +65,7 @@ export const userService = {
     }
   },
 
-  async ensureUserExists(data: EnsureUserData) {
+  async ensureUserExists(data: EnsureUserData): Promise<UserRegistrationResponse | { message: string }> {
     try {
       console.log('🔵 userService.ensureUserExists called with:', { ...data, authProviderId: data.authProviderId.substring(0, 8) + '...' });
       
@@ -83,10 +99,25 @@ export const userService = {
 
       const result = await response.json();
       console.log('✅ userService.ensureUserExists successful:', result);
+      
+      // Store the database user ID in localStorage for session creation
+      if (result.data?.id) {
+        localStorage.setItem('databaseUserId', result.data.id);
+        console.log('🔵 Stored database user ID:', result.data.id);
+      }
+      
       return result;
     } catch (error) {
       console.error('❌ userService.ensureUserExists error:', error);
       throw error;
     }
+  },
+
+  getDatabaseUserId(): string | null {
+    return localStorage.getItem('databaseUserId');
+  },
+
+  clearDatabaseUserId(): void {
+    localStorage.removeItem('databaseUserId');
   },
 }; 

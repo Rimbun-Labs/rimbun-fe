@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { CreateResponseGroupRequest, ResponseGroup } from './types/assessment';
 import { config } from './config';
+import { userService } from './userService';
 import { supabase } from '../supabase/client';
 
 const createMockSession = async (data?: CreateResponseGroupRequest): Promise<ResponseGroup> => {
@@ -34,12 +35,21 @@ export const createSession = async (data?: CreateResponseGroupRequest): Promise<
   }
 
   try {
-    console.log('Creating session with authenticated user ID:', user.id);
+    // Get the database user ID from localStorage (set during user registration)
+    const databaseUserId = userService.getDatabaseUserId();
+    
+    if (!databaseUserId) {
+      console.error('❌ No database user ID found. User may not be registered in backend.');
+      throw new Error('User not registered in backend. Please try logging in again.');
+    }
+
+    console.log('🔵 Creating session with database user ID:', databaseUserId);
+    console.log('🔵 Supabase user ID:', user.id);
     
     const response = await axios.post<ResponseGroup>(
       `${config.API_BASE_URL}/user-responses/session`,
       {
-        userId: data?.userId || user.id, // Use the authenticated user's ID instead of hardcoded one
+        userId: databaseUserId, // Use database user ID, not Supabase user ID
         questionnaireType: data?.questionnaireType || "ONBOARDING",
         description: "Investment Profile Assessment Session"
       },
@@ -51,10 +61,10 @@ export const createSession = async (data?: CreateResponseGroupRequest): Promise<
       }
     );
     
-    console.log('Session created successfully:', response.data);
+    console.log('✅ Session created successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Failed to create session:', error);
+    console.error('❌ Failed to create session:', error);
     throw new Error('Failed to create assessment session');
   }
-};
+}

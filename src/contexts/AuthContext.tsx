@@ -92,6 +92,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     const { error } = await authService.signOut();
     if (error) throw error;
+    
+    // Clear the database user ID when signing out
+    userService.clearDatabaseUserId();
+    
     navigate('/login');
   };
 
