@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { Question } from './types/assessment';
 import { mockQuestions } from '../mock/mockQuestions';
-
-const API_BASE_URL = 'http://localhost:3001/api/v1';
+import { config } from './config';
 
 const isMockEnvironment = () => {
   const host = window.location.hostname;
@@ -48,7 +47,7 @@ export const getQuestions = async (): Promise<Question[]> => {
 
   try {
     const response = await axios.get<Question[]>(
-      `${API_BASE_URL}/questionnaire/questions`,
+      `${config.API_BASE_URL}/questionnaire/questions`,
       {
         headers: {
           'Accept': 'application/json'

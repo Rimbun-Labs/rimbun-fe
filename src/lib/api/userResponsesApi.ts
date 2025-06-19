@@ -1,7 +1,6 @@
 import { Question, QuestionType, SaveUserResponseRequest, UserSession } from './types/assessment';
 import { apiClient } from './client';
-
-const API_BASE_URL = 'http://localhost:3001/api/v1';
+import { config } from './config';
 
 // UUID validation regex
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -83,7 +82,7 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
       response.answer = String(response.answer || '');
     }
 
-    const res = await fetch(`${API_BASE_URL}/user-responses/answer`, {
+    const res = await fetch(`${config.API_BASE_URL}/user-responses/answer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

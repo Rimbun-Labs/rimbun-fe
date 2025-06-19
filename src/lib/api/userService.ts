@@ -1,4 +1,5 @@
 import { supabase } from '../supabase/client';
+import { config } from './config';
 
 interface RegisterUserData {
   authproviderId:string;
@@ -10,7 +11,7 @@ interface RegisterUserData {
 export const userService = {
   async registerUser(data: RegisterUserData) {
     try {
-      const response = await fetch('http://localhost:3001/api/v1/users/register', {
+      const response = await fetch(`${config.API_BASE_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
