@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ProfileCard } from "./ProfileCard";
 import { useSession } from "@/contexts/SessionContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ className }: HeroSectionProps) => {
   const { session, isLoading } = useSession();
+  const { user } = useAuth();
 
   return (
     <section className={cn("py-16 md:py-24", className)}>
@@ -29,25 +31,39 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
             
             {/* Button Group */}
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button 
-                asChild 
-                size="lg"
-                disabled={isLoading}
-                className="relative"
-              >
-                <Link to={session?.isCompleted ? "/dashboard" : "/assessment"}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : session?.isCompleted ? (
-                    "View Dashboard"
-                  ) : (
-                    "Take Assessment"
-                  )}
-                </Link>
-              </Button>
+              {user ? (
+                // Authenticated user - show assessment or dashboard
+                <Button 
+                  asChild 
+                  size="lg"
+                  disabled={isLoading}
+                  className="relative"
+                >
+                  <Link to={session?.isCompleted ? "/dashboard" : "/assessment"}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : session?.isCompleted ? (
+                      "View Dashboard"
+                    ) : (
+                      "Take Assessment"
+                    )}
+                  </Link>
+                </Button>
+              ) : (
+                // Unauthenticated user - show sign up
+                <Button 
+                  asChild 
+                  size="lg"
+                  className="relative"
+                >
+                  <Link to="/signup">
+                    Get Started - Sign Up
+                  </Link>
+                </Button>
+              )}
               
               <Button 
                 asChild 
@@ -55,8 +71,8 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 size="lg"
                 disabled={isLoading}
               >
-                <Link to="/learning">
-                  Explore Learning
+                <Link to={user ? "/learning" : "/login"}>
+                  {user ? "Explore Learning" : "Already have an account? Sign In"}
                 </Link>
               </Button>
             </div>

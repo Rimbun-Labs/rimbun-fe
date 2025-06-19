@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useSession } from "@/contexts/SessionContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Loader2 } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface CTASectionProps {
 
 export const CTASection = ({ className }: CTASectionProps) => {
   const { session, isLoading } = useSession();
+  const { user } = useAuth();
   const isCompleted = session?.isCompleted;
 
   return (
@@ -19,12 +21,16 @@ export const CTASection = ({ className }: CTASectionProps) => {
           {/* Content */}
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-              {isCompleted 
+              {!user 
+                ? "Ready to start your investment journey?"
+                : isCompleted 
                 ? "Ready to continue your investment journey?"
                 : "Ready to understand your investment style?"}
             </h2>
             <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-              {isCompleted
+              {!user
+                ? "Create your account and take the first step towards financial mastery."
+                : isCompleted
                 ? "Explore your personalized learning paths and track your progress."
                 : "Take the financial profile assessment and get personalized insights today."}
             </p>
@@ -32,31 +38,48 @@ export const CTASection = ({ className }: CTASectionProps) => {
 
           {/* Button Group */}
           <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <Button 
-              asChild 
-              size="lg"
-              disabled={isLoading}
-              className="relative"
-            >
-              <Link to={isCompleted ? "/dashboard" : "/assessment"}>
-                {isLoading ? (
+            {user ? (
+              // Authenticated user
+              <Button 
+                asChild 
+                size="lg"
+                disabled={isLoading}
+                className="relative"
+              >
+                <Link to={isCompleted ? "/dashboard" : "/assessment"}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      View Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Start Assessment
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Link>
+              </Button>
+            ) : (
+              // Unauthenticated user
+              <Button 
+                asChild 
+                size="lg"
+                className="relative"
+              >
+                <Link to="/signup">
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : isCompleted ? (
-                  <>
-                    View Dashboard
+                    Create Free Account
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
-                ) : (
-                  <>
-                    Start Assessment
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Link>
-            </Button>
+                </Link>
+              </Button>
+            )}
 
             <Button 
               asChild 
@@ -64,8 +87,10 @@ export const CTASection = ({ className }: CTASectionProps) => {
               size="lg"
               disabled={isLoading}
             >
-              <Link to={isCompleted ? "/learning" : "/dashboard"}>
-                {isCompleted ? "Continue Learning" : "View Demo Dashboard"}
+              <Link to={user ? (isCompleted ? "/learning" : "/dashboard") : "/login"}>
+                {user 
+                  ? (isCompleted ? "Continue Learning" : "View Demo Dashboard")
+                  : "Already have an account? Sign In"}
               </Link>
             </Button>
           </div>
@@ -82,4 +107,4 @@ export const CTASection = ({ className }: CTASectionProps) => {
       </div>
     </section>
   );
-}; 
+};
