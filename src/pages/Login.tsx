@@ -49,6 +49,7 @@ const Login = () => {
     setError(null);
     try {
       await signInWithGoogle();
+      // Note: Backend registration is handled in AuthContext's onAuthStateChange
       navigate(from, { replace: true });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
