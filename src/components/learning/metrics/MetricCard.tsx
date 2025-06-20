@@ -31,14 +31,27 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const getWeightColor = (weight: number) => {
     if (weight >= 0.8) return 'bg-blue-50 text-blue-700 border-blue-200';
     if (weight >= 0.5) return 'bg-purple-50 text-purple-700 border-purple-200';
-    return 'bg-slate-50 text-slate-700 border-slate-200';
+    return 'bg-muted text-muted-foreground border-border';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'in-progress':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'locked':
+        return 'bg-muted text-muted-foreground border-border';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
+    }
   };
 
   return (
     <Card
       className={cn(
         "group relative overflow-hidden transition-all duration-200",
-        completed ? "border-green-500" : "hover:border-slate-300",
+        completed ? "border-green-500" : "hover:border-border",
         "hover:shadow-lg"
       )}
     >
@@ -69,7 +82,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         {/* Action Button */}
         <Button 
           variant="outline" 
-          className="w-full group-hover:bg-slate-50"
+          className="w-full group-hover:bg-muted"
           onClick={onClick}
         >
           <BookOpen className="h-4 w-4 mr-2" />

@@ -29,7 +29,7 @@ const MetricCategoryFilter: React.FC<MetricCategoryFilterProps> = ({
               "cursor-pointer transition-colors",
               selectedCategories.length === 0
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                : "hover:bg-slate-100"
+                : "hover:bg-muted"
             )}
             onClick={() => onCategorySelect('all')}
           >
@@ -44,7 +44,7 @@ const MetricCategoryFilter: React.FC<MetricCategoryFilterProps> = ({
                 getCategoryColor(category),
                 selectedCategories.includes(category)
                   ? "bg-opacity-20"
-                  : "hover:bg-slate-100"
+                  : "hover:bg-muted"
               )}
               onClick={() => onCategorySelect(category)}
             >

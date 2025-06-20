@@ -274,23 +274,23 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
           </div>
 
           {/* Comparison Summary */}
-          <div className="p-4 bg-slate-50 rounded-lg">
+          <div className="p-4 bg-muted rounded-lg">
             <h4 className="font-medium mb-2">Key Differences</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <ArrowRight className="h-4 w-4 mt-0.5 text-slate-400" />
+                <ArrowRight className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <span>
                   <strong>Conservative Plan</strong> uses your initial investment and investment rate
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ArrowRight className="h-4 w-4 mt-0.5 text-slate-400" />
+                <ArrowRight className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <span>
                   <strong>Aggressive Plan</strong> includes your savings and intial investment for this goal
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ArrowRight className="h-4 w-4 mt-0.5 text-slate-400" />
+                <ArrowRight className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <span>
                   Time difference: {formatYears(Math.abs(scenarios.aggressive.timeToGoal - scenarios.conservative.timeToGoal))}
                 </span>

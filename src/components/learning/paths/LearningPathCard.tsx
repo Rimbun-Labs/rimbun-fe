@@ -112,7 +112,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
         >
           <Bookmark className={cn(
             "h-4 w-4",
-            isBookmarked ? "fill-emerald-500 text-emerald-500" : "text-slate-400"
+            isBookmarked ? "fill-emerald-500 text-emerald-500" : "text-muted-foreground"
           )} />
         </Button>
       </div>
@@ -170,7 +170,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
             </div>
             <Progress 
               value={progressPercentage} 
-              className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+              className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{completedCount} of {totalSections} sections completed</span>

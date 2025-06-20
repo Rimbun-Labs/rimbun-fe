@@ -197,7 +197,13 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               paddingTop: '20px',
             }}
             formatter={(value) => (
-              <span className="text-sm font-medium text-foreground">{value}</span>
+              <span style={{ 
+                color: isDarkMode ? '#e2e8f0' : '#1e293b',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                {value}
+              </span>
             )}
           />
         </RadarChart>

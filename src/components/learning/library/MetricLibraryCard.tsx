@@ -63,7 +63,7 @@ const MetricLibraryCard: React.FC<MetricLibraryCardProps> = ({ metric, onStart }
           {/* Action Button */}
           <Button 
             variant="outline" 
-            className="w-full mt-auto group-hover:bg-slate-50"
+            className="w-full mt-auto group-hover:bg-muted"
             onClick={onStart}
           >
             <BookOpen className="h-4 w-4 mr-2" />

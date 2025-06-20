@@ -103,7 +103,7 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
                 "flex items-center space-x-3 p-3 rounded-lg border transition-colors",
                 hasAnswered && index === data.correct && "bg-green-50 border-green-200",
                 hasAnswered && selectedAnswer === option && index !== data.correct && "bg-red-50 border-red-200",
-                !hasAnswered && "hover:bg-slate-50 border-slate-200"
+                !hasAnswered && "hover:bg-muted border-border"
               )}
             >
               <RadioGroupItem value={option} id={`option-${index}`} />
@@ -122,7 +122,7 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
 
         {/* Hints - Only show in learning mode */}
         {showHints && currentHintIndex >= 0 && data.hints && (
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+          <div className="bg-muted p-4 rounded-lg space-y-2">
             <div className="flex items-center gap-2 text-blue-700">
               <HelpCircle className="h-5 w-5" />
               <span className="font-medium">Hint {currentHintIndex + 1}</span>
@@ -133,7 +133,7 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
 
         {/* Explanation - Show after answering in both modes */}
         {(showFullExplanation || hasAnswered) && (
-          <div className="bg-slate-50 p-4 rounded-lg space-y-2">
+          <div className="bg-muted p-4 rounded-lg space-y-2">
             <p className="text-sm text-muted-foreground">
               <span className="font-medium">Explanation:</span>{" "}
               {data.explanation}

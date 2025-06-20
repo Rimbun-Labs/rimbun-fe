@@ -192,7 +192,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Info className="h-4 w-4 text-slate-400" />
+                  <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Complete each step to master {assetClass} metrics</p>
@@ -201,7 +201,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
             </TooltipProvider>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-slate-400" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">~5 mins</span>
           </div>
         </div>
@@ -237,7 +237,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
           {!showPractice ? (
             <div className="space-y-6">
               {/* Learning Objectives */}
-              <div className="bg-slate-50 p-4 rounded-lg">
+              <div className="bg-muted p-4 rounded-lg">
                 <h3 className="font-semibold mb-2">What You'll Learn</h3>
                 <ul className="list-disc list-inside space-y-1 text-foreground">
                   <li>Understanding {metricName} and its importance</li>
@@ -252,7 +252,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
                 <p className="text-foreground">{content?.overview}</p>
                 
                 <h3>Why This Matters</h3>
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-muted p-4 rounded-lg">
                   <p className="text-foreground">{content?.details}</p>
                 </div>
               </div>

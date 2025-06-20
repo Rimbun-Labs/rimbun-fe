@@ -195,7 +195,7 @@ const generateCorrelationLabel = (
 const getCorrelationColor = (value: number): string => {
   if (value >= 0.7) return "text-emerald-600"; // Strong positive - green (growth)
   if (value >= 0.3) return "text-emerald-400"; // Moderate positive - lighter green
-  if (value >= -0.29) return "text-slate-500"; // Weak/neutral - slate gray
+  if (value >= -0.29) return "text-muted-foreground"; // Weak/neutral - slate gray
   if (value >= -0.69) return "text-amber-500"; // Moderate negative - amber (caution)
   return "text-rose-600"; // Strong negative - rose (warning)
 };
@@ -212,7 +212,7 @@ const CorrelationLegend = () => (
       <span className="font-medium">Moderate Positive (≥ 0.3)</span>
     </div>
     <div className="flex items-center gap-1.5">
-      <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+      <span className="w-2 h-2 rounded-full bg-muted-foreground"></span>
       <span className="font-medium">Neutral (-0.29 to 0.29)</span>
     </div>
     <div className="flex items-center gap-1.5">
@@ -239,13 +239,13 @@ export const CorrelationExplanation: React.FC<CorrelationExplanationProps> = ({
 
   return (
     <div className={`${className} space-y-4`}>
-      <div className="bg-slate-50 rounded-lg p-4">
+      <div className="bg-muted rounded-lg p-4">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[120px]"></TableHead>
               {assets.map(asset => (
-                <TableHead key={asset} className="text-center font-semibold text-slate-700">
+                <TableHead key={asset} className="text-center font-semibold text-foreground">
                   {asset.charAt(0).toUpperCase() + asset.slice(1)}
                 </TableHead>
               ))}
@@ -253,8 +253,8 @@ export const CorrelationExplanation: React.FC<CorrelationExplanationProps> = ({
           </TableHeader>
           <TableBody>
             {assets.map(asset1 => (
-              <TableRow key={asset1} className="hover:bg-slate-100/50">
-                <TableCell className="font-semibold text-slate-700">
+              <TableRow key={asset1} className="hover:bg-muted/50">
+                <TableCell className="font-semibold text-foreground">
                   {asset1.charAt(0).toUpperCase() + asset1.slice(1)}
                 </TableCell>
                 {assets.map(asset2 => {
@@ -283,7 +283,7 @@ export const CorrelationExplanation: React.FC<CorrelationExplanationProps> = ({
                           <TooltipContent 
                             side="top" 
                             align="center"
-                            className="max-w-lg p-4 z-50 bg-white shadow-lg border border-slate-200"
+                            className="max-w-lg p-4 z-50 bg-background shadow-lg border border-border"
                           >
                             <p className="text-sm leading-relaxed">{label}</p>
                           </TooltipContent>
@@ -297,7 +297,7 @@ export const CorrelationExplanation: React.FC<CorrelationExplanationProps> = ({
           </TableBody>
         </Table>
       </div>
-      <div className="bg-slate-50 rounded-lg p-3">
+      <div className="bg-muted rounded-lg p-3">
         <CorrelationLegend />
       </div>
     </div>

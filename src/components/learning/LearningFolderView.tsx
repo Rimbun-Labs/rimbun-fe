@@ -103,7 +103,7 @@ export const LearningFolderView: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/learning')}
-              className="hover:bg-slate-100"
+              className="hover:bg-muted"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -120,15 +120,15 @@ export const LearningFolderView: React.FC = () => {
               placeholder="Search modules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full px-4 py-2 pl-10 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
-            <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           </div>
         </div>
 
         {/* Progress Overview */}
-        <Card className="border-slate-200">
-          <CardHeader className="bg-gradient-to-b from-white to-slate-50/50">
+        <Card className="border-border">
+          <CardHeader className="bg-gradient-to-b from-background to-muted/50">
             <CardTitle className="text-xl">Overall Progress</CardTitle>
             <CardDescription>
               Track your learning journey across all {folder.title} modules
@@ -150,9 +150,9 @@ export const LearningFolderView: React.FC = () => {
                   modules.reduce((acc, m) => acc + m.progress, 0) / 
                   modules.length || 0
                 } 
-                className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+                className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
               />
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{modules.filter(m => m.progress === 100).length} of {modules.length} modules completed</span>
                 <span>{modules.length - modules.filter(m => m.progress === 100).length} remaining</span>
               </div>
@@ -173,7 +173,7 @@ export const LearningFolderView: React.FC = () => {
 
         {filteredModules.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-slate-500">No modules found matching your search.</p>
+            <p className="text-muted-foreground">No modules found matching your search.</p>
           </div>
         )}
       </div>

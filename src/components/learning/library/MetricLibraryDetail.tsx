@@ -45,7 +45,7 @@ const MetricLibraryDetail: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/learning/metrics')}
-              className="hover:bg-slate-100"
+              className="hover:bg-muted"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>

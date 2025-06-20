@@ -51,12 +51,12 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
         </div>
         <Progress 
           value={progress} 
-          className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+          className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
         />
       </div>
 
       {/* Welcome Card */}
-      <Card className="bg-gradient-to-b from-white to-slate-50/50">
+      <Card className="bg-gradient-to-b from-background to-muted/50">
         <CardContent className="pt-6">
           <div className="space-y-6">
             <div>
@@ -67,7 +67,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
                 <div className="p-2 bg-blue-50 rounded-lg">
                   <BookOpen className="h-5 w-5 text-blue-600" />
                 </div>
@@ -76,7 +76,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                   <div className="text-sm text-muted-foreground">to master</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
                 <div className="p-2 bg-emerald-50 rounded-lg">
                   <Clock className="h-5 w-5 text-emerald-600" />
                 </div>
@@ -85,7 +85,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                   <div className="text-sm text-muted-foreground">estimated time</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200">
+              <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
                 <div className="p-2 bg-purple-50 rounded-lg">
                   <Trophy className="h-5 w-5 text-purple-600" />
                 </div>
@@ -109,7 +109,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <Info className="h-4 w-4 text-slate-400" />
+                <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Follow these metrics in order to build your knowledge step by step</p>

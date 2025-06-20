@@ -326,7 +326,7 @@ const LearningPathDetail: React.FC = () => {
       case 'advanced':
         return 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+        return 'bg-muted text-muted-foreground border-border hover:bg-muted/80';
     }
   };
 
@@ -627,7 +627,7 @@ const LearningPathDetail: React.FC = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Investment Explorer */}
-                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                        <Card className="border-border hover:border-emerald-200 transition-colors">
                           <CardContent className="p-6">
                             <div className="space-y-4">
                               <div className="p-2 bg-blue-50 rounded-lg w-fit">
@@ -651,7 +651,7 @@ const LearningPathDetail: React.FC = () => {
                         </Card>
 
                         {/* More Learning Paths */}
-                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                        <Card className="border-border hover:border-emerald-200 transition-colors">
                           <CardContent className="p-6">
                             <div className="space-y-4">
                               <div className="p-2 bg-purple-50 rounded-lg w-fit">
@@ -675,10 +675,10 @@ const LearningPathDetail: React.FC = () => {
                         </Card>
 
                         {/* Back to Learning Paths */}
-                        <Card className="border-slate-200 hover:border-emerald-200 transition-colors">
+                        <Card className="border-border hover:border-emerald-200 transition-colors">
                           <CardContent className="p-6">
                             <div className="space-y-4">
-                              <div className="p-2 bg-slate-50 rounded-lg w-fit">
+                              <div className="p-2 bg-muted rounded-lg w-fit">
                                 <ArrowLeft className="h-5 w-5 text-muted-foreground" />
                               </div>
                               <div>
@@ -689,7 +689,7 @@ const LearningPathDetail: React.FC = () => {
                               </div>
                               <Button
                                 onClick={handleBackToLearningPaths}
-                                className="w-full bg-slate-600 hover:bg-slate-700"
+                                className="w-full"
                               >
                                 Go Back
                                 <ArrowLeft className="ml-2 h-4 w-4" />
@@ -766,9 +766,9 @@ const LearningPathDetail: React.FC = () => {
         ) : (
           <>
             {/* Asset Class Learning Content */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <Card className="border-slate-200">
-                <CardHeader className="bg-gradient-to-b from-white to-slate-50/50">
+            <div className="bg-background shadow rounded-lg overflow-hidden">
+              <Card className="border-border">
+                <CardHeader className="bg-gradient-to-b from-background to-muted/50">
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -789,7 +789,7 @@ const LearningPathDetail: React.FC = () => {
                       </div>
                       <Progress 
                         value={progressPercentage} 
-                        className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+                        className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{completedCount} of {totalSections} sections completed</span>
@@ -813,8 +813,8 @@ const LearningPathDetail: React.FC = () => {
                             }}
                             className={cn(
                               "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                              "hover:bg-slate-100",
-                              expandedSections.includes(index) && "bg-slate-100",
+                              "hover:bg-muted",
+                              expandedSections.includes(index) && "bg-muted",
                               completedSections.includes(index) && "text-emerald-600"
                             )}
                           >
@@ -841,7 +841,7 @@ const LearningPathDetail: React.FC = () => {
                             className="mb-4"
                           >
                             <div 
-                              className="p-4 bg-white rounded-lg border border-slate-200 cursor-pointer"
+                              className="p-4 bg-background rounded-lg border border-border cursor-pointer"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -876,8 +876,8 @@ const LearningPathDetail: React.FC = () => {
                                       toggleBookmark(index);
                                     }}
                                     className={cn(
-                                      "p-1 rounded-full hover:bg-slate-100 transition-colors",
-                                      bookmarkedSections.includes(index) ? "text-amber-500" : "text-slate-400"
+                                      "p-1 rounded-full hover:bg-muted transition-colors",
+                                      bookmarkedSections.includes(index) ? "text-amber-500" : "text-muted-foreground"
                                     )}
                                   >
                                     {bookmarkedSections.includes(index) ? (
@@ -893,8 +893,8 @@ const LearningPathDetail: React.FC = () => {
                                       toggleSectionCompletion(index);
                                     }}
                                     className={cn(
-                                      "p-1 rounded-full hover:bg-slate-100 transition-colors",
-                                      completedSections.includes(index) ? "text-emerald-600" : "text-slate-400"
+                                      "p-1 rounded-full hover:bg-muted transition-colors",
+                                      completedSections.includes(index) ? "text-emerald-600" : "text-muted-foreground"
                                     )}
                                   >
                                     {completedSections.includes(index) ? (
@@ -904,9 +904,9 @@ const LearningPathDetail: React.FC = () => {
                                     )}
                                   </button>
                                   {expandedSections.includes(index) ? (
-                                    <ChevronUp className="h-5 w-5 text-slate-400" />
+                                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
                                   ) : (
-                                    <ChevronDown className="h-5 w-5 text-slate-400" />
+                                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
                                   )}
                                 </div>
                               </div>
@@ -921,7 +921,7 @@ const LearningPathDetail: React.FC = () => {
                                   transition={{ duration: 0.2 }}
                                   className="overflow-hidden"
                                 >
-                                  <div className="p-4 space-y-4 bg-white rounded-lg border border-slate-200">
+                                  <div className="p-4 space-y-4 bg-background rounded-lg border border-border">
                                     {renderSectionContent(section.content)}
                                     
                                     <div className="flex justify-end">
@@ -935,7 +935,7 @@ const LearningPathDetail: React.FC = () => {
                                           "gap-2",
                                           completedSections.includes(index)
                                             ? "bg-emerald-600 hover:bg-emerald-700"
-                                            : "bg-slate-900 hover:bg-slate-800"
+                                            : "bg-foreground hover:bg-foreground/90"
                                         )}
                                       >
                                         {completedSections.includes(index) ? (
@@ -970,7 +970,7 @@ const LearningPathDetail: React.FC = () => {
       {/* Mobile Navigation Drawer */}
       <Sheet open={showMobileNav} onOpenChange={setShowMobileNav}>
         <SheetContent side="left" className="w-64 p-0 bg-white">
-          <div className="p-4 border-b border-slate-200">
+          <div className="p-4 border-b border-border">
             <h3 className="font-medium text-foreground">Sections</h3>
           </div>
           <ScrollArea className="h-[calc(100vh-4rem)]">
@@ -985,8 +985,8 @@ const LearningPathDetail: React.FC = () => {
                   }}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                    "hover:bg-slate-100",
-                    expandedSections.includes(index) && "bg-slate-100",
+                    "hover:bg-muted",
+                    expandedSections.includes(index) && "bg-muted",
                     completedSections.includes(index) && "text-emerald-600"
                   )}
                 >

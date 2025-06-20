@@ -159,7 +159,7 @@ const LearningFolderView: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/learning')}
-              className="hover:bg-slate-100"
+              className="hover:bg-muted"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -176,9 +176,9 @@ const LearningFolderView: React.FC = () => {
               placeholder="Search modules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full px-4 py-2 pl-10 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
-            <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           </div>
         </div>
 
