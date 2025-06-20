@@ -25,6 +25,14 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
   onAnswerChange,
   validationError
 }) => {
+  // Debug logging to see what we're receiving
+  console.log('AnswerInputs received question:', {
+    id: question.id,
+    questionType: question.questionType,
+    questionText: question.questionText,
+    sliderConfig: question.sliderConfig
+  });
+
   // Special handling for income question
   if (question.id === "eabf99f8-9a79-4cbd-baad-a81f0c48a3c9") {
     return (
@@ -39,7 +47,7 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
     );
   }
 
-  switch (question.questionType) {
+  switch (question.questionType?.toLowerCase()?.trim()) {
     case 'multiple_choice':
       return (
         <MultipleChoiceInput
@@ -94,6 +102,7 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
       );
 
     case 'slider':
+      console.log('Rendering slider input for question:', question.id);
       return (
         <SliderInput
           question={question}
@@ -118,7 +127,7 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
       );
 
     default:
-      console.warn(`Unsupported question type: ${question.questionType}`);
+      console.warn(`Unsupported question type: ${question.questionType}`, question);
       return null;
   }
 };

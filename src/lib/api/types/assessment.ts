@@ -10,7 +10,8 @@ export interface SliderConfig {
 
 export interface Question {
   id: string;
-  text: string;
+  questionText: string;
+  whyWeAsk: string;
   questionType: QuestionType;
   category: {
     id: string;
@@ -21,7 +22,11 @@ export interface Question {
     id: string;
     optionLabel: string;
   }>;
+  visibilityRules?: {
+    showToLevels: string[];
+  };
   required: boolean;
+  placeholder?: string;
   answer?: {
     value: number | string | boolean;
     text?: string;

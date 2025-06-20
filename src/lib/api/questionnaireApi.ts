@@ -55,6 +55,8 @@ export const getQuestions = async (): Promise<Question[]> => {
       }
     );
     
+    console.log('Backend questions response:', response.data);
+    
     return sortQuestionsByCategory(response.data);
   } catch (error) {
     console.error('Failed to fetch questions:', error);
