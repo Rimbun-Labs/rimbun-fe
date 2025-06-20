@@ -36,10 +36,10 @@ export const userService = {
         },
         body: JSON.stringify({
           displayName: data.displayName,
-          authProviderUid: data.authProviderId,
+          authProviderId: data.authProviderId,
           email: data.email,
           username: data.username,
-          authProviderType: 'supabase',
+          authProviderType: 'firebase',
         }),
       });
 
@@ -79,10 +79,10 @@ export const userService = {
         },
         body: JSON.stringify({
           displayName: data.displayName,
-          authProviderUid: data.authProviderId,
+          authProviderId: data.authProviderId,
           email: data.email,
           username: username,
-          authProviderType: 'supabase',
+          authProviderType: 'firebase',
         }),
       });
 
