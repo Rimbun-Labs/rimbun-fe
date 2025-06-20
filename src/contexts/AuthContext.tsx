@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { authService } from '@/lib/auth/authService';
 import { userService } from '@/lib/api/userService';
@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
-  const [lastProcessedUserId, setLastProcessedUserId] = useState<string | null>(null);
+  const lastProcessedUserIdRef = useRef<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,12 +43,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If user signed in (especially via Google OAuth), ensure they exist in backend
       if (user) {
         // Prevent duplicate processing for the same user
-        if (lastProcessedUserId === user.id) {
+        if (lastProcessedUserIdRef.current === user.id) {
           console.log('🔄 AuthContext: User already processed, skipping:', user.id.substring(0, 8) + '...');
           return;
         }
         
-        setLastProcessedUserId(user.id);
+        lastProcessedUserIdRef.current = user.id;
         setUserRegistrationComplete(false); // Reset on auth change
         
         try {
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         // User signed out, reset the last processed user ID
-        setLastProcessedUserId(null);
+        lastProcessedUserIdRef.current = null;
         setUserRegistrationComplete(false);
       }
     });
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, [lastProcessedUserId]);
+  }, []);
 
   const signInWithEmail = async (email: string, password: string):Promise<any>  =>  {
     const { user, error } = await authService.signInWithEmail(email, password);
