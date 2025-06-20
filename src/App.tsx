@@ -23,6 +23,7 @@ import Signup from "./pages/Signup";
 import { useAuth } from "./contexts/AuthContext";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
 import LearningFolderView from "./pages/LearningFolderView";
+import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 
 const queryClient = new QueryClient();
 
@@ -82,7 +83,9 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <AppRoutes />
+            <AssessmentPersistenceProvider>
+              <AppRoutes />
+            </AssessmentPersistenceProvider>
           </TooltipProvider>
         </AuthProvider>
       </BrowserRouter>
