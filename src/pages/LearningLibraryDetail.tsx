@@ -41,13 +41,13 @@ const LearningLibraryDetail: React.FC = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-800';
       case 'intermediate':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800';
       case 'advanced':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-200 dark:border-rose-800';
       default:
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 
@@ -67,21 +67,21 @@ const LearningLibraryDetail: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        <div className="prose prose-slate max-w-none">
-          <p className="text-slate-700 leading-relaxed">
+        <div className="prose prose-slate max-w-none dark:prose-invert">
+          <p className="text-foreground leading-relaxed">
             {paragraphs[0]}
           </p>
         </div>
 
         {keyPoints.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
               Key Points & Examples
             </h4>
             <ul className="space-y-2">
               {keyPoints.map((point, index) => (
-                <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
+                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                   <span className="text-amber-500 mt-1">•</span>
                   {point}
                 </li>
@@ -92,13 +92,13 @@ const LearningLibraryDetail: React.FC = () => {
 
         {practicalTips.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Trophy className="h-4 w-4 text-emerald-500" />
               Practical Tips
             </h4>
             <ul className="space-y-2">
               {practicalTips.map((tip, index) => (
-                <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
+                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                   <span className="text-emerald-500 mt-1">•</span>
                   {tip}
                 </li>
@@ -111,7 +111,7 @@ const LearningLibraryDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Header */}
@@ -121,7 +121,7 @@ const LearningLibraryDetail: React.FC = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate('/learning/asset-classes')}
-                className="hover:bg-slate-100"
+                className="hover:bg-accent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -134,15 +134,15 @@ const LearningLibraryDetail: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <Card className="border-slate-200">
-              <CardHeader className="bg-gradient-to-b from-white to-slate-50/50">
+          <div className="bg-card shadow rounded-lg overflow-hidden">
+            <Card className="border-border">
+              <CardHeader className="bg-gradient-to-b from-card to-muted/50">
                 <div className="space-y-4">
                   <div>
-                    <CardTitle className="text-3xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                    <CardTitle className="text-3xl bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                       {content.title}
                     </CardTitle>
-                    <CardDescription className="text-lg mt-2 text-slate-600">
+                    <CardDescription className="text-lg mt-2 text-muted-foreground">
                       {content.description}
                     </CardDescription>
                   </div>
@@ -157,7 +157,7 @@ const LearningLibraryDetail: React.FC = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="bg-white rounded-lg border border-slate-200 overflow-hidden"
+                      className="bg-card rounded-lg border border-border overflow-hidden"
                     >
                       <div 
                         className="p-6 cursor-pointer"
@@ -170,7 +170,7 @@ const LearningLibraryDetail: React.FC = () => {
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-slate-900">{section.title}</h3>
+                              <h3 className="font-medium text-foreground">{section.title}</h3>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge
@@ -183,7 +183,7 @@ const LearningLibraryDetail: React.FC = () => {
                                 {section.difficulty}
                               </Badge>
                               {section.relatedMetrics && (
-                                <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700">
+                                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
                                   {section.relatedMetrics.length} metrics
                                 </Badge>
                               )}

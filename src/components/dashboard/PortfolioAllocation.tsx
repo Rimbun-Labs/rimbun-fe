@@ -87,7 +87,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
               borderWidth={1}
               borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
               arcLinkLabelsSkipAngle={10}
-              arcLinkLabelsTextColor="#333333"
+              arcLinkLabelsTextColor="hsl(var(--foreground))"
               arcLinkLabelsThickness={2}
               arcLinkLabelsColor={{ from: 'color' }}
               arcLabelsSkipAngle={10}
@@ -122,7 +122,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
                   itemsSpacing: 0,
                   itemWidth: 100,
                   itemHeight: 18,
-                  itemTextColor: '#999',
+                  itemTextColor: 'hsl(var(--muted-foreground))',
                   itemDirection: 'left-to-right',
                   itemOpacity: 1,
                   symbolSize: 18,

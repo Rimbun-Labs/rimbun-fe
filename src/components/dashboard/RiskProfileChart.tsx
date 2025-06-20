@@ -36,29 +36,29 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
   
   const colors = {
     primary: {
-      stroke: '#4f46e5', // Brighter indigo
-      fill: 'rgba(79, 70, 229, 0.7)', // More opaque fill
-      gradient: 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(79, 70, 229, 0.5) 100%)',
+      stroke: 'hsl(var(--primary))', // Use CSS variable
+      fill: 'hsl(var(--primary) / 0.7)', // Use CSS variable with opacity
+      gradient: 'linear-gradient(180deg, hsl(var(--primary) / 0.9) 0%, hsl(var(--primary) / 0.5) 100%)',
     },
     confidence: {
       high: {
-        stroke: 'rgba(34, 197, 94, 0.6)', // More visible green
-        fill: 'rgba(34, 197, 94, 0.2)',
+        stroke: 'hsl(142 76% 36% / 0.6)', // Green with opacity
+        fill: 'hsl(142 76% 36% / 0.2)',
       },
       medium: {
-        stroke: 'rgba(234, 179, 8, 0.6)', // More visible yellow
-        fill: 'rgba(234, 179, 8, 0.2)',
+        stroke: 'hsl(48 96% 53% / 0.6)', // Yellow with opacity
+        fill: 'hsl(48 96% 53% / 0.2)',
       },
       low: {
-        stroke: 'rgba(239, 68, 68, 0.6)', // More visible red
-        fill: 'rgba(239, 68, 68, 0.2)',
+        stroke: 'hsl(0 84% 60% / 0.6)', // Red with opacity
+        fill: 'hsl(0 84% 60% / 0.2)',
       }
     },
-    grid: '#94a3b8', // Darker slate for better contrast
-    text: '#1e293b', // Darker text for better readability
+    grid: 'hsl(var(--border))', // Use CSS variable
+    text: 'hsl(var(--foreground))', // Use CSS variable
     active: {
-      stroke: '#3730a3', // Darker indigo for active state
-      fill: 'rgba(55, 48, 163, 0.9)',
+      stroke: 'hsl(var(--primary))', // Use CSS variable
+      fill: 'hsl(var(--primary) / 0.9)',
     },
   };
 
@@ -160,12 +160,12 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
                 const confidence = payload[1]?.value ? Number(payload[1].value) : null;
                 
                 return (
-                  <div className="bg-white p-4 rounded-lg shadow-lg border border-border">
-                    <h3 className="font-medium text-sm mb-2">{label}</h3>
+                  <div className="bg-popover p-4 rounded-lg shadow-lg border border-border">
+                    <h3 className="font-medium text-sm mb-2 text-popover-foreground">{label}</h3>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Score:</span>
-                        <span className="font-medium">{score}/100</span>
+                        <span className="font-medium text-popover-foreground">{score}/100</span>
                       </div>
                       {confidence && (
                         <div className="flex justify-between items-center">
@@ -193,7 +193,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               paddingTop: '20px',
             }}
             formatter={(value) => (
-              <span className="text-sm font-medium text-gray-700">{value}</span>
+              <span className="text-sm font-medium text-foreground">{value}</span>
             )}
           />
         </RadarChart>

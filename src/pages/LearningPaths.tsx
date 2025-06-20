@@ -120,15 +120,15 @@ const LearningPaths: React.FC = () => {
           <Button 
             variant="ghost" 
             onClick={() => navigate(`/dashboard/${sessionId}`)}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
           
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Your Learning Paths</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="text-2xl font-bold text-foreground">Your Learning Paths</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Start your learning journey with these recommended paths
             </p>
           </div>

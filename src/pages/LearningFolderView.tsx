@@ -213,7 +213,7 @@ const LearningFolderView: React.FC = () => {
 
         {filteredModules.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-slate-500">No modules found matching your search.</p>
+            <p className="text-muted-foreground">No modules found matching your search.</p>
           </div>
         )}
       </div>

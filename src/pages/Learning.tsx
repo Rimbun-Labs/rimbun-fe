@@ -96,7 +96,7 @@ const Learning: React.FC = () => {
 
         {filteredFolders.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-slate-500">No folders found matching your search.</p>
+            <p className="text-muted-foreground">No folders found matching your search.</p>
           </div>
         )}
       </div>

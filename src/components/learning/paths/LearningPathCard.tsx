@@ -123,27 +123,27 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
           <div className="flex items-start justify-between mb-6">
             <div className="space-y-2 max-w-[70%]">
               <div className="flex items-center gap-2">
-                <h3 className="text-2xl font-semibold text-slate-900">{content.title}</h3>
+                <h3 className="text-2xl font-semibold text-foreground">{content.title}</h3>
                 {allocation >= 30 && (
-                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Recommended
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {content.description}
               </p>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-2xl font-semibold text-emerald-600">{allocation}%</span>
-              <span className="text-xs text-slate-500">Allocation</span>
+              <span className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{allocation}%</span>
+              <span className="text-xs text-muted-foreground">Allocation</span>
             </div>
           </div>
 
           {/* Section preview */}
           <div className="mt-4 space-y-2">
-            <div className="flex items-center text-sm text-slate-500 mb-2">
+            <div className="flex items-center text-sm text-muted-foreground mb-2">
               <BookOpen className="h-4 w-4 mr-2" />
               <span>What you'll learn:</span>
             </div>
@@ -151,11 +151,11 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
               {content.sections.slice(0, 3).map((section, index) => (
                 <li key={index} className="flex items-start text-sm">
                   <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5 text-emerald-500" />
-                  <span className="text-slate-600">{section.title}</span>
+                  <span className="text-muted-foreground">{section.title}</span>
                 </li>
               ))}
               {content.sections.length > 3 && (
-                <li className="text-sm text-slate-500">
+                <li className="text-sm text-muted-foreground">
                   +{content.sections.length - 3} more sections
                 </li>
               )}
