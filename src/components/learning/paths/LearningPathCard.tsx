@@ -59,12 +59,12 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="space-y-1">
-                <h3 className="text-xl font-semibold text-slate-900">{assetClass}</h3>
-                <p className="text-sm text-slate-500">No detailed information available</p>
+                <h3 className="text-xl font-semibold text-foreground">{assetClass}</h3>
+                <p className="text-sm text-muted-foreground">No detailed information available</p>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-lg font-semibold text-emerald-600">{allocation}%</span>
-                <span className="text-xs text-slate-500">Allocation</span>
+                <span className="text-xs text-muted-foreground">Allocation</span>
               </div>
             </div>
             <div className="mt-auto">
@@ -165,14 +165,14 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
           {/* Progress indicator */}
           <div className="mt-6">
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-slate-500">Overall Progress</span>
-              <span className="font-medium text-slate-700">{progressPercentage}%</span>
+              <span className="text-muted-foreground">Overall Progress</span>
+              <span className="font-medium text-foreground">{progressPercentage}%</span>
             </div>
             <Progress 
               value={progressPercentage} 
               className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
             />
-            <div className="flex justify-between text-xs text-slate-500 mt-1">
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{completedCount} of {totalSections} sections completed</span>
               <span>{totalSections - completedCount} remaining</span>
             </div>

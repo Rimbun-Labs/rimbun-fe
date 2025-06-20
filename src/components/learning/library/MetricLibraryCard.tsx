@@ -56,8 +56,8 @@ const MetricLibraryCard: React.FC<MetricLibraryCardProps> = ({ metric, onStart }
 
           {/* Title and Description */}
           <div className="space-y-2 mb-4">
-            <h3 className="text-xl font-semibold text-slate-900">{metric.title}</h3>
-            <p className="text-sm text-slate-600 line-clamp-2">{metric.description}</p>
+            <h3 className="text-xl font-semibold text-foreground">{metric.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">{metric.description}</p>
           </div>
 
           {/* Action Button */}

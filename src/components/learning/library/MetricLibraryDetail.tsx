@@ -68,12 +68,12 @@ const MetricLibraryDetail: React.FC = () => {
           <CardContent className="p-6 space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Overview</h2>
-              <p className="text-slate-700">{content.overview}</p>
+              <p className="text-foreground">{content.overview}</p>
             </div>
 
             <div>
               <h2 className="text-xl font-semibold mb-4">Details</h2>
-              <p className="text-slate-700">{content.details}</p>
+              <p className="text-foreground">{content.details}</p>
             </div>
 
             <div>

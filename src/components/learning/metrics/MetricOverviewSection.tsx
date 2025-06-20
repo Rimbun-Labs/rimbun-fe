@@ -44,7 +44,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
       {/* Progress Header */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-slate-900">{assetClass} Metrics</h2>
+          <h2 className="text-2xl font-bold text-foreground">{assetClass} Metrics</h2>
           <Badge variant="outline" className="text-sm">
             {completedCount} of {totalMetrics} completed
           </Badge>
@@ -60,8 +60,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
         <CardContent className="pt-6">
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-semibold text-slate-900">Welcome to {assetClass} Metrics</h3>
-              <p className="text-slate-600 mt-2">
+              <h3 className="text-xl font-semibold text-foreground">Welcome to {assetClass} Metrics</h3>
+              <p className="text-muted-foreground mt-2">
                 Master these key metrics to make better investment decisions in {assetClass}.
               </p>
             </div>
@@ -72,8 +72,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                   <BookOpen className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-slate-900">{totalMetrics} Metrics</div>
-                  <div className="text-sm text-slate-600">to master</div>
+                  <div className="text-sm font-medium text-foreground">{totalMetrics} Metrics</div>
+                  <div className="text-sm text-muted-foreground">to master</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200">
@@ -81,8 +81,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                   <Clock className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-slate-900">~{totalMetrics * 5} mins</div>
-                  <div className="text-sm text-slate-600">estimated time</div>
+                  <div className="text-sm font-medium text-foreground">~{totalMetrics * 5} mins</div>
+                  <div className="text-sm text-muted-foreground">estimated time</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-slate-200">
@@ -90,8 +90,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                   <Trophy className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-slate-900">{completedCount} Completed</div>
-                  <div className="text-sm text-slate-600">metrics</div>
+                  <div className="text-sm font-medium text-foreground">{completedCount} Completed</div>
+                  <div className="text-sm text-muted-foreground">metrics</div>
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 text-blue-500" />
-            <h3 className="text-lg font-semibold text-slate-900">Your Learning Path</h3>
+            <h3 className="text-lg font-semibold text-foreground">Your Learning Path</h3>
           </div>
           <TooltipProvider>
             <Tooltip>

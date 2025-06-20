@@ -46,7 +46,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <h3 className="font-semibold text-slate-900">{name}</h3>
+            <h3 className="font-semibold text-foreground">{name}</h3>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className={getCategoryColor(category)}>
                 {getCategoryDisplayName(category)}
@@ -62,7 +62,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         </div>
 
         {/* Overview */}
-        <p className="text-sm text-slate-600 line-clamp-2">
+        <p className="text-sm text-muted-foreground line-clamp-2">
           {content?.overview || "Learn about this important metric for your investment decisions."}
         </p>
 

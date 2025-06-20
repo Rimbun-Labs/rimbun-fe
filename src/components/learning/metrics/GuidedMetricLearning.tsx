@@ -202,7 +202,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-slate-400" />
-            <span className="text-sm text-slate-600">~5 mins</span>
+            <span className="text-sm text-muted-foreground">~5 mins</span>
           </div>
         </div>
         <Progress value={progress} className="w-32" />
@@ -224,7 +224,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-muted-foreground">
                 Weight in portfolio
               </div>
               <div className="text-lg font-semibold">
@@ -239,7 +239,7 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
               {/* Learning Objectives */}
               <div className="bg-slate-50 p-4 rounded-lg">
                 <h3 className="font-semibold mb-2">What You'll Learn</h3>
-                <ul className="list-disc list-inside space-y-1 text-slate-700">
+                <ul className="list-disc list-inside space-y-1 text-foreground">
                   <li>Understanding {metricName} and its importance</li>
                   <li>How to calculate and interpret {metricName}</li>
                   <li>Real-world applications in {assetClass} investing</li>
@@ -249,11 +249,11 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
               {/* Main Content */}
               <div className="prose max-w-none">
                 <h3>Overview</h3>
-                <p className="text-slate-700">{content?.overview}</p>
+                <p className="text-foreground">{content?.overview}</p>
                 
                 <h3>Why This Matters</h3>
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-slate-700">{content?.details}</p>
+                  <p className="text-foreground">{content?.details}</p>
                 </div>
               </div>
 

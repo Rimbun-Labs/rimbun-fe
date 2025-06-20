@@ -86,7 +86,7 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
         {/* Question */}
         <div className="space-y-2">
           <h3 className="font-semibold text-lg">Practice Question</h3>
-          <p className="text-slate-700">{data.question}</p>
+          <p className="text-foreground">{data.question}</p>
         </div>
 
         {/* Options */}
@@ -134,14 +134,14 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
         {/* Explanation - Show after answering in both modes */}
         {(showFullExplanation || hasAnswered) && (
           <div className="bg-slate-50 p-4 rounded-lg space-y-2">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               <span className="font-medium">Explanation:</span>{" "}
               {data.explanation}
             </p>
             {data.relatedMetrics && data.relatedMetrics.length > 0 && (
               <div className="mt-2">
-                <p className="text-sm font-medium text-slate-600">Related Metrics:</p>
-                <ul className="list-disc list-inside text-sm text-slate-600">
+                <p className="text-sm font-medium text-muted-foreground">Related Metrics:</p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground">
                   {data.relatedMetrics.map((metric, index) => (
                     <li key={index}>{metric}</li>
                   ))}

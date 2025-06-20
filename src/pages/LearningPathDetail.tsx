@@ -363,7 +363,7 @@ const LearningPathDetail: React.FC = () => {
       <div className="space-y-6">
         {/* Overview */}
         <div className="prose prose-slate max-w-none">
-          <p className="text-slate-700 leading-relaxed">
+          <p className="text-foreground leading-relaxed">
             {paragraphs[0]}
           </p>
         </div>
@@ -371,13 +371,13 @@ const LearningPathDetail: React.FC = () => {
         {/* Key Points */}
         {keyPoints.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-500" />
               Key Points & Examples
             </h4>
             <ul className="space-y-2">
               {keyPoints.map((point, index) => (
-                <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
+                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                   <span className="text-amber-500 mt-1">•</span>
                   {point}
                 </li>
@@ -389,13 +389,13 @@ const LearningPathDetail: React.FC = () => {
         {/* Practical Tips */}
         {practicalTips.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Trophy className="h-4 w-4 text-emerald-500" />
               Practical Tips
             </h4>
             <ul className="space-y-2">
               {practicalTips.map((tip, index) => (
-                <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
+                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
                   <span className="text-emerald-500 mt-1">•</span>
                   {tip}
                 </li>
@@ -590,7 +590,7 @@ const LearningPathDetail: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={showMetrics ? handleBackToAssetClasses : handleBackToLearningPaths}
-                className="inline-flex items-center text-slate-600 hover:text-slate-900"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {showMetrics ? "Back to Asset Classes" : "Back to Learning Paths"}
@@ -620,8 +620,8 @@ const LearningPathDetail: React.FC = () => {
                           <Trophy className="h-6 w-6 text-emerald-600" />
                         </div>
                         <div>
-                          <h2 className="text-2xl font-bold text-slate-900">What's Next?</h2>
-                          <p className="text-slate-600">Continue your learning journey</p>
+                          <h2 className="text-2xl font-bold text-foreground">What's Next?</h2>
+                          <p className="text-muted-foreground">Continue your learning journey</p>
                         </div>
                       </div>
 
@@ -634,8 +634,8 @@ const LearningPathDetail: React.FC = () => {
                                 <Sparkles className="h-5 w-5 text-blue-600" />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-slate-900">Investment Explorer</h3>
-                                <p className="text-sm text-slate-600 mt-1">
+                                <h3 className="font-semibold text-foreground">Investment Explorer</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Explore real investment opportunities using your new knowledge
                                 </p>
                               </div>
@@ -658,8 +658,8 @@ const LearningPathDetail: React.FC = () => {
                                 <BookOpen className="h-5 w-5 text-purple-600" />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-slate-900">More Learning Paths</h3>
-                                <p className="text-sm text-slate-600 mt-1">
+                                <h3 className="font-semibold text-foreground">More Learning Paths</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Explore other asset classes and expand your investment knowledge
                                 </p>
                               </div>
@@ -679,11 +679,11 @@ const LearningPathDetail: React.FC = () => {
                           <CardContent className="p-6">
                             <div className="space-y-4">
                               <div className="p-2 bg-slate-50 rounded-lg w-fit">
-                                <ArrowLeft className="h-5 w-5 text-slate-600" />
+                                <ArrowLeft className="h-5 w-5 text-muted-foreground" />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-slate-900">Back to Learning Paths</h3>
-                                <p className="text-sm text-slate-600 mt-1">
+                                <h3 className="font-semibold text-foreground">Back to Learning Paths</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Return to your learning dashboard
                                 </p>
                               </div>
@@ -775,7 +775,7 @@ const LearningPathDetail: React.FC = () => {
                         <CardTitle className="text-3xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                           {content.title}
                         </CardTitle>
-                        <CardDescription className="text-lg mt-2 text-slate-600">
+                        <CardDescription className="text-lg mt-2 text-muted-foreground">
                           {content.description}
                         </CardDescription>
                       </div>
@@ -784,14 +784,14 @@ const LearningPathDetail: React.FC = () => {
                     {/* Progress Overview */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-slate-700">Overall Progress</span>
-                        <span className="text-sm font-medium text-slate-700">{progressPercentage}%</span>
+                        <span className="text-sm font-medium text-foreground">Overall Progress</span>
+                        <span className="text-sm font-medium text-foreground">{progressPercentage}%</span>
                       </div>
                       <Progress 
                         value={progressPercentage} 
                         className="h-2 bg-slate-100 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
                       />
-                      <div className="flex justify-between text-xs text-slate-500">
+                      <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{completedCount} of {totalSections} sections completed</span>
                         <span>{totalSections - completedCount} remaining</span>
                       </div>
@@ -803,7 +803,7 @@ const LearningPathDetail: React.FC = () => {
                     {/* Table of Contents */}
                     <div className="w-64 shrink-0 hidden md:block">
                       <div className="sticky top-4 space-y-2">
-                        <h3 className="font-medium mb-2 text-slate-700">Sections</h3>
+                        <h3 className="font-medium mb-2 text-foreground">Sections</h3>
                         {content.sections.map((section, index) => (
                           <button
                             key={index}
@@ -850,7 +850,7 @@ const LearningPathDetail: React.FC = () => {
                             >
                               <div className="flex items-start justify-between">
                                 <div className="space-y-1">
-                                  <h3 className="font-medium text-slate-900">{section.title}</h3>
+                                  <h3 className="font-medium text-foreground">{section.title}</h3>
                                   <div className="flex items-center gap-2">
                                     <Badge
                                       variant="outline"
@@ -862,7 +862,7 @@ const LearningPathDetail: React.FC = () => {
                                       {section.difficulty}
                                     </Badge>
                                     {section.relatedMetrics && (
-                                      <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700">
+                                      <Badge variant="secondary" className="text-xs bg-muted text-foreground">
                                         {section.relatedMetrics.length} metrics
                                       </Badge>
                                     )}
@@ -971,7 +971,7 @@ const LearningPathDetail: React.FC = () => {
       <Sheet open={showMobileNav} onOpenChange={setShowMobileNav}>
         <SheetContent side="left" className="w-64 p-0 bg-white">
           <div className="p-4 border-b border-slate-200">
-            <h3 className="font-medium text-slate-900">Sections</h3>
+            <h3 className="font-medium text-foreground">Sections</h3>
           </div>
           <ScrollArea className="h-[calc(100vh-4rem)]">
             <div className="p-2 space-y-1">

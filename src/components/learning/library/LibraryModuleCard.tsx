@@ -77,12 +77,12 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
 
           {/* Title and Description */}
           <div className="space-y-2 mb-4">
-            <h3 className="text-xl font-semibold text-slate-900">{module.title}</h3>
-            <p className="text-sm text-slate-600 line-clamp-2">{module.description}</p>
+            <h3 className="text-xl font-semibold text-foreground">{module.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">{module.description}</p>
           </div>
 
           {/* Duration */}
-          <div className="flex items-center text-sm text-slate-600 mb-4">
+          <div className="flex items-center text-sm text-muted-foreground mb-4">
             <Clock className="h-4 w-4 mr-2" />
             <span>{module.duration} mins</span>
           </div>
@@ -90,7 +90,7 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
           {/* Metrics Preview */}
           {module.metrics && module.metrics.length > 0 && (
             <div className="space-y-2 mb-4">
-              <div className="flex items-center text-sm text-slate-600">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <BookOpen className="h-4 w-4 mr-2" />
                 <span>Key Metrics:</span>
               </div>
@@ -105,7 +105,7 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
                   </Badge>
                 ))}
                 {module.metrics.length > 3 && (
-                  <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                  <Badge variant="outline" className="bg-muted text-muted-foreground">
                     +{module.metrics.length - 3} more
                   </Badge>
                 )}

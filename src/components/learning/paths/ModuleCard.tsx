@@ -93,18 +93,18 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ module, onStart }) => {
 
           {/* Title and Description */}
           <div className="space-y-2 mb-4">
-            <h3 className="text-xl font-semibold text-slate-900">{module.title}</h3>
-            <p className="text-sm text-slate-600 line-clamp-2">{module.description}</p>
+            <h3 className="text-xl font-semibold text-foreground">{module.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">{module.description}</p>
           </div>
 
           {/* Progress */}
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Progress</span>
+              <span className="text-muted-foreground">Progress</span>
               <span className="font-medium">{module.progress}%</span>
             </div>
             <Progress value={module.progress} className="h-2" />
-            <div className="flex justify-between text-xs text-slate-500">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>{module.completedLessons} of {module.totalLessons} lessons</span>
               <span>{module.duration} mins</span>
             </div>
@@ -113,7 +113,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ module, onStart }) => {
           {/* Metrics Preview */}
           {module.metrics && module.metrics.length > 0 && (
             <div className="space-y-2 mb-4">
-              <div className="flex items-center text-sm text-slate-600">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <BookOpen className="h-4 w-4 mr-2" />
                 <span>Key Metrics:</span>
               </div>
@@ -134,7 +134,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ module, onStart }) => {
                   </Badge>
                 ))}
                 {module.metrics.length > 3 && (
-                  <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                  <Badge variant="outline" className="bg-muted text-muted-foreground">
                     +{module.metrics.length - 3} more
                   </Badge>
                 )}

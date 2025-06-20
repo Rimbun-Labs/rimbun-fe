@@ -137,7 +137,7 @@ export const LearningFolderView: React.FC = () => {
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Average Completion</span>
+                <span className="text-muted-foreground">Average Completion</span>
                 <span className="font-medium">
                   {Math.round(
                     modules.reduce((acc, m) => acc + m.progress, 0) / 

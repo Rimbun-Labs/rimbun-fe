@@ -93,7 +93,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <p className="text-slate-600">No questions available for this asset class.</p>
+            <p className="text-muted-foreground">No questions available for this asset class.</p>
             <Button onClick={onClose} className="mt-4">
               Close
             </Button>

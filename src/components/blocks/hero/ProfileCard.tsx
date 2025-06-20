@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, BarChart, Shield, Loader2 } from "lucide-react";
-import { Session } from "@/lib/api/types/session";
+import { ResponseGroup } from "@/lib/api/types/assessment";
 import { cn } from "@/lib/utils";
 
 interface ProfileCardProps {
-  session?: Session | null;
+  session?: ResponseGroup | null;
   isLoading?: boolean;
 }
 
@@ -79,7 +79,7 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
                 isCompleted && "bg-primary/90 hover:bg-primary"
               )}
             >
-              <Link to={isCompleted ? "/dashboard" : "/assessment"}>
+              <Link to={isCompleted ? `/dashboard/${session.id}` : "/assessment"}>
                 {isCompleted ? "View Full Profile" : "Get Started"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

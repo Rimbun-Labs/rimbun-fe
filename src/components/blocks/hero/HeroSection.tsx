@@ -39,7 +39,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   disabled={isLoading}
                   className="relative"
                 >
-                  <Link to={session?.isCompleted ? "/dashboard" : "/assessment"}>
+                  <Link to={session?.isCompleted ? `/dashboard/${session.id}` : "/assessment"}>
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
