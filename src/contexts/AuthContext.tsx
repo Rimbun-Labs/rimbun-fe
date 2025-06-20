@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
+  const [lastProcessedUserId, setLastProcessedUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,10 +39,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = authService.onAuthStateChange(async (user) => {
       setUser(user);
       setLoading(false);
-      setUserRegistrationComplete(false); // Reset on auth change
       
       // If user signed in (especially via Google OAuth), ensure they exist in backend
       if (user) {
+        // Prevent duplicate processing for the same user
+        if (lastProcessedUserId === user.id) {
+          console.log('🔄 AuthContext: User already processed, skipping:', user.id.substring(0, 8) + '...');
+          return;
+        }
+        
+        setLastProcessedUserId(user.id);
+        setUserRegistrationComplete(false); // Reset on auth change
+        
         try {
           console.log('🔵 AuthContext: User signed in, ensuring backend registration:', { 
             id: user.id.substring(0, 8) + '...', 
@@ -60,13 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
           // Don't throw here - user is still authenticated with Supabase
         }
+      } else {
+        // User signed out, reset the last processed user ID
+        setLastProcessedUserId(null);
+        setUserRegistrationComplete(false);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [lastProcessedUserId]);
 
   const signInWithEmail = async (email: string, password: string):Promise<any>  =>  {
     const { user, error } = await authService.signInWithEmail(email, password);
@@ -85,7 +98,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Failed to ensure user exists in backend:', backendError);
         // Don't throw here - user is still authenticated with Supabase
       }
-      navigate('/home');
+      // Removed: navigate('/home');
+      // Let RootRedirect handle the navigation
     }
   };
 
