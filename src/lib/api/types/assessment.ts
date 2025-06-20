@@ -134,12 +134,24 @@ export interface QuestionsWithAnswersResponse {
   responseGroupId: string;
   questionsWithAnswers: Array<{
     id: string;
-    text: string;
-    questionType: string;
+    questionText: string;
+    whyWeAsk: string;
+    questionType: QuestionType;
     category: {
       id: string;
       name: string;
+      description: string;
     };
+    options?: Array<{
+      id: string;
+      optionLabel: string;
+    }>;
+    visibilityRules?: {
+      showToLevels: string[];
+    };
+    required: boolean;
+    placeholder?: string;
+    sliderConfig?: SliderConfig;
     answer: {
       id: string;
       value?: string;

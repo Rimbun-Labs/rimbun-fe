@@ -1,4 +1,3 @@
-
 import { 
   SubmitAnswerRequest, 
   UserResponse, 
@@ -45,12 +44,19 @@ export const getQuestionsWithAnswers = async (responseGroupId: string): Promise<
     responseGroupId,
     questionsWithAnswers: mockQuestions.map(q => ({
       id: q.id,
-      text: q.questionText,
+      questionText: q.questionText,
+      whyWeAsk: q.whyWeAsk,
       questionType: q.questionType,
       category: {
         id: q.category.id,
-        name: q.category.name
+        name: q.category.name,
+        description: q.category.description
       },
+      options: q.options,
+      visibilityRules: q.visibilityRules,
+      required: q.required,
+      placeholder: q.placeholder,
+      sliderConfig: q.sliderConfig,
       answer: {
         id: `answer-${q.id}`,
         value: q.questionType === "number" ? "1000" : undefined,
