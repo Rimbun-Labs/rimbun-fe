@@ -38,7 +38,7 @@ const MobileMenu: React.FC = () => {
         <nav className="space-y-6">
           {/* Overview Section */}
           <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
               Overview
             </h3>
             <Link
@@ -47,7 +47,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/dashboard${session?.id ? `/${session.id}` : ''}`) 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground"
+                  : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
             >
@@ -60,7 +60,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/assessment') 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground"
+                  : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
             >
@@ -71,7 +71,7 @@ const MobileMenu: React.FC = () => {
 
           {/* Learning Section */}
           <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
               Learning
             </h3>
             <Link
@@ -80,7 +80,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/learning') 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground"
+                  : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
             >
@@ -93,7 +93,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/learning-path/${session?.id}`) 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground"
+                  : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
             >
@@ -106,7 +106,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/investment-explorer/${session?.id}`) 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground",
+                  : "text-muted-foreground sidebar-nav-inactive",
                 !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
               )}
               onClick={closeMobileMenu}
@@ -119,7 +119,7 @@ const MobileMenu: React.FC = () => {
 
           {/* Profile Section */}
           <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
               Profile
             </h3>
             <Link
@@ -128,7 +128,7 @@ const MobileMenu: React.FC = () => {
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/profile') 
                   ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground"
+                  : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
             >

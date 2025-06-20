@@ -35,12 +35,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
           <Badge className={cn(getPriorityColor(), "font-medium")}>{priority}</Badge>
         </div>
-        <CardDescription className="text-muted-foreground dark:text-[hsl(var(--card-description))]">
+        <CardDescription className="text-muted-foreground card-description">
           {category}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground dark:text-[hsl(var(--card-description))]">
+        <p className="text-sm text-muted-foreground card-description">
           {description}
         </p>
       </CardContent>

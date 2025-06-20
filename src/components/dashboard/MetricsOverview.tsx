@@ -57,7 +57,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
           </div>
         )}
         
-        <p className="text-xs text-muted-foreground dark:text-[hsl(var(--card-description))] mt-3">
+        <p className="text-xs text-muted-foreground form-label-secondary mt-3">
           {description}
         </p>
       </CardContent>

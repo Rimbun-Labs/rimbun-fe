@@ -75,7 +75,7 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="text-foreground">Investment Scenarios</CardTitle>
-        <CardDescription className="text-muted-foreground dark:text-[hsl(var(--card-description))]">
+        <CardDescription className="text-muted-foreground card-description">
           Compare different approaches to reach your goal of {formatCurrency(targetAmount)}
         </CardDescription>
       </CardHeader>
@@ -100,11 +100,11 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Initial Investment</span>
+                  <span className="text-sm text-muted-foreground form-label-secondary">Initial Investment</span>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <Info className="h-4 w-4 text-muted-foreground tooltip-icon" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Your current savings for this goal</p>
@@ -117,11 +117,11 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
 
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Monthly Investment</span>
+                  <span className="text-sm text-muted-foreground form-label-secondary">Monthly Investment</span>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <Info className="h-4 w-4 text-muted-foreground tooltip-icon" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Your current monthly investment amount</p>
@@ -196,11 +196,11 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Total Savings</span>
+                  <span className="text-sm text-muted-foreground form-label-secondary">Total Savings</span>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <Info className="h-4 w-4 text-muted-foreground tooltip-icon" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Includes all your savings for this goal</p>
@@ -213,11 +213,11 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
 
               <div className="space-y-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Monthly Investment</span>
+                  <span className="text-sm text-muted-foreground form-label-secondary">Monthly Investment</span>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <Info className="h-4 w-4 text-muted-foreground tooltip-icon" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Your current monthly investment amount</p>

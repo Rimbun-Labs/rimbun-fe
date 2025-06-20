@@ -64,7 +64,7 @@
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 78%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -225,5 +225,26 @@
 
   .theme-transition {
     @apply transition-colors duration-200 ease-in-out;
+  }
+
+  /* Dark mode specific improvements for better contrast */
+  .dark .sidebar-section-header {
+    @apply text-gray-300;
+  }
+
+  .dark .sidebar-nav-inactive {
+    @apply text-gray-300 hover:text-gray-100;
+  }
+
+  .dark .form-label-secondary {
+    @apply text-gray-300;
+  }
+
+  .dark .tooltip-icon {
+    @apply text-gray-300 hover:text-gray-100;
+  }
+
+  .dark .card-description {
+    @apply text-gray-300;
   }
 }

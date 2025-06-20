@@ -64,7 +64,7 @@ const AppSidebar: React.FC = () => {
       <nav className="space-y-6">
         {/* Overview Section */}
         <div className="space-y-2">
-          <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+          <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
             Overview
           </h3>
           <NavLink
@@ -72,7 +72,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >
@@ -84,7 +84,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >
@@ -95,7 +95,7 @@ const AppSidebar: React.FC = () => {
 
         {/* Learning Section */}
         <div className="space-y-2">
-          <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+          <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
             Learning
           </h3>
           <NavLink
@@ -103,7 +103,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >
@@ -115,7 +115,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >
@@ -127,7 +127,7 @@ const AppSidebar: React.FC = () => {
 
         {/* Profile Section */}
         <div className="space-y-2">
-          <h3 className="px-2 text-sm font-semibold text-muted-foreground">
+          <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
             Profile
           </h3>
           <NavLink
@@ -135,7 +135,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >

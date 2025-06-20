@@ -25,8 +25,8 @@ const LearningProgressBar: React.FC<LearningProgressBarProps> = ({
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-foreground">Learning Progress</CardTitle>
-            <CardDescription className="text-muted-foreground dark:text-[hsl(var(--card-description))]">
-              Track your education journey
+            <CardDescription className="text-muted-foreground card-description">
+              Track your learning journey and achievements
             </CardDescription>
           </div>
           <div className="h-10 w-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
