@@ -26,6 +26,7 @@ export interface Question {
     value: number | string | boolean;
     text?: string;
   };
+  sliderConfig?: SliderConfig;
 }
 
 export interface UserAnswer {
