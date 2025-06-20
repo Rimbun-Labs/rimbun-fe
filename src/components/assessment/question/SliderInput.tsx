@@ -41,8 +41,8 @@ export const SliderInput: React.FC<SliderInputProps> = ({
   onChange,
   validationError
 }) => {
-  // Get the appropriate configuration for this question
-  const config = SLIDER_CONFIGS[question.id as keyof typeof SLIDER_CONFIGS] || SLIDER_CONFIGS.default;
+  // Use sliderConfig from the question if available, otherwise fall back to hardcoded configs
+  const config = question.sliderConfig || SLIDER_CONFIGS[question.id as keyof typeof SLIDER_CONFIGS] || SLIDER_CONFIGS.default;
 
   const formatValue = (val: number) => {
     if (config.format === 'currency') {
