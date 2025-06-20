@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
@@ -10,7 +12,8 @@ import {
   BarChart3,
   User,
   Compass,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -18,10 +21,29 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 const MobileMenu: React.FC = () => {
   const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
   const { session } = useSession();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
   const location = useLocation();
   const hasCompletedAssessment = Boolean(session?.isCompleted);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      closeMobileMenu();
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to log out",
+      });
+    }
+  };
 
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={closeMobileMenu}>
@@ -135,6 +157,18 @@ const MobileMenu: React.FC = () => {
               <User className="h-4 w-4" />
               Profile
             </Link>
+          </div>
+
+          {/* Logout Section */}
+          <div className="space-y-2 pt-6 border-t">
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4 mr-3" />
+              Logout
+            </Button>
           </div>
         </nav>
       </SheetContent>

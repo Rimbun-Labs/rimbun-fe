@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { transformRiskProfileData } from '@/utils/chartUtils';
 import { Badge } from "@/components/ui/badge";
 import { motion } from 'framer-motion';
+import { useTheme } from '@/hooks/useTheme';
 
 interface RiskProfileChartProps {
   data: {
@@ -32,33 +33,36 @@ interface RiskProfileChartProps {
 
 const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMetrics }) => {
   const [activeMetric, setActiveMetric] = useState<string | null>(null);
+  const { theme } = useTheme();
   const chartData = transformRiskProfileData(data, confidenceMetrics);
+  
+  const isDarkMode = theme === 'dark';
   
   const colors = {
     primary: {
-      stroke: 'hsl(var(--primary))', // Use CSS variable
-      fill: 'hsl(var(--primary) / 0.7)', // Use CSS variable with opacity
-      gradient: 'linear-gradient(180deg, hsl(var(--primary) / 0.9) 0%, hsl(var(--primary) / 0.5) 100%)',
+      stroke: '#4f46e5', // Indigo that works in both modes
+      fill: '#4f46e5',
+      gradient: 'linear-gradient(180deg, #4f46e5 0%, #6366f1 100%)',
     },
     confidence: {
       high: {
-        stroke: 'hsl(142 76% 36% / 0.6)', // Green with opacity
-        fill: 'hsl(142 76% 36% / 0.2)',
+        stroke: '#22c55e', // Green
+        fill: '#22c55e',
       },
       medium: {
-        stroke: 'hsl(48 96% 53% / 0.6)', // Yellow with opacity
-        fill: 'hsl(48 96% 53% / 0.2)',
+        stroke: '#eab308', // Yellow
+        fill: '#eab308',
       },
       low: {
-        stroke: 'hsl(0 84% 60% / 0.6)', // Red with opacity
-        fill: 'hsl(0 84% 60% / 0.2)',
+        stroke: '#ef4444', // Red
+        fill: '#ef4444',
       }
     },
-    grid: 'hsl(var(--border))', // Use CSS variable
-    text: 'hsl(var(--foreground))', // Use CSS variable
+    grid: isDarkMode ? '#475569' : '#94a3b8', // Slate that adapts to mode
+    text: isDarkMode ? '#f1f5f9' : '#1e293b', // Text that adapts to mode
     active: {
-      stroke: 'hsl(var(--primary))', // Use CSS variable
-      fill: 'hsl(var(--primary) / 0.9)',
+      stroke: '#3730a3',
+      fill: '#3730a3',
     },
   };
 
@@ -102,8 +106,8 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(79, 70, 229, 0.9)" />
-              <stop offset="100%" stopColor="rgba(79, 70, 229, 0.5)" />
+              <stop offset="0%" stopColor="#4f46e5" />
+              <stop offset="100%" stopColor="#6366f1" />
             </linearGradient>
           </defs>
           

@@ -138,8 +138,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
                 <DropdownMenuItem asChild>
                   <Link to="/profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Help</DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout

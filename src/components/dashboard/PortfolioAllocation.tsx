@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ResponsivePie } from '@nivo/pie';
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecommendedMetricsWithWeights, AssetClass } from '@/lib/api/types/metrics';
 import { getAssetClassDisplayName, getMetricDisplayName } from '@/lib/constants/displayNames';
+import { useTheme } from '@/hooks/useTheme';
 
 interface AssetAllocations {
   equities: number;
@@ -25,6 +26,9 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
   loading = false 
 }) => {
   const [view, setView] = useState<'pie' | 'metrics'>('pie');
+  const { theme } = useTheme();
+  
+  const isDarkMode = theme === 'dark';
 
   if (loading) {
     return (
@@ -87,7 +91,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
               borderWidth={1}
               borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
               arcLinkLabelsSkipAngle={10}
-              arcLinkLabelsTextColor="hsl(var(--foreground))"
+              arcLinkLabelsTextColor={isDarkMode ? "#f1f5f9" : "#1e293b"}
               arcLinkLabelsThickness={2}
               arcLinkLabelsColor={{ from: 'color' }}
               arcLabelsSkipAngle={10}
@@ -122,7 +126,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
                   itemsSpacing: 0,
                   itemWidth: 100,
                   itemHeight: 18,
-                  itemTextColor: 'hsl(var(--muted-foreground))',
+                  itemTextColor: isDarkMode ? '#94a3b8' : '#64748b',
                   itemDirection: 'left-to-right',
                   itemOpacity: 1,
                   symbolSize: 18,

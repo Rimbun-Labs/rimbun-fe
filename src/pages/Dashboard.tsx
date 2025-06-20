@@ -95,6 +95,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { session, setSession } = useSession();
   
+  // Use sessionId from params or fall back to session context
+  const effectiveSessionId = sessionId || session?.id;
+  
   // State for expandable sections
   const [expandedSections, setExpandedSections] = React.useState({
     profile: false,
@@ -104,27 +107,27 @@ const Dashboard = () => {
   
   // Get assessment results
   const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError, refetch: refetchAssessment } = useQuery({
-    queryKey: ['assessmentResults', sessionId],
-    queryFn: () => getAssessmentResults(sessionId!),
-    enabled: !!sessionId,
+    queryKey: ['assessmentResults', effectiveSessionId],
+    queryFn: () => getAssessmentResults(effectiveSessionId!),
+    enabled: !!effectiveSessionId,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Get recommendations
   const { data: recommendations, isLoading: recommendationsLoading, refetch: refetchRecommendations } = useQuery({
-    queryKey: ['recommendations', sessionId],
-    queryFn: () => getRecommendations(sessionId!),
-    enabled: !!sessionId,
+    queryKey: ['recommendations', effectiveSessionId],
+    queryFn: () => getRecommendations(effectiveSessionId!),
+    enabled: !!effectiveSessionId,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Update session when results are loaded
   useEffect(() => {
-    if (assessmentResults && sessionId) {
+    if (assessmentResults && effectiveSessionId) {
       setSession({
-        id: sessionId,
+        id: effectiveSessionId,
         userId: assessmentResults.responseGroupId,
         questionnaireType: "ONBOARDING",
         isCompleted: true,
@@ -142,7 +145,7 @@ const Dashboard = () => {
         updatedAt: assessmentResults.updatedAt
       });
     }
-  }, [assessmentResults, sessionId, setSession]);
+  }, [assessmentResults, effectiveSessionId, setSession]);
 
   const isLoading = assessmentLoading || recommendationsLoading;
 
@@ -159,7 +162,7 @@ const Dashboard = () => {
     );
   }
 
-  if (assessmentError || !sessionId) {
+  if (assessmentError || !effectiveSessionId) {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto space-y-4">
@@ -174,24 +177,36 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 text-destructive">
                 <AlertCircle className="h-5 w-5" />
                 <p>
-                  {!sessionId 
-                    ? 'No assessment session ID provided.' 
+                  {!effectiveSessionId 
+                    ? 'No assessment session found. Please complete your assessment first.' 
                     : 'Failed to load assessment results. The assessment might not be complete yet.'}
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  onClick={() => refetchAssessment()}
-                  variant="outline"
-                >
-                  Retry Assessment Data
-                </Button>
-                <Button 
-                  onClick={() => refetchRecommendations()}
-                  variant="outline"
-                >
-                  Retry Recommendations
-                </Button>
+                {!effectiveSessionId && (
+                  <Button 
+                    onClick={() => navigate('/assessment')}
+                    variant="default"
+                  >
+                    Start Assessment
+                  </Button>
+                )}
+                {effectiveSessionId && (
+                  <>
+                    <Button 
+                      onClick={() => refetchAssessment()}
+                      variant="outline"
+                    >
+                      Retry Assessment Data
+                    </Button>
+                    <Button 
+                      onClick={() => refetchRecommendations()}
+                      variant="outline"
+                    >
+                      Retry Recommendations
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

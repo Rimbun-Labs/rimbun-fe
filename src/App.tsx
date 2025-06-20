@@ -50,6 +50,7 @@ const AppRoutes = () => {
       >
         <Route path="/home" element={<Index />} />
         <Route path="/assessment" element={<Assessment />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:sessionId" element={<Dashboard />} />
         
         {/* Learning Library Routes */}
