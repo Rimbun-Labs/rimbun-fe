@@ -134,7 +134,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             dataKey="value"
             stroke={colors.primary.stroke}
             fill="url(#scoreGradient)"
-            fillOpacity={0.9}
+            fillOpacity={0.6}
             animationDuration={1000}
             animationEasing="ease-in-out"
             strokeWidth={2.5}
@@ -198,7 +198,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             }}
             formatter={(value) => (
               <span style={{ 
-                color: isDarkMode ? '#e2e8f0' : '#1e293b',
+                color: colors.text,
                 fontSize: '14px',
                 fontWeight: '500'
               }}>
