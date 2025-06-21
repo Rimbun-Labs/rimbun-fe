@@ -46,16 +46,16 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
     },
     confidence: {
       high: {
-        stroke: '#22c55e', // Green
-        fill: '#22c55e',
+        stroke: isDarkMode ? '#374151' : '#22c55e', // Very muted gray in dark mode
+        fill: isDarkMode ? '#374151' : '#22c55e',
       },
       medium: {
-        stroke: '#eab308', // Yellow
-        fill: '#eab308',
+        stroke: isDarkMode ? '#4b5563' : '#eab308', // Muted gray in dark mode
+        fill: isDarkMode ? '#4b5563' : '#eab308',
       },
       low: {
-        stroke: '#ef4444', // Red
-        fill: '#ef4444',
+        stroke: isDarkMode ? '#6b7280' : '#ef4444', // Light gray in dark mode
+        fill: isDarkMode ? '#6b7280' : '#ef4444',
       }
     },
     grid: isDarkMode ? '#475569' : '#94a3b8', // Slate that adapts to mode
@@ -148,12 +148,12 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               dataKey="confidence"
               stroke={colors.confidence.medium.stroke}
               fill={colors.confidence.medium.fill}
-              fillOpacity={0.15}
+              fillOpacity={isDarkMode ? 0.08 : 0.15}
               strokeDasharray="8 4"
               animationDuration={1000}
               animationBegin={500}
               animationEasing="ease-in-out"
-              strokeWidth={1.5}
+              strokeWidth={isDarkMode ? 1 : 1.5}
             />
           )}
           
