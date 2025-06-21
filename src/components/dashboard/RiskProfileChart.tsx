@@ -134,10 +134,10 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             dataKey="value"
             stroke={colors.primary.stroke}
             fill="url(#scoreGradient)"
-            fillOpacity={0.6}
+            fillOpacity={0.7}
             animationDuration={1000}
             animationEasing="ease-in-out"
-            strokeWidth={2.5}
+            strokeWidth={3}
             onClick={(data: any) => setActiveMetric(data.attribute)}
             style={{ cursor: 'pointer' }}
           />
@@ -148,12 +148,12 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
               dataKey="confidence"
               stroke={colors.confidence.medium.stroke}
               fill={colors.confidence.medium.fill}
-              fillOpacity={0.4}
-              strokeDasharray="5 5"
+              fillOpacity={0.15}
+              strokeDasharray="8 4"
               animationDuration={1000}
               animationBegin={500}
               animationEasing="ease-in-out"
-              strokeWidth={2}
+              strokeWidth={1.5}
             />
           )}
           
