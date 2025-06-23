@@ -1,4 +1,3 @@
-import { supabase } from '../supabase/client';
 import { config } from './config';
 
 interface RegisterUserData {

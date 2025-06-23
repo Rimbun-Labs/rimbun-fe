@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CreateResponseGroupRequest, ResponseGroup } from './types/assessment';
 import { config } from './config';
 import { userService } from './userService';
-import { supabase } from '../supabase/client';
+import { auth } from '../firebase/config';
 
 const createMockSession = async (data?: CreateResponseGroupRequest): Promise<ResponseGroup> => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Add delay to simulate network
@@ -22,13 +22,8 @@ export const createSession = async (data?: CreateResponseGroupRequest): Promise<
     return createMockSession(data);
   }
 
-  // Get the current authenticated user from Supabase
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError) {
-    console.error('Error getting authenticated user:', userError);
-    throw new Error('Failed to get authenticated user');
-  }
+  // Get the current authenticated user from Firebase
+  const user = auth.currentUser;
   
   if (!user) {
     throw new Error('User must be authenticated to create a session');
@@ -44,12 +39,12 @@ export const createSession = async (data?: CreateResponseGroupRequest): Promise<
     }
 
     console.log('🔵 Creating session with database user ID:', databaseUserId);
-    console.log('🔵 Supabase user ID:', user.id);
+    console.log('🔵 Firebase user ID:', user.uid);
     
     const response = await axios.post<ResponseGroup>(
       `${config.API_BASE_URL}/user-responses/session`,
       {
-        userId: databaseUserId, // Use database user ID, not Supabase user ID
+        userId: databaseUserId, // Use database user ID, not Firebase user ID
         questionnaireType: data?.questionnaireType || "ONBOARDING",
         description: "Investment Profile Assessment Session"
       },

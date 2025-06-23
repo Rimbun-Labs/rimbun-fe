@@ -37,15 +37,15 @@ const Signup = () => {
     }
 
     try {
-      // First, sign up with Supabase
-      const supabaseUser = await signUp(formData.email, formData.password, formData.fullName);
+      // First, sign up with Firebase
+      const firebaseUser = await signUp(formData.email, formData.password, formData.fullName);
 
       // Then, register the user in our backend
       await userService.registerUser({
         displayName: formData.fullName,
-        email: supabaseUser.email,
+        email: firebaseUser.email,
         username: formData.username,
-        authProviderId: supabaseUser.id
+        authProviderId: firebaseUser.uid
       });
 
       toast({

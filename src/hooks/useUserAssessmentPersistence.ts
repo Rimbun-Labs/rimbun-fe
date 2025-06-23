@@ -16,7 +16,7 @@ export const useUserAssessmentPersistence = () => {
     isLoading: isLoadingLatest,
     error: latestError 
   } = useQuery<AssessmentResult | null>({
-    queryKey: ['user-latest-assessment', user?.id],
+    queryKey: ['user-latest-assessment', user?.uid],
     queryFn: getLatestUserAssessmentResults,
     enabled: !!user && userRegistrationComplete && !hasCheckedPersistence,
     retry: 1,
@@ -29,7 +29,7 @@ export const useUserAssessmentPersistence = () => {
     isLoading: isLoadingAll,
     error: allError 
   } = useQuery<AssessmentResult[]>({
-    queryKey: ['user-all-assessments', user?.id],
+    queryKey: ['user-all-assessments', user?.uid],
     queryFn: getAllUserAssessmentResults,
     enabled: !!user && userRegistrationComplete,
     retry: 1,

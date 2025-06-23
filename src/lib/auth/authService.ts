@@ -1,73 +1,73 @@
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+  UserCredential,
+  updateProfile
+} from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 interface AuthResponse {
-  user: User | null;
+  user: FirebaseUser | null;
   error: Error | null;
 }
 
 export const authService = {
   async signUpWithEmail({ email, password, fullName }: { email: string; password: string; fullName: string }): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
+    try {
+      const userCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Update display name
+      await updateProfile(user, {
+        displayName: fullName
+      });
 
-    if (error) {
-      return { user: null, error };
+      return { user, error: null };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { user: null, error: error as Error };
     }
-
-    return { user: data.user, error: null };
   },
 
   async signInWithEmail(email: string, password: string): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      return { user: null, error };
+    try {
+      const userCredential: UserCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      return { user, error: null };
+    } catch (error) {
+      console.error('Sign in error:', error);
+      return { user: null, error: error as Error };
     }
-
-    return { user: data.user, error: null };
   },
 
   async signInWithGoogle(): Promise<AuthResponse> {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
-
-    if (error) {
-      return { user: null, error };
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential: UserCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      
+      // Get the ID token for backend authentication
+      const idToken = await user.getIdToken();
+      localStorage.setItem('firebaseIdToken', idToken);
+      
+      return { user, error: null };
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      return { user: null, error: error as Error };
     }
-
-    // For OAuth, we need to wait for the user to be signed in
-    // The actual user data will be available in the onAuthStateChange callback
-    return { user: null, error: null };
   },
 
   async signOut(): Promise<{ error: Error | null }> {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await firebaseSignOut(auth);
       
       // Clear any local storage or session data
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('firebaseIdToken');
       
       return { error: null };
     } catch (error) {
@@ -76,14 +76,13 @@ export const authService = {
     }
   },
 
-  async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
+  async getCurrentUser(): Promise<FirebaseUser | null> {
+    return auth.currentUser;
   },
 
-  onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange((event, session) => {
-      callback(session?.user ?? null);
+  onAuthStateChange(callback: (user: FirebaseUser | null) => void) {
+    return onAuthStateChanged(auth, (user) => {
+      callback(user);
     });
   }
 }; 

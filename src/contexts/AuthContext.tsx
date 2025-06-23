@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '@/lib/auth/authService';
 import { userService } from '@/lib/api/userService';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
-  user: User | null;
+  user: FirebaseUser | null;
   loading: boolean;
   userRegistrationComplete: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -17,7 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
   const lastProcessedUserIdRef = useRef<string | null>(null);
@@ -36,30 +36,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = authService.onAuthStateChange(async (user) => {
+    const unsubscribe = authService.onAuthStateChange(async (user) => {
       setUser(user);
       setLoading(false);
       
       // If user signed in (especially via Google OAuth), ensure they exist in backend
       if (user) {
         // Prevent duplicate processing for the same user
-        if (lastProcessedUserIdRef.current === user.id) {
-          console.log('🔄 AuthContext: User already processed, skipping:', user.id.substring(0, 8) + '...');
+        if (lastProcessedUserIdRef.current === user.uid) {
+          console.log('🔄 AuthContext: User already processed, skipping:', user.uid.substring(0, 8) + '...');
           return;
         }
         
-        lastProcessedUserIdRef.current = user.id;
+        lastProcessedUserIdRef.current = user.uid;
         setUserRegistrationComplete(false); // Reset on auth change
         
         try {
           console.log('🔵 AuthContext: User signed in, ensuring backend registration:', { 
-            id: user.id.substring(0, 8) + '...', 
+            id: user.uid.substring(0, 8) + '...', 
             email: user.email 
           });
           
           const result = await userService.ensureUserExists({
-            authProviderId: user.id,
-            displayName: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            authProviderId: user.uid,
+            displayName: user.displayName || user.email?.split('@')[0] || 'User',
             email: user.email || '',
           });
           
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('✅ AuthContext: User registration completed:', result);
         } catch (backendError) {
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
-          // Don't throw here - user is still authenticated with Supabase
+          // Don't throw here - user is still authenticated with Firebase
         }
       } else {
         // User signed out, reset the last processed user ID
@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
@@ -89,14 +89,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setUserRegistrationComplete(false); // Reset before registration
         await userService.ensureUserExists({
-          authProviderId: user.id,
-          displayName: user.user_metadata?.full_name || email.split('@')[0],
+          authProviderId: user.uid,
+          displayName: user.displayName || email.split('@')[0],
           email: user.email || email,
         });
         setUserRegistrationComplete(true); // Mark as complete
       } catch (backendError) {
         console.error('Failed to ensure user exists in backend:', backendError);
-        // Don't throw here - user is still authenticated with Supabase
+        // Don't throw here - user is still authenticated with Firebase
       }
       // Removed: navigate('/home');
       // Let RootRedirect handle the navigation
