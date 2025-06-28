@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ResponsivePie } from '@nivo/pie';
+import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecommendedMetricsWithWeights, AssetClass } from '@/lib/api/types/metrics';
 import { getAssetClassDisplayName, getMetricDisplayName } from '@/lib/constants/displayNames';
@@ -20,7 +20,7 @@ interface PortfolioAllocationProps {
   loading?: boolean;
 }
 
-const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({ 
+const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({ 
   allocations, 
   recommendedMetrics,
   loading = false 
@@ -29,6 +29,36 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
   const { theme } = useTheme();
   
   const isDarkMode = theme === 'dark';
+
+  // Memoize the color function to avoid recreating it on every render
+  const getAssetColor = useMemo(() => (assetClass: string): string => {
+    switch (assetClass) {
+      case 'equities':
+        return '#E9C46A';
+      case 'bonds':
+        return '#2A9D8F';
+      case 'realEstate':
+        return '#F4A261';
+      case 'cash':
+        return '#264653';
+      case 'commodities':
+        return '#E76F51';
+      case 'alternatives':
+        return '#E9C46A';
+      default:
+        return '#94a3b8';
+    }
+  }, []);
+
+  // Memoize the chart data to prevent unnecessary recalculations
+  const data = useMemo(() => 
+    Object.entries(allocations).map(([id, value]) => ({
+      id,
+      label: getAssetClassDisplayName(id as AssetClass),
+      value: value || 0,
+      color: getAssetColor(id)
+    })), [allocations, getAssetColor]
+  );
 
   if (loading) {
     return (
@@ -42,13 +72,6 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
       </Card>
     );
   }
-
-  const data = Object.entries(allocations).map(([id, value]) => ({
-    id,
-    label: getAssetClassDisplayName(id as AssetClass),
-    value: value || 0,
-    color: getAssetColor(id)
-  }));
 
   return (
     <Card>
@@ -81,60 +104,49 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
       <CardContent>
         {view === 'pie' ? (
           <div className="h-[400px]">
-            <ResponsivePie
-              data={data}
-              colors={(d) => getAssetColor(String(d.id))}
-              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-              innerRadius={0.5}
-              padAngle={0.7}
-              cornerRadius={3}
-              activeOuterRadiusOffset={8}
-              borderWidth={1}
-              borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-              arcLinkLabelsSkipAngle={10}
-              arcLinkLabelsTextColor={isDarkMode ? "#ffffff" : "#1e293b"}
-              arcLinkLabelsThickness={2}
-              arcLinkLabelsColor={{ from: 'color' }}
-              arcLabelsSkipAngle={10}
-              arcLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
-              defs={[
-                {
-                  id: 'dots',
-                  type: 'patternDots',
-                  background: 'inherit',
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  size: 4,
-                  padding: 1,
-                  stagger: true
-                },
-                {
-                  id: 'lines',
-                  type: 'patternLines',
-                  background: 'inherit',
-                  color: 'rgba(255, 255, 255, 0.3)',
-                  rotation: -45,
-                  lineWidth: 6,
-                  spacing: 10
-                }
-              ]}
-              legends={[
-                {
-                  anchor: 'bottom',
-                  direction: 'row',
-                  justify: false,
-                  translateX: 0,
-                  translateY: 56,
-                  itemsSpacing: 0,
-                  itemWidth: 100,
-                  itemHeight: 18,
-                  itemTextColor: isDarkMode ? '#e2e8f0' : '#64748b',
-                  itemDirection: 'left-to-right',
-                  itemOpacity: 1,
-                  symbolSize: 18,
-                  symbolShape: 'circle'
-                }
-              ]}
-            />
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-popover p-3 rounded-lg shadow-lg border border-border">
+                          <p className="font-medium text-popover-foreground">
+                            {payload[0].payload.label}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {payload[0].value}%
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={36}
+                  formatter={(value, entry) => (
+                    <span style={{ color: isDarkMode ? '#e2e8f0' : '#64748b' }}>
+                      {value}
+                    </span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         ) : (
           <div className="space-y-4">
@@ -161,25 +173,8 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
 
-const getAssetColor = (assetClass: string): string => {
-  switch (assetClass) {
-    case 'equities':
-      return '#E9C46A';
-    case 'bonds':
-      return '#2A9D8F';
-    case 'realEstate':
-      return '#F4A261';
-    case 'cash':
-      return '#264653';
-    case 'commodities':
-      return '#E76F51';
-    case 'alternatives':
-      return '#E9C46A';
-    default:
-      return '#94a3b8';
-  }
-};
+PortfolioAllocation.displayName = 'PortfolioAllocation';
 
 export default PortfolioAllocation;

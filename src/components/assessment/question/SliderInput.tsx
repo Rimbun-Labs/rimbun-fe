@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Question } from "@/lib/api/types/assessment";
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface SliderInputProps {
   question: Question;
@@ -35,27 +36,24 @@ const SLIDER_CONFIGS = {
   }
 };
 
-export const SliderInput: React.FC<SliderInputProps> = ({
+export const SliderInput: React.FC<SliderInputProps> = React.memo(({
   question,
   value,
   onChange,
   validationError
 }) => {
+  const { formatCurrency, formatNumber } = useFormatters();
+
   // Use sliderConfig from the question if available, otherwise fall back to hardcoded configs
   const config = question.sliderConfig || SLIDER_CONFIGS[question.id as keyof typeof SLIDER_CONFIGS] || SLIDER_CONFIGS.default;
 
-  const formatValue = (val: number) => {
+  // Memoize the formatValue function to prevent recalculation
+  const formatValue = useMemo(() => (val: number) => {
     if (config.format === 'currency') {
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-      });
-      return formatter.format(val);
+      return formatCurrency(val);
     }
-    return val.toString();
-  };
+    return formatNumber(val);
+  }, [config.format, formatCurrency, formatNumber]);
 
   return (
     <div className="space-y-4">
@@ -77,4 +75,6 @@ export const SliderInput: React.FC<SliderInputProps> = ({
       )}
     </div>
   );
-}; 
+});
+
+SliderInput.displayName = 'SliderInput'; 

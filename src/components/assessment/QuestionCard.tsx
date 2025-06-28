@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Question, UserAnswer, QuestionType } from "@/lib/api/types/assessment";
 import { QuestionHeader } from './question/QuestionHeader';
@@ -16,6 +15,49 @@ interface QuestionCardProps {
   error?: string;
 }
 
+// Question card state interface
+interface QuestionCardState {
+  answer: string | number | boolean;
+  validationError: string | null;
+  isSubmitting: boolean;
+}
+
+// Question card action types
+type QuestionCardAction = 
+  | { type: 'SET_ANSWER'; answer: string | number | boolean }
+  | { type: 'SET_VALIDATION_ERROR'; error: string | null }
+  | { type: 'SET_SUBMITTING'; isSubmitting: boolean }
+  | { type: 'RESET_VALIDATION' };
+
+// Question card reducer
+const questionCardReducer = (state: QuestionCardState, action: QuestionCardAction): QuestionCardState => {
+  switch (action.type) {
+    case 'SET_ANSWER':
+      return {
+        ...state,
+        answer: action.answer,
+        validationError: null // Clear validation error when answer changes
+      };
+    case 'SET_VALIDATION_ERROR':
+      return {
+        ...state,
+        validationError: action.error
+      };
+    case 'SET_SUBMITTING':
+      return {
+        ...state,
+        isSubmitting: action.isSubmitting
+      };
+    case 'RESET_VALIDATION':
+      return {
+        ...state,
+        validationError: null
+      };
+    default:
+      return state;
+  }
+};
+
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   onAnswer,
@@ -25,7 +67,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   error
 }) => {
   // Initialize with currentAnswer if provided, otherwise use appropriate default
-  const getInitialAnswer = () => {
+  const getInitialAnswer = (): string | number | boolean => {
     if (currentAnswer !== undefined) return currentAnswer;
     switch (question.questionType) {
       case 'number':
@@ -40,28 +82,34 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
-  const [answer, setAnswer] = useState<string | number | boolean>(getInitialAnswer());
-  const [validationError, setValidationError] = useState<string | null>(error || null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(questionCardReducer, {
+    answer: getInitialAnswer(),
+    validationError: error || null,
+    isSubmitting: false
+  });
+
+  const { answer, validationError, isSubmitting } = state;
 
   // Update answer state when currentAnswer prop changes
   useEffect(() => {
     if (currentAnswer !== undefined) {
-      setAnswer(currentAnswer);
+      dispatch({ type: 'SET_ANSWER', answer: currentAnswer });
     }
   }, [currentAnswer]);
 
   // Update validation error when error prop changes
   useEffect(() => {
     if (error) {
-      setValidationError(error);
+      dispatch({ type: 'SET_VALIDATION_ERROR', error });
     }
   }, [error]);
 
-  const validateAnswer = (): boolean => {
+  // Memoized validation function
+  const validateAnswer = useCallback((): boolean => {
     if (question.required) {
       if (answer === '' || answer === undefined || answer === null) {
-        setValidationError('This question requires an answer');
+        dispatch({ type: 'SET_VALIDATION_ERROR', error: 'This question requires an answer' });
         return false;
       }
 
@@ -69,11 +117,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         case 'number':
           const numValue = Number(answer);
           if (isNaN(numValue)) {
-            setValidationError('Please enter a valid number');
+            dispatch({ type: 'SET_VALIDATION_ERROR', error: 'Please enter a valid number' });
             return false;
           }
           if (numValue < 0) {
-            setValidationError('Please enter a positive number');
+            dispatch({ type: 'SET_VALIDATION_ERROR', error: 'Please enter a positive number' });
             return false;
           }
           break;
@@ -81,28 +129,29 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         case 'multiple_choice':
         case 'select':
           if (!answer || typeof answer !== 'string') {
-            setValidationError('Please select an option');
+            dispatch({ type: 'SET_VALIDATION_ERROR', error: 'Please select an option' });
             return false;
           }
           break;
 
         case 'single_text':
           if (!answer || typeof answer !== 'string' || answer.trim() === '') {
-            setValidationError('Please enter your answer');
+            dispatch({ type: 'SET_VALIDATION_ERROR', error: 'Please enter your answer' });
             return false;
           }
           break;
       }
     }
     return true;
-  };
+  }, [answer, question.required, question.questionType]);
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setValidationError(null);
+  // Memoized submit handler
+  const handleSubmit = useCallback(async () => {
+    dispatch({ type: 'SET_SUBMITTING', isSubmitting: true });
+    dispatch({ type: 'RESET_VALIDATION' });
 
     if (!validateAnswer()) {
-      setIsSubmitting(false);
+      dispatch({ type: 'SET_SUBMITTING', isSubmitting: false });
       return;
     }
 
@@ -119,16 +168,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         onNext();
       }
     } catch (err) {
-      setValidationError('Failed to save your answer. Please try again.');
+      dispatch({ type: 'SET_VALIDATION_ERROR', error: 'Failed to save your answer. Please try again.' });
     } finally {
-      setIsSubmitting(false);
+      dispatch({ type: 'SET_SUBMITTING', isSubmitting: false });
     }
-  };
+  }, [answer, question.id, question.questionType, onAnswer, onNext, validateAnswer]);
 
-  const handleAnswerChange = (value: string | number | boolean) => {
-    setAnswer(value);
-    setValidationError(null);
-  };
+  // Memoized answer change handler
+  const handleAnswerChange = useCallback((value: string | number | boolean) => {
+    dispatch({ type: 'SET_ANSWER', answer: value });
+  }, []);
 
   return (
     <Card className="w-full max-w-2xl mx-auto">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,28 +38,52 @@ import MetricOverviewSection from '@/components/learning/metrics/MetricOverviewS
 import GuidedMetricLearning from '@/components/learning/metrics/GuidedMetricLearning';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import QuizSection from '@/components/learning/quiz/QuizSection';
+import { useLearningProgress } from '@/hooks/useLearningProgress';
 
 const LearningPathDetail: React.FC = () => {
   const { sessionId, assetClass } = useParams<{ sessionId: string; assetClass: string }>();
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState<number[]>([]);
   const [showMetrics, setShowMetrics] = useState(false);
-  const [completedSections, setCompletedSections] = useState<number[]>([]);
   const [bookmarkedSections, setBookmarkedSections] = useState<number[]>([]);
   const [lastCompletedSection, setLastCompletedSection] = useState<number | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-  const [completedMetrics, setCompletedMetrics] = useState<string[]>([]);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [showFinalActions, setShowFinalActions] = useState(false);
   const [isFullyCompleted, setIsFullyCompleted] = useState(false);
   
   const { data: recommendations } = useQuery({
     queryKey: ['recommendations', sessionId],
     queryFn: () => getRecommendations(sessionId || ''),
     enabled: !!sessionId
+  });
+
+  // Validate recommendations function for metrics
+  const validateRecommendations = useCallback((metrics: string[]) => {
+    if (!recommendations?.recommendedMetrics[assetClass || '']) {
+      return false;
+    }
+    const availableMetrics = Object.keys(recommendations.recommendedMetrics[assetClass || '']);
+    return metrics.every(metric => availableMetrics.includes(metric));
+  }, [recommendations, assetClass]);
+
+  // Optimized learning progress hook
+  const {
+    completedSections,
+    completedMetrics,
+    showFinalActions,
+    toggleSectionCompletion,
+    toggleMetricCompletion,
+    isSectionCompleted,
+    isMetricCompleted,
+    getProgressPercentage,
+    getMetricsProgressPercentage
+  } = useLearningProgress({
+    sessionId: sessionId || '',
+    assetClass: assetClass || '',
+    validateRecommendations
   });
 
   // Auto-expand first section on load
@@ -93,77 +117,31 @@ const LearningPathDetail: React.FC = () => {
   const content = learningPathsContent[assetClass];
   const totalSections = content.sections.length;
   const completedCount = completedSections.length;
-  const progressPercentage = Math.round((completedCount / totalSections) * 100);
+  const progressPercentage = getProgressPercentage(totalSections);
 
-  // Load saved progress on mount
-  useEffect(() => {
-    const savedProgress = localStorage.getItem(`learning-path-${sessionId}-${assetClass}`);
-    if (savedProgress) {
-      try {
-        const { completedSections: savedCompleted, lastViewedSection } = JSON.parse(savedProgress);
-        setCompletedSections(savedCompleted);
-        if (lastViewedSection !== undefined) {
-          setExpandedSections([lastViewedSection]);
-        }
-      } catch (error) {
-        toast.error("Error loading saved progress");
-      }
-    }
-  }, [assetClass, sessionId]);
+  // Optimized section completion handler
+  const handleSectionCompletion = useCallback((index: number) => {
+    const wasCompleted = isSectionCompleted(index);
+    toggleSectionCompletion(index);
+    
+    if (!wasCompleted) {
+      setLastCompletedSection(index);
+      toast.success("Section completed! 🎉", {
+        description: "Great job! Keep up the good work.",
+      });
 
-  // Save progress when it changes
-  useEffect(() => {
-    const saveProgress = () => {
-      localStorage.setItem(`learning-path-${sessionId}-${assetClass}`, JSON.stringify({
-        completedSections,
-        lastViewedSection: expandedSections[0]
-      }));
-    };
-
-    if (completedSections.length > 0 || expandedSections.length > 0) {
-      saveProgress();
-    }
-
-    window.addEventListener('beforeunload', saveProgress);
-    return () => window.removeEventListener('beforeunload', saveProgress);
-  }, [assetClass, sessionId, completedSections, expandedSections]);
-  
-  const toggleSection = (index: number) => {
-    setExpandedSections(prev => {
-      const newSections = prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index];
-      return newSections;
-    });
-  };
-
-  const toggleSectionCompletion = (index: number) => {
-    setCompletedSections(prev => {
-      const newCompleted = prev.includes(index)
-        ? prev.filter(i => i !== index)
-        : [...prev, index];
-      
-      if (!prev.includes(index)) {
-        setLastCompletedSection(index);
-        toast.success("Section completed! 🎉", {
-          description: "Great job! Keep up the good work.",
+      if (completedSections.length + 1 === totalSections) {
+        setShowCompletionMessage(true);
+        toast.success("Asset Class Completed! 🎉", {
+          description: "Ready to learn about the key metrics for this asset class?",
         });
-
-        if (newCompleted.length === totalSections) {
-          setShowCompletionMessage(true);
-          toast.success("Asset Class Completed! 🎉", {
-            description: "Ready to learn about the key metrics for this asset class?",
-          });
-        }
-      } else {
-        if (newCompleted.length < totalSections) {
-          setShowCompletionMessage(false);
-        }
       }
-      
-      return newCompleted;
-    });
-  };
+    } else {
+      if (completedSections.length - 1 < totalSections) {
+        setShowCompletionMessage(false);
+      }
+    }
+  }, [toggleSectionCompletion, isSectionCompleted, completedSections.length, totalSections]);
 
   // Add effect to check completion on mount and when sections change
   useEffect(() => {
@@ -173,6 +151,67 @@ const LearningPathDetail: React.FC = () => {
       setShowCompletionMessage(false);
     }
   }, [completedSections.length, totalSections]);
+
+  // Optimized metric completion handler
+  const handleMetricComplete = useCallback((metric: string) => {
+    console.log('Attempting to complete metric:', metric);
+    
+    // Verify this is a valid metric for this asset class
+    const metricsForThisAssetClass = recommendations?.recommendedMetrics[assetClass] || {};
+    const availableMetrics = Object.keys(metricsForThisAssetClass);
+    
+    console.log('Validating metric:', {
+      metric,
+      assetClass,
+      availableMetrics,
+      hasRecommendations: !!recommendations,
+      recommendationsData: recommendations?.recommendedMetrics[assetClass]
+    });
+
+    if (!(metric in metricsForThisAssetClass)) {
+      console.error('Invalid metric for asset class:', { 
+        metric, 
+        assetClass, 
+        availableMetrics,
+        recommendationsData: recommendations?.recommendedMetrics[assetClass]
+      });
+      return;
+    }
+    
+    toggleMetricCompletion(metric);
+    
+    console.log('Updated completed metrics:', {
+      newCompleted: completedMetrics,
+      totalCompleted: completedMetrics.length,
+      totalAvailable: availableMetrics.length
+    });
+    
+    // Check if all metrics for current asset class are completed
+    const allMetricsCompleted = availableMetrics.every(m => 
+      [...completedMetrics, metric].includes(m)
+    );
+    
+    console.log('Metrics completion check:', {
+      metric,
+      availableMetrics,
+      completedMetrics,
+      allMetricsCompleted,
+      assetClassCompleted: completedSections.length === totalSections
+    });
+
+    // Update states based on current asset class completion
+    setIsFullyCompleted(completedSections.length === totalSections && allMetricsCompleted);
+    setShowFinalActions(completedSections.length === totalSections && allMetricsCompleted);
+  }, [toggleMetricCompletion, completedMetrics, recommendations, assetClass, completedSections.length, totalSections]);
+  
+  const toggleSection = (index: number) => {
+    setExpandedSections(prev => {
+      const newSections = prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index];
+      return newSections;
+    });
+  };
 
   const toggleBookmark = (index: number) => {
     setBookmarkedSections(prev =>
@@ -223,98 +262,32 @@ const LearningPathDetail: React.FC = () => {
         hasRecommendations: !!recommendations,
         recommendedMetrics: recommendations?.recommendedMetrics[assetClass]
       });
-      // Clear any existing progress for this session
-      localStorage.removeItem(`metrics-progress-${sessionId}-${assetClass}`);
-      setCompletedMetrics([]);
-      setShowFinalActions(false);
       return;
     }
 
-    // Only load saved progress if we have valid recommendations
-    const savedProgress = localStorage.getItem(`metrics-progress-${sessionId}-${assetClass}`);
-    if (savedProgress) {
-      try {
-        const { completedMetrics: savedMetrics, showFinalActions: savedFinalActions } = JSON.parse(savedProgress);
-        // Verify the saved metrics match the recommended metrics
-        const recommendedMetrics = Object.keys(recommendations.recommendedMetrics[assetClass]);
-        const validMetrics = savedMetrics.filter(metric => recommendedMetrics.includes(metric));
-        
-        console.log('Validating saved metrics progress:', {
-          savedMetrics,
-          recommendedMetrics,
-          validMetrics,
-          isValid: validMetrics.length === savedMetrics.length
-        });
-
-        setCompletedMetrics(validMetrics);
-        setShowFinalActions(savedFinalActions && validMetrics.length === recommendedMetrics.length);
-      } catch (error) {
-        console.error('Error loading metrics progress:', error);
-        // Clear invalid progress
-        localStorage.removeItem(`metrics-progress-${sessionId}-${assetClass}`);
-        setCompletedMetrics([]);
-        setShowFinalActions(false);
-      }
-    }
-  }, [assetClass, sessionId, recommendations]);
-
-  // Update handleMetricComplete to prevent duplicates and validate metrics
-  const handleMetricComplete = (metric: string) => {
-    console.log('Attempting to complete metric:', metric);
-    setCompletedMetrics(prev => {
-      // Only add if not already completed
-      if (prev.includes(metric)) {
-        console.log('Metric already completed:', metric);
-        return prev;
-      }
-
-      // Verify this is a valid metric for this asset class
-      const metricsForThisAssetClass = recommendations?.recommendedMetrics[assetClass] || {};
-      const availableMetrics = Object.keys(metricsForThisAssetClass);
-      
-      console.log('Validating metric:', {
-        metric,
-        assetClass,
-        availableMetrics,
-        hasRecommendations: !!recommendations,
-        recommendationsData: recommendations?.recommendedMetrics[assetClass]
-      });
-
-      if (!(metric in metricsForThisAssetClass)) {
-        console.error('Invalid metric for asset class:', { 
-          metric, 
-          assetClass, 
-          availableMetrics,
-          recommendationsData: recommendations?.recommendedMetrics[assetClass]
-        });
-        return prev;
-      }
-      
-      const newCompleted = [...prev, metric];
-      console.log('Updated completed metrics:', {
-        newCompleted,
-        totalCompleted: newCompleted.length,
-        totalAvailable: availableMetrics.length
-      });
-      
-      // Check if all metrics for current asset class are completed
-      const allMetricsCompleted = availableMetrics.every(m => newCompleted.includes(m));
-      
-      console.log('Metrics completion check:', {
-        metric,
-        availableMetrics,
-        newCompleted,
-        allMetricsCompleted,
-        assetClassCompleted: completedSections.length === totalSections
-      });
-      
-      // Only show final actions if asset class learning is also completed
-      const assetClassCompleted = completedSections.length === totalSections;
-      const shouldShowFinalActions = allMetricsCompleted && assetClassCompleted;
-      
-      setShowFinalActions(shouldShowFinalActions);
-      return newCompleted;
+    // Check if all metrics for current asset class are completed
+    const availableMetrics = Object.keys(recommendations.recommendedMetrics[assetClass]);
+    const allMetricsCompleted = availableMetrics.every(m => completedMetrics.includes(m));
+    
+    console.log('Metrics completion check:', {
+      availableMetrics,
+      completedMetrics,
+      allMetricsCompleted,
+      assetClassCompleted: completedSections.length === totalSections
     });
+
+    // Update states based on current asset class completion
+    setIsFullyCompleted(completedSections.length === totalSections && allMetricsCompleted);
+    setShowFinalActions(completedSections.length === totalSections && allMetricsCompleted);
+  }, [completedSections, completedMetrics, totalSections, recommendations, assetClass]);
+
+  const handleStartQuiz = () => {
+    if (!recommendations?.recommendedMetrics[assetClass]) {
+      console.error('Cannot start quiz - no valid recommendations');
+      return;
+    }
+
+    setShowQuiz(true);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -448,7 +421,7 @@ const LearningPathDetail: React.FC = () => {
   };
 
   const handleCompletionClick = (index: number) => {
-    toggleSectionCompletion(index);
+    handleSectionCompletion(index);
   };
 
   const getCompletionMessage = () => {
@@ -507,77 +480,6 @@ const LearningPathDetail: React.FC = () => {
         ...learningPathsContent[path],
         difficulty: learningPathsContent[path].sections[0].difficulty
       }));
-  };
-
-  // Update effect to check completion for current asset class only
-  useEffect(() => {
-    if (!recommendations?.recommendedMetrics[assetClass]) {
-      console.log('No recommendations found for asset class:', assetClass);
-      return;
-    }
-    
-    // Check completion for current asset class only
-    const assetClassCompleted = completedSections.length === totalSections;
-    const metricsForThisAssetClass = recommendations.recommendedMetrics[assetClass] || {};
-    const allMetricsForAssetClass = Object.keys(metricsForThisAssetClass);
-    
-    // Check if ALL metrics for this asset class are completed
-    const metricsCompleted = allMetricsForAssetClass.every(metric => 
-      completedMetrics.includes(metric)
-    );
-    
-    console.log('Completion Status:', {
-      assetClass,
-      assetClassCompleted,
-      totalSections,
-      completedSectionsCount: completedSections.length,
-      allMetricsForAssetClass,
-      completedMetrics,
-      metricsCompleted,
-      isFullyCompleted: assetClassCompleted && metricsCompleted
-    });
-    
-    // Update states based on current asset class completion
-    setIsFullyCompleted(assetClassCompleted && metricsCompleted);
-    setShowFinalActions(assetClassCompleted && metricsCompleted);
-  }, [completedSections, completedMetrics, totalSections, recommendations, assetClass]);
-
-  // Save metrics progress when it changes
-  useEffect(() => {
-    if (!recommendations?.recommendedMetrics[assetClass]) {
-      return; // Don't save if we don't have valid recommendations
-    }
-
-    if (completedMetrics.length > 0 || showFinalActions) {
-      const metricsToSave = completedMetrics.filter(metric => 
-        recommendations.recommendedMetrics[assetClass][metric]
-      );
-      
-      localStorage.setItem(`metrics-progress-${sessionId}-${assetClass}`, JSON.stringify({
-        completedMetrics: metricsToSave,
-        showFinalActions: showFinalActions && 
-          metricsToSave.length === Object.keys(recommendations.recommendedMetrics[assetClass]).length
-      }));
-    }
-  }, [completedMetrics, showFinalActions, assetClass, sessionId, recommendations]);
-
-  const handleStartQuiz = () => {
-    if (!recommendations?.recommendedMetrics[assetClass]) {
-      console.error('Cannot start quiz - no valid recommendations');
-      return;
-    }
-
-    // Save current state before showing quiz
-    const metricsToSave = completedMetrics.filter(metric => 
-      recommendations.recommendedMetrics[assetClass][metric]
-    );
-    
-    localStorage.setItem(`metrics-progress-${sessionId}-${assetClass}`, JSON.stringify({
-      completedMetrics: metricsToSave,
-      showFinalActions: showFinalActions && 
-        metricsToSave.length === Object.keys(recommendations.recommendedMetrics[assetClass]).length
-    }));
-    setShowQuiz(true);
   };
 
   return (
@@ -890,7 +792,7 @@ const LearningPathDetail: React.FC = () => {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      toggleSectionCompletion(index);
+                                      handleCompletionClick(index);
                                     }}
                                     className={cn(
                                       "p-1 rounded-full hover:bg-muted transition-colors",
@@ -929,7 +831,7 @@ const LearningPathDetail: React.FC = () => {
                                         onClick={(e) => {
                                           e.preventDefault();
                                           e.stopPropagation();
-                                          toggleSectionCompletion(index);
+                                          handleCompletionClick(index);
                                         }}
                                         className={cn(
                                           "gap-2",

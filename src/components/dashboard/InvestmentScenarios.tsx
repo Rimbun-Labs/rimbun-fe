@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info, ArrowRight, Target, PiggyBank, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface InvestmentScenario {
   name: string;
@@ -28,25 +29,25 @@ interface InvestmentScenariosProps {
   loading?: boolean;
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(value);
-};
-
 const formatYears = (value: number) => {
   return `${value.toFixed(1)} years`;
 };
 
-const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
+const InvestmentScenarios: React.FC<InvestmentScenariosProps> = React.memo(({
   scenarios,
   targetAmount,
   investmentHorizon,
   loading = false
 }) => {
+  const { formatCurrency } = useFormatters();
+
+  // Memoize the scenario color function to prevent recalculation
+  const getScenarioColor = useMemo(() => (scenario: InvestmentScenario) => {
+    if (!scenario.isRealistic) return 'text-red-600';
+    if (scenario.timeToGoal <= investmentHorizon) return 'text-emerald-600';
+    return 'text-yellow-600';
+  }, [investmentHorizon]);
+
   if (loading) {
     return (
       <Card>
@@ -64,12 +65,6 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
       </Card>
     );
   }
-
-  const getScenarioColor = (scenario: InvestmentScenario) => {
-    if (!scenario.isRealistic) return 'text-red-600';
-    if (scenario.timeToGoal <= investmentHorizon) return 'text-emerald-600';
-    return 'text-yellow-600';
-  };
 
   return (
     <Card>
@@ -301,6 +296,8 @@ const InvestmentScenarios: React.FC<InvestmentScenariosProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+InvestmentScenarios.displayName = 'InvestmentScenarios';
 
 export default InvestmentScenarios; 

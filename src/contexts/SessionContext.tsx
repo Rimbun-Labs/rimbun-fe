@@ -1,13 +1,32 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ResponseGroup } from '@/lib/api/types/assessment';
-import { getAssessmentResults, getLatestUserAssessmentResults } from '@/lib/api/assessmentApi';
+import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+export interface ResponseGroup {
+  id: string;
+  userId: string;
+  questionnaireType: string;
+  isCompleted: boolean;
+  metadata: {
+    score: number;
+    profile: string;
+    riskProfile: number;
+    knowledgeLevel: number;
+    leverageAptitude: number;
+    riskCapacity: number;
+    investmentHorizon: number;
+    overallConfidence: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface SessionContextType {
   sessionId: string | null;
-  setSessionId: (id: string) => void;
+  setSessionId: (id: string | null) => void;
   session: ResponseGroup | null;
-  setSession: (session: ResponseGroup) => void;
+  setSession: (session: ResponseGroup | null) => void;
   clearSession: () => void;
   isLoading: boolean;
   hasCompletedAssessment: () => Promise<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean }>;
@@ -16,17 +35,15 @@ interface SessionContextType {
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load session from localStorage on mount
-  useEffect(() => {
-    const savedSessionId = localStorage.getItem('assessmentSessionId');
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-    }
-  }, []);
+  // Optimized localStorage hook for session ID
+  const [sessionId, setSessionId] = useLocalStorage<string | null>(
+    'assessmentSessionId',
+    null,
+    { debounceMs: 100 }
+  );
 
   // Fetch session data when sessionId changes
   useEffect(() => {
@@ -74,12 +91,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     fetchSessionData();
-  }, [sessionId, setSession]);
+  }, [sessionId]);
 
   const clearSession = () => {
     setSessionId(null);
     setSession(null);
-    localStorage.removeItem('assessmentSessionId');
   };
 
   // Function to check if user has completed an assessment - NO API CALL

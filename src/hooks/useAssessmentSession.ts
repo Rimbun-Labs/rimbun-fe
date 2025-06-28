@@ -1,14 +1,20 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { createSession } from '@/lib/api/assessmentApi';
 import { toast } from "sonner";
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocalStorage } from './useLocalStorage';
 
 export const useAssessmentSession = () => {
-  const {user} = useAuth()
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const { user } = useAuth();
   const [retryCount, setRetryCount] = useState(0);
+  
+  // Optimized localStorage hook for session ID
+  const [sessionId, setSessionId] = useLocalStorage<string | null>(
+    'assessmentSessionId',
+    null,
+    { debounceMs: 100 }
+  );
   
   // Create session
   const createSessionMutation = useMutation({
@@ -17,8 +23,6 @@ export const useAssessmentSession = () => {
       if (data && data.id) {
         setSessionId(data.id);
         setRetryCount(0);
-        // Store session ID in localStorage for persistence
-        localStorage.setItem('assessmentSessionId', data.id);
       }
     },
     onError: () => {
@@ -36,31 +40,24 @@ export const useAssessmentSession = () => {
 
   // Load existing session on mount
   useEffect(() => {
-    const savedSessionId = localStorage.getItem('assessmentSessionId');
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-    } else {
+    if (!sessionId) {
       createSessionMutation.mutate();
     }
   }, []);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (sessionId) {
-        localStorage.removeItem('assessmentSessionId');
-      }
-    };
-  }, [sessionId]);
-
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setRetryCount(0);
     createSessionMutation.mutate();
-  };
+  }, [createSessionMutation]);
+
+  const clearSession = useCallback(() => {
+    setSessionId(null);
+  }, [setSessionId]);
 
   return { 
     sessionId, 
     isCreatingSession: createSessionMutation.isPending, 
-    handleRetry 
+    handleRetry,
+    clearSession
   };
 };

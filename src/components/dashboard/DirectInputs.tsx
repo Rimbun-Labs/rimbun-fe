@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, AlertCircle, ArrowRight, Target, PiggyBank, Shield } from "lucide-react";
+import { Info, AlertCircle, ArrowRight, Target, PiggyBank, Shield, TrendingUp, Clock } from "lucide-react";
+import { useFormatters } from '@/hooks/useFormatters';
 
 interface GoalGapInsights {
   currentGap: number;
@@ -41,7 +42,9 @@ interface DirectInputsProps {
   loading?: boolean;
 }
 
-const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, loading }) => {
+const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapInsights, loading }) => {
+  const { formatCurrency, formatNumber } = useFormatters();
+
   if (loading) {
     return (
       <Card>
@@ -67,25 +70,22 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
     return null;
   }
 
-  const formatLabel = (key: string) => {
+  // Memoize the formatLabel function to prevent recalculation
+  const formatLabel = useMemo(() => (key: string) => {
     return key
       .split(/(?=[A-Z])/)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
-  };
+  }, []);
 
-  const formatValue = (key: string, value: string | number) => {
+  // Memoize the formatValue function to prevent recalculation
+  const formatValue = useMemo(() => (key: string, value: string | number) => {
     if (typeof value === 'number') {
       if (key.toLowerCase().includes('amount') || 
           key.toLowerCase().includes('savings') || 
           key.toLowerCase().includes('income') ||
           key.toLowerCase().includes('gap')) {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0
-        }).format(value);
+        return formatCurrency(value);
       }
       if (key.toLowerCase().includes('rate')) {
         return `${value}%`;
@@ -93,12 +93,13 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
       if (key.toLowerCase().includes('time') || key.toLowerCase().includes('horizon')) {
         return `${value} years`;
       }
-      return value.toLocaleString();
+      return formatNumber(value);
     }
     return value;
-  };
+  }, [formatCurrency, formatNumber]);
 
-  const getActionColor = (action: GoalGapInsights['recommendations']['primaryAction']) => {
+  // Memoize the getActionColor function
+  const getActionColor = useMemo(() => (action: GoalGapInsights['recommendations']['primaryAction']) => {
     switch (action) {
       case 'increase_savings':
         return 'text-yellow-600';
@@ -111,9 +112,10 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
       default:
         return 'text-foreground';
     }
-  };
+  }, []);
 
-  const getGoalTypeLabel = (goal: string | undefined) => {
+  // Memoize the getGoalTypeLabel function
+  const getGoalTypeLabel = useMemo(() => (goal: string | undefined) => {
     if (!goal) return 'your goal';
     
     switch (goal.toLowerCase()) {
@@ -123,7 +125,7 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
       case 'wealth': return 'wealth building';
       default: return goal.toLowerCase();
     }
-  };
+  }, []);
 
   return (
     <Card>
@@ -283,40 +285,26 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
                         </div>
                       </div>
                     )}
-                    {goalGapInsights.recommendations.suggestedStrategy && (
-                      <div className="flex items-start">
-                        <span className="mr-2 text-blue-600 font-medium">3.</span>
-                        <div>
-                          <p className="text-sm font-medium">Investment Strategy</p>
-                          <p className="text-sm text-muted-foreground">
-                            Adopt a {goalGapInsights.recommendations.suggestedStrategy.replace('_', ' ')} approach to better manage market risks
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* Risk Considerations */}
-                <div className="p-4 border rounded-lg bg-yellow-50">
-                  <h5 className="font-medium mb-2 text-yellow-800 flex items-center">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Risk Considerations
-                  </h5>
-                  <div className="space-y-2 text-sm text-yellow-700">
-                    <p>• Market volatility may affect your returns of 13.8% annually</p>
-                    <p>• Your current investment rate may not be sufficient for your timeline</p>
-                    <p>• Consider adjusting your risk tolerance to match your goals</p>
-                  </div>
-                </div>
-
-                {/* What's Next */}
-                <div className="p-4 border rounded-lg bg-blue-50">
-                  <h5 className="font-medium mb-2 text-blue-800">What's Next</h5>
-                  <div className="space-y-2 text-sm text-blue-700">
-                    <p>1. Review and adjust your target amount based on the recommendation</p>
-                    <p>2. Update your monthly investment plan</p>
-                    <p>3. Review your investment strategy with a financial advisor</p>
+                {/* Primary Recommendation */}
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-medium mb-1">Primary Recommendation</h5>
+                      <p className={`text-sm ${getActionColor(goalGapInsights.recommendations.primaryAction)}`}>
+                        {goalGapInsights.recommendations.message}
+                      </p>
+                      {goalGapInsights.recommendations.suggestedMonthlySavings && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Suggested monthly investment: {formatValue('savings', goalGapInsights.recommendations.suggestedMonthlySavings)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -326,6 +314,8 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
       </CardContent>
     </Card>
   );
-};
+});
+
+DirectInputs.displayName = 'DirectInputs';
 
 export default DirectInputs; 

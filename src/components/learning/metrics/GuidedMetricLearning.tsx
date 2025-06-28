@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { getCategoryColor, getPriorityColor } from '@/utils/metrics';
 import { toast } from "sonner";
 import { PracticeQuestion } from '../quiz/PracticeQuestion';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 interface GuidedMetricLearningProps {
   metrics: Record<string, RecommendedMetric>;
@@ -35,6 +36,13 @@ type MetricState = {
   lastPracticeScore?: number;
 };
 
+interface MetricProgress {
+  completedSteps: string[];
+  currentStep: number;
+  userAnswers: Record<string, string>;
+  metricStates: Record<string, MetricState>;
+}
+
 const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   metrics,
   assetClass,
@@ -42,11 +50,21 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   onComplete,
   sessionId
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [showPractice, setShowPractice] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-  const [metricStates, setMetricStates] = useState<Record<string, MetricState>>({});
+
+  // Optimized localStorage hook for metric progress
+  const [metricProgress, setMetricProgress] = useLocalStorage<MetricProgress>(
+    `metric-progress-${sessionId}-${assetClass}`,
+    {
+      completedSteps: [],
+      currentStep: 0,
+      userAnswers: {},
+      metricStates: {}
+    },
+    { debounceMs: 200 }
+  );
+
+  const { completedSteps, currentStep, userAnswers, metricStates } = metricProgress;
 
   const metricEntries = Object.entries(metrics);
   const currentMetric = metricEntries[currentStep];
@@ -56,80 +74,69 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
   const totalSteps = metricEntries.length;
   const progress = (completedSteps.length / totalSteps) * 100;
 
-  // Load saved progress on mount
-  useEffect(() => {
-    if (!sessionId) return;
-    
-    const savedProgress = localStorage.getItem(`metric-progress-${sessionId}-${assetClass}`);
-    if (savedProgress) {
-      try {
-        const { completedSteps: savedCompleted, currentStep: savedStep } = JSON.parse(savedProgress);
-        setCompletedSteps(savedCompleted);
-        setCurrentStep(savedStep);
-      } catch (error) {
-        console.error('Error parsing saved progress:', error);
-      }
-    }
-  }, [assetClass, sessionId]);
-
-  // Save progress when it changes
-  useEffect(() => {
-    if (!sessionId) return;
-    
-    const saveProgress = () => {
-      localStorage.setItem(`metric-progress-${sessionId}-${assetClass}`, JSON.stringify({
-        completedSteps,
-        currentStep
-      }));
-    };
-
-    if (completedSteps.length > 0 || currentStep > 0) {
-      saveProgress();
-    }
-  }, [assetClass, sessionId, completedSteps, currentStep]);
-
-  const handleNext = () => {
+  // Optimized step navigation
+  const handleNext = useCallback(() => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
+      setMetricProgress(prev => ({
+        ...prev,
+        currentStep: prev.currentStep + 1
+      }));
       setShowPractice(false);
     } else {
       onComplete();
     }
-  };
+  }, [currentStep, totalSteps, setMetricProgress, onComplete]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setMetricProgress(prev => ({
+        ...prev,
+        currentStep: prev.currentStep - 1
+      }));
       setShowPractice(false);
     }
-  };
+  }, [currentStep, setMetricProgress]);
 
-  const handleCompleteStep = () => {
+  // Optimized step completion
+  const handleCompleteStep = useCallback(() => {
     if (!sessionId) return;
     
     if (!completedSteps.includes(metricName)) {
-      setCompletedSteps(prev => [...prev, metricName]);
-      setMetricStates(prev => ({
-        ...prev,
+      const newCompletedSteps = [...completedSteps, metricName];
+      const newMetricStates = {
+        ...metricStates,
         [metricName]: {
           ...metricStates[metricName],
-          status: 'completed'
+          status: 'completed' as const
         }
+      };
+
+      setMetricProgress(prev => ({
+        ...prev,
+        completedSteps: newCompletedSteps,
+        metricStates: newMetricStates
       }));
 
       // Save individual metric progress with answers and practice data
-      localStorage.setItem(`metric-progress-${sessionId}-${metricName}`, JSON.stringify({
+      const individualProgress = {
         progress: 100,
         completed: true,
         answers: userAnswers[metricName],
         practiceAttempts: metricStates[metricName]?.practiceAttempts || 0,
         lastPracticeScore: metricStates[metricName]?.lastPracticeScore,
         completedAt: new Date().toISOString()
-      }));
+      };
+
+      // Use localStorage directly for individual metric data (not cached)
+      try {
+        localStorage.setItem(`metric-progress-${sessionId}-${metricName}`, JSON.stringify(individualProgress));
+      } catch (error) {
+        console.error('Failed to save individual metric progress:', error);
+      }
 
       // Check if all metrics are completed
       const allMetricsCompleted = metricEntries.every(([name]) => 
-        [...completedSteps, metricName].includes(name)
+        newCompletedSteps.includes(name)
       );
 
       if (allMetricsCompleted) {
@@ -144,17 +151,23 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
 
       onComplete();
     }
-  };
+  }, [sessionId, completedSteps, metricName, metricStates, userAnswers, setMetricProgress, metricEntries, onComplete]);
 
-  const handlePracticeComplete = (isCorrect: boolean) => {
-    setMetricStates(prev => ({
-      ...prev,
+  // Optimized practice completion
+  const handlePracticeComplete = useCallback((isCorrect: boolean) => {
+    const newMetricStates = {
+      ...metricStates,
       [metricName]: {
         ...metricStates[metricName],
         status: isCorrect ? 'completed' : 'practicing',
         practiceAttempts: (metricStates[metricName]?.practiceAttempts || 0) + 1,
         lastPracticeScore: isCorrect ? 100 : 0
       }
+    };
+
+    setMetricProgress(prev => ({
+      ...prev,
+      metricStates: newMetricStates
     }));
 
     if (isCorrect) {
@@ -167,18 +180,33 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
     } else {
       toast.error("Not quite right. Try again!");
     }
-  };
+  }, [metricStates, metricName, setMetricProgress, handleCompleteStep, currentStep, totalSteps, handleNext, onComplete]);
 
-  const handleStartPractice = () => {
+  // Optimized practice start
+  const handleStartPractice = useCallback(() => {
     setShowPractice(true);
-    setMetricStates(prev => ({
+    setMetricProgress(prev => ({
       ...prev,
-      [metricName]: {
-        ...metricStates[metricName],
-        status: 'practicing'
+      metricStates: {
+        ...prev.metricStates,
+        [metricName]: {
+          ...prev.metricStates[metricName],
+          status: 'practicing'
+        }
       }
     }));
-  };
+  }, [metricName, setMetricProgress]);
+
+  // Update user answers
+  const updateUserAnswer = useCallback((questionId: string, answer: string) => {
+    setMetricProgress(prev => ({
+      ...prev,
+      userAnswers: {
+        ...prev.userAnswers,
+        [questionId]: answer
+      }
+    }));
+  }, [setMetricProgress]);
 
   if (!currentMetric) return null;
 
@@ -293,7 +321,8 @@ const GuidedMetricLearning: React.FC<GuidedMetricLearningProps> = ({
                   data={content.practiceQuestion}
                   mode="learning"
                   onComplete={handlePracticeComplete}
-                  allowRetry={true}
+                  onAnswerChange={updateUserAnswer}
+                  userAnswer={userAnswers[metricName]}
                 />
               )}
 

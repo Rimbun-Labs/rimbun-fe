@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -31,40 +31,49 @@ interface RiskProfileChartProps {
   };
 }
 
-const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMetrics }) => {
-  const [activeMetric, setActiveMetric] = useState<string | null>(null);
+const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, confidenceMetrics }) => {
   const { theme } = useTheme();
-  const chartData = transformRiskProfileData(data, confidenceMetrics);
-  
   const isDarkMode = theme === 'dark';
-  
-  const colors = {
+
+  // Memoize the colors object to prevent recreation on every render
+  const colors = useMemo(() => ({
     primary: {
-      stroke: '#4f46e5', // Indigo that works in both modes
+      stroke: '#4f46e5',
       fill: '#4f46e5',
       gradient: 'linear-gradient(180deg, #4f46e5 0%, #6366f1 100%)',
     },
     confidence: {
       high: {
-        stroke: isDarkMode ? '#10B981' : '#22c55e', // Bright green in dark mode
+        stroke: isDarkMode ? '#10B981' : '#22c55e',
         fill: isDarkMode ? '#10B981' : '#22c55e',
       },
       medium: {
-        stroke: isDarkMode ? '#CA8A04' : '#eab308', // Muted yellow in dark mode
+        stroke: isDarkMode ? '#CA8A04' : '#eab308',
         fill: isDarkMode ? '#CA8A04' : '#eab308',
       },
       low: {
-        stroke: isDarkMode ? '#EF4444' : '#ef4444', // Bright red in dark mode
+        stroke: isDarkMode ? '#EF4444' : '#ef4444',
         fill: isDarkMode ? '#EF4444' : '#ef4444',
       }
     },
-    grid: isDarkMode ? '#475569' : '#94a3b8', // Slate that adapts to mode
-    text: isDarkMode ? '#f1f5f9' : '#1e293b', // Text that adapts to mode
-    active: {
-      stroke: '#3730a3',
-      fill: '#3730a3',
-    },
-  };
+  }), [isDarkMode]);
+
+  // Memoize the chart data transformation to prevent unnecessary recalculations
+  const chartData = useMemo(() => 
+    transformRiskProfileData(data), [data]
+  );
+
+  // Memoize confidence data transformation
+  const confidenceData = useMemo(() => {
+    if (!confidenceMetrics) return null;
+    return transformRiskProfileData({
+      riskProfile: confidenceMetrics.riskProfileConfidence,
+      knowledgeLevel: confidenceMetrics.knowledgeLevelConfidence,
+      leverageAptitude: confidenceMetrics.leverageAptitudeConfidence,
+      decisionStyleScore: confidenceMetrics.decisionStyleConfidence,
+      personalityScore: confidenceMetrics.personalityConfidence,
+    });
+  }, [confidenceMetrics]);
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return colors.confidence.high;
@@ -112,7 +121,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
           </defs>
           
           <PolarGrid 
-            stroke={colors.grid} 
+            stroke={isDarkMode ? '#374151' : '#e2e8f0'} 
             strokeDasharray="3 3"
             strokeOpacity={0.7}
           />
@@ -120,13 +129,11 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
           <PolarAngleAxis 
             dataKey="attribute" 
             tick={{ 
-              fill: colors.text, 
-              fontSize: 13,
-              fontWeight: 600,
+              fill: isDarkMode ? '#9ca3af' : '#64748b',
+              fontSize: 12,
+              fontWeight: 500
             }}
-            tickLine={false}
-            onClick={(data: any) => setActiveMetric(data.value)}
-            style={{ cursor: 'pointer' }}
+            axisLine={{ stroke: isDarkMode ? '#374151' : '#e2e8f0' }}
           />
           
           <Radar
@@ -138,11 +145,9 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             animationDuration={1000}
             animationEasing="ease-in-out"
             strokeWidth={3}
-            onClick={(data: any) => setActiveMetric(data.attribute)}
-            style={{ cursor: 'pointer' }}
           />
           
-          {confidenceMetrics && (
+          {confidenceData && (
             <Radar
               name="Confidence Range"
               dataKey="confidence"
@@ -198,7 +203,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
             }}
             formatter={(value) => (
               <span style={{ 
-                color: colors.text,
+                color: isDarkMode ? '#e2e8f0' : '#64748b',
                 fontSize: '14px',
                 fontWeight: '500'
               }}>
@@ -210,6 +215,8 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data, confidenceMet
       </ResponsiveContainer>
     </motion.div>
   );
-};
+});
+
+RiskProfileChart.displayName = 'RiskProfileChart';
 
 export default RiskProfileChart;

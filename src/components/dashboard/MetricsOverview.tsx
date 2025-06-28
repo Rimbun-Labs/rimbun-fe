@@ -20,7 +20,7 @@ interface MetricCardProps {
   progressValue?: number;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({
+const MetricCard: React.FC<MetricCardProps> = React.memo(({
   title,
   value,
   description,
@@ -63,7 +63,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+MetricCard.displayName = 'MetricCard';
 
 const MetricsOverview: React.FC<MetricsOverviewProps> = ({ className }) => {
   // Mock data for metrics overview

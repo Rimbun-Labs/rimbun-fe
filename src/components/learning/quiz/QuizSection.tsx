@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useReducer, useCallback, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getQuizQuestions, submitQuizAttempt } from '@/lib/api/quizApi';
 import { Question } from '@/lib/api/types/assessment';
@@ -17,12 +17,56 @@ interface QuizSectionProps {
   onClose: () => void;
 }
 
+// Quiz section action types
+type QuizSectionAction = 
+  | { type: 'SET_ANSWER'; questionId: string; answer: string }
+  | { type: 'NEXT_QUESTION' }
+  | { type: 'PREVIOUS_QUESTION' }
+  | { type: 'COMPLETE_QUIZ'; result: QuizResult }
+  | { type: 'RESET_QUIZ' };
+
+// Quiz section reducer
+const quizSectionReducer = (state: QuizState, action: QuizSectionAction): QuizState => {
+  switch (action.type) {
+    case 'SET_ANSWER':
+      return {
+        ...state,
+        answers: { ...state.answers, [action.questionId]: action.answer }
+      };
+    case 'NEXT_QUESTION':
+      return {
+        ...state,
+        currentQuestionIndex: state.currentQuestionIndex + 1
+      };
+    case 'PREVIOUS_QUESTION':
+      return {
+        ...state,
+        currentQuestionIndex: Math.max(0, state.currentQuestionIndex - 1)
+      };
+    case 'COMPLETE_QUIZ':
+      return {
+        ...state,
+        isComplete: true,
+        result: action.result
+      };
+    case 'RESET_QUIZ':
+      return {
+        currentQuestionIndex: 0,
+        answers: {},
+        isComplete: false
+      };
+    default:
+      return state;
+  }
+};
+
 const QuizSection: React.FC<QuizSectionProps> = ({ 
   assetClass, 
   responseGroupId,
   onClose 
 }) => {
-  const [state, setState] = useState<QuizState>({
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(quizSectionReducer, {
     currentQuestionIndex: 0,
     answers: {},
     isComplete: false
@@ -42,7 +86,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
         selectedAnswer: answerId
       }))),
     onSuccess: (result) => {
-      setState(prev => ({ ...prev, isComplete: true, result }));
+      dispatch({ type: 'COMPLETE_QUIZ', result });
       toast.success('Quiz completed successfully!');
     },
     onError: (error) => {
@@ -50,35 +94,37 @@ const QuizSection: React.FC<QuizSectionProps> = ({
     }
   });
 
-  const currentQuestion = questions?.[state.currentQuestionIndex];
-  const progress = (state.currentQuestionIndex / (questions?.length || 1)) * 100;
+  // Memoized derived values
+  const currentQuestion = useMemo(() => 
+    questions?.[state.currentQuestionIndex], 
+    [questions, state.currentQuestionIndex]
+  );
 
-  const handleAnswer = (answer: string) => {
-    setState(prev => ({
-      ...prev,
-      answers: { ...prev.answers, [currentQuestion?.id || '']: answer }
-    }));
-  };
+  const progress = useMemo(() => 
+    (state.currentQuestionIndex / (questions?.length || 1)) * 100, 
+    [state.currentQuestionIndex, questions?.length]
+  );
 
-  const handleNext = () => {
+  // Memoized event handlers
+  const handleAnswer = useCallback((answer: string) => {
+    if (currentQuestion?.id) {
+      dispatch({ type: 'SET_ANSWER', questionId: currentQuestion.id, answer });
+    }
+  }, [currentQuestion?.id]);
+
+  const handleNext = useCallback(() => {
     if (currentQuestion && state.currentQuestionIndex < (questions?.length || 0) - 1) {
-      setState(prev => ({
-        ...prev,
-        currentQuestionIndex: prev.currentQuestionIndex + 1
-      }));
+      dispatch({ type: 'NEXT_QUESTION' });
     } else {
       submitMutation.mutate(state.answers);
     }
-  };
+  }, [currentQuestion, state.currentQuestionIndex, questions?.length, submitMutation, state.answers]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (state.currentQuestionIndex > 0) {
-      setState(prev => ({
-        ...prev,
-        currentQuestionIndex: prev.currentQuestionIndex - 1
-      }));
+      dispatch({ type: 'PREVIOUS_QUESTION' });
     }
-  };
+  }, [state.currentQuestionIndex]);
 
   if (isLoadingQuestions) {
     return (

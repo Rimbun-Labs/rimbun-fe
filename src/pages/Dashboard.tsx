@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
@@ -17,7 +17,7 @@ import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -36,11 +36,9 @@ import {
   RealEstateExplanation,
   CashExplanation
 } from '@/components/dashboard/explanations/assetAllocation';
-import { AlertCircle } from "lucide-react";
 import InvestmentScenarios from '@/components/dashboard/InvestmentScenarios';
-import { BarChart3, Lightbulb, TrendingUp, BookOpen, Shield, Target, Clock, Sparkles } from "lucide-react";
 
-// Add type definitions
+// Types
 interface LowercaseAssetAllocations {
   equities: number;
   bonds: number;
@@ -55,22 +53,79 @@ interface UppercaseAssetAllocations {
   CASH: number;
 }
 
+// Dashboard state interface
+interface DashboardState {
+  expandedSections: {
+    profile: boolean;
+    portfolio: boolean;
+    insights: boolean;
+  };
+  showWelcome: boolean;
+  loading: boolean;
+}
+
+// Dashboard action types
+type DashboardAction = 
+  | { type: 'TOGGLE_SECTION'; section: keyof DashboardState['expandedSections'] }
+  | { type: 'SET_WELCOME'; show: boolean }
+  | { type: 'SET_LOADING'; loading: boolean };
+
+// Dashboard reducer
+const dashboardReducer = (state: DashboardState, action: DashboardAction): DashboardState => {
+  switch (action.type) {
+    case 'TOGGLE_SECTION':
+      return {
+        ...state,
+        expandedSections: {
+          ...state.expandedSections,
+          [action.section]: !state.expandedSections[action.section]
+        }
+      };
+    case 'SET_WELCOME':
+      return {
+        ...state,
+        showWelcome: action.show
+      };
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: action.loading
+      };
+    default:
+      return state;
+  }
+};
+
+// Initial state
+const initialState: DashboardState = {
+  expandedSections: {
+    profile: false,
+    portfolio: false,
+    insights: false
+  },
+  showWelcome: false,
+  loading: false
+};
+
+// Utility functions
 const getScoreColor = (score: number) => {
-  if (score >= 0.7) return "text-green-600";
-  if (score >= 0.4) return "text-yellow-600";
-  return "text-red-600";
+  if (score >= 80) return 'text-green-600';
+  if (score >= 60) return 'text-yellow-600';
+  return 'text-red-600';
 };
 
 const getScoreLabel = (score: number) => {
-  if (score >= 0.7) return "High";
-  if (score >= 0.4) return "Medium";
-  return "Low";
+  if (score >= 80) return 'Excellent';
+  if (score >= 60) return 'Good';
+  return 'Needs Improvement';
 };
 
 const getRiskProfileLabel = (riskProfile: number) => {
-  if (riskProfile >= 0.7) return "High Risk";
-  if (riskProfile >= 0.4) return "Medium Risk";
-  return "Low Risk";
+  if (riskProfile >= 80) return 'Very Aggressive';
+  if (riskProfile >= 60) return 'Aggressive';
+  if (riskProfile >= 40) return 'Moderate';
+  if (riskProfile >= 20) return 'Conservative';
+  return 'Very Conservative';
 };
 
 const mapGoalGapInsights = (oldInsights: any) => {
@@ -101,15 +156,9 @@ const Dashboard = () => {
   // Use sessionId from params or fall back to session context
   const effectiveSessionId = sessionId || session?.id;
   
-  // State for expandable sections
-  const [expandedSections, setExpandedSections] = React.useState({
-    profile: false,
-    portfolio: false,
-    insights: false
-  });
-
-  // State for welcome modal
-  const [showWelcome, setShowWelcome] = useState(false);
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(dashboardReducer, initialState);
+  const { expandedSections, showWelcome, loading } = state;
   
   // Get assessment results
   const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError, refetch: refetchAssessment } = useQuery({
@@ -128,6 +177,12 @@ const Dashboard = () => {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
+
+  // Memoize loading state
+  const isLoading = useMemo(() => 
+    (assessmentLoading || recommendationsLoading) && effectiveSessionId, 
+    [assessmentLoading, recommendationsLoading, effectiveSessionId]
+  );
 
   // Update session when results are loaded
   useEffect(() => {
@@ -165,12 +220,31 @@ const Dashboard = () => {
     if (!effectiveSessionId && !session?.isCompleted) {
       const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
       if (!hasSeenWelcome) {
-        setShowWelcome(true);
+        dispatch({ type: 'SET_WELCOME', show: true });
       }
     }
   }, [effectiveSessionId, session?.isCompleted]);
 
-  const isLoading = (assessmentLoading || recommendationsLoading) && effectiveSessionId;
+  // Memoize utility functions
+  const getReadableProfile = useMemo(() => (profile: string): string => {
+    return profile.split('_').map(word => 
+      word.charAt(0) + word.slice(1).toLowerCase()
+    ).join(' ');
+  }, []);
+
+  // Memoize event handlers
+  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
+    dispatch({ type: 'TOGGLE_SECTION', section });
+  }, [expandedSections]);
+
+  const handleCloseWelcome = useCallback(() => {
+    dispatch({ type: 'SET_WELCOME', show: false });
+    localStorage.setItem('hasSeenWelcome', 'true');
+  }, []);
+
+  const handleStartAssessment = useCallback(() => {
+    navigate('/assessment');
+  }, [navigate]);
 
   if (isLoading) {
     return (
@@ -282,19 +356,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const getReadableProfile = (profile: string): string => {
-    return profile.split('_').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ');
-  };
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -490,13 +551,10 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Portfolio Insights Section */}
+        {/* Investment Insights Section */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">Portfolio Insights</CardTitle>
-              <CardDescription>Key metrics and analysis of your portfolio's performance and risk management</CardDescription>
-            </div>
+            <CardTitle className="text-xl">Investment Insights</CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -508,209 +566,117 @@ const Dashboard = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            {/* Overview Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
-              {/* Diversification Score */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Diversification Score</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold">
-                        {(recommendations?.diversificationAnalysis?.diversificationScore * 100).toFixed(0)}%
-                      </span>
-                      <Badge className={getScoreColor(recommendations?.diversificationAnalysis?.diversificationScore)}>
-                        {getScoreLabel(recommendations?.diversificationAnalysis?.diversificationScore)}
-                      </Badge>
-                    </div>
-                    <Progress 
-                      value={recommendations?.diversificationAnalysis?.diversificationScore * 100} 
-                      className="h-2" 
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Risk Metrics */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Risk Metrics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Risk-Adjusted Volatility</span>
-                      <span className="text-2xl font-bold">
-                        {recommendations?.diversificationAnalysis?.riskAdjustedVolatility.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Risk Profile</span>
-                      <span className="text-sm font-medium">
-                        {getRiskProfileLabel(assessmentResults?.scoreData.riskProfile)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Key Insights */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Key Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {recommendations?.diversificationAnalysis?.recommendations.slice(0, 2).map((recommendation, index) => (
-                      <div key={index} className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span className="text-sm">{recommendation}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Always Visible: Direct Inputs */}
+            <div className="mb-6">
+              <DirectInputs 
+                inputs={assessmentResults?.inputs}
+                goalGapInsights={mapGoalGapInsights(assessmentResults?.goalGapInsights)}
+                loading={assessmentLoading}
+              />
             </div>
 
-            {/* Expanded Content */}
+            {/* Expanded Content: Detailed Analysis */}
             {expandedSections.insights && (
-              <div className="mt-6 space-y-6">
-                {/* Portfolio Strategy */}
+              <div className="space-y-6">
+                {/* Investment Scenarios */}
+                {assessmentResults?.investmentScenarios && (
+                  <InvestmentScenarios 
+                    scenarios={assessmentResults.investmentScenarios}
+                    targetAmount={assessmentResults.inputs?.targetAmount || 0}
+                    investmentHorizon={assessmentResults.inputs?.investmentHorizon || 0}
+                    loading={assessmentLoading}
+                  />
+                )}
+
+                {/* Diversification Analysis */}
+                {recommendations?.diversificationAnalysis && (
+                  <DiversificationAnalysis 
+                    diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
+                    riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
+                    recommendations={recommendations.diversificationAnalysis.recommendations}
+                    correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
+                  />
+                )}
+
+                {/* Portfolio Interaction */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Portfolio Strategy</CardTitle>
-                    <CardDescription>How your portfolio is structured to achieve your investment goals</CardDescription>
+                    <CardTitle className="text-lg">How do your investments work together?</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <AllocationStrategyExplanation
-                      diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore || 0}
+                    <PortfolioInteractionExplanation 
+                      allocations={recommendations?.adjustedAllocations || {
+                        equities: 0,
+                        bonds: 0,
+                        realEstate: 0,
+                        cash: 0
+                      }}
                       riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                      riskAdjustedVolatility={recommendations?.diversificationAnalysis?.riskAdjustedVolatility || 0}
                     />
                   </CardContent>
                 </Card>
 
-                {/* Asset Correlations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Asset Correlations</CardTitle>
-                    <CardDescription>
-                      How different assets in your portfolio move in relation to each other. 
-                      A correlation of 1 means assets move perfectly together, -1 means they move in opposite directions, 
-                      and 0 means no relationship.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="min-h-[400px]">
-                      <CorrelationExplanation
-                        correlationMatrix={recommendations?.diversificationAnalysis?.correlationMatrix || {}}
-                        goal="other"
-                        allocations={{
-                          equities: recommendations?.adjustedAllocations?.equities || 0,
-                          bonds: recommendations?.adjustedAllocations?.bonds || 0,
-                          realEstate: recommendations?.adjustedAllocations?.realEstate || 0,
-                          cash: recommendations?.adjustedAllocations?.cash || 0
+                {/* Correlation Analysis */}
+                {recommendations?.correlationAnalysis && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Asset Correlation Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CorrelationExplanation 
+                        correlations={recommendations.correlationAnalysis}
+                        allocations={recommendations?.adjustedAllocations || {
+                          equities: 0,
+                          bonds: 0,
+                          realEstate: 0,
+                          cash: 0
                         }}
                         riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        investmentHorizon={assessmentResults?.scoreData.investmentHorizon || 0}
-                        knowledgeLevel={assessmentResults?.scoreData.knowledgeLevel >= 0.7 ? 'advanced' : 
-                                      assessmentResults?.scoreData.knowledgeLevel >= 0.4 ? 'intermediate' : 
-                                      'beginner'}
+                        investmentHorizon={assessmentResults?.inputs?.investmentHorizon || 0}
+                        goal={assessmentResults?.inputs?.financialGoal || 'wealth'}
+                        knowledgeLevel={assessmentResults?.scoreData.knowledgeLevel || 0}
                       />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
           </CardContent>
         </Card>
-
-        {/* Preferences Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Your Preferences</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DirectInputs 
-              inputs={assessmentResults?.scoreData?.directInputs}
-              goalGapInsights={mapGoalGapInsights(recommendations?.recommendationCalculationData?.goalGapInsights)}
-              loading={isLoading}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Add Investment Scenarios */}
-        {recommendations?.recommendationCalculationData?.goalGapInsights?.investmentScenarios && (
-          <InvestmentScenarios
-            scenarios={recommendations.recommendationCalculationData.goalGapInsights.investmentScenarios}
-            targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount || 0}
-            investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
-            loading={isLoading}
-          />
-        )}
       </div>
 
-      {/* Welcome Modal for New Users */}
-      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
-        <DialogContent className="max-w-md">
+      {/* Welcome Modal */}
+      <Dialog open={showWelcome} onOpenChange={(open) => dispatch({ type: 'SET_WELCOME', show: open })}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Welcome to InvestLearn!
-            </DialogTitle>
+            <DialogTitle>Welcome to InvestLearn!</DialogTitle>
             <DialogDescription>
-              Let's discover your investment profile and create a personalized learning path.
+              Let's get started with your personalized investment journey.
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4">
-            {/* Simple Assessment Info */}
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">Quick Assessment</h4>
-              <p className="text-sm text-muted-foreground">
-                Our 10-15 minute assessment helps us understand your investment goals and knowledge level.
-              </p>
+            <p className="text-sm text-muted-foreground">
+              Complete a quick assessment to unlock your custom dashboard, learning path, and investment recommendations.
+            </p>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <span>10-15 minute assessment</span>
             </div>
-
-            {/* Simple Benefits */}
-            <div className="grid grid-cols-3 gap-3 text-xs">
-              <div className="text-center">
-                <Lightbulb className="h-6 w-6 mx-auto mb-1 text-primary" />
-                <p className="font-medium">AI Insights</p>
-              </div>
-              <div className="text-center">
-                <TrendingUp className="h-6 w-6 mx-auto mb-1 text-primary" />
-                <p className="font-medium">Learning Path</p>
-              </div>
-              <div className="text-center">
-                <Shield className="h-6 w-6 mx-auto mb-1 text-primary" />
-                <p className="font-medium">Secure</p>
-              </div>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <span>Personalized recommendations</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <span>Custom learning path</span>
             </div>
           </div>
-
-          <DialogFooter className="flex flex-col gap-2">
-            <Button 
-              onClick={() => {
-                setShowWelcome(false);
-                localStorage.setItem('hasSeenWelcome', 'true');
-                navigate('/assessment');
-              }}
-              className="w-full"
-            >
-              Start Assessment
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowWelcome(false);
-                localStorage.setItem('hasSeenWelcome', 'true');
-              }}
-              className="w-full"
-            >
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={handleCloseWelcome}>
               Maybe Later
+            </Button>
+            <Button onClick={handleStartAssessment}>
+              Start Assessment
             </Button>
           </DialogFooter>
         </DialogContent>
