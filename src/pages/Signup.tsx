@@ -53,7 +53,7 @@ const Signup = () => {
         description: "Account created successfully",
       });
 
-      navigate('/home');
+      navigate('/dashboard');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       setError(errorMessage);
@@ -72,7 +72,7 @@ const Signup = () => {
     setError(null);
     try {
       await signInWithGoogle();
-      navigate('/home');
+      navigate('/dashboard');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
       setError(errorMessage);

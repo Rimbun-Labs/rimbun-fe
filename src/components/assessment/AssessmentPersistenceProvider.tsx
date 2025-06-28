@@ -13,7 +13,7 @@ export const AssessmentPersistenceProvider: React.FC<AssessmentPersistenceProvid
   const navigate = useNavigate();
   const location = useLocation();
   const { user, userRegistrationComplete } = useAuth();
-  const { session } = useSession();
+  const { session, hasCompletedAssessment } = useSession();
   const { 
     hasCheckedPersistence, 
     hasExistingAssessment, 
@@ -33,17 +33,32 @@ export const AssessmentPersistenceProvider: React.FC<AssessmentPersistenceProvid
       return;
     }
 
-    // Only redirect if user has existing assessment AND is on the home page
-    if (hasExistingAssessment && session?.id && location.pathname === '/home') {
-      console.log('✅ User has existing assessment and is on home page, redirecting to dashboard');
-      navigate(`/dashboard/${session.id}`);
-    }
-    // If no existing assessment, let them stay on current page
-    else if (!hasExistingAssessment) {
-      console.log('ℹ️ No existing assessment found, user can take assessment');
-      // Don't redirect - let them stay on current page
-    }
-  }, [user, userRegistrationComplete, hasCheckedPersistence, hasExistingAssessment, session, navigate, isLoading, location.pathname]);
+    // Check if user has a complete assessment (not just existing)
+    const checkCompleteAssessment = async () => {
+      try {
+        const status = await hasCompletedAssessment();
+        // Only redirect if user has complete assessment AND is on the dashboard or root page
+        if (status.hasAssessment && status.sessionId && !status.isIncomplete && (location.pathname === '/dashboard' || location.pathname === '/')) {
+          console.log('✅ User has complete assessment and is on dashboard/root, redirecting to dashboard');
+          navigate(`/dashboard/${status.sessionId}`);
+        }
+        // If incomplete assessment, let them stay on current page
+        else if (status.isIncomplete) {
+          console.log('⚠️ User has incomplete assessment, allowing them to complete it');
+          // Don't redirect - let them stay on current page
+        }
+        // If no existing assessment, let them stay on current page
+        else if (!status.hasAssessment) {
+          console.log('ℹ️ No existing assessment found, user can take assessment');
+          // Don't redirect - let them stay on current page
+        }
+      } catch (error) {
+        console.error('Failed to check assessment completion status:', error);
+      }
+    };
+
+    checkCompleteAssessment();
+  }, [navigate, userRegistrationComplete]);
 
   // Show loading while checking persistence
   if (user && userRegistrationComplete && !hasCheckedPersistence && isLoading) {

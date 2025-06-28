@@ -1,61 +1,69 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 interface FeatureCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
-  color: "blue" | "purple" | "green";
+  icon: React.ComponentType<{ className?: string }>;
+  color: "blue" | "purple" | "green" | "orange" | "red" | "indigo";
+  benefits?: string[];
+  details?: string;
   className?: string;
 }
 
-const colorStyles = {
-  blue: {
-    border: "bg-blue-500",
-    icon: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-100 dark:bg-blue-900/30"
-  },
-  purple: {
-    border: "bg-purple-500",
-    icon: "text-purple-600 dark:text-purple-400",
-    bg: "bg-purple-100 dark:bg-purple-900/30"
-  },
-  green: {
-    border: "bg-green-500",
-    icon: "text-green-600 dark:text-green-400",
-    bg: "bg-green-100 dark:bg-green-900/30"
-  }
+const colorClasses = {
+  blue: "text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400",
+  purple: "text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400",
+  green: "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400",
+  orange: "text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400",
+  red: "text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400",
+  indigo: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400"
 };
 
-export const FeatureCard = ({ 
-  title, 
-  description, 
-  icon: Icon, 
+export const FeatureCard: React.FC<FeatureCardProps> = ({
+  title,
+  description,
+  icon: Icon,
   color,
-  className 
-}: FeatureCardProps) => {
-  const styles = colorStyles[color];
-
+  benefits = [],
+  details,
+  className
+}) => {
   return (
-    <Card className={cn("relative overflow-hidden group hover:shadow-lg transition-all duration-200", className)}>
-      {/* Colored border */}
-      <div className={cn("absolute top-0 left-0 w-1 h-full", styles.border)}></div>
-      
-      <CardContent className="p-6">
-        {/* Icon */}
-        <div className={cn(
-          "mb-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110",
-          styles.bg
-        )}>
-          <Icon className={cn("h-5 w-5", styles.icon)} />
+    <Card className={cn("h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50", className)}>
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-4">
+          <div className={cn("p-3 rounded-xl", colorClasses[color])}>
+            <Icon className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold mb-2">{title}</CardTitle>
+            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+          </div>
         </div>
-
-        {/* Content */}
-        <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="text-muted-foreground">
-          {description}
-        </p>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {details && (
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {details}
+          </p>
+        )}
+        
+        {benefits.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-foreground">Key Benefits:</h4>
+            <ul className="space-y-1">
+              {benefits.map((benefit, index) => (
+                <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

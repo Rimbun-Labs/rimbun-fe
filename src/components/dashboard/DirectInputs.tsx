@@ -113,7 +113,9 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
     }
   };
 
-  const getGoalTypeLabel = (goal: string) => {
+  const getGoalTypeLabel = (goal: string | undefined) => {
+    if (!goal) return 'your goal';
+    
     switch (goal.toLowerCase()) {
       case 'house': return 'a house';
       case 'retirement': return 'retirement';
@@ -139,8 +141,8 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
                 Your Goal Summary
               </h4>
               <p className="text-sm">
-                You're investing for {getGoalTypeLabel(inputs.financialGoal as string)}, targeting {formatValue('amount', inputs.targetAmount as number)} in {inputs.investmentHorizon} years.
-                With your current monthly income of {formatValue('income', inputs.monthlyIncome as number)}, you're investing {formatValue('savings', inputs.monthlyInvestable as number)} monthly.
+                You're investing for {getGoalTypeLabel(inputs.financialGoal)}, targeting {formatValue('amount', inputs.targetAmount || 0)} in {inputs.investmentHorizon || 0} years.
+                With your current monthly income of {formatValue('income', inputs.monthlyIncome || '0')}, you're investing {formatValue('savings', inputs.monthlyInvestable || 0)} monthly.
               </p>
             </div>
           )}
@@ -242,14 +244,14 @@ const DirectInputs: React.FC<DirectInputsProps> = ({ inputs, goalGapInsights, lo
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Current Monthly Investment</span>
-                        <span>{formatValue('savings', inputs.monthlyInvestable as number)}</span>
+                        <span>{formatValue('savings', inputs.monthlyInvestable || 0)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Required Monthly Investment</span>
                         <span>{formatValue('savings', goalGapInsights.requiredMonthlySavings)}</span>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        You're currently investing {Math.round((inputs.monthlyInvestable as number / goalGapInsights.requiredMonthlySavings) * 100)}% of what's needed
+                        You're currently investing {Math.round(((inputs.monthlyInvestable || 0) / goalGapInsights.requiredMonthlySavings) * 100)}% of what's needed
                       </div>
                     </div>
                   </div>

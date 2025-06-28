@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
@@ -7,6 +7,7 @@ import { getRecommendations } from '@/lib/api/recommendationApi';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
+import { isAssessmentComplete } from '@/utils/assessmentValidation';
 
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -20,6 +21,7 @@ import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   RiskStyleExplanation,
   KnowledgeLevelExplanation,
@@ -36,6 +38,7 @@ import {
 } from '@/components/dashboard/explanations/assetAllocation';
 import { AlertCircle } from "lucide-react";
 import InvestmentScenarios from '@/components/dashboard/InvestmentScenarios';
+import { BarChart3, Lightbulb, TrendingUp, BookOpen, Shield, Target, Clock, Sparkles } from "lucide-react";
 
 // Add type definitions
 interface LowercaseAssetAllocations {
@@ -104,6 +107,9 @@ const Dashboard = () => {
     portfolio: false,
     insights: false
   });
+
+  // State for welcome modal
+  const [showWelcome, setShowWelcome] = useState(false);
   
   // Get assessment results
   const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError, refetch: refetchAssessment } = useQuery({
@@ -126,28 +132,45 @@ const Dashboard = () => {
   // Update session when results are loaded
   useEffect(() => {
     if (assessmentResults && effectiveSessionId) {
-      setSession({
-        id: effectiveSessionId,
-        userId: assessmentResults.responseGroupId,
-        questionnaireType: "ONBOARDING",
-        isCompleted: true,
-        metadata: {
-          score: assessmentResults.scoreData.finalScore,
-          profile: assessmentResults.scoreData.profile,
-          riskProfile: assessmentResults.scoreData.riskProfile,
-          knowledgeLevel: assessmentResults.scoreData.knowledgeLevel,
-          leverageAptitude: assessmentResults.scoreData.leverageAptitude,
-          riskCapacity: assessmentResults.scoreData.riskCapacity,
-          investmentHorizon: assessmentResults.scoreData.investmentHorizon,
-          overallConfidence: assessmentResults.scoreData.overallConfidence
-        },
-        createdAt: assessmentResults.createdAt,
-        updatedAt: assessmentResults.updatedAt
-      });
+      // Use comprehensive assessment validation
+      if (isAssessmentComplete(assessmentResults)) {
+        console.log('✅ Dashboard: Assessment is complete, setting session');
+        setSession({
+          id: effectiveSessionId,
+          userId: assessmentResults.responseGroupId,
+          questionnaireType: "ONBOARDING",
+          isCompleted: true,
+          metadata: {
+            score: assessmentResults.scoreData.finalScore,
+            profile: assessmentResults.scoreData.profile,
+            riskProfile: assessmentResults.scoreData.riskProfile,
+            knowledgeLevel: assessmentResults.scoreData.knowledgeLevel,
+            leverageAptitude: assessmentResults.scoreData.leverageAptitude,
+            riskCapacity: assessmentResults.scoreData.riskCapacity,
+            investmentHorizon: assessmentResults.scoreData.investmentHorizon,
+            overallConfidence: assessmentResults.scoreData.overallConfidence
+          },
+          createdAt: assessmentResults.createdAt,
+          updatedAt: assessmentResults.updatedAt
+        });
+      } else {
+        console.log('⚠️ Dashboard: Assessment exists but is incomplete, not setting session');
+        // Don't set session for incomplete assessments
+      }
     }
   }, [assessmentResults, effectiveSessionId, setSession]);
 
-  const isLoading = assessmentLoading || recommendationsLoading;
+  // Show welcome modal for new users without assessment
+  useEffect(() => {
+    if (!effectiveSessionId && !session?.isCompleted) {
+      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+      }
+    }
+  }, [effectiveSessionId, session?.isCompleted]);
+
+  const isLoading = (assessmentLoading || recommendationsLoading) && effectiveSessionId;
 
   if (isLoading) {
     return (
@@ -163,6 +186,67 @@ const Dashboard = () => {
   }
 
   if (assessmentError || !effectiveSessionId) {
+    // Show welcoming empty state instead of error
+    if (!effectiveSessionId) {
+      return (
+        <div className="container mx-auto py-12 px-4">
+          <div className="max-w-2xl mx-auto text-center space-y-8">
+            {/* Welcome Header */}
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold">Welcome to Your Investment Journey!</h1>
+              <p className="text-xl text-muted-foreground">
+                Complete your personalized assessment to unlock your custom dashboard and learning path.
+              </p>
+            </div>
+
+            {/* Main CTA Card */}
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+              <CardContent className="pt-8 pb-8">
+                <div className="space-y-6">
+                  {/* Single Feature Highlight */}
+                  <div className="text-center">
+                    <BarChart3 className="h-16 w-16 mx-auto mb-4 text-primary" />
+                    <h3 className="text-xl font-semibold mb-2">Discover Your Investment Profile</h3>
+                    <p className="text-muted-foreground">
+                      Our 10-15 minute assessment will help you understand your risk tolerance, 
+                      knowledge level, and investment preferences.
+                    </p>
+                  </div>
+
+                  {/* Removed duplicate CTA button - users have welcome modal and assessment start page */}
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Complete your assessment to unlock personalized insights and recommendations.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Simple Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 text-sm">
+              <div className="text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-2 text-primary" />
+                <h4 className="font-medium">AI Insights</h4>
+                <p className="text-muted-foreground">Get personalized recommendations</p>
+              </div>
+              <div className="text-center">
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
+                <h4 className="font-medium">Learning Path</h4>
+                <p className="text-muted-foreground">Access customized education</p>
+              </div>
+              <div className="text-center">
+                <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
+                <h4 className="font-medium">Secure & Private</h4>
+                <p className="text-muted-foreground">Your data is protected</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Show error state only for actual errors (not missing assessment)
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto space-y-4">
@@ -176,37 +260,21 @@ const Dashboard = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-destructive">
                 <AlertCircle className="h-5 w-5" />
-                <p>
-                  {!effectiveSessionId 
-                    ? 'No assessment session found. Please complete your assessment first.' 
-                    : 'Failed to load assessment results. The assessment might not be complete yet.'}
-                </p>
+                <p>Failed to load assessment results. The assessment might not be complete yet.</p>
               </div>
               <div className="flex gap-2">
-                {!effectiveSessionId && (
-                  <Button 
-                    onClick={() => navigate('/assessment')}
-                    variant="default"
-                  >
-                    Start Assessment
-                  </Button>
-                )}
-                {effectiveSessionId && (
-                  <>
-                    <Button 
-                      onClick={() => refetchAssessment()}
-                      variant="outline"
-                    >
-                      Retry Assessment Data
-                    </Button>
-                    <Button 
-                      onClick={() => refetchRecommendations()}
-                      variant="outline"
-                    >
-                      Retry Recommendations
-                    </Button>
-                  </>
-                )}
+                <Button 
+                  onClick={() => refetchAssessment()}
+                  variant="outline"
+                >
+                  Retry Assessment Data
+                </Button>
+                <Button 
+                  onClick={() => refetchRecommendations()}
+                  variant="outline"
+                >
+                  Retry Recommendations
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -583,6 +651,70 @@ const Dashboard = () => {
           />
         )}
       </div>
+
+      {/* Welcome Modal for New Users */}
+      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Welcome to InvestLearn!
+            </DialogTitle>
+            <DialogDescription>
+              Let's discover your investment profile and create a personalized learning path.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Simple Assessment Info */}
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h4 className="font-medium mb-2">Quick Assessment</h4>
+              <p className="text-sm text-muted-foreground">
+                Our 10-15 minute assessment helps us understand your investment goals and knowledge level.
+              </p>
+            </div>
+
+            {/* Simple Benefits */}
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="text-center">
+                <Lightbulb className="h-6 w-6 mx-auto mb-1 text-primary" />
+                <p className="font-medium">AI Insights</p>
+              </div>
+              <div className="text-center">
+                <TrendingUp className="h-6 w-6 mx-auto mb-1 text-primary" />
+                <p className="font-medium">Learning Path</p>
+              </div>
+              <div className="text-center">
+                <Shield className="h-6 w-6 mx-auto mb-1 text-primary" />
+                <p className="font-medium">Secure</p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2">
+            <Button 
+              onClick={() => {
+                setShowWelcome(false);
+                localStorage.setItem('hasSeenWelcome', 'true');
+                navigate('/assessment');
+              }}
+              className="w-full"
+            >
+              Start Assessment
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowWelcome(false);
+                localStorage.setItem('hasSeenWelcome', 'true');
+              }}
+              className="w-full"
+            >
+              Maybe Later
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

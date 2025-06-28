@@ -73,15 +73,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </Link>
           </div>
           <div className="flex-1 flex justify-end items-center space-x-4">
-            {showFullNav && !session?.isCompleted && !isHomePage && (
-              <Button asChild className="hidden md:flex">
-                <Link to="/assessment" className="flex items-center gap-2">
-                  Complete Your Assessment
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            )}
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">

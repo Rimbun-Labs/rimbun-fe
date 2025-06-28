@@ -4,6 +4,7 @@ import { getLatestUserAssessmentResults, getAllUserAssessmentResults } from '@/l
 import { AssessmentResult } from '@/lib/api/types/assessment';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSession } from '@/contexts/SessionContext';
+import { isAssessmentComplete } from '@/utils/assessmentValidation';
 
 export const useUserAssessmentPersistence = () => {
   const { user, userRegistrationComplete } = useAuth();
@@ -39,29 +40,37 @@ export const useUserAssessmentPersistence = () => {
   // Effect to handle when latest results are found
   useEffect(() => {
     if (latestResults && !hasCheckedPersistence) {
-      console.log('✅ Found existing assessment results for user, restoring session');
+      console.log('✅ Found existing assessment results for user, checking completeness');
       
-      // Create a session object from the existing results
-      const sessionData = {
-        id: latestResults.responseGroupId,
-        userId: latestResults.responseGroupId, // This should be the user ID
-        questionnaireType: "ONBOARDING",
-        isCompleted: true,
-        metadata: {
-          score: latestResults.scoreData.finalScore,
-          profile: latestResults.scoreData.profile,
-          riskProfile: latestResults.scoreData.riskProfile,
-          knowledgeLevel: latestResults.scoreData.knowledgeLevel,
-          leverageAptitude: latestResults.scoreData.leverageAptitude,
-          riskCapacity: latestResults.scoreData.riskCapacity,
-          investmentHorizon: latestResults.scoreData.investmentHorizon,
-          overallConfidence: latestResults.scoreData.overallConfidence
-        },
-        createdAt: latestResults.createdAt,
-        updatedAt: latestResults.updatedAt
-      };
+      // Use comprehensive assessment validation
+      if (isAssessmentComplete(latestResults)) {
+        console.log('✅ Assessment is complete, restoring session');
+        // Create a session object from the existing results
+        const sessionData = {
+          id: latestResults.responseGroupId,
+          userId: latestResults.responseGroupId,
+          questionnaireType: "ONBOARDING",
+          isCompleted: true,
+          metadata: {
+            score: latestResults.scoreData.finalScore,
+            profile: latestResults.scoreData.profile,
+            riskProfile: latestResults.scoreData.riskProfile,
+            knowledgeLevel: latestResults.scoreData.knowledgeLevel,
+            leverageAptitude: latestResults.scoreData.leverageAptitude,
+            riskCapacity: latestResults.scoreData.riskCapacity,
+            investmentHorizon: latestResults.scoreData.investmentHorizon,
+            overallConfidence: latestResults.scoreData.overallConfidence
+          },
+          createdAt: latestResults.createdAt,
+          updatedAt: latestResults.updatedAt
+        };
 
-      setSession(sessionData);
+        setSession(sessionData);
+      } else {
+        console.log('⚠️ Assessment exists but is incomplete, not setting session');
+        // Don't set session for incomplete assessments
+      }
+
       setHasCheckedPersistence(true);
     } else if (latestResults === null && !hasCheckedPersistence) {
       // No results found, mark as checked

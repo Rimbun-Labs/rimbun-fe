@@ -67,7 +67,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('✅ AuthContext: User registration completed:', result);
         } catch (backendError) {
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
-          // Don't throw here - user is still authenticated with Firebase
+          
+          // Check if user already has database ID stored (might be a "user already exists" error)
+          if (userService.getDatabaseUserId()) {
+            console.log('✅ AuthContext: User already has database ID stored, marking as complete');
+            setUserRegistrationComplete(true);
+          } else {
+            console.log('⚠️ AuthContext: User registration failed and no database ID found');
+            // Don't set userRegistrationComplete to true - user needs to retry
+          }
         }
       } else {
         // User signed out, reset the last processed user ID
@@ -96,7 +104,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserRegistrationComplete(true); // Mark as complete
       } catch (backendError) {
         console.error('Failed to ensure user exists in backend:', backendError);
-        // Don't throw here - user is still authenticated with Firebase
+        
+        // Check if user already has database ID stored (might be a "user already exists" error)
+        if (userService.getDatabaseUserId()) {
+          console.log('✅ AuthContext: User already has database ID stored, marking as complete');
+          setUserRegistrationComplete(true);
+        } else {
+          console.log('⚠️ AuthContext: User registration failed and no database ID found');
+          // Don't set userRegistrationComplete to true - user needs to retry
+        }
       }
       // Removed: navigate('/home');
       // Let RootRedirect handle the navigation
@@ -124,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userService.clearDatabaseUserId();
     setUserRegistrationComplete(false); // Reset registration state
     
-    navigate('/login');
+    navigate('/'); // Go to landing page instead of login
   };
 
   const value = {

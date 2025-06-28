@@ -1,108 +1,166 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useSession } from "@/contexts/SessionContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Award, Shield } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface CTASectionProps {
   className?: string;
 }
 
+const benefits = [
+  {
+    icon: Award,
+    title: "Personalized Learning",
+    description: "Educational content tailored to your goals and knowledge level"
+  },
+  {
+    icon: Shield,
+    title: "Interactive Scenarios",
+    description: "Learn investment concepts through real-world examples"
+  },
+  {
+    icon: Users,
+    title: "Progress Tracking",
+    description: "Monitor your learning journey and goal progress"
+  }
+];
+
 export const CTASection = ({ className }: CTASectionProps) => {
-  const { session, isLoading } = useSession();
-  const { user } = useAuth();
-  const isCompleted = session?.isCompleted;
-
   return (
-    <section className={cn("py-16 md:py-24", className)}>
+    <section className={cn("py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-primary/5", className)}>
       <div className="container px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          {/* Content */}
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-              {!user 
-                ? "Ready to start your investment journey?"
-                : isCompleted 
-                ? "Ready to continue your investment journey?"
-                : "Ready to understand your investment style?"}
-            </h2>
-            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-              {!user
-                ? "Create your account and take the first step towards financial mastery."
-                : isCompleted
-                ? "Explore your personalized learning paths and track your progress."
-                : "Take the financial profile assessment and get personalized insights today."}
-            </p>
-          </div>
-
-          {/* Button Group */}
-          <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            {user ? (
-              // Authenticated user
-              <Button 
-                asChild 
-                size="lg"
-                disabled={isLoading}
-                className="relative"
-              >
-                <Link to={isCompleted ? "/dashboard" : "/assessment"}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : isCompleted ? (
-                    <>
-                      View Dashboard
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      Start Assessment
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Link>
-              </Button>
-            ) : (
-              // Unauthenticated user
-              <Button 
-                asChild 
-                size="lg"
-                className="relative"
-              >
-                <Link to="/signup">
-                  <>
-                    Create Free Account
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                </Link>
-              </Button>
-            )}
-
-            <Button 
-              asChild 
-              variant="outline" 
-              size="lg"
-              disabled={isLoading}
-            >
-              <Link to={user ? (isCompleted ? "/learning" : "/dashboard") : "/login"}>
-                {user 
-                  ? (isCompleted ? "Continue Learning" : "View Demo Dashboard")
-                  : "Already have an account? Sign In"}
-              </Link>
-            </Button>
-          </div>
-
-          {/* Additional Info */}
-          {isCompleted && (
-            <div className="pt-4">
-              <p className="text-sm text-muted-foreground">
-                Last updated: {new Date(session.updatedAt).toLocaleDateString()}
+        <div className="max-w-4xl mx-auto">
+          {/* Main Content */}
+          <motion.div 
+            className="text-center space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            {/* Header */}
+            <div className="space-y-4">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
+                Ready to Build Your Investment Confidence?
+              </h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl leading-relaxed">
+                Join thousands of learners who are developing the knowledge and skills to make informed investment decisions through personalized education.
               </p>
             </div>
-          )}
+
+            {/* Benefits Grid */}
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              {benefits.map((benefit, index) => (
+                <motion.div
+                  key={benefit.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="text-center space-y-3"
+                >
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
+                    <benefit.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-semibold text-foreground">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div 
+              className="flex flex-wrap justify-center gap-8 mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">10,000+</div>
+                <div className="text-sm text-muted-foreground">Active Learners</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">98%</div>
+                <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">15,000+</div>
+                <div className="text-sm text-muted-foreground">Assessments Completed</div>
+              </div>
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <Button 
+                asChild 
+                size="lg"
+                className="group relative overflow-hidden"
+              >
+                <Link to="/signup">
+                  <span className="relative z-10 flex items-center">
+                    Start Your Learning Journey
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild 
+                variant="outline" 
+                size="lg"
+                className="group"
+              >
+                <Link to="/login">
+                  <span className="flex items-center">
+                    Sign In to Continue
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              </Button>
+            </motion.div>
+
+            {/* Trust Indicators */}
+            <motion.div 
+              className="pt-8 border-t border-border/40"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <p className="text-sm text-muted-foreground mb-4">
+                Trusted by investors worldwide
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-6 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">No credit card required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">Free assessment</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">Cancel anytime</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>
