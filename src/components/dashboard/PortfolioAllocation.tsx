@@ -83,6 +83,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
           <div className="h-[400px]">
             <ResponsivePie
               data={data}
+              colors={(d) => getAssetColor(String(d.id))}
               margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
               innerRadius={0.5}
               padAngle={0.7}
@@ -165,13 +166,17 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = ({
 const getAssetColor = (assetClass: string): string => {
   switch (assetClass) {
     case 'equities':
-      return '#4f46e5';
+      return '#E9C46A';
     case 'bonds':
-      return '#10b981';
+      return '#2A9D8F';
     case 'realEstate':
-      return '#f59e0b';
+      return '#F4A261';
     case 'cash':
-      return '#6b7280';
+      return '#264653';
+    case 'commodities':
+      return '#E76F51';
+    case 'alternatives':
+      return '#E9C46A';
     default:
       return '#94a3b8';
   }

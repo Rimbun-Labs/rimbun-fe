@@ -33,39 +33,13 @@ const Assessment: React.FC = () => {
   const { sessionId, setSessionId, setSession, hasCompletedAssessment } = useSession();
   const { userRegistrationComplete } = useAuth();
   
-  // Check if user already has completed assessment on mount
+  // Check assessment status for resume functionality - REMOVE THE AUTOMATIC REDIRECT
   useEffect(() => {
-    const checkExistingAssessment = async () => {
+    const checkAssessmentStatus = async () => {
       if (!userRegistrationComplete) {
         setIsCheckingExistingAssessment(false);
         return;
       }
-
-      try {
-        const status = await hasCompletedAssessment();
-        if (status.hasAssessment && status.sessionId && !status.isIncomplete) {
-          // User already has completed assessment, redirect to dashboard
-          navigate(`/dashboard/${status.sessionId}`);
-          return;
-        }
-        // If incomplete assessment, let them stay on assessment page to complete it
-        else if (status.isIncomplete) {
-          console.log('⚠️ User has incomplete assessment, allowing them to complete it');
-        }
-      } catch (error) {
-        console.error('Failed to check existing assessment:', error);
-      } finally {
-        setIsCheckingExistingAssessment(false);
-      }
-    };
-
-    checkExistingAssessment();
-  }, [navigate, userRegistrationComplete]);
-
-  // Check assessment status for resume functionality
-  useEffect(() => {
-    const checkAssessmentStatus = async () => {
-      if (!userRegistrationComplete) return;
       
       try {
         const status = await getAssessmentResumeStatus();
@@ -83,6 +57,8 @@ const Assessment: React.FC = () => {
       } catch (error) {
         console.error('Failed to check assessment status:', error);
         setAssessmentMode('new');
+      } finally {
+        setIsCheckingExistingAssessment(false);
       }
     };
 
@@ -212,9 +188,16 @@ const Assessment: React.FC = () => {
 
   const handleStartAssessment = async () => {
     if (!userRegistrationComplete) {
-      toast.error('Please wait while we set up your account...');
-      console.log('❌ Assessment: User registration not complete yet');
-      return;
+      // Add a small delay and retry once in case of timing issue
+      console.log('⚠️ Assessment: User registration not complete, waiting 2 seconds and retrying...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Check again after delay
+      if (!userRegistrationComplete) {
+        toast.error('Please wait while we set up your account. If this persists, try refreshing the page.');
+        console.log('❌ Assessment: User registration still not complete after retry');
+        return;
+      }
     }
     
     if (assessmentMode === 'resume' && existingSessionId) {
