@@ -1,4 +1,6 @@
 import { AssessmentResult } from '@/lib/api/types/assessment';
+import { getLatestUserAssessmentResults } from '@/lib/api/assessmentApi';
+import { config } from '@/lib/api/config';
 
 /**
  * Simple assessment completion validation
@@ -131,4 +133,100 @@ export const getAssessmentStatus = (result: AssessmentResult): {
     missingFields,
     reason
   };
+};
+
+/**
+ * Get comprehensive assessment status for resume functionality
+ */
+export const getAssessmentResumeStatus = async (): Promise<{
+  hasAssessment: boolean;
+  sessionId?: string;
+  isComplete: boolean;
+  isIncomplete: boolean;
+  canResume: boolean;
+  progress?: {
+    questionsAnswered: number;
+    totalQuestions: number;
+    lastAnsweredAt?: string;
+  };
+  answers?: Record<string, any>;
+}> => {
+  try {
+    // Use existing function to get latest results
+    const latestResults = await getLatestUserAssessmentResults();
+    
+    if (!latestResults) {
+      return {
+        hasAssessment: false,
+        isComplete: false,
+        isIncomplete: false,
+        canResume: false
+      };
+    }
+
+    const sessionId = latestResults.responseGroupId;
+    
+    // Check if assessment is complete by trying to get results
+    try {
+      const assessmentResponse = await fetch(`${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`);
+      
+      if (assessmentResponse.ok) {
+        // Assessment is complete
+        return {
+          hasAssessment: true,
+          sessionId,
+          isComplete: true,
+          isIncomplete: false,
+          canResume: false
+        };
+      }
+    } catch (error) {
+      // Assessment results not available - check if incomplete
+    }
+    
+    // Assessment exists but is incomplete - check for answers
+    try {
+      const answersResponse = await fetch(`${config.API_BASE_URL}/user-responses/session/${sessionId}/questions-answers`);
+      
+      if (answersResponse.ok) {
+        const answersData = await answersResponse.json();
+        const hasAnswers = answersData.questionsWithAnswers.length > 0;
+        
+        return {
+          hasAssessment: true,
+          sessionId,
+          isComplete: false,
+          isIncomplete: true,
+          canResume: hasAnswers,
+          progress: {
+            questionsAnswered: answersData.questionsWithAnswers.length,
+            totalQuestions: 30, // Update this to match your total questions
+            lastAnsweredAt: answersData.questionsWithAnswers[answersData.questionsWithAnswers.length - 1]?.createdAt
+          },
+          answers: answersData.questionsWithAnswers.reduce((acc: any, q: any) => {
+            acc[q.id] = q.answer.value || q.answer.selectedOption?.id || q.answer.answerText || q.answer.answerNumber || q.answer.answerBoolean;
+            return acc;
+          }, {})
+        };
+      }
+    } catch (error) {
+      console.error('Failed to get answers:', error);
+    }
+    
+    return {
+      hasAssessment: true,
+      sessionId,
+      isComplete: false,
+      isIncomplete: true,
+      canResume: false
+    };
+  } catch (error) {
+    console.error('Failed to get assessment status:', error);
+    return {
+      hasAssessment: false,
+      isComplete: false,
+      isIncomplete: false,
+      canResume: false
+    };
+  }
 }; 

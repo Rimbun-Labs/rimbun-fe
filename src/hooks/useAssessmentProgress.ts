@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Question } from '@/lib/api/types/assessment';
 
@@ -46,6 +45,35 @@ export const useAssessmentProgress = (questions: Question[] | undefined) => {
       }));
     }
   }, [questions]);
+
+  // Add function to set current question index externally (for resume)
+  const setCurrentQuestionIndex = (index: number) => {
+    if (!questions || index < 0 || index >= questions.length) return;
+    
+    const question = questions[index];
+    const category = question.category.id;
+    
+    // Calculate category progress
+    const questionsInCategory = questions.filter(q => q.category.id === category);
+    const questionIndexInCategory = questionsInCategory.findIndex(q => q.id === question.id) + 1;
+    
+    setProgressState(prev => ({
+      ...prev,
+      currentQuestionIndex: index,
+      currentCategory: category,
+      progress: {
+        ...prev.progress,
+        current: index + 1,
+        byCategory: {
+          ...prev.progress.byCategory,
+          [category]: {
+            current: questionIndexInCategory,
+            total: questionsInCategory.length
+          }
+        }
+      }
+    }));
+  };
 
   const handleNext = () => {
     if (!questions) return;
@@ -115,6 +143,7 @@ export const useAssessmentProgress = (questions: Question[] | undefined) => {
   return {
     ...progressState,
     handleNext,
-    handlePrevious
+    handlePrevious,
+    setCurrentQuestionIndex
   };
 };

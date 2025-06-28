@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Question, UserAnswer, SaveUserResponseRequest } from '@/lib/api/types/assessment';
 import { userResponsesApi } from '@/lib/api/userResponsesApi';
 import { toast } from "sonner";
+import { config } from '@/lib/api/config';
 
 export const useAssessmentAnswers = (sessionId: string | null) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -18,6 +18,26 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
       setError(error.message || "Failed to save your answer. Please try again.");
     }
   });
+
+  // Add function to load existing answers (for resume)
+  const loadExistingAnswers = async (sessionId: string) => {
+    try {
+      const response = await fetch(`${config.API_BASE_URL}/user-responses/session/${sessionId}/questions-answers`);
+      if (response.ok) {
+        const data = await response.json();
+        const answers = data.questionsWithAnswers.reduce((acc: any, q: any) => {
+          acc[q.id] = q.answer.value || q.answer.selectedOption?.id || q.answer.answerText || q.answer.answerNumber || q.answer.answerBoolean;
+          return acc;
+        }, {});
+        setAnswers(answers);
+        return answers;
+      }
+      return {};
+    } catch (error) {
+      console.error('Failed to load existing answers:', error);
+      return {};
+    }
+  };
 
   const handleAnswer = async (answer: UserAnswer, question: Question) => {
     if (!sessionId) {
@@ -86,6 +106,8 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
     error,
     handleAnswer,
     validateCurrentAnswer,
-    setError
+    setError,
+    loadExistingAnswers,
+    setAnswers
   };
 };
