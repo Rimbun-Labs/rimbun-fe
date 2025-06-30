@@ -26,6 +26,7 @@ import { useSession } from "./contexts/SessionContext";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
 import LearningFolderView from "./pages/LearningFolderView";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
+import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
@@ -123,23 +124,25 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SessionProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <ThemeProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <AssessmentPersistenceProvider>
-                <AppRoutes />
-              </AssessmentPersistenceProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </SessionProvider>
-  </QueryClientProvider>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <AssessmentPersistenceProvider>
+                  <AppRoutes />
+                </AssessmentPersistenceProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </SessionProvider>
+    </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 export default App;

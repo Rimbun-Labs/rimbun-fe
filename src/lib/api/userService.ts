@@ -1,4 +1,5 @@
 import { config } from './config';
+import { storageUtils } from '../storage/storageUtils';
 
 interface RegisterUserData {
   authProviderId:string;
@@ -53,7 +54,7 @@ export const userService = {
       
       // Store the database user ID in localStorage for session creation
       if (result.data?.id) {
-        localStorage.setItem('databaseUserId', result.data.id);
+        storageUtils.setItem('databaseUserId', result.data.id);
         console.log('🔵 Stored database user ID:', result.data.id);
       }
       
@@ -101,7 +102,7 @@ export const userService = {
       
       // Store the database user ID in localStorage for session creation
       if (result.data?.id) {
-        localStorage.setItem('databaseUserId', result.data.id);
+        storageUtils.setItem('databaseUserId', result.data.id);
         console.log('🔵 Stored database user ID:', result.data.id);
       }
       
@@ -113,10 +114,10 @@ export const userService = {
   },
 
   getDatabaseUserId(): string | null {
-    return localStorage.getItem('databaseUserId');
+    return storageUtils.getItem('databaseUserId');
   },
 
   clearDatabaseUserId(): void {
-    localStorage.removeItem('databaseUserId');
+    storageUtils.removeItem('databaseUserId');
   },
 }; 

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import RecommendationCard from './RecommendationCard';
 
 interface RecommendationsSectionProps {
@@ -21,7 +20,7 @@ const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({ recomme
         {loading ? (
           Array(3).fill(0).map((_, i) => (
             <div key={i} className="h-[160px]">
-              <Skeleton className="h-full w-full" />
+              <LoadingState variant="expanded" lines={2} />
             </div>
           ))
         ) : recommendations.map((rec) => (

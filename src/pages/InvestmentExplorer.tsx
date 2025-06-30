@@ -21,6 +21,7 @@ import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplor
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
+import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
 
 const MotionCard = motion(Card);
 
@@ -351,4 +352,13 @@ const InvestmentExplorer: React.FC = () => {
   );
 };
 
-export default InvestmentExplorer; 
+// Wrap the InvestmentExplorer component with RouteErrorBoundary
+const InvestmentExplorerWithErrorBoundary: React.FC = () => {
+  return (
+    <RouteErrorBoundary routeName="Investment Explorer" showFullPage={true}>
+      <InvestmentExplorer />
+    </RouteErrorBoundary>
+  );
+};
+
+export default InvestmentExplorerWithErrorBoundary; 

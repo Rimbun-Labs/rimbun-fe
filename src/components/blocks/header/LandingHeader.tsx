@@ -183,24 +183,26 @@ export const LandingHeader = () => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/40"
           >
-            <div className="container px-4 py-4 space-y-4">
+            <div className="container px-4 py-6 space-y-3">
               {navigation.map((item) => (
                 <Button
                   key={item.name}
                   variant="ghost"
-                  className="w-full justify-start text-left"
+                  size="lg"
+                  className="w-full justify-start text-left h-12"
                   onClick={() => scrollToSection(item.href)}
                 >
                   {item.name}
                 </Button>
               ))}
               <div className="pt-4 border-t border-border/40">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {features.map((feature) => (
                     <Button
                       key={feature.name}
                       variant="ghost"
-                      className="w-full justify-start text-left"
+                      size="lg"
+                      className="w-full justify-start text-left h-16"
                       onClick={() => scrollToSection(feature.href)}
                     >
                       <div className="flex flex-col items-start">

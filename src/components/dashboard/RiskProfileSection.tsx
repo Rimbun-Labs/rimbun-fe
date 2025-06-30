@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import RiskProfileChart from './RiskProfileChart';
 
 interface RiskProfileSectionProps {
@@ -20,7 +19,7 @@ const RiskProfileSection: React.FC<RiskProfileSectionProps> = ({ profile, profil
         <div className="h-[320px]">
           {profileLoading ? (
             <div className="h-full flex items-center justify-center">
-              <Skeleton className="h-full w-full" />
+              <LoadingState variant="expanded" lines={3} />
             </div>
           ) : profile ? (
             <RiskProfileChart data={profile} confidenceMetrics={profile.confidenceMetrics} />

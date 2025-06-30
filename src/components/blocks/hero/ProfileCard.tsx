@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, BarChart, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, BookOpen, BarChart, Shield } from "lucide-react";
 import { ResponseGroup } from "@/lib/api/types/assessment";
 import { cn } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ProfileCardProps {
   session?: ResponseGroup | null;
@@ -22,7 +23,7 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
       <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-6 flex flex-col justify-between">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <LoadingSpinner />
           </div>
         ) : (
           <>

@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import ProfileDetermination from './ProfileDetermination';
 import { ResultsTabs } from './results/ResultsTabs';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 
 interface AssessmentResultsProps {
   result?: AssessmentResult;
@@ -31,12 +31,12 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
   if (isLoading) {
     return (
       <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
-        <Skeleton className="h-12 w-1/3" />
+        <LoadingState variant="expanded" lines={1} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Skeleton className="h-[400px] w-full" />
+            <LoadingState variant="expanded" lines={3} />
           </div>
-          <Skeleton className="h-[300px]" />
+          <LoadingState variant="expanded" lines={2} />
         </div>
       </div>
     );

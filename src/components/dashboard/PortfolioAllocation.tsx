@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
-import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip, Label } from 'recharts';
+import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 import { RecommendedMetricsWithWeights, AssetClass } from '@/lib/api/types/metrics';
 import { getAssetClassDisplayName, getMetricDisplayName } from '@/lib/constants/displayNames';
 import { useTheme } from '@/hooks/useTheme';
+import { ComponentErrorBoundary } from '@/components/error/ComponentErrorBoundary';
 
 interface AssetAllocations {
   equities: number;
@@ -67,7 +68,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
           <CardTitle>Portfolio Allocation</CardTitle>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[400px] w-full" />
+          <LoadingState variant="expanded" lines={3} />
         </CardContent>
       </Card>
     );
@@ -103,7 +104,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
       </CardHeader>
       <CardContent>
         {view === 'pie' ? (
-          <div className="h-[400px]">
+          <div className="h-[300px] sm:h-[350px] md:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -114,6 +115,8 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
                   outerRadius={120}
                   paddingAngle={5}
                   dataKey="value"
+                  label={({ value, percent }) => `${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
                 >
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -139,7 +142,12 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
                 <Legend 
                   verticalAlign="bottom" 
                   height={36}
-                  formatter={(value, entry) => (
+                  payload={data.map(item => ({
+                    value: item.label,
+                    type: 'circle',
+                    color: item.color
+                  }))}
+                  formatter={(value) => (
                     <span style={{ color: isDarkMode ? '#e2e8f0' : '#64748b' }}>
                       {value}
                     </span>
@@ -149,11 +157,11 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recommendedMetrics && Object.entries(recommendedMetrics).map(([assetClass, metrics]) => (
               <div key={assetClass} className="space-y-2">
                 <h4 className="font-medium text-sm">{getAssetClassDisplayName(assetClass as AssetClass)}</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {Object.entries(metrics).map(([key, metric]) => (
                     <div key={key} className="text-xs">
                       <div className="flex items-center justify-between">
@@ -177,4 +185,17 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
 
 PortfolioAllocation.displayName = 'PortfolioAllocation';
 
-export default PortfolioAllocation;
+// Wrap the PortfolioAllocation component with ComponentErrorBoundary
+const PortfolioAllocationWithErrorBoundary: React.FC<PortfolioAllocationProps> = (props) => {
+  return (
+    <ComponentErrorBoundary 
+      componentName="PortfolioAllocation"
+      variant="card"
+      showDetails={false}
+    >
+      <PortfolioAllocation {...props} />
+    </ComponentErrorBoundary>
+  );
+};
+
+export default PortfolioAllocationWithErrorBoundary;

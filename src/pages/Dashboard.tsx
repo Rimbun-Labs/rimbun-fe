@@ -8,6 +8,7 @@ import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
+import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
 
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -358,21 +359,21 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4">
+    <div className="container mx-auto py-4 sm:py-6 px-4">
       {/* Header Section */}
       <DashboardHeader />
       
       {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
         {/* Investment Profile Section */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <CardTitle className="text-xl">Your Investment Profile</CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => toggleSection('profile')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 self-start sm:self-auto"
             >
               {expandedSections.profile ? 'Show Less' : 'Learn More'}
               {expandedSections.profile ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -380,7 +381,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             {/* Always Visible: Radar Chart */}
-            <div className="h-[400px] w-full mb-6">
+            <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full mb-6">
               <RiskProfileChart 
                 data={{
                   riskProfile: assessmentResults?.scoreData.riskProfile || 0,
@@ -395,7 +396,7 @@ const Dashboard = () => {
 
             {/* Expanded Content: Question Cards */}
             {expandedSections.profile && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* What's your risk style? */}
                 <Card>
                   <CardHeader>
@@ -459,13 +460,13 @@ const Dashboard = () => {
 
         {/* Portfolio Breakdown Section */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => toggleSection('portfolio')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 self-start sm:self-auto"
             >
               {expandedSections.portfolio ? 'Show Less' : 'Learn More'}
               {expandedSections.portfolio ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -473,7 +474,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             {/* Always Visible: Portfolio Allocation Chart */}
-            <div className="min-h-[300px] mb-6">
+            <div className="min-h-[250px] sm:min-h-[300px] mb-6">
               <PortfolioAllocation 
                 allocations={recommendations?.adjustedAllocations || {
                   equities: 0,
@@ -488,14 +489,14 @@ const Dashboard = () => {
 
             {/* Expanded Content: Asset Explanations */}
             {expandedSections.portfolio && (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* What are you investing in? */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">What are you investing in?</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {/* Equities */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
@@ -569,8 +570,8 @@ const Dashboard = () => {
             {/* Always Visible: Direct Inputs */}
             <div className="mb-6">
               <DirectInputs 
-                inputs={assessmentResults?.inputs}
-                goalGapInsights={mapGoalGapInsights(assessmentResults?.goalGapInsights)}
+                inputs={assessmentResults?.scoreData?.directInputs}
+                goalGapInsights={mapGoalGapInsights(recommendations?.recommendationCalculationData?.goalGapInsights)}
                 loading={assessmentLoading}
               />
             </div>
@@ -579,11 +580,11 @@ const Dashboard = () => {
             {expandedSections.insights && (
               <div className="space-y-6">
                 {/* Investment Scenarios */}
-                {assessmentResults?.investmentScenarios && (
+                {recommendations?.recommendationCalculationData?.goalGapInsights?.investmentScenarios && (
                   <InvestmentScenarios 
-                    scenarios={assessmentResults.investmentScenarios}
-                    targetAmount={assessmentResults.inputs?.targetAmount || 0}
-                    investmentHorizon={assessmentResults.inputs?.investmentHorizon || 0}
+                    scenarios={recommendations.recommendationCalculationData.goalGapInsights.investmentScenarios}
+                    targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount || 0}
+                    investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
                     loading={assessmentLoading}
                   />
                 )}
@@ -605,26 +606,22 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <PortfolioInteractionExplanation 
-                      allocations={recommendations?.adjustedAllocations || {
-                        equities: 0,
-                        bonds: 0,
-                        realEstate: 0,
-                        cash: 0
-                      }}
+                      riskAdjustedVolatility={recommendations?.diversificationAnalysis?.riskAdjustedVolatility || 0}
                       riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                      diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore || 0}
                     />
                   </CardContent>
                 </Card>
 
                 {/* Correlation Analysis */}
-                {recommendations?.correlationAnalysis && (
+                {recommendations?.diversificationAnalysis?.correlationMatrix && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">Asset Correlation Analysis</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <CorrelationExplanation 
-                        correlations={recommendations.correlationAnalysis}
+                        correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
                         allocations={recommendations?.adjustedAllocations || {
                           equities: 0,
                           bonds: 0,
@@ -632,9 +629,12 @@ const Dashboard = () => {
                           cash: 0
                         }}
                         riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        investmentHorizon={assessmentResults?.inputs?.investmentHorizon || 0}
-                        goal={assessmentResults?.inputs?.financialGoal || 'wealth'}
-                        knowledgeLevel={assessmentResults?.scoreData.knowledgeLevel || 0}
+                        investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
+                        goal={(assessmentResults?.scoreData?.directInputs?.financialGoal as 'retirement' | 'house' | 'wealth' | 'education' | 'other') || 'wealth'}
+                        knowledgeLevel={
+                          (assessmentResults?.scoreData.knowledgeLevel || 0) < 30 ? 'beginner' :
+                          (assessmentResults?.scoreData.knowledgeLevel || 0) < 70 ? 'intermediate' : 'advanced'
+                        }
                       />
                     </CardContent>
                   </Card>
@@ -647,35 +647,37 @@ const Dashboard = () => {
 
       {/* Welcome Modal */}
       <Dialog open={showWelcome} onOpenChange={(open) => dispatch({ type: 'SET_WELCOME', show: open })}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Welcome to InvestLearn!</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-2xl p-8">
+          <DialogHeader className="space-y-4">
+            <DialogTitle className="text-2xl">Welcome to InvestLearn!</DialogTitle>
+            <DialogDescription className="text-lg">
               Let's get started with your personalized investment journey.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-8">
+            <p className="text-base text-muted-foreground leading-relaxed">
               Complete a quick assessment to unlock your custom dashboard, learning path, and investment recommendations.
             </p>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>10-15 minute assessment</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Personalized recommendations</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Custom learning path</span>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 text-base">
+                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                <span>10-15 minute assessment</span>
+              </div>
+              <div className="flex items-center gap-3 text-base">
+                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                <span>Personalized recommendations</span>
+              </div>
+              <div className="flex items-center gap-3 text-base">
+                <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                <span>Custom learning path</span>
+              </div>
             </div>
           </div>
-          <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={handleCloseWelcome}>
+          <DialogFooter className="flex gap-4 pt-6">
+            <Button variant="outline" onClick={handleCloseWelcome} className="flex-1 sm:flex-none">
               Maybe Later
             </Button>
-            <Button onClick={handleStartAssessment}>
+            <Button onClick={handleStartAssessment} className="flex-1 sm:flex-none">
               Start Assessment
             </Button>
           </DialogFooter>
@@ -685,4 +687,13 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+// Wrap the Dashboard component with RouteErrorBoundary
+const DashboardWithErrorBoundary: React.FC = () => {
+  return (
+    <RouteErrorBoundary routeName="Dashboard" showFullPage={true}>
+      <Dashboard />
+    </RouteErrorBoundary>
+  );
+};
+
+export default DashboardWithErrorBoundary;

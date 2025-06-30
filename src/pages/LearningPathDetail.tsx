@@ -201,7 +201,6 @@ const LearningPathDetail: React.FC = () => {
 
     // Update states based on current asset class completion
     setIsFullyCompleted(completedSections.length === totalSections && allMetricsCompleted);
-    setShowFinalActions(completedSections.length === totalSections && allMetricsCompleted);
   }, [toggleMetricCompletion, completedMetrics, recommendations, assetClass, completedSections.length, totalSections]);
   
   const toggleSection = (index: number) => {
@@ -278,7 +277,6 @@ const LearningPathDetail: React.FC = () => {
 
     // Update states based on current asset class completion
     setIsFullyCompleted(completedSections.length === totalSections && allMetricsCompleted);
-    setShowFinalActions(completedSections.length === totalSections && allMetricsCompleted);
   }, [completedSections, completedMetrics, totalSections, recommendations, assetClass]);
 
   const handleStartQuiz = () => {

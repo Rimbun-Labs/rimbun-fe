@@ -6,6 +6,8 @@ export const getRecommendations = async (responseGroupId: string): Promise<Recom
     const response = await apiClient.get<RecommendationResponse>(
       `/recommendation/response-group/${responseGroupId}`
     );
+    
+    // Return the response directly without transformation
     return response.data;
   } catch (error) {
     console.error('Failed to fetch recommendations:', error);

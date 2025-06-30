@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
@@ -32,12 +31,12 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
           <RadioGroup
             value={value}
             onValueChange={onChange}
-            className="space-y-3"
+            className="space-y-4"
           >
             {options?.map((option) => (
-              <div key={option.id} className="flex items-center space-x-2">
+              <div key={option.id} className="flex items-center space-x-3 p-2">
                 <RadioGroupItem value={option.id} id={option.id} />
-                <Label htmlFor={option.id} className="text-base cursor-pointer">
+                <Label htmlFor={option.id} className="text-base cursor-pointer flex-1">
                   {option.optionLabel}
                 </Label>
               </div>

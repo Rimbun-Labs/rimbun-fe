@@ -19,6 +19,9 @@ import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { getAssessmentResumeStatus } from '@/utils/assessmentValidation';
+import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
+import { AssessmentContainerWithErrorBoundary } from '@/components/assessment/AssessmentContainer';
+
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
@@ -352,7 +355,7 @@ const Assessment: React.FC = () => {
   }
   
   return (
-    <AssessmentContainer
+    <AssessmentContainerWithErrorBoundary
       questions={questions}
       currentQuestionIndex={currentQuestionIndex}
       progress={progress}
@@ -366,4 +369,13 @@ const Assessment: React.FC = () => {
   );
 };
 
-export default Assessment;
+// Wrap the Assessment component with RouteErrorBoundary
+const AssessmentWithErrorBoundary: React.FC = () => {
+  return (
+    <RouteErrorBoundary routeName="Assessment" showFullPage={true}>
+      <Assessment />
+    </RouteErrorBoundary>
+  );
+};
+
+export default AssessmentWithErrorBoundary;

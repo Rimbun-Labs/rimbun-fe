@@ -13,6 +13,7 @@ import { transformRiskProfileData } from '@/utils/chartUtils';
 import { Badge } from "@/components/ui/badge";
 import { motion } from 'framer-motion';
 import { useTheme } from '@/hooks/useTheme';
+import { ComponentErrorBoundary } from '@/components/error/ComponentErrorBoundary';
 
 interface RiskProfileChartProps {
   data: {
@@ -60,20 +61,8 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
 
   // Memoize the chart data transformation to prevent unnecessary recalculations
   const chartData = useMemo(() => 
-    transformRiskProfileData(data), [data]
+    transformRiskProfileData(data, confidenceMetrics), [data, confidenceMetrics]
   );
-
-  // Memoize confidence data transformation
-  const confidenceData = useMemo(() => {
-    if (!confidenceMetrics) return null;
-    return transformRiskProfileData({
-      riskProfile: confidenceMetrics.riskProfileConfidence,
-      knowledgeLevel: confidenceMetrics.knowledgeLevelConfidence,
-      leverageAptitude: confidenceMetrics.leverageAptitudeConfidence,
-      decisionStyleScore: confidenceMetrics.decisionStyleConfidence,
-      personalityScore: confidenceMetrics.personalityConfidence,
-    });
-  }, [confidenceMetrics]);
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return colors.confidence.high;
@@ -121,9 +110,10 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
           </defs>
           
           <PolarGrid 
-            stroke={isDarkMode ? '#374151' : '#e2e8f0'} 
+            stroke={isDarkMode ? '#6b7280' : '#d1d5db'} 
             strokeDasharray="3 3"
-            strokeOpacity={0.7}
+            strokeOpacity={0.9}
+            strokeWidth={1}
           />
           
           <PolarAngleAxis 
@@ -147,18 +137,17 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
             strokeWidth={3}
           />
           
-          {confidenceData && (
+          {confidenceMetrics && (
             <Radar
               name="Confidence Range"
               dataKey="confidence"
               stroke={colors.confidence.medium.stroke}
               fill={colors.confidence.medium.fill}
-              fillOpacity={isDarkMode ? 0.08 : 0.1}
+              fillOpacity={isDarkMode ? 0.15 : 0.2}
               strokeDasharray="8 4"
-              animationDuration={1000}
               animationBegin={500}
               animationEasing="ease-in-out"
-              strokeWidth={isDarkMode ? 1 : 1}
+              strokeWidth={2}
             />
           )}
           
@@ -219,4 +208,17 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
 
 RiskProfileChart.displayName = 'RiskProfileChart';
 
-export default RiskProfileChart;
+// Wrap the RiskProfileChart component with ComponentErrorBoundary
+const RiskProfileChartWithErrorBoundary: React.FC<RiskProfileChartProps> = (props) => {
+  return (
+    <ComponentErrorBoundary 
+      componentName="RiskProfileChart"
+      variant="card"
+      showDetails={false}
+    >
+      <RiskProfileChart {...props} />
+    </ComponentErrorBoundary>
+  );
+};
+
+export default RiskProfileChartWithErrorBoundary;

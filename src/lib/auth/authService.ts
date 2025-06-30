@@ -10,6 +10,7 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { storageUtils } from '../storage/storageUtils';
 
 interface AuthResponse {
   user: FirebaseUser | null;
@@ -53,7 +54,7 @@ export const authService = {
       
       // Get the ID token for backend authentication
       const idToken = await user.getIdToken();
-      localStorage.setItem('firebaseIdToken', idToken);
+      storageUtils.setItem('firebaseIdToken', idToken);
       
       return { user, error: null };
     } catch (error) {
@@ -67,7 +68,7 @@ export const authService = {
       await firebaseSignOut(auth);
       
       // Clear any local storage or session data
-      localStorage.removeItem('firebaseIdToken');
+      storageUtils.removeItem('firebaseIdToken');
       
       return { error: null };
     } catch (error) {

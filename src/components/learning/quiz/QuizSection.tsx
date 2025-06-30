@@ -9,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface QuizSectionProps {
   assetClass: string;
@@ -129,7 +130,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
   if (isLoadingQuestions) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <LoadingSpinner />
       </div>
     );
   }

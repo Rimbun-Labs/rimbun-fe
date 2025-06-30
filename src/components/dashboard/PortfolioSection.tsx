@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { Button } from "@/components/ui/button";
 import { CircleChevronRight } from "lucide-react";
 import PortfolioAllocation from './PortfolioAllocation';
@@ -29,7 +28,7 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({
         <div className="h-[320px]">
           {portfolioLoading || recommendationsLoading ? (
             <div className="h-full flex items-center justify-center">
-              <Skeleton className="h-full w-full" />
+              <LoadingState variant="expanded" lines={3} />
             </div>
           ) : (portfolioData && recommendationsData) ? (
             <PortfolioAllocation 

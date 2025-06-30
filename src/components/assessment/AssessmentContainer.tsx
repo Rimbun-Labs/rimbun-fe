@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { Question, UserAnswer } from '@/lib/api/types/assessment';
@@ -6,6 +6,7 @@ import { AssessmentProgressState } from '@/hooks/useAssessmentProgress';
 import QuestionCard from './QuestionCard';
 import ProgressBar from './ProgressBar';
 import CategoryHeader from './CategoryHeader';
+import { ComponentErrorBoundary } from '@/components/error/ComponentErrorBoundary';
 
 interface AssessmentContainerProps {
   questions: Question[];
@@ -86,5 +87,18 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
         />
       </div>
     </div>
+  );
+};
+
+// Wrap the AssessmentContainer component with ComponentErrorBoundary
+export const AssessmentContainerWithErrorBoundary: React.FC<AssessmentContainerProps> = (props) => {
+  return (
+    <ComponentErrorBoundary 
+      componentName="AssessmentContainer"
+      variant="card"
+      showDetails={false}
+    >
+      <AssessmentContainer {...props} />
+    </ComponentErrorBoundary>
   );
 };
