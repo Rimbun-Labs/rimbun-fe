@@ -3,11 +3,9 @@ import { getLatestUserAssessmentResults } from '@/lib/api/assessmentApi';
 import { config } from '@/lib/api/config';
 
 /**
- * Simple assessment completion validation
- * Checks if an assessment result has the basic required fields
+ * Check if assessment is complete based on required fields
  */
 export const isAssessmentComplete = (result: AssessmentResult): boolean => {
-  console.log('🔄 HMR TEST - Validation function updated!');
   if (!result || !result.scoreData) {
     console.log('❌ Assessment validation: No result or scoreData');
     return false;
@@ -15,23 +13,10 @@ export const isAssessmentComplete = (result: AssessmentResult): boolean => {
 
   const { scoreData } = result;
 
-  // Check if basic required fields exist (like original working version)
-  const requiredFields = [
-    'riskProfile',
-    'knowledgeLevel', 
-    'leverageAptitude',
-    'riskCapacity',
-    'investmentHorizon',
-    'finalScore',
-    'profile',
-    'overallConfidence'
-  ];
-
-  for (const field of requiredFields) {
-    if (!(field in scoreData) || scoreData[field] === undefined || scoreData[field] === null) {
-      console.log(`❌ Assessment validation: Missing required field: ${field}`);
-      return false;
-    }
+  // Check if finalScore exists and is a number
+  if (typeof scoreData.finalScore !== 'number' || scoreData.finalScore < 0) {
+    console.log('❌ Assessment validation: Missing or invalid finalScore');
+    return false;
   }
 
   // Check if profile is not empty
@@ -171,6 +156,7 @@ export const getAssessmentResumeStatus = async (): Promise<{
       const assessmentResponse = await fetch(`${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`);
       
       if (assessmentResponse.ok) {
+        const assessmentData = await assessmentResponse.json();
         // Assessment is complete
         return {
           hasAssessment: true,

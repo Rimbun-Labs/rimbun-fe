@@ -50,9 +50,7 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
   }
 };
 
-// Add these two functions after the existing getAssessmentResults function:
-
-// New function to get latest assessment results for a user
+// Function to get latest assessment results for a user
 export const getLatestUserAssessmentResults = async (): Promise<AssessmentResult | null> => {
   try {
     const databaseUserId = userService.getDatabaseUserId();
@@ -108,7 +106,7 @@ export const getLatestUserAssessmentResults = async (): Promise<AssessmentResult
   }
 };
 
-// New function to get all assessment results for a user
+// Function to get all assessment results for a user
 export const getAllUserAssessmentResults = async (): Promise<AssessmentResult[]> => {
   try {
     const databaseUserId = userService.getDatabaseUserId();
