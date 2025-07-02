@@ -113,6 +113,44 @@ export const userService = {
     }
   },
 
+  async getDatabaseUserIdForExistingUser(authProviderId: string): Promise<string | null> {
+    try {
+      console.log('🔵 userService.getDatabaseUserIdForExistingUser called for:', authProviderId.substring(0, 8) + '...');
+      
+      const response = await fetch(`${config.API_BASE_URL}/users/me/${authProviderId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('ℹ️ userService.getDatabaseUserIdForExistingUser - user not found');
+          return null;
+        }
+        const error = await response.json();
+        console.error('❌ userService.getDatabaseUserIdForExistingUser failed:', error);
+        throw new Error(error.message || 'Failed to get user');
+      }
+
+      const result = await response.json();
+      console.log('✅ userService.getDatabaseUserIdForExistingUser successful:', result);
+      
+      // Store the database user ID in localStorage for future use
+      if (result.data?.id) {
+        storageUtils.setItem('databaseUserId', result.data.id);
+        console.log('🔵 Stored database user ID:', result.data.id);
+        return result.data.id;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('❌ userService.getDatabaseUserIdForExistingUser error:', error);
+      return null;
+    }
+  },
+
   getDatabaseUserId(): string | null {
     return storageUtils.getItem('databaseUserId');
   },
