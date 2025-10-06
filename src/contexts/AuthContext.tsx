@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '@/lib/auth/authService';
 import { userService } from '@/lib/api/userService';
@@ -20,38 +20,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
+  const lastProcessedUserIdRef = useRef<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for auth changes - this is the ONLY place that handles user setup
+    // Check for existing session
+    authService.getCurrentUser().then((user) => {
+      setUser(user);
+      setLoading(false);
+      // Check if user already has database ID stored
+      if (user && userService.getDatabaseUserId()) {
+        setUserRegistrationComplete(true);
+        console.log('✅ AuthContext: User already has database ID stored');
+      }
+    });
+
+    // Listen for auth changes
     const unsubscribe = authService.onAuthStateChange(async (user) => {
       setUser(user);
       setLoading(false);
       
+      // If user signed in (especially via Google OAuth), ensure they exist in backend
       if (user) {
+        // Prevent duplicate processing for the same user
+        if (lastProcessedUserIdRef.current === user.uid) {
+          console.log('🔄 AuthContext: User already processed, skipping:', user.uid.substring(0, 8) + '...');
+          return;
+        }
+        
+        lastProcessedUserIdRef.current = user.uid;
+        setUserRegistrationComplete(false); // Reset on auth change
+        
         try {
           console.log('🔵 AuthContext: User signed in, ensuring backend registration:', { 
             id: user.uid.substring(0, 8) + '...', 
             email: user.email 
           });
           
-          // First, try to get the database user ID for existing users
-          const existingDatabaseUserId = await userService.getDatabaseUserIdForExistingUser(user.uid);
+          const result = await userService.ensureUserExists({
+            authProviderId: user.uid,
+            displayName: user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+          });
           
-          if (existingDatabaseUserId) {
-            console.log('✅ AuthContext: Found existing user in database');
-            setUserRegistrationComplete(true);
-          } else {
-            // User doesn't exist, create them
-            const result = await userService.ensureUserExists({
-              authProviderId: user.uid,
-              displayName: user.displayName || user.email?.split('@')[0] || 'User',
-              email: user.email || '',
-            });
-            
-            setUserRegistrationComplete(true); // Mark as complete
-            console.log('✅ AuthContext: User registration completed:', result);
-          }
+          setUserRegistrationComplete(true); // Mark as complete
+          console.log('✅ AuthContext: User registration completed:', result);
         } catch (backendError) {
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
           
@@ -65,7 +78,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } else {
-        // User signed out
+        // User signed out, reset the last processed user ID
+        lastProcessedUserIdRef.current = null;
         setUserRegistrationComplete(false);
       }
     });
@@ -75,47 +89,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const signInWithEmail = async (email: string, password: string): Promise<any> => {
+  const signInWithEmail = async (email: string, password: string):Promise<any>  =>  {
     const { user, error } = await authService.signInWithEmail(email, password);
     if (error) throw error;
-    // Note: Backend registration is handled in onAuthStateChange callback
-    return user;
+    if (user) {
+      // Ensure user exists in backend
+      try {
+        setUserRegistrationComplete(false); // Reset before registration
+        await userService.ensureUserExists({
+          authProviderId: user.uid,
+          displayName: user.displayName || email.split('@')[0],
+          email: user.email || email,
+        });
+        setUserRegistrationComplete(true); // Mark as complete
+      } catch (backendError) {
+        console.error('Failed to ensure user exists in backend:', backendError);
+        
+        // Check if user already has database ID stored (might be a "user already exists" error)
+        if (userService.getDatabaseUserId()) {
+          console.log('✅ AuthContext: User already has database ID stored, marking as complete');
+          setUserRegistrationComplete(true);
+        } else {
+          console.log('⚠️ AuthContext: User registration failed and no database ID found');
+          // Don't set userRegistrationComplete to true - user needs to retry
+        }
+      }
+      // Removed: navigate('/home');
+      // Let RootRedirect handle the navigation
+    }
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await authService.signInWithGoogle();
+    const { user, error } = await authService.signInWithGoogle();
     if (error) throw error;
-    // Note: Backend registration is handled in onAuthStateChange callback
+    // User setup is handled in onAuthStateChange
   };
 
-  const signUp = async (email: string, password: string, fullName: string): Promise<any> => {
-    const { user, error } = await authService.signUpWithEmail({ email, password, fullName });
+  const signUp = async (email: string, password: string, fullName: string) => {
+    const { user, error } = await authService.signUp(email, password, fullName);
     if (error) throw error;
-    return user;
+    if (user) {
+      // Ensure user exists in backend
+      try {
+        setUserRegistrationComplete(false); // Reset before registration
+        await userService.ensureUserExists({
+          authProviderId: user.uid,
+          displayName: fullName,
+          email: email,
+        });
+        setUserRegistrationComplete(true); // Mark as complete
+      } catch (backendError) {
+        console.error('Failed to ensure user exists in backend:', backendError);
+        
+        // Check if user already has database ID stored (might be a "user already exists" error)
+        if (userService.getDatabaseUserId()) {
+          console.log('✅ AuthContext: User already has database ID stored, marking as complete');
+          setUserRegistrationComplete(true);
+        } else {
+          console.log('⚠️ AuthContext: User registration failed and no database ID found');
+          // Don't set userRegistrationComplete to true - user needs to retry
+        }
+      }
+      // Removed: navigate('/home');
+      // Let RootRedirect handle the navigation
+    }
   };
 
   const signOut = async () => {
-    const { error } = await authService.signOut();
-    if (error) throw error;
-    
-    // Clear the database user ID when signing out
-    userService.clearDatabaseUserId();
-    setUserRegistrationComplete(false); // Reset registration state
-    
-    navigate('/'); // Go to landing page instead of login
+    await authService.signOut();
+    // User cleanup is handled in onAuthStateChange
   };
 
-  const value = {
-    user,
-    loading,
-    userRegistrationComplete,
-    signInWithEmail,
-    signInWithGoogle,
-    signUp,
-    signOut,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      userRegistrationComplete,
+      signInWithEmail,
+      signInWithGoogle,
+      signUp,
+      signOut,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

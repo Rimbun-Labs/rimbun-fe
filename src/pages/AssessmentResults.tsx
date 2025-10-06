@@ -23,122 +23,120 @@ const AssessmentResults: React.FC = () => {
     navigate('/assessment');
   };
 
-  if (resultsLoading) {
-    return (
-      <div className="container max-w-4xl py-8">
-        <LoadingState 
-          variant="expanded"
-          showTitle
-          showSubtitle
-          lines={3}
-        />
-      </div>
-    );
-  }
-
-  if (resultsError || !sessionId) {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <Card className="bg-destructive/10">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-destructive">
-                <AlertCircle className="h-5 w-5" />
-                <p>
-                  {!sessionId 
-                    ? 'No assessment session ID provided.' 
-                    : 'Failed to load assessment results. The assessment might not be complete yet.'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Assessment
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!results) return null;
-
-  const scoreCategories = [
-    { label: 'Risk Profile', value: results.scoreData.riskProfile, confidence: results.scoreData.confidenceMetrics?.riskProfileConfidence ?? 0 },
-    { label: 'Knowledge Level', value: results.scoreData.knowledgeLevel, confidence: results.scoreData.confidenceMetrics?.knowledgeLevelConfidence ?? 0 },
-    { label: 'Leverage Aptitude', value: results.scoreData.leverageAptitude, confidence: results.scoreData.confidenceMetrics?.leverageAptitudeConfidence ?? 0 },
-    { label: 'Risk Capacity', value: results.scoreData.riskCapacity, confidence: results.scoreData.confidenceMetrics?.riskCapacityConfidence ?? 0 },
-    { label: 'Decision Style', value: results.scoreData.decisionStyleScore, confidence: results.scoreData.confidenceMetrics?.decisionStyleConfidence ?? 0 },
-    { label: 'Personality', value: results.scoreData.personalityScore, confidence: results.scoreData.confidenceMetrics?.personalityConfidence ?? 0 }
-  ];
-
+  // Consolidated return with conditional content
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Assessment
-          </Button>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Loading State */}
+      {resultsLoading && (
+        <div className="mx-auto py-8">
+          <LoadingState 
+            variant="expanded"
+            showTitle
+            showSubtitle
+            lines={3}
+          />
         </div>
+      )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Assessment Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">{results.scoreData.profile}</h2>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-lg">Overall Score:</span>
-                  <span className="text-2xl font-bold">{results.scoreData.finalScore}</span>
-                  <span className="text-sm text-muted-foreground">
-                    ({(results.scoreData.overallConfidence * 100).toFixed(1)}% confidence)
-                  </span>
+      {/* Error State */}
+      {!resultsLoading && (resultsError || !sessionId) && (
+        <div className="mx-auto py-8 px-4">
+          <div className="max-w-4xl mx-auto space-y-4">
+            <Card className="bg-destructive/10">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <p>
+                    {!sessionId 
+                      ? 'No assessment session ID provided.' 
+                      : 'Failed to load assessment results. The assessment might not be complete yet.'}
+                  </p>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+            <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Assessment
+            </Button>
+          </div>
+        </div>
+      )}
 
-              <div className="grid gap-4">
-                {scoreCategories.map((category) => (
-                  <div key={category.label} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{category.label}</span>
+      {/* Main Results Content */}
+      {!resultsLoading && !resultsError && sessionId && results && (
+        <div className="mx-auto py-8 px-4">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Assessment
+              </Button>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Assessment Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold mb-2">{results.scoreData.profile}</h2>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-lg">Overall Score:</span>
+                      <span className="text-2xl font-bold">{results.scoreData.finalScore}</span>
                       <span className="text-sm text-muted-foreground">
-                        {category.value.toFixed(1)} ({(category.confidence * 100).toFixed(1)}% confidence)
+                        ({(results.scoreData.overallConfidence * 100).toFixed(1)}% confidence)
                       </span>
                     </div>
-                    <Progress value={category.value} className="h-2" />
                   </div>
-                ))}
-              </div>
 
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Direct Inputs</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(results.scoreData.directInputs || {}).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                      <span className="font-medium">{value}</span>
-                    </div>
-                  ))}
+                  {/* Score Categories */}
+                  {(() => {
+                    const scoreCategories = [
+                      { label: 'Risk Profile', value: results.scoreData.riskProfile, confidence: results.scoreData.confidenceMetrics?.riskProfileConfidence ?? 0 },
+                      { label: 'Knowledge Level', value: results.scoreData.knowledgeLevel, confidence: results.scoreData.confidenceMetrics?.knowledgeLevelConfidence ?? 0 },
+                      { label: 'Leverage Aptitude', value: results.scoreData.leverageAptitude, confidence: results.scoreData.confidenceMetrics?.leverageAptitudeConfidence ?? 0 },
+                      { label: 'Risk Capacity', value: results.scoreData.riskCapacity, confidence: results.scoreData.confidenceMetrics?.riskCapacityConfidence ?? 0 },
+                      { label: 'Decision Style', value: results.scoreData.decisionStyleScore, confidence: results.scoreData.confidenceMetrics?.decisionStyleConfidence ?? 0 },
+                      { label: 'Personality', value: results.scoreData.personalityScore, confidence: results.scoreData.confidenceMetrics?.personalityConfidence ?? 0 }
+                    ];
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                        {scoreCategories.map((category) => (
+                          <Card key={category.label} className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-sm">{category.label}</span>
+                                <span className="text-lg font-bold">{category.value}</span>
+                              </div>
+                              <Progress value={category.value} className="h-2" />
+                              <div className="text-xs text-muted-foreground text-center">
+                                Confidence: {(category.confidence * 100).toFixed(1)}%
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Raw JSON Response</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="bg-muted p-4 rounded-lg overflow-auto">
-              {JSON.stringify(results, null, 2)}
-            </pre>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Raw JSON Response</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted p-4 rounded-lg overflow-auto">
+                  {JSON.stringify(results, null, 2)}
+                </pre>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

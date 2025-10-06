@@ -14,8 +14,8 @@ interface Option {
 
 interface AnswerInputsProps {
   question: Question;
-  answer: string | number | boolean;
-  onAnswerChange: (value: string | number | boolean) => void;
+  answer: string | number;
+  onAnswerChange: (value: string | number) => void;
   validationError: string | null;
 }
 
@@ -31,10 +31,9 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <MultipleChoiceInput
           question={question}
           value={answer as string}
-          onChange={(value: string | Option) => {
-            // Ensure we're passing the option ID as a string
-            const optionId = typeof value === 'object' && value !== null ? value.id : value;
-            onAnswerChange(optionId as string);
+          onChange={(value: string) => {
+            // Now we receive option labels directly, not UUIDs
+            onAnswerChange(value);
           }}
         />
       );
@@ -44,10 +43,9 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
         <SelectInput
           question={question}
           value={answer as string}
-          onChange={(value: string | Option) => {
-            // Ensure we're passing the option ID as a string
-            const optionId = typeof value === 'object' && value !== null ? value.id : value;
-            onAnswerChange(optionId as string);
+          onChange={(value: string) => {
+            // Now we receive option labels directly, not UUIDs
+            onAnswerChange(value);
           }}
         />
       );
@@ -70,11 +68,10 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
       return (
         <BooleanInput
           question={question}
-          value={answer as boolean}
-          onChange={(value: boolean | string) => {
-            // Ensure we're passing a boolean
-            const boolValue = typeof value === 'string' ? value === 'true' : value;
-            onAnswerChange(boolValue);
+          value={answer as string}
+          onChange={(value: string) => {
+            // Now we receive "true" or "false" strings directly
+            onAnswerChange(value);
           }}
         />
       );
@@ -104,7 +101,10 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
       );
 
     default:
-      console.warn(`Unsupported question type: ${question.questionType}`, question);
-      return null;
+      return (
+        <div className="p-4 text-center text-muted-foreground">
+          Unsupported question type: {question.questionType}
+        </div>
+      );
   }
 };

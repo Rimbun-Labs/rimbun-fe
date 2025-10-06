@@ -50,20 +50,11 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
   }
 };
 
-// Function to get latest assessment results for a user
-export const getLatestUserAssessmentResults = async (): Promise<AssessmentResult | null> => {
+// ✅ CORRECT: Get user sessions by database user ID (this API exists)
+export const getUserSessions = async (databaseUserId: string): Promise<any[]> => {
   try {
-    const databaseUserId = userService.getDatabaseUserId();
-    
-    if (!databaseUserId) {
-      console.log('No database user ID found, user may not be registered');
-      return null;
-    }
-
-    console.log('🔵 Fetching latest assessment results for user:', databaseUserId);
-    
-    const response = await axios.get<AssessmentResult>(
-      `${config.API_BASE_URL}/assessment/user/${databaseUserId}/latest`,
+    const response = await axios.get(
+      `${config.API_BASE_URL}/user-responses/user/${databaseUserId}/sessions`,
       {
         headers: {
           'Accept': 'application/json'
@@ -71,111 +62,116 @@ export const getLatestUserAssessmentResults = async (): Promise<AssessmentResult
       }
     );
     
-    if (!response.data) {
-      console.log('No assessment results found for user');
-      return null;
-    }
-
-    if (!response.data.scoreData) {
-      console.error('Missing scoreData in response');
-      return null;
-    }
-
-    const requiredFields = ['riskProfile', 'knowledgeLevel', 'leverageAptitude', 'riskCapacity', 
-                          'investmentHorizon', 'finalScore', 'profile', 'overallConfidence'];
-    
-    const missingFields = requiredFields.filter(field => !(field in response.data.scoreData));
-    if (missingFields.length > 0) {
-      console.error('Missing required fields in scoreData:', missingFields);
-      return null;
-    }
-    
-    console.log('✅ Successfully retrieved latest assessment results for user');
-    return response.data;
+    return response.data || [];
   } catch (error) {
-    console.error('Failed to fetch latest user assessment results:', error);
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        console.log('No assessment results found for user (404)');
-        return null;
-      }
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-    }
-    return null;
-  }
-};
-
-// Function to get all assessment results for a user
-export const getAllUserAssessmentResults = async (): Promise<AssessmentResult[]> => {
-  try {
-    const databaseUserId = userService.getDatabaseUserId();
-    
-    if (!databaseUserId) {
-      console.log('No database user ID found, user may not be registered');
-      return [];
-    }
-
-    console.log('🔵 Fetching all assessment results for user:', databaseUserId);
-    
-    const response = await axios.get<AssessmentResult[]>(
-      `${config.API_BASE_URL}/assessment/user/${databaseUserId}/all`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
-    );
-    
-    if (!response.data || !Array.isArray(response.data)) {
-      console.log('No assessment results found for user');
-      return [];
-    }
-    
-    console.log('✅ Successfully retrieved all assessment results for user');
-    return response.data;
-  } catch (error) {
-    console.error('Failed to fetch all user assessment results:', error);
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        console.log('No assessment results found for user (404)');
-        return [];
-      }
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-    }
+    console.error('Failed to fetch user sessions:', error);
     return [];
   }
 };
 
-export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promise<void> => {
+// ✅ CORRECT: Get session questions and answers (this API exists)
+export const getSessionQuestionsAnswers = async (sessionId: string): Promise<any> => {
   try {
-    const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text');
+    const response = await axios.get(
+      `${config.API_BASE_URL}/user-responses/session/${sessionId}/questions-answers`,
+      {
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
+    );
     
-    const request: SaveUserResponseRequest = {
-      responseGroupId: sessionId,
-      questionId: answer.questionId,
-      answer: formattedAnswer
-    };
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch session questions and answers:', error);
+    throw new Error('Failed to fetch session data');
+  }
+};
 
-    await userResponsesApi.submitAnswer(request);
+// ✅ CORRECT: Get latest assessment results using session-based approach
+export const getLatestAssessmentResults = async (): Promise<AssessmentResult | null> => {
+  try {
+    const databaseUserId = userService.getDatabaseUserId();
+    
+    if (!databaseUserId) {
+      console.log('No database user ID found, user may not be registered');
+      return null;
+    }
+
+    console.log('🔵 Getting user sessions for database user ID:', databaseUserId);
+    
+    // Step 1: Get user's sessions
+    const userSessions = await getUserSessions(databaseUserId);
+    
+    if (!userSessions || userSessions.length === 0) {
+      console.log('No sessions found for user');
+      return null;
+    }
+
+    // Step 2: Find the latest completed session
+    const completedSessions = userSessions.filter(session => session.isCompleted);
+    
+    if (completedSessions.length === 0) {
+      console.log('No completed sessions found for user');
+      return null;
+    }
+
+    // Step 3: Get the most recent completed session
+    const latestSession = completedSessions.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+
+    console.log('🔵 Getting assessment results for latest session:', latestSession.id);
+    
+    // Step 4: Get assessment results for the latest session
+    const results = await getAssessmentResults(latestSession.id);
+    
+    console.log('✅ Successfully retrieved latest assessment results');
+    return results;
+  } catch (error) {
+    console.error('Failed to get latest assessment results:', error);
+    return null;
+  }
+};
+
+export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promise<any> => {
+  try {
+    const response = await axios.post(
+      `${config.API_BASE_URL}/user-responses/answer`,
+      {
+        responseGroupId: sessionId,
+        questionId: answer.questionId,
+        answer: answer.answer
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
+    );
+    
+    return response.data;
   } catch (error) {
     console.error('Failed to submit answer:', error);
     throw new Error('Failed to submit answer');
   }
 };
 
-export const submitAnswersBulk = async (sessionId: string, answers: UserAnswer[]): Promise<void> => {
+export const getQuestions = async (): Promise<any[]> => {
   try {
-    const formattedRequests = answers.map(answer => ({
-      responseGroupId: sessionId,
-      questionId: answer.questionId,
-      answer: userResponsesApi.formatAnswerForApi(answer.answer, answer.questionType || 'single_text')
-    }));
-
-    await Promise.all(formattedRequests.map(request => userResponsesApi.submitAnswer(request)));
+    const response = await axios.get(
+      `${config.API_BASE_URL}/questionnaire/questions`,
+      {
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
+    );
+    
+    return response.data;
   } catch (error) {
-    console.error('Failed to submit answers in bulk:', error);
-    throw new Error('Failed to submit answers in bulk');
+    console.error('Failed to fetch questions:', error);
+    throw new Error('Failed to fetch questions');
   }
 };

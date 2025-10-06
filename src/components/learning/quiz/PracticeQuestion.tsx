@@ -101,8 +101,8 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
               key={index}
               className={cn(
                 "flex items-center space-x-3 p-3 rounded-lg border transition-colors",
-                hasAnswered && index === data.correct && "bg-green-50 border-green-200",
-                hasAnswered && selectedAnswer === option && index !== data.correct && "bg-red-50 border-red-200",
+                hasAnswered && index === data.correct && "bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800",
+                hasAnswered && selectedAnswer === option && index !== data.correct && "bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800",
                 !hasAnswered && "hover:bg-muted border-border"
               )}
             >
@@ -111,10 +111,10 @@ export const PracticeQuestion: React.FC<PracticeQuestionProps> = ({
                 {option}
               </Label>
               {hasAnswered && index === data.correct && (
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
               )}
               {hasAnswered && selectedAnswer === option && index !== data.correct && (
-                <XCircle className="h-5 w-5 text-red-500" />
+                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
               )}
             </div>
           ))}

@@ -36,44 +36,44 @@ const stages = [
 export const HeroSection = ({ className }: HeroSectionProps) => {
   const [currentStage, setCurrentStage] = useState(0);
 
-  // Auto-advance stages
+  // Auto-advance stages - slowed down for better user experience
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentStage((prev) => (prev + 1) % stages.length);
-    }, 4000);
+    }, 6000); // Increased from 4000ms to 6000ms for better readability
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className={cn("py-16 md:py-24 relative", className)}>
+    <section className={cn("py-20 md:py-28 relative", className)}>
       <div className="container px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           {/* Main Content */}
-          <div className="flex flex-col justify-center space-y-8">
+          <div className="flex flex-col justify-center space-y-10">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="space-y-6"
+              className="space-y-8"
             >
               {/* Badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 backdrop-blur-sm"
+                className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 backdrop-blur-sm"
               >
                 <Sparkles className="h-4 w-4" />
                 <span>Interactive Investment Education</span>
               </motion.div>
 
               {/* Main Heading */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.8 }}
-                  className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl/none bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent"
+                  className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl/none text-foreground"
                 >
                   Build Investment Confidence Through Learning
                 </motion.h1>
@@ -93,18 +93,18 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              <h3 className="text-lg font-semibold">How it works:</h3>
-              <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-foreground">How it works:</h3>
+              <div className="space-y-4">
                 {stages.map((stage, index) => (
                   <motion.div
                     key={stage.id}
                     className={cn(
-                      "flex items-center gap-4 p-4 rounded-lg border transition-all duration-500 cursor-pointer",
+                      "flex items-center gap-4 p-5 rounded-lg border transition-all duration-500 cursor-pointer",
                       currentStage === index
-                        ? "bg-gradient-to-r border-primary/30 shadow-lg shadow-primary/10"
-                        : "bg-background/50 border-border/50"
+                        ? "bg-primary/5 border-primary/30 shadow-lg shadow-primary/10"
+                        : "bg-muted/30 border-border/50 hover:bg-muted/50"
                     )}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setCurrentStage(index)}
@@ -129,7 +129,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                       )}>
                         {stage.title}
                       </h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {stage.description}
                       </p>
                     </div>
@@ -155,20 +155,19 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col gap-3 min-[400px]:flex-row"
+              className="flex flex-col gap-4 min-[400px]:flex-row"
             >
               {/* Primary CTA - Get Started */}
               <Button 
                 asChild 
                 size="lg"
-                className="relative group overflow-hidden"
+                className="relative group overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link to="/signup">
                   <span className="relative z-10 flex items-center">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
               
@@ -177,7 +176,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 asChild 
                 variant="outline" 
                 size="lg"
-                className="group"
+                className="group border-border hover:bg-muted hover:text-foreground"
               >
                 <Link to="/login">
                   <span className="flex items-center">

@@ -33,17 +33,8 @@ const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
   switch (questionType) {
     case 'multiple_choice':
     case 'select':
-      // If the value is already an option ID, return it as is
-      if (typeof value === 'string' && isValidUUID(value)) {
-        formattedAnswer = value;
-      }
-      // If the value is an object with an id property, return the id
-      else if (value && typeof value === 'object' && 'id' in value) {
-        formattedAnswer = value.id;
-      }
-      else {
-        formattedAnswer = String(value);
-      }
+      // Always convert to string - the frontend now sends option labels, not UUIDs
+      formattedAnswer = String(value);
       break;
 
     case 'number':
@@ -51,6 +42,7 @@ const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
       break;
 
     case 'boolean':
+      // Ensure boolean values are sent as strings
       formattedAnswer = value ? 'true' : 'false';
       break;
 

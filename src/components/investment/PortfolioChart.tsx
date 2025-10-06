@@ -32,7 +32,7 @@ export const PortfolioChart: React.FC<PortfolioChartProps> = ({ sessionId }) => 
 
   return (
     <div className="h-[600px] flex flex-col">
-      <h3 className="text-xl font-semibold mb-4">Your Recommended Portfolio</h3>
+      <h3 className="text-xl font-semibold mb-6 text-foreground">Your Recommended Portfolio</h3>
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-md">
           <Pie data={portfolioData} />

@@ -18,7 +18,7 @@ const ProfileAchievements = () => {
           <Skeleton className="h-4 w-64" />
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 w-full">
             {Array(4).fill(0).map((_, i) => (
               <Skeleton key={i} className="h-20 w-full" />
             ))}
@@ -52,7 +52,7 @@ const ProfileAchievements = () => {
         <Trophy className="h-5 w-5 text-amber-500" />
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 w-full">
           {achievements.map((achievement) => (
             <div 
               key={achievement.id}

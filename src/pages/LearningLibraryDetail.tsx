@@ -23,8 +23,8 @@ const LearningLibraryDetail: React.FC = () => {
   
   if (!content) {
     return (
-      <div className="container max-w-7xl py-8">
-        <div className="text-center">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center">
           <h1 className="text-2xl font-bold">Module not found</h1>
           <Button 
             variant="link" 
@@ -41,11 +41,11 @@ const LearningLibraryDetail: React.FC = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-800';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800';
       case 'intermediate':
-        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800';
+        return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800';
       case 'advanced':
-        return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-200 dark:border-rose-800';
+        return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800';
       default:
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -112,7 +112,7 @@ const LearningLibraryDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">

@@ -71,9 +71,9 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
   };
 
   const getConfidenceBadgeColor = (confidence: number) => {
-    if (confidence >= 80) return "bg-green-100 text-green-800";
-    if (confidence >= 60) return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
+    if (confidence >= 80) return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200 border-green-200 dark:border-green-800";
+    if (confidence >= 60) return "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-200 border-amber-200 dark:border-amber-800";
+    return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200 border-red-200 dark:border-red-800";
   };
 
   const getMetricDescription = (label: string): string => {

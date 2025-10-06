@@ -26,24 +26,24 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
 
   if (mode === 'resume') {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold">Continue Your Assessment</h1>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+        <div className="space-y-10">
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-foreground">Continue Your Assessment</h1>
             <p className="text-lg text-muted-foreground">
               You have an incomplete assessment. Would you like to continue where you left off?
             </p>
           </div>
 
           {progress && (
-            <Card className="border-primary/20">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
+            <Card className="border border-primary/20 bg-primary/5">
+              <CardContent className="pt-8">
+                <div className="space-y-6">
                   <div className="flex justify-between text-sm">
-                    <span>Progress</span>
-                    <span>{progress.questionsAnswered} of {progress.totalQuestions} questions</span>
+                    <span className="text-foreground">Progress</span>
+                    <span className="text-foreground font-medium">{progress.questionsAnswered} of {progress.totalQuestions} questions</span>
                   </div>
-                  <Progress value={getProgressPercentage()} />
+                  <Progress value={getProgressPercentage()} className="h-2 bg-muted [&>div]:bg-primary" />
                   {progress.lastAnsweredAt && (
                     <p className="text-xs text-muted-foreground">
                       Last activity: {new Date(progress.lastAnsweredAt).toLocaleDateString()}
@@ -55,10 +55,10 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
           )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={onStart}>
+            <Button size="lg" onClick={onStart} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Resume Assessment
             </Button>
-            <Button variant="outline" size="lg" onClick={onStart}>
+            <Button variant="outline" size="lg" onClick={onStart} className="border-border hover:bg-muted hover:text-foreground">
               Start Over
             </Button>
           </div>
@@ -69,28 +69,28 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
 
   if (mode === 'retake') {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-2xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold">Retake Assessment</h1>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+        <div className="space-y-10">
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-foreground">Retake Assessment</h1>
             <p className="text-lg text-muted-foreground">
               You've already completed an assessment. Starting over will create new results.
             </p>
           </div>
 
-          <Card className="border-yellow-200 bg-yellow-50">
-            <CardContent className="pt-6">
-              <p className="text-sm text-yellow-800">
+          <Card className="border-amber-200 bg-amber-100 dark:bg-amber-900/20 dark:border-amber-800">
+            <CardContent className="pt-8">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Note:</strong> Your previous assessment results will be preserved, but this new assessment will become your primary profile.
               </p>
             </CardContent>
           </Card>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={onStart}>
+            <Button size="lg" onClick={onStart} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Start New Assessment
             </Button>
-            <Button variant="outline" size="lg" onClick={() => window.history.back()}>
+            <Button variant="outline" size="lg" onClick={() => window.history.back()} className="border-border hover:bg-muted hover:text-foreground">
               Keep Current Results
             </Button>
           </div>
@@ -101,34 +101,46 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
 
   // Default new assessment mode
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold">Start Your Assessment</h1>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="space-y-10">
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold text-foreground">Start Your Assessment</h1>
           <p className="text-lg text-muted-foreground">
             Take our personalized assessment to understand your investment style and get customized recommendations.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 text-sm">
-          <div className="text-center p-4 rounded-lg bg-primary/10">
-            <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <h3 className="font-semibold">10-15 minutes</h3>
-            <p className="text-muted-foreground">Quick and comprehensive</p>
+        <div className="grid md:grid-cols-3 gap-6 w-full">
+          <div className="flex items-start gap-4 p-6 rounded-lg bg-primary/10 border border-primary/20">
+            <div className="flex-shrink-0">
+              <Clock className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">10-15 minutes</h3>
+              <p className="text-sm text-muted-foreground">Quick and comprehensive assessment</p>
+            </div>
           </div>
-          <div className="text-center p-4 rounded-lg bg-primary/10">
-            <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <h3 className="font-semibold">Save & Resume</h3>
-            <p className="text-muted-foreground">Complete at your own pace</p>
+          <div className="flex items-start gap-4 p-6 rounded-lg bg-primary/10 border border-primary/20">
+            <div className="flex-shrink-0">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">Save & Resume</h3>
+              <p className="text-sm text-muted-foreground">Complete at your own pace</p>
+            </div>
           </div>
-          <div className="text-center p-4 rounded-lg bg-primary/10">
-            <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <h3 className="font-semibold">Personalized Results</h3>
-            <p className="text-muted-foreground">Tailored to your profile</p>
+          <div className="flex items-start gap-4 p-6 rounded-lg bg-primary/10 border border-primary/20">
+            <div className="flex-shrink-0">
+              <Target className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">Personalized Results</h3>
+              <p className="text-sm text-muted-foreground">Tailored to your profile</p>
+            </div>
           </div>
         </div>
 
-        <Button size="lg" onClick={onStart}>
+        <Button size="lg" onClick={onStart} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
           Begin Assessment
         </Button>
       </div>

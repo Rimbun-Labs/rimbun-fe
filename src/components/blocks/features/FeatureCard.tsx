@@ -13,12 +13,12 @@ interface FeatureCardProps {
 }
 
 const colorClasses = {
-  blue: "text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400",
-  purple: "text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400",
-  green: "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400",
-  orange: "text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400",
-  red: "text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400",
-  indigo: "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400"
+  blue: "text-primary bg-primary/10 border border-primary/20",
+  purple: "text-primary bg-primary/10 border border-primary/20",
+  green: "text-green-600 bg-green-100 border border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800",
+  orange: "text-amber-600 bg-amber-100 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800",
+  red: "text-red-600 bg-red-100 border border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800",
+  indigo: "text-primary bg-primary/10 border border-primary/20"
 };
 
 export const FeatureCard: React.FC<FeatureCardProps> = ({
@@ -56,8 +56,8 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
             <h4 className="text-sm font-medium text-foreground">Key Benefits:</h4>
             <ul className="space-y-1">
               {benefits.map((benefit, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
+                <li key={index} className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Check className="h-3 w-3 text-green-600 dark:text-green-400 flex-shrink-0" />
                   <span>{benefit}</span>
                 </li>
               ))}

@@ -74,8 +74,8 @@ const LearningFolderView: React.FC = () => {
   
   if (!folder) {
     return (
-      <div className="container max-w-7xl py-8">
-        <div className="text-center">
+      <div className="w-full py-8">
+        <div className="w-full">
           <h1 className="text-2xl font-bold">Folder not found</h1>
           <Button 
             variant="link" 
@@ -150,7 +150,7 @@ const LearningFolderView: React.FC = () => {
   });
 
   return (
-    <div className="container max-w-7xl py-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -212,7 +212,7 @@ const LearningFolderView: React.FC = () => {
         </div>
 
         {filteredModules.length === 0 && (
-          <div className="text-center py-12">
+          <div className="flex justify-center py-12">
             <p className="text-muted-foreground">No modules found matching your search.</p>
           </div>
         )}

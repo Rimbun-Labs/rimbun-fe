@@ -19,9 +19,6 @@ import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { getAssessmentResumeStatus } from '@/utils/assessmentValidation';
-import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
-import { AssessmentContainerWithErrorBoundary } from '@/components/assessment/AssessmentContainer';
-
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
@@ -36,13 +33,39 @@ const Assessment: React.FC = () => {
   const { sessionId, setSessionId, setSession, hasCompletedAssessment } = useSession();
   const { userRegistrationComplete } = useAuth();
   
-  // Check assessment status for resume functionality - REMOVE THE AUTOMATIC REDIRECT
+  // Check if user already has completed assessment on mount
   useEffect(() => {
-    const checkAssessmentStatus = async () => {
+    const checkExistingAssessment = async () => {
       if (!userRegistrationComplete) {
         setIsCheckingExistingAssessment(false);
         return;
       }
+
+      try {
+        const status = await hasCompletedAssessment();
+        if (status.hasAssessment && status.sessionId && !status.isIncomplete) {
+          // User already has completed assessment, redirect to dashboard
+          navigate(`/dashboard/${status.sessionId}`);
+          return;
+        }
+        // If incomplete assessment, let them stay on assessment page to complete it
+        else if (status.isIncomplete) {
+          console.log('⚠️ User has incomplete assessment, allowing them to complete it');
+        }
+      } catch (error) {
+        console.error('Failed to check existing assessment:', error);
+      } finally {
+        setIsCheckingExistingAssessment(false);
+      }
+    };
+
+    checkExistingAssessment();
+  }, [navigate, userRegistrationComplete]);
+
+  // Check assessment status for resume functionality
+  useEffect(() => {
+    const checkAssessmentStatus = async () => {
+      if (!userRegistrationComplete) return;
       
       try {
         const status = await getAssessmentResumeStatus();
@@ -60,8 +83,6 @@ const Assessment: React.FC = () => {
       } catch (error) {
         console.error('Failed to check assessment status:', error);
         setAssessmentMode('new');
-      } finally {
-        setIsCheckingExistingAssessment(false);
       }
     };
 
@@ -73,6 +94,7 @@ const Assessment: React.FC = () => {
     mutationFn: createSession,
     onSuccess: (response) => {
       setSessionId(response.id);
+      localStorage.setItem('assessmentSessionId', response.id);
       setShowStartPage(false);
       setHasStarted(true);
     },
@@ -191,21 +213,14 @@ const Assessment: React.FC = () => {
 
   const handleStartAssessment = async () => {
     if (!userRegistrationComplete) {
-      // Add a small delay and retry once in case of timing issue
-      console.log('⚠️ Assessment: User registration not complete, waiting 2 seconds and retrying...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Check again after delay
-      if (!userRegistrationComplete) {
-        toast.error('Please wait while we set up your account. If this persists, try refreshing the page.');
-        console.log('❌ Assessment: User registration still not complete after retry');
-        return;
-      }
+      toast.error('Please wait while we set up your account...');
+      console.log('❌ Assessment: User registration not complete yet');
+      return;
     }
     
     if (assessmentMode === 'resume' && existingSessionId) {
       // Resume existing session
-      setSessionId(existingSessionId);
+      setSessionId(existingSessionId); // Use regular setSessionId for existing sessions
       setShowStartPage(false);
       setHasStarted(true);
       
@@ -275,7 +290,7 @@ const Assessment: React.FC = () => {
   // Show loading while checking existing assessment
   if (isCheckingExistingAssessment) {
     return (
-      <div className="container max-w-4xl py-8">
+      <div className="py-12">
         <LoadingState 
           variant="expanded"
           showTitle
@@ -286,21 +301,12 @@ const Assessment: React.FC = () => {
     );
   }
 
-  // Show start page with different modes
-  if (showStartPage) {
-    return (
-      <AssessmentStartPage 
-        mode={assessmentMode}
-        onStart={handleStartAssessment}
-        progress={existingProgress}
-      />
-    );
-  }
-  
-  if (isComplete) {
-    if (resultsLoading) {
-      return (
-        <div className="container max-w-4xl py-8">
+  // Consolidated return with conditional content
+  return (
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Loading State */}
+      {isCheckingExistingAssessment && (
+        <div className="py-12">
           <LoadingState 
             variant="expanded"
             showTitle
@@ -308,74 +314,87 @@ const Assessment: React.FC = () => {
             lines={3}
           />
         </div>
-      );
-    }
+      )}
 
-    if (resultsError) {
-      return (
-        <div className="container mx-auto py-8 px-4">
-          <h1 className="text-3xl font-bold mb-8 text-center">Error Loading Results</h1>
-          <div className="max-w-3xl mx-auto space-y-4">
-            <AssessmentError 
-              onRetry={() => {
-                setIsComplete(false);
-                // Retry the query
-              }}
-            />
-          </div>
-        </div>
-      );
-    }
+      {/* Start Page */}
+      {!isCheckingExistingAssessment && showStartPage && (
+        <AssessmentStartPage 
+          mode={assessmentMode}
+          onStart={handleStartAssessment}
+          progress={existingProgress}
+        />
+      )}
 
-    // Do not render results here; navigation will occur in useEffect
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">Redirecting to Dashboard...</h1>
-        <div className="max-w-3xl mx-auto space-y-4">
-          <LoadingState 
-            variant="expanded"
-            showTitle
-            showSubtitle
-            lines={3}
-          />
-        </div>
-      </div>
-    );
-  }
-  
-  if (!questions || questions.length === 0) {
-    return (
-      <AssessmentError 
-        onRetry={() => {
-          setHasStarted(false);
-          setShowStartPage(true);
-        }}
-      />
-    );
-  }
-  
-  return (
-    <AssessmentContainerWithErrorBoundary
-      questions={questions}
-      currentQuestionIndex={currentQuestionIndex}
-      progress={progress}
-      answers={answers}
-      error={error}
-      isSubmitting={isSubmitting}
-      onAnswer={handleUserAnswer}
-      onNext={moveToNextQuestion}
-      onPrevious={handlePrevious}
-    />
+      {/* Complete State */}
+      {!isCheckingExistingAssessment && !showStartPage && isComplete && (
+        <>
+          {resultsLoading && (
+            <div className="py-12">
+              <LoadingState 
+                variant="expanded"
+                showTitle
+                showSubtitle
+                lines={3}
+              />
+            </div>
+          )}
+
+          {resultsError && (
+            <div className="w-full py-12">
+              <h1 className="text-3xl font-bold mb-10 text-center text-foreground">Error Loading Results</h1>
+              <div className="w-full space-y-6">
+                <AssessmentError 
+                  onRetry={() => {
+                    setIsComplete(false);
+                    // Retry the query
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {!resultsLoading && !resultsError && (
+            // Do not render results here; navigation will occur in useEffect
+            <div className="w-full py-12">
+              <div className="w-full space-y-6">
+                <LoadingState 
+                  variant="expanded"
+                  showTitle
+                  showSubtitle
+                  lines={3}
+                />
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Error State */}
+      {!isCheckingExistingAssessment && !showStartPage && !isComplete && (!questions || questions.length === 0) && (
+        <AssessmentError 
+          onRetry={() => {
+            setHasStarted(false);
+            setShowStartPage(true);
+          }}
+        />
+      )}
+
+      {/* Main Assessment Content */}
+      {!isCheckingExistingAssessment && !showStartPage && !isComplete && questions && questions.length > 0 && (
+        <AssessmentContainer
+          questions={questions}
+          currentQuestionIndex={currentQuestionIndex}
+          progress={progress}
+          answers={answers}
+          error={error}
+          isSubmitting={isSubmitting}
+          onAnswer={handleUserAnswer}
+          onNext={moveToNextQuestion}
+          onPrevious={handlePrevious}
+        />
+      )}
+    </div>
   );
 };
 
-// Wrap the Assessment component with RouteErrorBoundary
-const AssessmentWithErrorBoundary: React.FC = () => {
-  return (
-    <RouteErrorBoundary routeName="Assessment" showFullPage={true}>
-      <Assessment />
-    </RouteErrorBoundary>
-  );
-};
-
-export default AssessmentWithErrorBoundary;
+export default Assessment;

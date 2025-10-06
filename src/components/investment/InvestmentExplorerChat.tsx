@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSession } from '@/contexts/SessionContext';
-import { 
-  mockChatResponses, 
-  actionBasedResponses, 
-  educationalResponses,
-  topicFallbackResponses,
-  contextualFollowUps
-} from '@/lib/mock/chatResponses';
+import { useChat } from '@/hooks/useEnhancedChat';
 import { Card, CardContent } from "@/components/ui/card";
 import { topics, Topic } from '@/lib/constants/investmentTopics';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,11 +11,22 @@ import {
   Send, 
   Mic, 
   MicOff, 
-  ArrowLeft, 
   Sparkles,
-  Loader2
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Lightbulb,
+  TrendingUp,
+  DollarSign,
+  Shield,
+  Building2,
+  LineChart,
+  PieChart,
+  Globe,
+  BarChart2
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Message {
   type: 'user' | 'ai';
@@ -31,18 +36,192 @@ interface Message {
 
 interface InvestmentExplorerChatProps {
   sessionId: string;
+  onError?: (error: Error) => void;
 }
 
 const MotionCard = motion(Card);
 
-export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ sessionId }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+// Smart topic suggestions based on conversation context
+const getSmartTopicSuggestions = (messages: Message[], session: any): string[] => {
+  if (messages.length === 0) {
+    // Initial suggestions based on user profile
+    const profile = session?.metadata?.profile;
+    if (profile === 'conservative') {
+      return [
+        "What are safe investment options for beginners?",
+        "How can I build a conservative portfolio?",
+        "What are the best bond investment strategies?",
+        "How do I manage investment risk?"
+      ];
+    } else if (profile === 'moderate') {
+      return [
+        "How should I balance stocks and bonds?",
+        "What's a good diversified portfolio strategy?",
+        "How do I analyze market trends?",
+        "What are the best ETFs for diversification?"
+      ];
+    } else if (profile === 'aggressive') {
+      return [
+        "What are the best growth stock opportunities?",
+        "How do I find high-potential investments?",
+        "What sectors are showing strong growth?",
+        "How do I analyze stock fundamentals?"
+      ];
+    } else {
+      return [
+        "What should I invest in as a beginner?",
+        "How do I start building an investment portfolio?",
+        "What are the different types of investments?",
+        "How do I assess my risk tolerance?"
+      ];
+    }
+  }
+
+  // Analyze recent conversation to suggest relevant topics
+  const recentContent = messages.slice(-3).map(m => m.content.toLowerCase()).join(' ');
+  
+  if (recentContent.includes('stock') || recentContent.includes('equity')) {
+    return [
+      "How do I analyze a company's fundamentals?",
+      "What are the best stock screening tools?",
+      "How do I diversify my stock portfolio?",
+      "What's the difference between growth and value stocks?"
+    ];
+  } else if (recentContent.includes('bond') || recentContent.includes('fixed income')) {
+    return [
+      "How do bond yields work?",
+      "What are the different types of bonds?",
+      "How do I assess bond risk?",
+      "When should I invest in bonds vs stocks?"
+    ];
+  } else if (recentContent.includes('market') || recentContent.includes('trend')) {
+    return [
+      "What are the current market trends?",
+      "How do I read market indicators?",
+      "What causes market volatility?",
+      "How do I time the market?"
+    ];
+  } else if (recentContent.includes('portfolio') || recentContent.includes('allocation')) {
+    return [
+      "How do I rebalance my portfolio?",
+      "What's the optimal asset allocation?",
+      "How do I manage portfolio risk?",
+      "Should I use ETFs or individual stocks?"
+    ];
+  } else if (recentContent.includes('risk') || recentContent.includes('safety')) {
+    return [
+      "How can I hedge my portfolio?",
+      "What are low-risk investment options?",
+      "How do I protect against market volatility?",
+      "What are defensive investment strategies?"
+    ];
+  } else if (recentContent.includes('dividend') || recentContent.includes('income')) {
+    return [
+      "How do I find high-dividend stocks?",
+      "What are the best income-generating investments?",
+      "How do I assess dividend sustainability?",
+      "What are REITs and how do they work?"
+    ];
+  }
+
+  // Default suggestions
+  return [
+    "Tell me more about this topic",
+    "What are the risks involved?",
+    "How do I get started?",
+    "What resources should I use?"
+  ];
+};
+
+// Get topic icon for visual suggestions
+const getTopicIcon = (suggestion: string) => {
+  const lowerSuggestion = suggestion.toLowerCase();
+  if (lowerSuggestion.includes('stock') || lowerSuggestion.includes('fundamental')) {
+    return TrendingUp;
+  } else if (lowerSuggestion.includes('bond') || lowerSuggestion.includes('income')) {
+    return DollarSign;
+  } else if (lowerSuggestion.includes('market') || lowerSuggestion.includes('trend')) {
+    return BarChart2;
+  } else if (lowerSuggestion.includes('portfolio') || lowerSuggestion.includes('allocation')) {
+    return PieChart;
+  } else if (lowerSuggestion.includes('risk') || lowerSuggestion.includes('safety')) {
+    return Shield;
+  } else if (lowerSuggestion.includes('dividend') || lowerSuggestion.includes('reit')) {
+    return Building2;
+  } else if (lowerSuggestion.includes('technical') || lowerSuggestion.includes('chart')) {
+    return LineChart;
+  } else if (lowerSuggestion.includes('global') || lowerSuggestion.includes('international')) {
+    return Globe;
+  }
+  return Lightbulb;
+};
+
+export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ sessionId, onError }) => {
   const [inputValue, setInputValue] = useState('');
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { session } = useSession();
+  
+  // Use the real chat hook instead of mock data
+  const { 
+    messages, 
+    sendMessage, 
+    isLoading, 
+    error, 
+    behavioralInsights, 
+    clearMessages, 
+    clearError,
+    loadMessages 
+  } = useChat(sessionId);
+
+  const generateFollowUpPrompts = (content: string): string[] => {
+    // Generate contextual follow-ups based on the AI response content
+    const contentLower = content.toLowerCase();
+    
+    if (contentLower.includes('stock') || contentLower.includes('equity')) {
+      return [
+        "How do I analyze a company's fundamentals?",
+        "What are the best stock screening tools?",
+        "How do I diversify my stock portfolio?",
+        "What's the difference between growth and value stocks?"
+      ];
+    } else if (contentLower.includes('bond') || contentLower.includes('fixed income')) {
+      return [
+        "How do bond yields work?",
+        "What are the different types of bonds?",
+        "How do I assess bond risk?",
+        "When should I invest in bonds vs stocks?"
+      ];
+    } else if (contentLower.includes('market') || contentLower.includes('trend')) {
+      return [
+        "What are the current market trends?",
+        "How do I read market indicators?",
+        "What causes market volatility?",
+        "How do I time the market?"
+      ];
+    } else if (contentLower.includes('portfolio') || contentLower.includes('allocation')) {
+      return [
+        "How do I rebalance my portfolio?",
+        "What's the optimal asset allocation?",
+        "How do I manage portfolio risk?",
+        "Should I use ETFs or individual stocks?"
+      ];
+    } else {
+      return [
+        "Tell me more about this topic",
+        "What are the risks involved?",
+        "How do I get started?",
+        "What resources should I use?"
+      ];
+    }
+  };
+
+  // Convert API messages to UI format
+  const uiMessages: Message[] = messages.map(msg => ({
+    type: msg.isAIResponse ? 'ai' : 'user',
+    content: msg.content,
+    followUps: msg.isAIResponse ? generateFollowUpPrompts(msg.content) : undefined
+  }));
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -50,299 +229,184 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (error && onError) {
+      onError(new Error(error));
+    }
+  }, [error, onError]);
+
   const handlePromptClick = async (prompt: string) => {
-    const newMessage: Message = {
-      type: 'user',
-      content: prompt,
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    setIsTyping(true);
-    
-    // Simulate AI typing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if it's an educational prompt
-    if (educationalResponses[prompt]) {
-      setMessages(prev => [...prev, {
-        type: 'ai',
-        content: educationalResponses[prompt].content,
-        followUps: educationalResponses[prompt].followUps
-      }]);
-      setIsTyping(false);
-      return;
-    }
-    
-    // Generate personalized response
-    const aiResponse: Message = {
-      type: 'ai',
-      content: generatePersonalizedResponse(prompt),
-      followUps: generateFollowUpPrompts(prompt)
-    };
-
-    setMessages(prev => [...prev, aiResponse]);
-    setIsTyping(false);
-  };
-
-  const generatePersonalizedResponse = (prompt: string): string => {
-    if (!session?.metadata) {
-      return "I'd be happy to help you explore investment options. Could you tell me more about your investment goals?";
-    }
-
-    const { profile } = session.metadata;
-
-    // Try to find a matching response in the profile-based responses
-    const profileResponses = mockChatResponses[profile] || {};
-    const matchingResponse = profileResponses[prompt];
-
-    if (matchingResponse) {
-      return matchingResponse.content;
-    }
-
-    // Try to find a matching response in the action-based responses
-    const actionMatchingResponse = actionBasedResponses[prompt];
-
-    if (actionMatchingResponse) {
-      return actionMatchingResponse.content;
-    }
-
-    // Try to find a matching response in the educational responses
-    const educationalMatchingResponse = educationalResponses[prompt];
-
-    if (educationalMatchingResponse) {
-      return educationalMatchingResponse.content;
-    }
-
-    // Try to find a matching response in the topic-based fallbacks
-    const topicFallback = topicFallbackResponses[selectedTopic?.id || ''];
-    if (topicFallback) {
-      return topicFallback.content;
-    }
-
-    // Generate contextual response based on prompt content
-    const promptLower = prompt.toLowerCase();
-    if (promptLower.includes('stock')) {
-      return topicFallbackResponses['stock-analysis'].content;
-    } else if (promptLower.includes('bond')) {
-      return topicFallbackResponses['income-investing'].content;
-    } else if (promptLower.includes('market')) {
-      return topicFallbackResponses['market-research'].content;
-    }
-
-    // Default response if no specific match is found
-    return "I can help you explore investment options. Would you like to learn about stocks, bonds, or other investment types?";
-  };
-
-  const generateFollowUpPrompts = (prompt: string): string[] => {
-    if (!session?.metadata) {
-      return ["Tell me more about your goals", "What's your risk tolerance?", "How long do you plan to invest?"];
-    }
-
-    const { profile } = session.metadata;
-
-    // Try to find matching follow-ups in the profile-based responses
-    const profileResponses = mockChatResponses[profile] || {};
-    const matchingResponse = profileResponses[prompt];
-
-    if (matchingResponse?.followUps) {
-      return matchingResponse.followUps;
-    }
-
-    // Try to find matching follow-ups in the action-based responses
-    const actionMatchingResponse = actionBasedResponses[prompt];
-
-    if (actionMatchingResponse?.followUps) {
-      return actionMatchingResponse.followUps;
-    }
-
-    // Try to find matching follow-ups in the educational responses
-    const educationalMatchingResponse = educationalResponses[prompt];
-
-    if (educationalMatchingResponse?.followUps) {
-      return educationalMatchingResponse.followUps;
-    }
-
-    // Try to find matching follow-ups in the topic-based fallbacks
-    const topicFallback = topicFallbackResponses[selectedTopic?.id || ''];
-    if (topicFallback?.followUps) {
-      return topicFallback.followUps;
-    }
-
-    // Generate contextual follow-ups based on the prompt content
-    const promptLower = prompt.toLowerCase();
-    if (promptLower.includes('stock')) {
-      return contextualFollowUps['stocks'];
-    } else if (promptLower.includes('bond')) {
-      return contextualFollowUps['bonds'];
-    } else if (promptLower.includes('market')) {
-      return contextualFollowUps['market'];
-    } else {
-      return contextualFollowUps['education'];
+    try {
+      await sendMessage(prompt);
+    } catch (error) {
+      console.error('Failed to send prompt:', error);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
 
     handlePromptClick(inputValue);
     setInputValue('');
   };
 
-  const handleTopicSelect = (topic: Topic) => {
-    setSelectedTopic(topic);
-    setMessages([]);
+  const handleRetry = () => {
+    clearError();
+    loadMessages();
   };
 
+  const smartSuggestions = getSmartTopicSuggestions(uiMessages, session);
+
   return (
-    <div className="flex flex-col h-[600px] bg-gradient-to-b from-background to-secondary/5 rounded-lg">
-      {!selectedTopic ? (
-        <div className="flex-1 p-6">
-          <h3 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-            Choose a topic to explore:
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {topics.map((topic, index) => (
-              <MotionCard 
-                key={topic.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="cursor-pointer group hover:bg-primary/5 transition-all duration-300"
-                onClick={() => handleTopicSelect(topic)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                      <topic.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg mb-1">{topic.name}</h4>
-                      <p className="text-sm text-muted-foreground">{topic.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </MotionCard>
-            ))}
+    <div className="flex flex-col h-[600px] bg-background rounded-lg border border-border">
+      {/* Header */}
+      <div className="flex items-center gap-4 p-6 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+            <Sparkles className="h-5 w-5 text-primary" />
           </div>
+          <h3 className="text-lg font-semibold text-foreground">AI Investment Assistant</h3>
         </div>
-      ) : (
-        <>
-          <div className="flex items-center gap-3 p-4 border-b">
+        {behavioralInsights && (
+          <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+            <Sparkles className="h-3 w-3" />
+            <span>AI Enhanced</span>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <Alert className="m-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSelectedTopic(null)}
-              className="hover:bg-primary/10"
+              onClick={handleRetry}
+              className="h-6 px-3"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Topics
+              <RefreshCw className="h-3 w-3 mr-2" />
+              Retry
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <selectedTopic.icon className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">{selectedTopic.name}</h3>
-            </div>
-          </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
-          <ScrollArea ref={scrollRef} className="flex-1 p-4">
-            <div className="space-y-4">
-              <AnimatePresence>
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-4 rounded-2xl ${
-                        message.type === 'user' 
-                          ? 'bg-primary text-primary-foreground ml-12' 
-                          : 'bg-gradient-to-br from-primary/10 to-primary/5 mr-12'
-                      }`}
-                    >
-                      <p className="whitespace-pre-line">{message.content}</p>
-                      {message.followUps && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {message.followUps.map((followUp, idx) => (
-                            <Button
-                              key={idx}
-                              variant={message.type === 'user' ? 'secondary' : 'outline'}
-                              size="sm"
-                              onClick={() => handlePromptClick(followUp)}
-                              className="rounded-full"
-                            >
-                              {followUp}
-                            </Button>
-                          ))}
-                        </div>
-                      )}
+      <ScrollArea ref={scrollRef} className="flex-1 p-6">
+        <div className="space-y-6">
+          <AnimatePresence>
+            {uiMessages.map((message, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-6 rounded-2xl ${
+                    message.type === 'user' 
+                      ? 'bg-primary text-primary-foreground ml-12' 
+                      : 'bg-muted/50 border border-border mr-12'
+                  }`}
+                >
+                  <p className="whitespace-pre-line">{message.content}</p>
+                  {message.followUps && (
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      {message.followUps.map((followUp, idx) => (
+                        <Button
+                          key={idx}
+                          variant={message.type === 'user' ? 'secondary' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePromptClick(followUp)}
+                          className="rounded-full border-border hover:bg-muted hover:text-foreground"
+                          disabled={isLoading}
+                        >
+                          {followUp}
+                        </Button>
+                      ))}
                     </div>
-                  </motion.div>
-                ))}
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="max-w-[80%] p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 mr-12">
-                      <div className="flex items-center gap-2">
-                        <LoadingSpinner 
-                          size="sm" 
-                          variant="default" 
-                          text="AI is typing..."
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </ScrollArea>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex justify-start"
+              >
+                <div className="max-w-[80%] p-6 rounded-2xl bg-muted/50 border border-border mr-12">
+                  <div className="flex items-center gap-3">
+                    <LoadingSpinner 
+                      size="sm" 
+                      variant="default" 
+                      text="AI is thinking..."
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </ScrollArea>
 
-          <div className="p-4 border-t bg-background/50 backdrop-blur-sm">
-            {messages.length === 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-                {selectedTopic.prompts.map((prompt, index) => (
+      <div className="p-6 border-t border-border bg-muted/20">
+        {/* Smart Suggestions */}
+        {uiMessages.length === 0 && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-muted-foreground mb-4">Suggested topics to explore:</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {smartSuggestions.map((suggestion, index) => {
+                const IconComponent = getTopicIcon(suggestion);
+                return (
                   <Button
                     key={index}
                     variant="outline"
-                    className="justify-start group hover:bg-primary/5"
-                    onClick={() => handlePromptClick(prompt)}
+                    className="justify-start group hover:bg-primary/5 h-auto p-4 border-border hover:border-primary/20"
+                    onClick={() => handlePromptClick(suggestion)}
+                    disabled={isLoading}
                   >
-                    <Sparkles className="h-4 w-4 mr-2 text-primary group-hover:scale-110 transition-transform" />
-                    {prompt}
+                    <IconComponent className="h-4 w-4 mr-3 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-left text-sm">{suggestion}</span>
                   </Button>
-                ))}
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsRecording(!isRecording)}
-                className={isRecording ? 'text-red-500' : ''}
-              >
-                {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              </Button>
-              <Button type="submit" size="icon">
-                <Send className="h-5 w-5" />
-              </Button>
-            </form>
+                );
+              })}
+            </div>
           </div>
-        </>
-      )}
+        )}
+
+        {/* Input Form */}
+        <form onSubmit={handleSubmit} className="flex gap-3">
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Ask anything about investing..."
+            className="flex-1"
+            disabled={isLoading}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsRecording(!isRecording)}
+            className={isRecording ? 'text-red-500 hover:bg-red-50' : 'hover:bg-muted hover:text-foreground'}
+            disabled={isLoading}
+          >
+            {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </Button>
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={isLoading || !inputValue.trim()}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }; 

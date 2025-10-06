@@ -40,28 +40,39 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
   ) + 1;
   
   return (
-    <div className="container mx-auto py-8 px-4 animate-fade-in">
-      <h1 className="text-3xl font-bold mb-8 text-center">Investment Profile Assessment</h1>
+    <div className="min-h-screen bg-background py-12 px-4">
+      {/* Main Header */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-foreground mb-4">
+          Investment Profile Assessment
+        </h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          Let's understand your investment preferences to provide personalized recommendations
+        </p>
+      </div>
       
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-8">
+        {/* Progress Bar */}
         <ProgressBar 
           currentStep={progress.current} 
           totalSteps={progress.total}
           category={currentQuestion.category.name}
         />
         
+        {/* Category Header */}
         <CategoryHeader 
           category={currentQuestion.category}
           questionCount={questionsInCurrentCategory.length}
           currentQuestion={currentQuestionInCategory}
         />
         
+        {/* Navigation */}
         {currentQuestionIndex > 0 && (
-          <div>
+          <div className="flex justify-center">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               onClick={onPrevious}
-              className="flex items-center gap-1"
+              className="flex items-center gap-3 border-border hover:bg-muted hover:text-foreground"
               disabled={isSubmitting}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -70,13 +81,17 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
           </div>
         )}
         
+        {/* Error Display */}
         {error && (
-          <div className="p-3 bg-destructive/10 text-destructive rounded-md flex items-center">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <span>{error}</span>
+          <div className="max-w-4xl mx-auto">
+            <div className="p-6 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center">
+              <AlertCircle className="h-5 w-5 text-destructive mr-3" />
+              <span className="text-destructive font-medium">{error}</span>
+            </div>
           </div>
         )}
         
+        {/* Question Card */}
         <QuestionCard 
           question={currentQuestion}
           onAnswer={onAnswer}

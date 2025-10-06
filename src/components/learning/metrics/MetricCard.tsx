@@ -29,17 +29,17 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const content = metricContent[name]?.content;
 
   const getWeightColor = (weight: number) => {
-    if (weight >= 0.8) return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (weight >= 0.5) return 'bg-purple-50 text-purple-700 border-purple-200';
+    if (weight >= 0.8) return 'bg-primary/10 text-primary border-primary/20';
+    if (weight >= 0.5) return 'bg-primary/5 text-primary border-primary/10';
     return 'bg-muted text-muted-foreground border-border';
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800';
       case 'in-progress':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'locked':
         return 'bg-muted text-muted-foreground border-border';
       default:
@@ -70,7 +70,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
             </div>
           </div>
           {completed && (
-            <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
           )}
         </div>
 

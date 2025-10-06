@@ -11,11 +11,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { QuizResults } from './QuizResults';
+import { QuizToChatTransition } from './QuizToChatTransition';
 
 interface QuizSectionProps {
   assetClass: string;
   responseGroupId: string;
   onClose: () => void;
+  onStartChat?: (context: any) => void;
+  onContinueLearning?: () => void;
 }
 
 // Quiz section action types
@@ -64,7 +68,9 @@ const quizSectionReducer = (state: QuizState, action: QuizSectionAction): QuizSt
 const QuizSection: React.FC<QuizSectionProps> = ({ 
   assetClass, 
   responseGroupId,
-  onClose 
+  onClose,
+  onStartChat,
+  onContinueLearning
 }) => {
   // Use reducer for state management
   const [state, dispatch] = useReducer(quizSectionReducer, {
@@ -72,6 +78,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({
     answers: {},
     isComplete: false
   });
+
+  // Add state for enhanced results flow
+  const [showEnhancedResults, setShowEnhancedResults] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
 
   // Fetch questions
   const { data: questions, isLoading: isLoadingQuestions } = useQuery({
@@ -89,6 +99,8 @@ const QuizSection: React.FC<QuizSectionProps> = ({
     onSuccess: (result) => {
       dispatch({ type: 'COMPLETE_QUIZ', result });
       toast.success('Quiz completed successfully!');
+      // Show enhanced results after a brief delay
+      setTimeout(() => setShowEnhancedResults(true), 1000);
     },
     onError: (error) => {
       toast.error('Failed to submit quiz. Please try again.');
@@ -151,6 +163,58 @@ const QuizSection: React.FC<QuizSectionProps> = ({
   }
 
   if (state.isComplete && state.result) {
+    // Show enhanced results flow
+    if (showEnhancedResults && !showTransition) {
+      return (
+        <QuizResults
+          result={state.result}
+          assetClass={assetClass}
+          onNextStep={(action) => {
+            if (action === 'chat') {
+              setShowTransition(true);
+            } else if (action === 'learn' && onContinueLearning) {
+              onContinueLearning();
+            } else if (action === 'retake') {
+              dispatch({ type: 'RESET_QUIZ' });
+              setShowEnhancedResults(false);
+              setShowTransition(false);
+            }
+          }}
+          onChatPrompt={(prompt) => {
+            if (onStartChat) {
+              onStartChat({ prompt, result: state.result, assetClass });
+            }
+          }}
+        />
+      );
+    }
+
+    // Show transition to chat
+    if (showTransition) {
+      return (
+        <QuizToChatTransition
+          quizResult={state.result}
+          assetClass={assetClass}
+          onStartChat={(context) => {
+            if (onStartChat) {
+              onStartChat(context);
+            }
+          }}
+          onContinueLearning={() => {
+            if (onContinueLearning) {
+              onContinueLearning();
+            }
+          }}
+          onRetakeQuiz={() => {
+            dispatch({ type: 'RESET_QUIZ' });
+            setShowEnhancedResults(false);
+            setShowTransition(false);
+          }}
+        />
+      );
+    }
+
+    // Show basic results initially (will transition to enhanced results)
     return (
       <Card>
         <CardHeader>
@@ -166,28 +230,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({
               <span>Correct Answers:</span>
               <span className="font-semibold">{state.result.correctAnswers} of {state.result.totalQuestions}</span>
             </div>
-            {state.result.answers && state.result.answers.length > 0 && (
-              <div className="space-y-4 mt-6">
-                {state.result.answers.map((answer, index) => (
-                  <div key={index} className="flex items-start space-x-2">
-                    {answer.isCorrect ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                    )}
-                    <div>
-                      <p className="font-medium">Question {index + 1}</p>
-                      {answer.explanation && (
-                        <p className="text-sm text-gray-600 mt-1">{answer.explanation}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-sm text-muted-foreground mt-2">Preparing your personalized results...</p>
               </div>
-            )}
-            <Button onClick={onClose} className="w-full mt-6">
-              Close
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -206,7 +252,7 @@ const QuizSection: React.FC<QuizSectionProps> = ({
             <h3 className="text-lg font-medium mb-4">
               Question {state.currentQuestionIndex + 1} of {questions.length}
             </h3>
-            <p className="text-gray-700">{currentQuestion?.questionText}</p>
+            <p className="text-foreground">{currentQuestion?.questionText}</p>
           </div>
 
           <RadioGroup

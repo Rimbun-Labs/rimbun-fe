@@ -43,8 +43,8 @@ if (queryClient) {
 console.log('4. Network Tab Check:');
 console.log('   Look for these API calls:');
 console.log('   - GET /api/v1/users/me/:authProviderId');
-console.log('   - GET /api/v1/assessment/user/:userId/latest');
-console.log('   - GET /api/v1/assessment/user/:userId/all');
+console.log('   - GET /api/v1/user-responses/user/:databaseUserId/sessions');
+console.log('   - GET /api/v1/assessment/response-group/:sessionId/score');
 
 // 5. Check component state (if React DevTools available)
 console.log('5. Component State Check:');
@@ -63,22 +63,27 @@ async function testEndpoints() {
   }
   
   try {
-    // Test latest assessment endpoint
-    const latestResponse = await fetch(`/api/v1/assessment/user/${databaseUserId}/latest`);
-    console.log(`   Latest Assessment (${latestResponse.status}):`, latestResponse.ok ? '✅ Success' : '❌ Failed');
+    // Test user sessions endpoint (this exists)
+    const sessionsResponse = await fetch(`/api/v1/user-responses/user/${databaseUserId}/sessions`);
+    console.log(`   User Sessions (${sessionsResponse.status}):`, sessionsResponse.ok ? '✅ Success' : '❌ Failed');
     
-    if (latestResponse.ok) {
-      const latestData = await latestResponse.json();
-      console.log('   Latest Assessment Data:', latestData);
-    }
-    
-    // Test all assessments endpoint
-    const allResponse = await fetch(`/api/v1/assessment/user/${databaseUserId}/all`);
-    console.log(`   All Assessments (${allResponse.status}):`, allResponse.ok ? '✅ Success' : '❌ Failed');
-    
-    if (allResponse.ok) {
-      const allData = await allResponse.json();
-      console.log('   All Assessments Count:', allData.length);
+    if (sessionsResponse.ok) {
+      const sessionsData = await sessionsResponse.json();
+      console.log('   User Sessions Count:', sessionsData.length);
+      
+      if (sessionsData.length > 0) {
+        const latestSession = sessionsData[0];
+        console.log('   Latest Session ID:', latestSession.id);
+        
+        // Test assessment results endpoint with session ID (this exists)
+        const resultsResponse = await fetch(`/api/v1/assessment/response-group/${latestSession.id}/score`);
+        console.log(`   Assessment Results (${resultsResponse.status}):`, resultsResponse.ok ? '✅ Success' : '❌ Failed');
+        
+        if (resultsResponse.ok) {
+          const resultsData = await resultsResponse.json();
+          console.log('   Assessment Results:', resultsData);
+        }
+      }
     }
     
   } catch (error) {
@@ -99,7 +104,7 @@ if (errors.length > 0) {
   console.log('   ✅ No relevant errors found');
 }
 
-// Run the API tests
+// Run the endpoint tests
 testEndpoints();
 
 console.log('=====================================');

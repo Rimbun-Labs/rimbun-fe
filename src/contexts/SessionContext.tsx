@@ -1,26 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { ResponseGroup } from '@/lib/api/types/assessment';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-
-export interface ResponseGroup {
-  id: string;
-  userId: string;
-  questionnaireType: string;
-  isCompleted: boolean;
-  metadata: {
-    score: number;
-    profile: string;
-    riskProfile: number;
-    knowledgeLevel: number;
-    leverageAptitude: number;
-    riskCapacity: number;
-    investmentHorizon: number;
-    overallConfidence: number;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface SessionContextType {
   sessionId: string | null;
@@ -35,15 +16,17 @@ interface SessionContextType {
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Optimized localStorage hook for session ID
-  const [sessionId, setSessionId] = useLocalStorage<string | null>(
-    'assessmentSessionId',
-    null,
-    { debounceMs: 100 }
-  );
+  // Load session from localStorage on mount
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem('assessmentSessionId');
+    if (savedSessionId) {
+      setSessionId(savedSessionId);
+    }
+  }, []);
 
   // Fetch session data when sessionId changes
   useEffect(() => {
@@ -96,6 +79,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const clearSession = () => {
     setSessionId(null);
     setSession(null);
+    localStorage.removeItem('assessmentSessionId');
   };
 
   // Function to check if user has completed an assessment - NO API CALL

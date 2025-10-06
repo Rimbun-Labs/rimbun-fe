@@ -76,12 +76,12 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
-          <CardTitle className="text-base font-medium">
+          <CardTitle className="text-lg font-semibold">
             Portfolio Allocation
           </CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2">
             Optimal asset distribution based on your risk profile and market conditions
           </p>
         </div>
@@ -90,6 +90,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
             variant={view === 'pie' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setView('pie')}
+            className={view === 'pie' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'border-border hover:bg-muted'}
           >
             Allocation
           </Button>
@@ -97,6 +98,7 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
             variant={view === 'metrics' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setView('metrics')}
+            className={view === 'metrics' ? 'bg-primary hover:bg-primary/90 text-primary-foreground' : 'border-border hover:bg-muted'}
           >
             Metrics
           </Button>
@@ -157,18 +159,18 @@ const PortfolioAllocation: React.FC<PortfolioAllocationProps> = React.memo(({
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-6">
             {recommendedMetrics && Object.entries(recommendedMetrics).map(([assetClass, metrics]) => (
-              <div key={assetClass} className="space-y-2">
-                <h4 className="font-medium text-sm">{getAssetClassDisplayName(assetClass as AssetClass)}</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div key={assetClass} className="space-y-3">
+                <h4 className="font-medium text-sm text-foreground">{getAssetClassDisplayName(assetClass as AssetClass)}</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Object.entries(metrics).map(([key, metric]) => (
                     <div key={key} className="text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{getMetricDisplayName(key)}</span>
-                        <span className="text-primary">{(metric.weight * 100).toFixed(0)}%</span>
+                        <span className="font-medium text-foreground">{getMetricDisplayName(key)}</span>
+                        <span className="text-primary font-semibold">{(metric.weight * 100).toFixed(0)}%</span>
                       </div>
-                      <p className="text-muted-foreground text-xs mt-0.5">
+                      <p className="text-muted-foreground text-xs mt-1">
                         {metric.description}
                       </p>
                     </div>

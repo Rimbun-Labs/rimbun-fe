@@ -57,21 +57,39 @@ export const SliderInput: React.FC<SliderInputProps> = React.memo(({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Label>{formatValue(config.min)}</Label>
-        <Label className="text-lg font-medium">{formatValue(value)}</Label>
-        <Label>{formatValue(config.max)}</Label>
+      {/* Value Display */}
+      <div className="flex justify-between items-center p-4 bg-muted/30 rounded-md border border-border">
+        <Label className="text-sm font-medium text-muted-foreground">
+          {formatValue(config.min)}
+        </Label>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary">
+            {formatValue(value)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Current Value</div>
+        </div>
+        <Label className="text-sm font-medium text-muted-foreground">
+          {formatValue(config.max)}
+        </Label>
       </div>
-      <Slider
-        value={[value]}
-        min={config.min}
-        max={config.max}
-        step={config.step}
-        onValueChange={([newValue]) => onChange(newValue)}
-        className="w-full"
-      />
+      
+      {/* Slider */}
+      <div className="px-2">
+        <Slider
+          value={[value]}
+          min={config.min}
+          max={config.max}
+          step={config.step}
+          onValueChange={([newValue]) => onChange(newValue)}
+          className="w-full"
+        />
+      </div>
+      
+      {/* Validation Error */}
       {validationError && (
-        <p className="text-sm text-red-500 mt-1">{validationError}</p>
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <p className="text-sm text-destructive">{validationError}</p>
+        </div>
       )}
     </div>
   );

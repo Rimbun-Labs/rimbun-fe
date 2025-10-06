@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { UserProfile, getProfile, updateProfile } from '@/lib/api/profileApi';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { userService } from '@/lib/api/userService';
 
 interface ProfileContextType {
   profile: UserProfile | null;
@@ -27,12 +29,28 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const fetchProfile = async () => {
+    if (!user) {
+      setError('User not authenticated');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-      const data = await getProfile();
+      
+      // Get the database user ID
+      const databaseUserId = userService.getDatabaseUserId();
+      if (!databaseUserId) {
+        setError('User profile not found. Please complete your registration.');
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await getProfile(databaseUserId);
       setProfile(data);
       setOriginalProfile(data);
     } catch (err) {
@@ -48,8 +66,12 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
   
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (user) {
+      fetchProfile();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user]);
   
   useEffect(() => {
     if (originalProfile && profile) {
@@ -58,11 +80,20 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   }, [originalProfile, profile]);
   
   const updateProfileData = async (data: Partial<UserProfile>) => {
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
+
     try {
       setProfile(prev => prev ? { ...prev, ...data } : null);
       if (!isEditing) {
         setIsLoading(true);
-        await updateProfile(data);
+        const databaseUserId = userService.getDatabaseUserId();
+        if (!databaseUserId) {
+          throw new Error('User profile not found');
+        }
+        await updateProfile(databaseUserId, data);
         setOriginalProfile(prev => prev ? { ...prev, ...data } : null);
         toast({
           title: 'Success',
@@ -84,11 +115,15 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const saveProfileChanges = async () => {
-    if (!profile) return;
+    if (!profile || !user) return;
     
     try {
       setIsLoading(true);
-      await updateProfile(profile);
+      const databaseUserId = userService.getDatabaseUserId();
+      if (!databaseUserId) {
+        throw new Error('User profile not found');
+      }
+      await updateProfile(databaseUserId, profile);
       setOriginalProfile(profile);
       setIsEditing(false);
       toast({
@@ -115,6 +150,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const updateProfilePictureHandler = async (file: File) => {
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
+
     try {
       setIsLoading(true);
       const url = URL.createObjectURL(file);

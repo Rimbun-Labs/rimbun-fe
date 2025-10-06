@@ -91,6 +91,7 @@ const AppSidebar: React.FC = () => {
             <BarChart3 className="h-4 w-4" />
             Assessment
           </NavLink>
+          
         </div>
 
         {/* Learning Section */}

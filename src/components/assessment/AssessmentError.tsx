@@ -9,11 +9,11 @@ interface AssessmentErrorProps {
 
 export const AssessmentError: React.FC<AssessmentErrorProps> = ({ onRetry }) => {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Error Loading Assessment</h1>
-      <div className="text-center space-y-4">
+    <div className="container mx-auto py-12 px-4">
+      <h1 className="text-3xl font-bold mb-10 text-center text-foreground">Error Loading Assessment</h1>
+      <div className="text-center space-y-6">
         <p className="text-muted-foreground">Unable to load assessment questions.</p>
-        <Button onClick={onRetry} className="flex items-center gap-2">
+        <Button onClick={onRetry} className="flex items-center gap-3 bg-primary hover:bg-primary/90 text-primary-foreground">
           <RefreshCw className="h-4 w-4" />
           Try Again
         </Button>

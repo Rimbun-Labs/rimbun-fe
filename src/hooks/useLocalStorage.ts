@@ -1,128 +1,98 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { storageCache } from '@/lib/storage/cache';
-import { storagePerformanceMonitor } from '@/lib/storage/performance';
-
-interface UseLocalStorageOptions {
-  debounceMs?: number;
-  validate?: (value: any) => boolean;
-  onError?: (error: Error) => void;
-}
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-  options: UseLocalStorageOptions = {}
+  options?: { debounceMs?: number }
 ): [T, (value: T | ((val: T) => T)) => void, () => void] {
-  const { debounceMs = 300, validate, onError } = options;
+  const { debounceMs = 0 } = options || {};
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Get from localStorage then parse stored json or return initialValue
   const [storedValue, setStoredValue] = useState<T>(() => {
-    const startTime = performance.now();
     try {
-      const cached = storageCache.get(key);
-      if (cached !== null) {
-        const duration = performance.now() - startTime;
-        storagePerformanceMonitor.trackOperation(key, 'get', duration, true);
-        return cached;
-      }
-      
-      // Fallback to localStorage if not in cache
-      const item = localStorage.getItem(key);
-      const duration = performance.now() - startTime;
-      storagePerformanceMonitor.trackOperation(key, 'get', duration, true);
-      
-      if (item !== null) {
-        const parsed = JSON.parse(item);
-        storageCache.set(key, parsed);
-        return parsed;
-      }
-      
-      return initialValue;
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      const duration = performance.now() - startTime;
-      storagePerformanceMonitor.trackOperation(key, 'get', duration, false);
-      onError?.(error as Error);
+      console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
   });
 
-  const debounceRef = useRef<NodeJS.Timeout>();
-  const lastValueRef = useRef<T>(storedValue);
-
+  // Return a wrapped version of useState's setter function that persists the new value to localStorage
   const setValue = useCallback((value: T | ((val: T) => T)) => {
-    const newValue = value instanceof Function ? value(storedValue) : value;
-    
-    // Validation
-    if (validate && !validate(newValue)) {
-      onError?.(new Error(`Invalid value for key: ${key}`));
-      return;
-    }
-
-    // Update state immediately for responsive UI
-    setStoredValue(newValue);
-    lastValueRef.current = newValue;
-
-    // Debounce localStorage write
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      const startTime = performance.now();
-      try {
-        storageCache.set(key, newValue);
-        const duration = performance.now() - startTime;
-        storagePerformanceMonitor.trackOperation(key, 'set', duration, true);
-      } catch (error) {
-        const duration = performance.now() - startTime;
-        storagePerformanceMonitor.trackOperation(key, 'set', duration, false);
-        onError?.(error as Error);
+    try {
+      // Allow value to be a function so we have the same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      
+      // Save state immediately
+      setStoredValue(valueToStore);
+      
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }, debounceMs);
-  }, [key, storedValue, debounceMs, validate, onError]);
+      
+      // Debounce localStorage write if debounceMs is set
+      if (debounceMs > 0) {
+        timeoutRef.current = setTimeout(() => {
+          try {
+            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          } catch (error) {
+            console.error(`Error setting localStorage key "${key}":`, error);
+          }
+        }, debounceMs);
+      } else {
+        // Write to localStorage immediately if no debouncing
+        try {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (error) {
+          console.error(`Error setting localStorage key "${key}":`, error);
+        }
+      }
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}":`, error);
+    }
+  }, [key, storedValue, debounceMs]);
 
   const removeValue = useCallback(() => {
-    const startTime = performance.now();
     try {
-      storageCache.remove(key);
-      setStoredValue(initialValue);
-      lastValueRef.current = initialValue;
-      
-      const duration = performance.now() - startTime;
-      storagePerformanceMonitor.trackOperation(key, 'remove', duration, true);
-    } catch (error) {
-      const duration = performance.now() - startTime;
-      storagePerformanceMonitor.trackOperation(key, 'remove', duration, false);
-      onError?.(error as Error);
-    }
-  }, [key, initialValue, onError]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    };
-  }, []);
+      
+      setStoredValue(initialValue);
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error removing localStorage key "${key}":`, error);
+    }
+  }, [key, initialValue]);
 
-  // Sync with other tabs/windows
+  // Listen for changes to this localStorage key in other tabs/windows
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
-          const newValue = JSON.parse(e.newValue);
-          if (JSON.stringify(newValue) !== JSON.stringify(lastValueRef.current)) {
-            setStoredValue(newValue);
-            lastValueRef.current = newValue;
-          }
+          setStoredValue(JSON.parse(e.newValue));
         } catch (error) {
-          onError?.(error as Error);
+          console.error(`Error parsing localStorage change for key "${key}":`, error);
         }
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [key, onError]);
+  }, [key]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return [storedValue, setValue, removeValue];
 } 

@@ -30,11 +30,11 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800';
       case 'intermediate':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800';
       case 'advanced':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800';
       default:
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -43,15 +43,15 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
   const getCategoryColor = (category: MetricCategory) => {
     switch (category) {
       case 'Growth':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'Risk':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800';
       case 'Income':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800';
       case 'Value':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-200 dark:border-purple-800';
       case 'Technical':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800';
       default:
         return 'bg-muted text-muted-foreground border-border';
     }
@@ -60,9 +60,9 @@ const LibraryModuleCard: React.FC<LibraryModuleCardProps> = ({ module, onStart }
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800';
       case 'in-progress':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'locked':
         return 'bg-muted text-muted-foreground border-border';
       default:

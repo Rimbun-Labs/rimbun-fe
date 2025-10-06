@@ -6,28 +6,30 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SessionProvider } from "./contexts/SessionContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./hooks/useTheme";
-import AppLayout from "./components/layout/AppLayout";
+import { AppLayout, ContentLayout } from "./components/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Assessment from "./pages/Assessment";
 import AssessmentResultsPage from "./pages/AssessmentResults";
 import Dashboard from "./pages/Dashboard";
 import Learning from "./pages/Learning";
+import LearningFolderView from "./pages/LearningFolderView";
+import LearningLibraryDetail from "./pages/LearningLibraryDetail";
+import LearningPathDetail from "./pages/LearningPathDetail";
+import LearningPaths from "./pages/LearningPaths";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import LearningPaths from "./pages/LearningPaths";
-import LearningPathDetail from "./pages/LearningPathDetail";
-import LearningLibraryDetail from "./pages/LearningLibraryDetail";
-import MetricLibraryDetail from "./components/learning/library/MetricLibraryDetail";
+import InvestmentExplorer from "./pages/InvestmentExplorer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import MetricLibraryDetail from "./components/learning/library/MetricLibraryDetail";
 import { useAuth } from "./contexts/AuthContext";
 import { useSession } from "./contexts/SessionContext";
-import InvestmentExplorer from "./pages/InvestmentExplorer";
-import LearningFolderView from "./pages/LearningFolderView";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import { useEffect, useState } from "react";
+import QuizFlowDemo from "./components/debug/QuizFlowDemo";
+import TestLayout from "./pages/TestLayout";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,10 @@ const RootRedirect = () => {
   const { hasCompletedAssessment } = useSession();
   const [isCheckingAssessment, setIsCheckingAssessment] = useState(false);
   const [assessmentStatus, setAssessmentStatus] = useState<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean } | null>(null);
+  
+  // 🔑 SMART ROUTE PROTECTION: Only redirect if we're on the root path
+  // This prevents aggressive redirects when users intentionally navigate to specific routes
+  const isRootPath = window.location.pathname === '/';
 
   useEffect(() => {
     const checkUserAssessment = async () => {
@@ -64,8 +70,8 @@ const RootRedirect = () => {
 
   // If user is authenticated, check assessment status
   if (user) {
-    // If user has complete assessment, redirect to dashboard
-    if (assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete) {
+    // 🔑 MODIFIED: Only redirect to dashboard if we're on root path AND user has complete assessment
+    if (isRootPath && assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete) {
       return <Navigate to={`/dashboard/${assessmentStatus.sessionId}`} replace />;
     } 
     // If user has incomplete assessment, redirect to assessment to complete it
@@ -73,7 +79,7 @@ const RootRedirect = () => {
       return <Navigate to="/assessment" replace />;
     }
     // If user has no assessment, go to dashboard (which will show assessment prompt)
-    else {
+    else if (isRootPath) {
       return <Navigate to="/dashboard" replace />;
     }
   }
@@ -90,7 +96,20 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<RootRedirect />} />
 
-      {/* Protected routes */}
+      {/* Protected routes with ContentLayout (contained, centered) */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <ContentLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/assessment" element={<Assessment />} />
+        <Route path="/assessment-results" element={<AssessmentResultsPage />} />
+        <Route path="/quiz-demo" element={<QuizFlowDemo />} />
+      </Route>
+
+      {/* Protected routes with AppLayout (full width) */}
       <Route
         element={
           <ProtectedRoute>
@@ -98,7 +117,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="/assessment" element={<Assessment />} />
+        {/* Dashboard Routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:sessionId" element={<Dashboard />} />
         
@@ -112,9 +131,10 @@ const AppRoutes = () => {
         <Route path="/learning-path/:sessionId" element={<LearningPaths />} />
         <Route path="/learning-path/:sessionId/:assetClass" element={<LearningPathDetail />} />
         
+        {/* Application Pages */}
         <Route path="/profile" element={<Profile />} />
-        <Route path="/assessment-results" element={<AssessmentResultsPage />} />
         <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
+
       </Route>
 
       {/* 404 route */}

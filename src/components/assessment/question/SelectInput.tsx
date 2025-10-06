@@ -20,7 +20,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
       </SelectTrigger>
       <SelectContent>
         {question.options?.map((option) => (
-          <SelectItem key={option.id} value={option.id}>
+          <SelectItem key={option.id} value={option.optionLabel}>
             {option.optionLabel}
           </SelectItem>
         ))}

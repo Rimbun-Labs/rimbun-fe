@@ -21,7 +21,7 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session
         </p>
       </div>
       
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="grid md:grid-cols-2 gap-6 mb-8 w-full">
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle>Your Investment Profile</CardTitle>

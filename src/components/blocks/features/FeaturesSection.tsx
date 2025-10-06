@@ -118,17 +118,17 @@ const itemVariants = {
 
 export const FeaturesSection = ({ className }: FeaturesSectionProps) => {
   return (
-    <section className={cn("py-16 md:py-24 bg-gradient-to-br from-background via-background to-muted/20", className)}>
+    <section className={cn("py-20 md:py-28 bg-gradient-to-br from-background via-background to-muted/20", className)}>
       <div className="container px-4 md:px-6">
         {/* Section Header */}
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need to Succeed</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">Everything You Need to Succeed</h2>
           <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
             Our comprehensive platform combines AI-powered assessment, personalized learning, and expert insights to help you build confidence and achieve your financial goals.
           </p>
@@ -161,28 +161,28 @@ export const FeaturesSection = ({ className }: FeaturesSectionProps) => {
 
         {/* Bottom CTA */}
         <motion.div 
-          className="text-center mt-16"
+          className="text-center mt-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
         >
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-8 border border-primary/20">
-            <Shield className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <h3 className="text-2xl font-bold mb-2">Your Privacy Matters</h3>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <Shield className="h-12 w-12 mx-auto mb-6 text-primary" />
+            <h3 className="text-2xl font-bold mb-4 text-foreground">Your Privacy Matters</h3>
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               We respect your privacy and only collect the information needed to personalize your learning experience. Your data is never shared with third parties.
             </p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>No sensitive data collected</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>Privacy focused</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>Cancel anytime</span>
               </div>

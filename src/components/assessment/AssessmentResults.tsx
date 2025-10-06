@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AssessmentResult } from '@/lib/api/types/assessment';
 import { Button } from '@/components/ui/button';
-import { Download, Share2 } from 'lucide-react';
+import { Download, Share2, RefreshCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import ProfileDetermination from './ProfileDetermination';
 import { ResultsTabs } from './results/ResultsTabs';
@@ -30,9 +30,9 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
+      <div className="py-6 px-4 space-y-6">
         <LoadingState variant="expanded" lines={1} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
           <div className="lg:col-span-2">
             <LoadingState variant="expanded" lines={3} />
           </div>
@@ -44,7 +44,7 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
 
   if (!result) {
     return (
-      <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl">
+      <div className="py-6 px-4 space-y-6">
         <div className="p-4 bg-destructive/10 text-destructive rounded-md">
           No assessment results found. Please complete the assessment first.
         </div>
@@ -55,45 +55,23 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
   const scoreData = result.scoreData;
 
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6 max-w-6xl animate-fade-in">
+    <div className="py-6 px-4 space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">Assessment Results</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-2">
             Your personalized investment profile analysis
           </p>
         </div>
-        <div className="flex gap-2 mt-4 md:mt-0">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Download your assessment results</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Share your results with others</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="mt-4 md:mt-0">
+          <Button variant="outline" onClick={handleRetakeAssessment}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retake Assessment
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
         <div className="lg:col-span-2">
           <ResultsTabs result={scoreData} />
         </div>

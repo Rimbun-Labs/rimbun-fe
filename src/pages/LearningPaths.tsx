@@ -26,7 +26,7 @@ const LearningPaths: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container max-w-7xl py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <LoadingState 
           variant="expanded"
           showTitle
@@ -39,7 +39,7 @@ const LearningPaths: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container max-w-7xl py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-xl text-red-600">Error Loading Learning Paths</CardTitle>
@@ -75,7 +75,7 @@ const LearningPaths: React.FC = () => {
 
   if (!recommendations) {
     return (
-      <div className="container max-w-7xl py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">No Learning Paths Available</CardTitle>
@@ -114,30 +114,19 @@ const LearningPaths: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(`/dashboard/${sessionId}`)}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Your Learning Paths</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Start your learning journey with these recommended paths
-            </p>
-          </div>
-        </div>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Learning Paths</h1>
+        <p className="text-muted-foreground">
+          Choose your learning journey and master investment concepts
+        </p>
+      </div>
 
-        <div className={cn(
-          "grid gap-6",
-          getGridCols(nonZeroAllocations.length)
-        )}>
+      {/* Featured Learning Paths */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Featured Learning Paths</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {nonZeroAllocations.map(([assetClass, allocation]) => {
             const formattedAssetClass = formatAssetClass(assetClass);
             return (

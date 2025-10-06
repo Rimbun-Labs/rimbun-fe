@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getLatestUserAssessmentResults, getAllUserAssessmentResults } from '@/lib/api/assessmentApi';
+import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { AssessmentResult } from '@/lib/api/types/assessment';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSession } from '@/contexts/SessionContext';
@@ -11,29 +11,16 @@ export const useUserAssessmentPersistence = () => {
   const { setSession } = useSession();
   const [hasCheckedPersistence, setHasCheckedPersistence] = useState(false);
 
-  // Query for latest assessment results
+  // Query for latest assessment results - using CORRECT session-based approach
   const { 
     data: latestResults, 
     isLoading: isLoadingLatest,
     error: latestError 
   } = useQuery<AssessmentResult | null>({
     queryKey: ['user-latest-assessment', user?.uid],
-    queryFn: getLatestUserAssessmentResults,
-    enabled: !!user && userRegistrationComplete && !hasCheckedPersistence,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Query for all assessment results (for history)
-  const { 
-    data: allResults, 
-    isLoading: isLoadingAll,
-    error: allError 
-  } = useQuery<AssessmentResult[]>({
-    queryKey: ['user-all-assessments', user?.uid],
-    queryFn: getAllUserAssessmentResults,
+    queryFn: getLatestAssessmentResults, // ✅ CORRECT: Uses session-based approach
     enabled: !!user && userRegistrationComplete,
-    retry: 1,
+    retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -81,10 +68,8 @@ export const useUserAssessmentPersistence = () => {
 
   return {
     latestResults,
-    allResults,
-    isLoading: isLoadingLatest || isLoadingAll,
-    hasCheckedPersistence,
-    hasExistingAssessment: !!latestResults,
-    error: latestError || allError
+    isLoadingLatest,
+    latestError,
+    hasCheckedPersistence
   };
 };

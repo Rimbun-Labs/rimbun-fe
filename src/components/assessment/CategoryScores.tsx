@@ -20,7 +20,7 @@ const CategoryScores: React.FC<CategoryScoresProps> = ({ categoryScores }) => {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Category Breakdown</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {categories.map(([category, scoreData]) => (
           <ScoreCard
             key={category}

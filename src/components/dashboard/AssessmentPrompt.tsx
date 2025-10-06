@@ -59,7 +59,7 @@ export const AssessmentPrompt: React.FC<AssessmentPromptProps> = ({
       </CardHeader>
       <CardContent className="space-y-6">
         {showFeatures && (
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <div className="text-center p-4 rounded-lg bg-background/50">
               <BarChart3 className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-semibold text-sm mb-1">Personalized Assessment</h3>

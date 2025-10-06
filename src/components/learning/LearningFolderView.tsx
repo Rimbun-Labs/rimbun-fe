@@ -150,7 +150,7 @@ export const LearningFolderView: React.FC = () => {
                   modules.reduce((acc, m) => acc + m.progress, 0) / 
                   modules.length || 0
                 } 
-                className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+                className="h-2 bg-muted [&>div]:bg-primary" 
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{modules.filter(m => m.progress === 100).length} of {modules.length} modules completed</span>

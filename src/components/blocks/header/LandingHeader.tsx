@@ -67,7 +67,7 @@ export const LandingHeader = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           isScrolled
-            ? "bg-background/95 backdrop-blur-md border-b border-border/40 shadow-sm"
+            ? "bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
             : "bg-transparent"
         )}
       >
@@ -87,7 +87,7 @@ export const LandingHeader = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  <span className="font-bold text-xl text-foreground">
                     Investlearn
                   </span>
                   <span className="text-xs text-muted-foreground -mt-1">Interactive Investment Education</span>
@@ -98,78 +98,110 @@ export const LandingHeader = () => {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               {navigation.map((item, index) => (
-                <motion.div
+                <motion.button
                   key={item.name}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + index * 0.1 }}
+                  onClick={() => scrollToSection(item.href)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
-                  {item.name === "Features" ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="flex items-center gap-1 group">
-                          {item.name}
-                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="center" className="w-80 p-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          {features.map((feature) => (
-                            <DropdownMenuItem
-                              key={feature.name}
-                              className="flex flex-col items-start p-3 rounded-lg hover:bg-accent cursor-pointer"
-                              onClick={() => scrollToSection(feature.href)}
-                            >
-                              <span className="font-medium text-sm">{feature.name}</span>
-                              <span className="text-xs text-muted-foreground">{feature.description}</span>
-                            </DropdownMenuItem>
-                          ))}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      onClick={() => scrollToSection(item.href)}
-                      className="relative group"
-                    >
-                      {item.name}
-                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-                    </Button>
-                  )}
-                </motion.div>
+                  {item.name}
+                </motion.button>
               ))}
+              
+              {/* Features Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    Features
+                    <ChevronDown className="h-4 w-4" />
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  {features.map((feature) => (
+                    <DropdownMenuItem key={feature.name} asChild>
+                      <Link to={feature.href} className="flex flex-col items-start p-3">
+                        <span className="font-medium text-foreground">{feature.name}</span>
+                        <span className="text-xs text-muted-foreground">{feature.description}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
-            {/* Right side buttons */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center space-x-3"
-            >
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-3">
               {/* Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="relative group"
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 }}
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="p-2 rounded-lg border border-border bg-muted/50 hover:bg-muted transition-colors duration-200"
               >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
-              </Button>
+                {theme === 'light' ? (
+                  <Moon className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Sun className="h-4 w-4 text-muted-foreground" />
+                )}
+              </motion.button>
+
+              {/* Auth Buttons */}
+              {user ? (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex items-center gap-3"
+                >
+                  <Button asChild variant="outline" size="sm" className="border-border hover:bg-muted">
+                    <Link to="/dashboard">Dashboard</Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Link to="/profile">Profile</Link>
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex items-center gap-3"
+                >
+                  <Button asChild variant="outline" size="sm" className="border-border hover:bg-muted">
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Link to="/signup">
+                      Get Started
+                      <ArrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                </motion.div>
+              )}
 
               {/* Mobile Menu Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8 }}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg border border-border bg-muted/50 hover:bg-muted transition-colors duration-200"
               >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </motion.div>
+                {isMobileMenuOpen ? (
+                  <X className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Menu className="h-4 w-4 text-muted-foreground" />
+                )}
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.header>

@@ -247,27 +247,27 @@ const Dashboard = () => {
     navigate('/assessment');
   }, [navigate]);
 
-  if (isLoading) {
-    return (
-      <div className="container max-w-7xl py-8">
-        <LoadingState 
-          variant="expanded"
-          showTitle
-          showSubtitle
-          lines={3}
-        />
-      </div>
-    );
-  }
+  // Consolidated return with conditional content
+  return (
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Loading State */}
+      {isLoading && (
+        <div className="py-8">
+          <LoadingState 
+            variant="expanded"
+            showTitle
+            showSubtitle
+            lines={3}
+          />
+        </div>
+      )}
 
-  if (assessmentError || !effectiveSessionId) {
-    // Show welcoming empty state instead of error
-    if (!effectiveSessionId) {
-      return (
-        <div className="container mx-auto py-12 px-4">
-          <div className="max-w-2xl mx-auto text-center space-y-8">
+      {/* Welcome/No Session State */}
+      {!isLoading && (!effectiveSessionId || assessmentError) && (
+        <div className="py-12">
+          <div className="w-full space-y-8">
             {/* Welcome Header */}
-            <div className="space-y-4">
+            <div className="w-full space-y-4">
               <h1 className="text-4xl font-bold">Welcome to Your Investment Journey!</h1>
               <p className="text-xl text-muted-foreground">
                 Complete your personalized assessment to unlock your custom dashboard and learning path.
@@ -275,375 +275,396 @@ const Dashboard = () => {
             </div>
 
             {/* Main CTA Card */}
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+            <Card className="w-full border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
               <CardContent className="pt-8 pb-8">
                 <div className="space-y-6">
-                  {/* Single Feature Highlight */}
-                  <div className="text-center">
-                    <BarChart3 className="h-16 w-16 mx-auto mb-4 text-primary" />
-                    <h3 className="text-xl font-semibold mb-2">Discover Your Investment Profile</h3>
-                    <p className="text-muted-foreground">
-                      Our 10-15 minute assessment will help you understand your risk tolerance, 
-                      knowledge level, and investment preferences.
-                    </p>
-                  </div>
-
-                  {/* Removed duplicate CTA button - users have welcome modal and assessment start page */}
-                  <div className="text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Complete your assessment to unlock personalized insights and recommendations.
-                    </p>
+                  {/* Feature Highlight with better layout */}
+                  <div className="flex items-start gap-6">
+                    <div className="flex-shrink-0">
+                      <BarChart3 className="h-16 w-16 text-primary" />
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <h3 className="text-xl font-semibold">Discover Your Investment Profile</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Our comprehensive 10-15 minute assessment will help you understand your risk tolerance, 
+                        knowledge level, and investment preferences. This personalized evaluation creates a 
+                        foundation for your investment strategy and learning journey.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Complete your assessment to unlock personalized insights, recommendations, and a 
+                        customized learning path tailored to your investment goals.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Simple Benefits */}
-            <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div className="text-center">
-                <Lightbulb className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h4 className="font-medium">AI Insights</h4>
-                <p className="text-muted-foreground">Get personalized recommendations</p>
+            {/* Enhanced Benefits Grid */}
+            <div className="grid md:grid-cols-3 gap-6 w-full">
+              <div className="flex items-start gap-4 p-4 rounded-lg border bg-card/50">
+                <div className="flex-shrink-0">
+                  <Lightbulb className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">AI-Powered Insights</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Get personalized recommendations based on your risk profile and investment goals
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h4 className="font-medium">Learning Path</h4>
-                <p className="text-muted-foreground">Access customized education</p>
+              <div className="flex items-start gap-4 p-4 rounded-lg border bg-card/50">
+                <div className="flex-shrink-0">
+                  <TrendingUp className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Customized Learning Path</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Access tailored educational content that matches your knowledge level and interests
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <Shield className="h-8 w-8 mx-auto mb-2 text-primary" />
-                <h4 className="font-medium">Secure & Private</h4>
-                <p className="text-muted-foreground">Your data is protected</p>
+              <div className="flex items-start gap-4 p-4 rounded-lg border bg-card/50">
+                <div className="flex-shrink-0">
+                  <Shield className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Secure & Private</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Your personal and financial data is protected with enterprise-grade security
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      );
-    }
+      )}
 
-    // Show error state only for actual errors (not missing assessment)
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-red-600">Error Loading Dashboard</CardTitle>
-              <CardDescription>
-                There was a problem loading your dashboard data. Please try again.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2 text-destructive">
-                <AlertCircle className="h-5 w-5" />
-                <p>Failed to load assessment results. The assessment might not be complete yet.</p>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => refetchAssessment()}
-                  variant="outline"
-                >
-                  Retry Assessment Data
-                </Button>
-                <Button 
-                  onClick={() => refetchRecommendations()}
-                  variant="outline"
-                >
-                  Retry Recommendations
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Error State */}
+      {!isLoading && assessmentError && effectiveSessionId && (
+        <div className="py-8">
+          <div className="w-full space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-destructive">Error Loading Dashboard</CardTitle>
+                <CardDescription>
+                  There was a problem loading your dashboard data. Please try again.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <p>Failed to load assessment results. The assessment might not be complete yet.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => refetchAssessment()}
+                    variant="outline"
+                  >
+                    Retry Assessment Data
+                  </Button>
+                  <Button 
+                    onClick={() => refetchRecommendations()}
+                    variant="outline"
+                  >
+                    Retry Recommendations
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="container mx-auto py-4 sm:py-6 px-4">
-      {/* Header Section */}
-      <DashboardHeader />
-      
-      {/* Main Content */}
-        <div className="space-y-4 sm:space-y-6">
-        {/* Investment Profile Section */}
-        <Card>
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <CardTitle className="text-xl">Your Investment Profile</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('profile')}
-              className="flex items-center gap-2 self-start sm:self-auto"
-            >
-              {expandedSections.profile ? 'Show Less' : 'Learn More'}
-              {expandedSections.profile ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Always Visible: Radar Chart */}
-            <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full mb-6">
-              <RiskProfileChart 
-                data={{
-                  riskProfile: assessmentResults?.scoreData.riskProfile || 0,
-                  knowledgeLevel: assessmentResults?.scoreData.knowledgeLevel || 0,
-                  leverageAptitude: assessmentResults?.scoreData.leverageAptitude || 0,
-                  decisionStyleScore: assessmentResults?.scoreData.decisionStyleScore || 0,
-                  personalityScore: assessmentResults?.scoreData.personalityScore || 0
-                }}
-                confidenceMetrics={assessmentResults?.scoreData.confidenceMetrics}
-              />
-            </div>
+      {/* Main Dashboard Content */}
+      {!isLoading && !assessmentError && effectiveSessionId && (
+        <>
+          {/* Header Section */}
+          <DashboardHeader />
+          
+          {/* Main Content */}
+          <div className="space-y-6">
+            {/* Investment Profile Section */}
+            <Card>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <CardTitle className="text-xl">Your Investment Profile</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleSection('profile')}
+                  className="flex items-center gap-2 self-start sm:self-auto"
+                >
+                  {expandedSections.profile ? 'Show Less' : 'Learn More'}
+                  {expandedSections.profile ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {/* Always Visible: Radar Chart */}
+                <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full mb-6">
+                  <RiskProfileChart 
+                    data={{
+                      riskProfile: assessmentResults?.scoreData.riskProfile || 0,
+                      knowledgeLevel: assessmentResults?.scoreData.knowledgeLevel || 0,
+                      leverageAptitude: assessmentResults?.scoreData.leverageAptitude || 0,
+                      decisionStyleScore: assessmentResults?.scoreData.decisionStyleScore || 0,
+                      personalityScore: assessmentResults?.scoreData.personalityScore || 0
+                    }}
+                    confidenceMetrics={assessmentResults?.scoreData.confidenceMetrics}
+                  />
+                </div>
 
-            {/* Expanded Content: Question Cards */}
-            {expandedSections.profile && (
-              <div className="space-y-4 sm:space-y-6">
-                {/* What's your risk style? */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">What's your risk style?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold">
-                          {assessmentResults?.scoreData.riskProfile}%
+                {/* Expanded Content: Question Cards */}
+                {expandedSections.profile && (
+                  <div className="space-y-6">
+                    {/* What's your risk style? */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">What's your risk style?</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="text-2xl font-bold">
+                              {assessmentResults?.scoreData.riskProfile}%
+                            </div>
+                          </div>
+                          <RiskStyleExplanation 
+                            score={assessmentResults?.scoreData.riskProfile || 0}
+                          />
                         </div>
-                      </div>
-                      <RiskStyleExplanation 
-                        score={assessmentResults?.scoreData.riskProfile || 0}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
 
-                {/* How well do you know? */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">How well do you know?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold">
-                          {assessmentResults?.scoreData.knowledgeLevel}%
+                    {/* How well do you know? */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">How well do you know?</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="text-2xl font-bold">
+                              {assessmentResults?.scoreData.knowledgeLevel}%
+                            </div>
+                          </div>
+                          <KnowledgeLevelExplanation 
+                            score={assessmentResults?.scoreData.knowledgeLevel || 0}
+                          />
                         </div>
-                      </div>
-                      <KnowledgeLevelExplanation 
-                        score={assessmentResults?.scoreData.knowledgeLevel || 0}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
 
-                {/* What's your approach? */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">What's your approach?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold">
-                          {assessmentResults?.scoreData.decisionStyleScore}%
+                    {/* What's your approach? */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">What's your approach?</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="text-2xl font-bold">
+                              {assessmentResults?.scoreData.decisionStyleScore}%
+                            </div>
+                          </div>
+                          <DecisionStyleExplanation 
+                            score={assessmentResults?.scoreData.decisionStyleScore || 0}
+                          />
                         </div>
-                      </div>
-                      <DecisionStyleExplanation 
-                        score={assessmentResults?.scoreData.decisionStyleScore || 0}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-        {/* Portfolio Breakdown Section */}
-        <Card>
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('portfolio')}
-              className="flex items-center gap-2 self-start sm:self-auto"
-            >
-              {expandedSections.portfolio ? 'Show Less' : 'Learn More'}
-              {expandedSections.portfolio ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Always Visible: Portfolio Allocation Chart */}
-            <div className="min-h-[250px] sm:min-h-[300px] mb-6">
-              <PortfolioAllocation 
-                allocations={recommendations?.adjustedAllocations || {
-                  equities: 0,
-                  bonds: 0,
-                  realEstate: 0,
-                  cash: 0
-                }}
-                recommendedMetrics={recommendations?.recommendedMetrics}
-                loading={recommendationsLoading}
-              />
-            </div>
+            {/* Portfolio Breakdown Section */}
+            <Card>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleSection('portfolio')}
+                  className="flex items-center gap-2 self-start sm:self-auto"
+                >
+                  {expandedSections.portfolio ? 'Show Less' : 'Learn More'}
+                  {expandedSections.portfolio ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {/* Always Visible: Portfolio Allocation Chart */}
+                <div className="min-h-[250px] sm:min-h-[300px] mb-6">
+                  <PortfolioAllocation 
+                    allocations={recommendations?.adjustedAllocations || {
+                      equities: 0,
+                      bonds: 0,
+                      realEstate: 0,
+                      cash: 0
+                    }}
+                    recommendedMetrics={recommendations?.recommendedMetrics}
+                    loading={recommendationsLoading}
+                  />
+                </div>
 
-            {/* Expanded Content: Asset Explanations */}
-            {expandedSections.portfolio && (
-              <div className="space-y-4 sm:space-y-6">
-                {/* What are you investing in? */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">What are you investing in?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 sm:space-y-6">
-                      {/* Equities */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Equities</span>
-                          <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.equities}%</span>
+                {/* Expanded Content: Asset Explanations */}
+                {expandedSections.portfolio && (
+                  <div className="space-y-6">
+                    {/* What are you investing in? */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">What are you investing in?</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {/* Equities */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Equities</span>
+                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.equities}%</span>
+                            </div>
+                            <EquitiesExplanation 
+                              allocation={recommendations?.adjustedAllocations?.equities || 0}
+                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                            />
+                          </div>
+
+                          {/* Bonds */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Bonds</span>
+                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.bonds}%</span>
+                            </div>
+                            <BondsExplanation 
+                              allocation={recommendations?.adjustedAllocations?.bonds || 0}
+                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                            />
+                          </div>
+
+                          {/* Real Estate */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Real Estate</span>
+                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.realEstate}%</span>
+                            </div>
+                            <RealEstateExplanation 
+                              allocation={recommendations?.adjustedAllocations?.realEstate || 0}
+                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                            />
+                          </div>
+
+                          {/* Cash */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Cash</span>
+                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.cash}%</span>
+                            </div>
+                            <CashExplanation 
+                              allocation={recommendations?.adjustedAllocations?.cash || 0}
+                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                            />
+                          </div>
                         </div>
-                        <EquitiesExplanation 
-                          allocation={recommendations?.adjustedAllocations?.equities || 0}
-                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        />
-                      </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                      {/* Bonds */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Bonds</span>
-                          <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.bonds}%</span>
-                        </div>
-                        <BondsExplanation 
-                          allocation={recommendations?.adjustedAllocations?.bonds || 0}
-                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        />
-                      </div>
-
-                      {/* Real Estate */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Real Estate</span>
-                          <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.realEstate}%</span>
-                        </div>
-                        <RealEstateExplanation 
-                          allocation={recommendations?.adjustedAllocations?.realEstate || 0}
-                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        />
-                      </div>
-
-                      {/* Cash */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Cash</span>
-                          <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.cash}%</span>
-                        </div>
-                        <CashExplanation 
-                          allocation={recommendations?.adjustedAllocations?.cash || 0}
-                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Investment Insights Section */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl">Investment Insights</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('insights')}
-              className="flex items-center gap-2"
-            >
-              {expandedSections.insights ? 'Show Less' : 'Learn More'}
-              {expandedSections.insights ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Always Visible: Direct Inputs */}
-            <div className="mb-6">
-              <DirectInputs 
-                inputs={assessmentResults?.scoreData?.directInputs}
-                goalGapInsights={mapGoalGapInsights(recommendations?.recommendationCalculationData?.goalGapInsights)}
-                loading={assessmentLoading}
-              />
-            </div>
-
-            {/* Expanded Content: Detailed Analysis */}
-            {expandedSections.insights && (
-              <div className="space-y-6">
-                {/* Investment Scenarios */}
-                {recommendations?.recommendationCalculationData?.goalGapInsights?.investmentScenarios && (
-                  <InvestmentScenarios 
-                    scenarios={recommendations.recommendationCalculationData.goalGapInsights.investmentScenarios}
-                    targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount || 0}
-                    investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
+            {/* Investment Insights Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-xl">Investment Insights</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleSection('insights')}
+                  className="flex items-center gap-2"
+                >
+                  {expandedSections.insights ? 'Show Less' : 'Learn More'}
+                  {expandedSections.insights ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {/* Always Visible: Direct Inputs */}
+                <div className="mb-6">
+                  <DirectInputs 
+                    inputs={assessmentResults?.scoreData?.directInputs}
+                    goalGapInsights={mapGoalGapInsights(recommendations?.recommendationCalculationData?.goalGapInsights)}
                     loading={assessmentLoading}
                   />
-                )}
+                </div>
 
-                {/* Diversification Analysis */}
-                {recommendations?.diversificationAnalysis && (
-                  <DiversificationAnalysis 
-                    diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
-                    riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
-                    recommendations={recommendations.diversificationAnalysis.recommendations}
-                    correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
-                  />
-                )}
-
-                {/* Portfolio Interaction */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">How do your investments work together?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <PortfolioInteractionExplanation 
-                      riskAdjustedVolatility={recommendations?.diversificationAnalysis?.riskAdjustedVolatility || 0}
-                      riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                      diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore || 0}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Correlation Analysis */}
-                {recommendations?.diversificationAnalysis?.correlationMatrix && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Asset Correlation Analysis</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CorrelationExplanation 
-                        correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
-                        allocations={recommendations?.adjustedAllocations || {
-                          equities: 0,
-                          bonds: 0,
-                          realEstate: 0,
-                          cash: 0
-                        }}
-                        riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                {/* Expanded Content: Detailed Analysis */}
+                {expandedSections.insights && (
+                  <div className="space-y-6">
+                    {/* Investment Scenarios */}
+                    {recommendations?.recommendationCalculationData?.goalGapInsights?.investmentScenarios && (
+                      <InvestmentScenarios 
+                        scenarios={recommendations.recommendationCalculationData.goalGapInsights.investmentScenarios}
+                        targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount || 0}
                         investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
-                        goal={(assessmentResults?.scoreData?.directInputs?.financialGoal as 'retirement' | 'house' | 'wealth' | 'education' | 'other') || 'wealth'}
-                        knowledgeLevel={
-                          (assessmentResults?.scoreData.knowledgeLevel || 0) < 30 ? 'beginner' :
-                          (assessmentResults?.scoreData.knowledgeLevel || 0) < 70 ? 'intermediate' : 'advanced'
-                        }
+                        loading={assessmentLoading}
                       />
-                    </CardContent>
-                  </Card>
+                    )}
+
+                    {/* Diversification Analysis */}
+                    {recommendations?.diversificationAnalysis && (
+                      <DiversificationAnalysis 
+                        diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
+                        riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
+                        recommendations={recommendations.diversificationAnalysis.recommendations}
+                        correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
+                      />
+                    )}
+
+                    {/* Portfolio Interaction */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">How do your investments work together?</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <PortfolioInteractionExplanation 
+                          riskAdjustedVolatility={recommendations?.diversificationAnalysis?.riskAdjustedVolatility || 0}
+                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                          diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore || 0}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    {/* Correlation Analysis */}
+                    {recommendations?.diversificationAnalysis?.correlationMatrix && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Asset Correlation Analysis</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <CorrelationExplanation 
+                            correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
+                            allocations={recommendations?.adjustedAllocations || {
+                              equities: 0,
+                              bonds: 0,
+                              realEstate: 0,
+                              cash: 0
+                            }}
+                            riskProfile={assessmentResults?.scoreData.riskProfile || 0}
+                            investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
+                            goal={(assessmentResults?.scoreData?.directInputs?.financialGoal as 'retirement' | 'house' | 'wealth' | 'education' | 'other') || 'wealth'}
+                            knowledgeLevel={
+                              (assessmentResults?.scoreData.knowledgeLevel || 0) < 30 ? 'beginner' :
+                              (assessmentResults?.scoreData.knowledgeLevel || 0) < 70 ? 'intermediate' : 'advanced'
+                            }
+                          />
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
 
       {/* Welcome Modal */}
       <Dialog open={showWelcome} onOpenChange={(open) => dispatch({ type: 'SET_WELCOME', show: open })}>
@@ -654,7 +675,7 @@ const Dashboard = () => {
               Let's get started with your personalized investment journey.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-8">
+          <div className="space-y-6">
             <p className="text-base text-muted-foreground leading-relaxed">
               Complete a quick assessment to unlock your custom dashboard, learning path, and investment recommendations.
             </p>

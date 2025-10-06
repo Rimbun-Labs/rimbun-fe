@@ -18,6 +18,7 @@ import {
   Share2,
   Bookmark,
   BookmarkCheck,
+  Target,
   Trophy,
   Sparkles,
   Menu,
@@ -105,11 +106,13 @@ const LearningPathDetail: React.FC = () => {
   // Early return if asset class is invalid
   if (!assetClass || !learningPathsContent[assetClass]) {
     return (
-      <div className="text-center p-6">
-        <p>Learning path not found</p>
-        <Button onClick={() => navigate(`/learning-path/${sessionId}`)} className="mt-4">
-          Back to Learning Paths
-        </Button>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center p-6">
+          <p>Learning path not found</p>
+          <Button onClick={() => navigate(`/learning-path/${sessionId}`)} className="mt-4">
+            Back to Learning Paths
+          </Button>
+        </div>
       </div>
     );
   }
@@ -291,11 +294,11 @@ const LearningPathDetail: React.FC = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100';
+        return 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-200 dark:border-green-800 dark:hover:bg-green-900/30';
       case 'intermediate':
-        return 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100';
+        return 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800 dark:hover:bg-amber-900/30';
       case 'advanced':
-        return 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100';
+        return 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-800 dark:hover:bg-red-900/30';
       default:
         return 'bg-muted text-muted-foreground border-border hover:bg-muted/80';
     }
@@ -303,10 +306,10 @@ const LearningPathDetail: React.FC = () => {
 
   const getMetricColor = (metric: string) => {
     const colors = [
-      'bg-blue-50 text-blue-700 border-blue-200',
-      'bg-purple-50 text-purple-700 border-purple-200',
-      'bg-cyan-50 text-cyan-700 border-cyan-200',
-      'bg-indigo-50 text-indigo-700 border-indigo-200',
+      'bg-primary/10 text-primary border-primary/20',
+      'bg-primary/5 text-primary border-primary/10',
+      'bg-muted text-muted-foreground border-border',
+      'bg-muted/50 text-muted-foreground border-border',
     ];
     return colors[metric.length % colors.length];
   };
@@ -343,13 +346,13 @@ const LearningPathDetail: React.FC = () => {
         {keyPoints.length > 0 && (
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-amber-500" />
+              <Lightbulb className="h-4 w-4 text-primary" />
               Key Points & Examples
             </h4>
             <ul className="space-y-2">
               {keyPoints.map((point, index) => (
                 <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-primary mt-1">•</span>
                   {point}
                 </li>
               ))}
@@ -361,13 +364,13 @@ const LearningPathDetail: React.FC = () => {
         {practicalTips.length > 0 && (
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-emerald-500" />
+              <Trophy className="h-4 w-4 text-primary" />
               Practical Tips
             </h4>
             <ul className="space-y-2">
               {practicalTips.map((tip, index) => (
                 <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-emerald-500 mt-1">•</span>
+                  <span className="text-primary mt-1">•</span>
                   {tip}
                 </li>
               ))}
@@ -377,8 +380,8 @@ const LearningPathDetail: React.FC = () => {
 
         {/* Interactive Prompt */}
         {content.toLowerCase().includes('try a prompt') && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-sm text-blue-700">
+          <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground">
               {content.split('Try a prompt')[1].split('.')[0]}
             </p>
           </div>
@@ -481,134 +484,134 @@ const LearningPathDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/20">
       {/* Navigation Header */}
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="container mx-auto px-4 py-4">
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="w-full px-4 py-4">
           <div className="space-y-4">
-          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <Button
                 variant="outline"
                 onClick={showMetrics ? handleBackToAssetClasses : handleBackToLearningPaths}
-                className="inline-flex items-center text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center text-muted-foreground hover:text-foreground border-border hover:border-border hover:bg-muted/50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {showMetrics ? "Back to Asset Classes" : "Back to Learning Paths"}
               </Button>
               
-            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4">
                 {showCompletionMessage && !showMetrics && (
-              <Button
+                  <Button
                     onClick={handleStartMetrics}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
                   >
                     Learn Key Metrics
                     <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+                  </Button>
                 )}
               </div>
             </div>
-
-            {/* What's Next section - only show when current asset class is fully completed */}
-            {isFullyCompleted && (
-              <div className="container mx-auto px-4 py-8">
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl p-8 border border-emerald-200">
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-emerald-100 rounded-xl">
-                          <Trophy className="h-6 w-6 text-emerald-600" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-bold text-foreground">What's Next?</h2>
-                          <p className="text-muted-foreground">Continue your learning journey</p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Investment Explorer */}
-                        <Card className="border-border hover:border-emerald-200 transition-colors">
-                          <CardContent className="p-6">
-                            <div className="space-y-4">
-                              <div className="p-2 bg-blue-50 rounded-lg w-fit">
-                                <Sparkles className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-foreground">Investment Explorer</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Explore real investment opportunities using your new knowledge
-                                </p>
-                              </div>
-                              <Button
-                                onClick={handleGoToInvestmentExplorer}
-                                className="w-full bg-blue-600 hover:bg-blue-700"
-                              >
-                                Start Exploring
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* More Learning Paths */}
-                        <Card className="border-border hover:border-emerald-200 transition-colors">
-                          <CardContent className="p-6">
-                            <div className="space-y-4">
-                              <div className="p-2 bg-purple-50 rounded-lg w-fit">
-                                <BookOpen className="h-5 w-5 text-purple-600" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-foreground">More Learning Paths</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Explore other asset classes and expand your investment knowledge
-                                </p>
-                              </div>
-                              <Button
-                                onClick={() => navigate(`/learning-path/${sessionId}`)}
-                                className="w-full bg-purple-600 hover:bg-purple-700"
-                              >
-                                View Learning Paths
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* Back to Learning Paths */}
-                        <Card className="border-border hover:border-emerald-200 transition-colors">
-                          <CardContent className="p-6">
-                            <div className="space-y-4">
-                              <div className="p-2 bg-muted rounded-lg w-fit">
-                                <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-foreground">Back to Learning Paths</h3>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  Return to your learning dashboard
-                                </p>
-                              </div>
-                              <Button
-                                onClick={handleBackToLearningPaths}
-                                className="w-full"
-                              >
-                                Go Back
-                                <ArrowLeft className="ml-2 h-4 w-4" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
+      {/* What's Next section - only show when current asset class is fully completed */}
+      {isFullyCompleted && (
+        <div className="w-full px-4 py-8">
+          <div className="w-full">
+            <div className="bg-gradient-to-br from-muted/20 to-muted/10 rounded-2xl p-8 border border-border">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-primary/20 rounded-xl">
+                    <Trophy className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">What's Next?</h2>
+                    <p className="text-muted-foreground">Continue your learning journey</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Investment Explorer */}
+                  <Card className="border-border hover:border-primary/30 transition-colors hover:shadow-lg">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                          <Sparkles className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">Investment Explorer</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Explore real investment opportunities using your new knowledge
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleGoToInvestmentExplorer}
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          Start Exploring
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* More Learning Paths */}
+                  <Card className="border-border hover:border-primary/30 transition-colors hover:shadow-lg">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                          <BookOpen className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">More Learning Paths</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Explore other asset classes and expand your investment knowledge
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => navigate(`/learning-path/${sessionId}`)}
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          View Learning Paths
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Back to Learning Paths */}
+                  <Card className="border-border hover:border-primary/30 transition-colors hover:shadow-lg">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                          <ArrowLeft className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">Back to Learning Paths</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Return to your learning dashboard
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleBackToLearningPaths}
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          Go Back
+                          <ArrowLeft className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {showMetrics ? (
           selectedMetric ? (
             <div className="space-y-4">
@@ -668,34 +671,68 @@ const LearningPathDetail: React.FC = () => {
             {/* Asset Class Learning Content */}
             <div className="bg-background shadow rounded-lg overflow-hidden">
               <Card className="border-border">
-                <CardHeader className="bg-gradient-to-b from-background to-muted/50">
-                  <div className="space-y-4">
+                <CardHeader className="bg-gradient-to-b from-muted/20 to-background border-b border-border">
+                  <div className="space-y-6">
                     <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-3xl bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                          {content.title}
-                        </CardTitle>
-                        <CardDescription className="text-lg mt-2 text-muted-foreground">
-                          {content.description}
-                        </CardDescription>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-primary/10 rounded-xl">
+                            <BookOpen className="h-8 w-8 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-3xl font-bold text-foreground">
+                              {content.title}
+                            </CardTitle>
+                            <CardDescription className="text-lg mt-2 text-muted-foreground">
+                              {content.description}
+                            </CardDescription>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
                     {/* Progress Overview */}
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-foreground">Overall Progress</span>
-                        <span className="text-sm font-medium text-foreground">{progressPercentage}%</span>
+                        <span className="text-sm font-semibold text-foreground">Overall Progress</span>
+                        <span className="text-lg font-bold text-primary">{progressPercentage}%</span>
                       </div>
                       <Progress 
                         value={progressPercentage} 
-                        className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+                        className="h-3 bg-muted [&>div]:bg-primary" 
                       />
-                      <div className="flex justify-between text-xs text-muted-foreground">
+                      <div className="flex justify-between text-sm text-muted-foreground">
                         <span>{completedCount} of {totalSections} sections completed</span>
                         <span>{totalSections - completedCount} remaining</span>
                       </div>
                     </div>
+                    
+                    {/* Quiz Section - Show when all sections are completed */}
+                    {completedSections.length === totalSections && totalSections > 0 && (
+                      <div className="mt-6 p-6 bg-muted/30 border border-border rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-primary/20 rounded-full">
+                              <Target className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                              <h4 className="text-lg font-semibold text-foreground">Ready to Test Your Knowledge?</h4>
+                              <p className="text-sm text-muted-foreground">
+                                You've completed all learning sections. Take the quiz to reinforce what you've learned!
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={handleStartQuiz}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
+                            size="lg"
+                          >
+                            <Target className="h-4 w-4 mr-2" />
+                            Start Quiz
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -715,7 +752,7 @@ const LearningPathDetail: React.FC = () => {
                               "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
                               "hover:bg-muted",
                               expandedSections.includes(index) && "bg-muted",
-                              completedSections.includes(index) && "text-emerald-600"
+                              completedSections.includes(index) && "text-green-600"
                             )}
                           >
                             <div className="flex items-center gap-2">
@@ -777,7 +814,7 @@ const LearningPathDetail: React.FC = () => {
                                     }}
                                     className={cn(
                                       "p-1 rounded-full hover:bg-muted transition-colors",
-                                      bookmarkedSections.includes(index) ? "text-amber-500" : "text-muted-foreground"
+                                      bookmarkedSections.includes(index) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
                                     )}
                                   >
                                     {bookmarkedSections.includes(index) ? (
@@ -794,7 +831,7 @@ const LearningPathDetail: React.FC = () => {
                                     }}
                                     className={cn(
                                       "p-1 rounded-full hover:bg-muted transition-colors",
-                                      completedSections.includes(index) ? "text-emerald-600" : "text-muted-foreground"
+                                      completedSections.includes(index) ? "text-green-600 bg-green-100 dark:bg-green-900/20" : "text-muted-foreground hover:text-green-600"
                                     )}
                                   >
                                     {completedSections.includes(index) ? (
@@ -834,8 +871,8 @@ const LearningPathDetail: React.FC = () => {
                                         className={cn(
                                           "gap-2",
                                           completedSections.includes(index)
-                                            ? "bg-emerald-600 hover:bg-emerald-700"
-                                            : "bg-foreground hover:bg-foreground/90"
+                                            ? "bg-green-600 hover:bg-green-700 text-white"
+                                            : "bg-muted hover:bg-muted/80 text-muted-foreground border border-border"
                                         )}
                                       >
                                         {completedSections.includes(index) ? (
@@ -869,8 +906,8 @@ const LearningPathDetail: React.FC = () => {
 
       {/* Mobile Navigation Drawer */}
       <Sheet open={showMobileNav} onOpenChange={setShowMobileNav}>
-        <SheetContent side="left" className="w-64 p-0 bg-white">
-          <div className="p-4 border-b border-border">
+        <SheetContent side="left" className="w-64 p-0 bg-background">
+          <div className="p-4 border-b border-border bg-muted/20">
             <h3 className="font-medium text-foreground">Sections</h3>
           </div>
           <ScrollArea className="h-[calc(100vh-4rem)]">
@@ -886,8 +923,8 @@ const LearningPathDetail: React.FC = () => {
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
                     "hover:bg-muted",
-                    expandedSections.includes(index) && "bg-muted",
-                    completedSections.includes(index) && "text-emerald-600"
+                    expandedSections.includes(index) && "bg-muted text-foreground",
+                    completedSections.includes(index) && "text-green-600 font-medium"
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -911,10 +948,11 @@ const LearningPathDetail: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center pointer-events-none"
+            exit={{ opacity: 0, scale: -20 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
           >
-            <div className="text-6xl bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
+            <div className="text-6xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent drop-shadow-lg">
               🎉
             </div>
           </motion.div>
@@ -923,11 +961,25 @@ const LearningPathDetail: React.FC = () => {
 
       {/* Quiz Dialog */}
       <Dialog open={showQuiz} onOpenChange={setShowQuiz}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <QuizSection
             assetClass={assetClass || ''}
             responseGroupId={sessionId || ''}
             onClose={() => setShowQuiz(false)}
+            onStartChat={(context) => {
+              setShowQuiz(false);
+              // Navigate to chat with quiz context
+              navigate(`/investment-explorer/${sessionId}`, {
+                state: { 
+                  quizContext: context,
+                  suggestedPrompts: context.suggestedPrompts 
+                }
+              });
+            }}
+            onContinueLearning={() => {
+              setShowQuiz(false);
+              // Stay on learning path
+            }}
           />
         </DialogContent>
       </Dialog>

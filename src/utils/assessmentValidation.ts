@@ -1,5 +1,5 @@
 import { AssessmentResult } from '@/lib/api/types/assessment';
-import { getLatestUserAssessmentResults } from '@/lib/api/assessmentApi';
+import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { config } from '@/lib/api/config';
 
 /**
@@ -36,7 +36,7 @@ export const isAssessmentComplete = (result: AssessmentResult): boolean => {
 };
 
 /**
- * Check if assessment has partial data (some answers but not complete)
+ * Check if assessment has partial data
  */
 export const hasPartialAssessmentData = (result: AssessmentResult): boolean => {
   if (!result || !result.scoreData) {
@@ -44,16 +44,11 @@ export const hasPartialAssessmentData = (result: AssessmentResult): boolean => {
   }
 
   const { scoreData } = result;
+  const hasAnyScoreData = Object.values(scoreData).some(value => 
+    value !== undefined && value !== null && value !== ''
+  );
 
-  // Check if we have some data but not complete
-  const hasSomeMetrics = scoreData.riskProfile !== undefined || 
-                        scoreData.knowledgeLevel !== undefined ||
-                        scoreData.finalScore !== undefined;
-
-  const hasSomeInputs = scoreData.directInputs && 
-                       Object.keys(scoreData.directInputs).length > 0;
-
-  return hasSomeMetrics || hasSomeInputs;
+  return hasAnyScoreData;
 };
 
 /**
@@ -137,8 +132,8 @@ export const getAssessmentResumeStatus = async (): Promise<{
   answers?: Record<string, any>;
 }> => {
   try {
-    // Use existing function to get latest results
-    const latestResults = await getLatestUserAssessmentResults();
+    // Use CORRECT function to get latest results
+    const latestResults = await getLatestAssessmentResults(); // ✅ CORRECT: Uses session-based approach
     
     if (!latestResults) {
       return {
@@ -176,29 +171,30 @@ export const getAssessmentResumeStatus = async (): Promise<{
       
       if (answersResponse.ok) {
         const answersData = await answersResponse.json();
-        const hasAnswers = answersData.questionsWithAnswers.length > 0;
+        const questionsAnswered = answersData.questionsWithAnswers?.length || 0;
         
         return {
           hasAssessment: true,
           sessionId,
           isComplete: false,
           isIncomplete: true,
-          canResume: hasAnswers,
+          canResume: questionsAnswered > 0,
           progress: {
-            questionsAnswered: answersData.questionsWithAnswers.length,
-            totalQuestions: 30, // Update this to match your total questions
-            lastAnsweredAt: answersData.questionsWithAnswers[answersData.questionsWithAnswers.length - 1]?.createdAt
+            questionsAnswered,
+            totalQuestions: 0, // We don't have total questions count
+            lastAnsweredAt: answersData.questionsWithAnswers?.[questionsAnswered - 1]?.createdAt
           },
-          answers: answersData.questionsWithAnswers.reduce((acc: any, q: any) => {
-            acc[q.id] = q.answer.value || q.answer.selectedOption?.id || q.answer.answerText || q.answer.answerNumber || q.answer.answerBoolean;
+          answers: answersData.questionsWithAnswers?.reduce((acc: any, qa: any) => {
+            acc[qa.questionId] = qa.answer;
             return acc;
           }, {})
         };
       }
     } catch (error) {
-      console.error('Failed to get answers:', error);
+      console.error('Failed to check session answers:', error);
     }
     
+    // Default case: assessment exists but we can't determine status
     return {
       hasAssessment: true,
       sessionId,
@@ -206,8 +202,9 @@ export const getAssessmentResumeStatus = async (): Promise<{
       isIncomplete: true,
       canResume: false
     };
+    
   } catch (error) {
-    console.error('Failed to get assessment status:', error);
+    console.error('Failed to get assessment resume status:', error);
     return {
       hasAssessment: false,
       isComplete: false,

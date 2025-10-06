@@ -28,6 +28,27 @@ const folders: LearningFolder[] = [
     description: 'Learn about key metrics used in investment analysis',
     icon: <BarChart className="h-6 w-6" />,
     moduleCount: Object.keys(metricContent).length
+  },
+  {
+    id: 'risk-management',
+    title: 'Risk Management',
+    description: 'Understand risk assessment and portfolio protection strategies',
+    icon: <GraduationCap className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'market-analysis',
+    title: 'Market Analysis',
+    description: 'Learn fundamental and technical analysis techniques',
+    icon: <Lightbulb className="h-6 w-6" />,
+    moduleCount: 8
+  },
+  {
+    id: 'portfolio-optimization',
+    title: 'Portfolio Optimization',
+    description: 'Master portfolio construction and rebalancing strategies',
+    icon: <Trophy className="h-6 w-6" />,
+    moduleCount: 5
   }
   // We can add more folders here later
 ];
@@ -42,33 +63,23 @@ const Learning: React.FC = () => {
   );
 
   return (
-    <div className="container max-w-7xl py-8">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Learning Library</h1>
-            <p className="text-muted-foreground mt-1">
-              Explore our comprehensive learning resources
-            </p>
-          </div>
-          <div className="relative w-72">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search learning content..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-        </div>
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Learning Center</h1>
+        <p className="text-muted-foreground">
+          Explore investment concepts and build your financial knowledge
+        </p>
+      </div>
 
-        {/* Folders Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Learning Paths */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Learning Paths</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full max-w-none">
           {filteredFolders.map((folder) => (
             <Card 
               key={folder.id}
-              className="hover:shadow-lg transition-all duration-200 cursor-pointer"
+              className="hover:shadow-lg transition-all duration-200 cursor-pointer w-full"
               onClick={() => navigate(`/learning/${folder.id}`)}
             >
               <CardContent className="p-6">

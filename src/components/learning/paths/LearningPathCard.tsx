@@ -63,7 +63,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
                 <p className="text-sm text-muted-foreground">No detailed information available</p>
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-lg font-semibold text-emerald-600">{allocation}%</span>
+                <span className="text-lg font-semibold text-primary">{allocation}%</span>
                 <span className="text-xs text-muted-foreground">Allocation</span>
               </div>
             </div>
@@ -92,13 +92,13 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
       className={cn(
         "hover:shadow-lg transition-all duration-200 cursor-pointer h-full",
         "group relative overflow-hidden",
-        allocation >= 30 && "border-2 border-emerald-500"
+        allocation >= 30 && "border-2 border-primary"
       )}
       onClick={handleClick}
     >
       {/* Visual indicator for allocation */}
       <div 
-        className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"
+        className="absolute left-0 top-0 bottom-0 w-1 bg-primary"
         style={{ height: `${allocation}%` }}
       />
 
@@ -125,7 +125,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
               <div className="flex items-center gap-2">
                 <h3 className="text-2xl font-semibold text-foreground">{content.title}</h3>
                 {allocation >= 30 && (
-                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Recommended
                   </Badge>
@@ -136,7 +136,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
               </p>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{allocation}%</span>
+              <span className="text-2xl font-semibold text-primary">{allocation}%</span>
               <span className="text-xs text-muted-foreground">Allocation</span>
             </div>
           </div>
@@ -170,7 +170,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
             </div>
             <Progress 
               value={progressPercentage} 
-              className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+              className="h-2 bg-muted [&>div]:bg-primary" 
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{completedCount} of {totalSections} sections completed</span>
@@ -183,7 +183,7 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
             <Button 
               variant="default" 
               size="sm" 
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Start
               <ChevronRight className="ml-2 h-4 w-4" />

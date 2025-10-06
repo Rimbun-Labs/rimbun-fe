@@ -55,7 +55,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
+        <div className="flex h-16 items-center px-4 md:px-6">
           {showFullNav && (
             <div className="md:hidden mr-2">
               <Button onClick={toggleMobileMenu} variant="ghost" size="icon">

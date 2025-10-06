@@ -28,20 +28,20 @@ const benefits = [
 
 export const CTASection = ({ className }: CTASectionProps) => {
   return (
-    <section className={cn("py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-primary/5", className)}>
+    <section className={cn("py-20 md:py-28 bg-gradient-to-br from-primary/5 via-background to-primary/5", className)}>
       <div className="container px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           {/* Main Content */}
           <motion.div 
-            className="text-center space-y-8"
+            className="text-center space-y-10"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
             {/* Header */}
-            <div className="space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl text-foreground">
                 Ready to Build Your Investment Confidence?
               </h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl leading-relaxed">
@@ -51,7 +51,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
 
             {/* Benefits Grid */}
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12"
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -64,7 +64,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
                   viewport={{ once: true }}
-                  className="text-center space-y-3"
+                  className="text-center space-y-4"
                 >
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary">
                     <benefit.icon className="h-6 w-6" />
@@ -77,7 +77,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
 
             {/* Stats */}
             <motion.div 
-              className="flex flex-wrap justify-center gap-8 mt-12"
+              className="flex flex-wrap justify-center gap-12 mt-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -99,7 +99,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
 
             {/* CTA Buttons */}
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
+              className="flex flex-col sm:flex-row gap-4 justify-center mt-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
@@ -108,14 +108,13 @@ export const CTASection = ({ className }: CTASectionProps) => {
               <Button 
                 asChild 
                 size="lg"
-                className="group relative overflow-hidden"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link to="/signup">
-                  <span className="relative z-10 flex items-center">
+                  <span className="flex items-center">
                     Start Your Learning Journey
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
               
@@ -123,7 +122,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
                 asChild 
                 variant="outline" 
                 size="lg"
-                className="group"
+                className="border-border hover:bg-muted hover:text-foreground"
               >
                 <Link to="/login">
                   <span className="flex items-center">
@@ -136,26 +135,26 @@ export const CTASection = ({ className }: CTASectionProps) => {
 
             {/* Trust Indicators */}
             <motion.div 
-              className="pt-8 border-t border-border/40"
+              className="pt-10 border-t border-border"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-6">
                 Trusted by investors worldwide
               </p>
-              <div className="flex flex-wrap justify-center items-center gap-6 text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+              <div className="flex flex-wrap justify-center items-center gap-8 text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <span className="text-sm">No credit card required</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <span className="text-sm">Free assessment</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <span className="text-sm">Cancel anytime</span>
                 </div>
               </div>

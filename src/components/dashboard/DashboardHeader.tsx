@@ -15,13 +15,15 @@ const DashboardHeader = () => {
   const { session } = useSession();
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-2 border-b">
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <BarChart className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Investment Profile</h1>
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 mb-6 border-b border-border">
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <BarChart className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground">Investment Profile</h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-lg">
           View your personalized investment recommendations and portfolio allocation
         </p>
       </div>
@@ -30,7 +32,7 @@ const DashboardHeader = () => {
         <Button 
           size="lg"
           asChild
-          className="bg-primary hover:bg-primary/90"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Link to={session?.id ? `/learning-path/${session.id}` : '/learning'}>
             <Lightbulb className="h-5 w-5 mr-2" />
@@ -41,7 +43,7 @@ const DashboardHeader = () => {
         {/* Secondary Actions in Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="border-border hover:bg-muted">
               <MoreHorizontal className="h-5 w-5" />
               <span className="sr-only">More actions</span>
             </Button>

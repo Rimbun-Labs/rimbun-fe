@@ -51,7 +51,7 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
         </div>
         <Progress 
           value={progress} 
-          className="h-2 bg-muted [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-emerald-600" 
+          className="h-2 bg-muted [&>div]:bg-primary" 
         />
       </div>
 
@@ -68,8 +68,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <BookOpen className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-foreground">{totalMetrics} Metrics</div>
@@ -77,8 +77,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
-                <div className="p-2 bg-emerald-50 rounded-lg">
-                  <Clock className="h-5 w-5 text-emerald-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-foreground">~{totalMetrics * 5} mins</div>
@@ -86,8 +86,8 @@ const MetricOverviewSection: React.FC<MetricOverviewSectionProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <Trophy className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Trophy className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-foreground">{completedCount} Completed</div>

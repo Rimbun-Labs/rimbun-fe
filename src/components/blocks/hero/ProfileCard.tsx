@@ -17,10 +17,10 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
   return (
     <div className="relative w-full h-80 md:h-96">
       {/* Background Gradient */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl opacity-20 blur-2xl"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl opacity-20 blur-2xl"></div>
       
       {/* Card Content */}
-      <div className="relative w-full h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-6 flex flex-col justify-between">
+      <div className="relative w-full h-full bg-background rounded-xl shadow-lg overflow-hidden p-6 flex flex-col justify-between border border-border">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <LoadingSpinner />
@@ -28,43 +28,43 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
         ) : (
           <>
             <div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold text-foreground">
                 {isCompleted ? "Your Investment Profile" : "Investment Profile Preview"}
               </h3>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-3">
                 {isCompleted 
                   ? "Your personalized investment insights:"
                   : "Take the assessment to discover your:"}
               </p>
               
-              <ul className="mt-4 space-y-3">
-                <li className="flex items-center gap-2">
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-1 rounded-full">
-                    <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <ul className="mt-6 space-y-4">
+                <li className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full border border-primary/20">
+                    <Shield className="h-4 w-4 text-primary" />
                   </div>
-                  <span>
+                  <span className="text-foreground">
                     {isCompleted 
                       ? `Risk Profile: ${metadata?.riskProfile || 'N/A'}`
                       : 'Risk Tolerance'}
                   </span>
                 </li>
                 
-                <li className="flex items-center gap-2">
-                  <div className="bg-purple-100 dark:bg-purple-900/30 p-1 rounded-full">
-                    <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <li className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full border border-primary/20">
+                    <BookOpen className="h-4 w-4 text-primary" />
                   </div>
-                  <span>
+                  <span className="text-foreground">
                     {isCompleted 
                       ? `Knowledge Level: ${metadata?.knowledgeLevel || 'N/A'}`
                       : 'Investment Knowledge'}
                   </span>
                 </li>
                 
-                <li className="flex items-center gap-2">
-                  <div className="bg-green-100 dark:bg-green-900/30 p-1 rounded-full">
+                <li className="flex items-center gap-3">
+                  <div className="bg-green-100 p-2 rounded-full border border-green-200 dark:bg-green-900/20 dark:border-green-800">
                     <BarChart className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <span>
+                  <span className="text-foreground">
                     {isCompleted 
                       ? `Investment Horizon: ${metadata?.investmentHorizon || 'N/A'}`
                       : 'Financial Goals Alignment'}
@@ -76,8 +76,8 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
             <Button 
               asChild 
               className={cn(
-                "mt-6 w-full",
-                isCompleted && "bg-primary/90 hover:bg-primary"
+                "mt-8 w-full",
+                isCompleted ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"
               )}
             >
               <Link to={isCompleted ? `/dashboard/${session.id}` : "/assessment"}>

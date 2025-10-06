@@ -102,13 +102,13 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
   const getActionColor = useMemo(() => (action: GoalGapInsights['recommendations']['primaryAction']) => {
     switch (action) {
       case 'increase_savings':
-        return 'text-yellow-600';
+        return 'text-amber-600 dark:text-amber-400';
       case 'adjust_strategy':
-        return 'text-blue-600';
+        return 'text-primary';
       case 'extend_timeline':
-        return 'text-orange-600';
+        return 'text-orange-600 dark:text-orange-400';
       case 'on_track':
-        return 'text-green-600';
+        return 'text-green-600 dark:text-green-400';
       default:
         return 'text-foreground';
     }
@@ -137,12 +137,12 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
         <div className="space-y-6">
           {/* Goal Summary */}
           {inputs && goalGapInsights && (
-            <div className="mb-6 p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center">
+            <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border">
+              <h4 className="font-medium mb-3 flex items-center">
                 <Target className="w-4 h-4 mr-2" />
                 Your Goal Summary
               </h4>
-              <p className="text-sm">
+              <p className="text-sm text-muted-foreground">
                 You're investing for {getGoalTypeLabel(inputs.financialGoal)}, targeting {formatValue('amount', inputs.targetAmount || 0)} in {inputs.investmentHorizon || 0} years.
                 With your current monthly income of {formatValue('income', inputs.monthlyIncome || '0')}, you're investing {formatValue('savings', inputs.monthlyInvestable || 0)} monthly.
               </p>
@@ -150,13 +150,13 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
           )}
 
           {/* Direct Inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(inputs).map(([key, value]) => (
-              <div key={key} className="space-y-1">
+              <div key={key} className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">
                   {formatLabel(key)}
                 </h4>
-                <p className="text-sm">
+                <p className="text-sm text-foreground">
                   {formatValue(key, value)}
                 </p>
               </div>
@@ -190,7 +190,7 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
 
               {/* Goal Achievability Score */}
               <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center">
                     <h4 className="text-sm font-medium text-muted-foreground">Goal Achievability Score</h4>
                     <TooltipProvider>
@@ -204,15 +204,15 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <span className="text-sm font-medium">{goalGapInsights.goalAchievabilityScore}/100</span>
+                  <span className="text-sm font-medium text-foreground">{goalGapInsights.goalAchievabilityScore}/100</span>
                 </div>
-                <Progress value={goalGapInsights.goalAchievabilityScore} className="h-2" />
+                <Progress value={goalGapInsights.goalAchievabilityScore} className="h-2 bg-muted [&>div]:bg-primary" />
               </div>
 
               {/* Analysis and Recommendations */}
               <div className="space-y-4">
                 {/* Timeline and Investment Analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Timeline Analysis */}
                   <div className="p-4 border rounded-lg">
                     <h5 className="font-medium mb-2 flex items-center">
@@ -229,7 +229,7 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
                         <span>{formatValue('time', goalGapInsights.timeAnalysis.investmentHorizon)}</span>
                       </div>
                       {!goalGapInsights.timeAnalysis.isRealistic && (
-                        <div className="text-sm text-yellow-600 flex items-center">
+                        <div className="text-sm text-amber-600 dark:text-amber-400 flex items-center">
                           <AlertCircle className="w-4 h-4 mr-1" />
                           Exceeds your investment horizon by {goalGapInsights.timeAnalysis.actualYears - goalGapInsights.timeAnalysis.investmentHorizon} years
                         </div>
@@ -265,9 +265,9 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
                   <div className="space-y-3">
                     {goalGapInsights.timeAnalysis.suggestedAdjustments?.targetAmount && (
                       <div className="flex items-start">
-                        <span className="mr-2 text-blue-600 font-medium">1.</span>
+                        <span className="mr-3 text-primary font-medium">1.</span>
                         <div>
-                          <p className="text-sm font-medium">Adjust Target Amount (Recommended First)</p>
+                          <p className="text-sm font-medium text-foreground">Adjust Target Amount (Recommended First)</p>
                           <p className="text-sm text-muted-foreground">
                             Reduce your target to {formatValue('amount', goalGapInsights.timeAnalysis.suggestedAdjustments.targetAmount)} to reach your goal within {goalGapInsights.timeAnalysis.investmentHorizon} years
                           </p>
@@ -276,9 +276,9 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
                     )}
                     {goalGapInsights.timeAnalysis.suggestedAdjustments?.monthlySavings && (
                       <div className="flex items-start">
-                        <span className="mr-2 text-blue-600 font-medium">2.</span>
+                        <span className="mr-3 text-primary font-medium">2.</span>
                         <div>
-                          <p className="text-sm font-medium">Increase Monthly Investment</p>
+                          <p className="text-sm font-medium text-foreground">Increase Monthly Investment</p>
                           <p className="text-sm text-muted-foreground">
                             Invest {formatValue('savings', goalGapInsights.timeAnalysis.suggestedAdjustments.monthlySavings)} monthly to reach your goal within {goalGapInsights.timeAnalysis.investmentHorizon} years
                           </p>

@@ -34,30 +34,30 @@ const MetricCard: React.FC<MetricCardProps> = React.memo(({
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div>
-            <div className="flex items-center gap-2">
-              <div className={cn("rounded-full p-2 bg-primary/10 text-primary dark:bg-primary/20")}>
+            <div className="flex items-center gap-3">
+              <div className={cn("rounded-lg p-2 bg-primary/10 text-primary dark:bg-primary/20")}>
                 {icon}
               </div>
               <p className="text-sm font-medium text-foreground">{title}</p>
             </div>
             {loading ? (
-              <Skeleton className="h-8 w-24 mt-1" />
+              <Skeleton className="h-8 w-24 mt-2" />
             ) : (
-              <h3 className="text-2xl font-bold mt-2 text-foreground">{formatter(value)}</h3>
+              <h3 className="text-2xl font-bold mt-3 text-foreground">{formatter(value)}</h3>
             )}
           </div>
         </div>
         
         {progressValue !== undefined && !loading && (
-          <div className="mt-2">
+          <div className="mt-4">
             <Progress 
               value={progressValue} 
-              className="h-1.5 bg-muted dark:bg-muted/50" 
+              className="h-2 bg-muted [&>div]:bg-primary" 
             />
           </div>
         )}
         
-        <p className="text-xs text-muted-foreground form-label-secondary mt-3">
+        <p className="text-xs text-muted-foreground mt-4">
           {description}
         </p>
       </CardContent>
@@ -102,8 +102,8 @@ const MetricsOverview: React.FC<MetricsOverviewProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <h2 className="text-2xl font-bold mb-4 text-foreground">Your Learning Journey</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <h2 className="text-2xl font-bold mb-6 text-foreground">Your Learning Journey</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
         <MetricCard
           title="Learning Progress"
           value={metrics?.learningProgress.completedModules || 0}
