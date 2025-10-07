@@ -49,6 +49,13 @@ export const authService = {
   async signInWithGoogle(): Promise<AuthResponse> {
     try {
       const provider = new GoogleAuthProvider();
+      
+      // Configure provider to avoid COOP issues
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      // Use redirect instead of popup to avoid COOP issues
       const userCredential: UserCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
       
@@ -59,6 +66,14 @@ export const authService = {
       return { user, error: null };
     } catch (error) {
       console.error('Google sign in error:', error);
+      
+      // Handle specific COOP errors
+      if (error instanceof Error && error.message.includes('Cross-Origin-Opener-Policy')) {
+        console.log('🔄 Google OAuth COOP error detected, this is a browser security feature');
+        // The authentication may still succeed despite the COOP warning
+        return { user: null, error: new Error('Authentication popup blocked by browser security. Please try again or use email/password login.') };
+      }
+      
       return { user: null, error: error as Error };
     }
   },

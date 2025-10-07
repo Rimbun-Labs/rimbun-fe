@@ -33,11 +33,11 @@ export const AssessmentLoading: React.FC<AssessmentLoadingProps> = ({
   showTitle = true,
 }) => {
   return (
-    <div className="container mx-auto py-12 px-4">
+    <div className="w-full py-12">
       {showTitle && (
         <h1 className="text-3xl font-bold mb-10 text-center text-foreground">Investment Profile Assessment</h1>
       )}
-      <div className="max-w-3xl mx-auto">
+      <div className="w-full">
         <LoadingState
           variant="expanded"
           lines={3}

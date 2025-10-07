@@ -5,8 +5,9 @@ import { useSession } from '@/contexts/SessionContext';
 import { getUserSessions } from '@/lib/api/userResponsesApi';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
-import { LoadingState } from '@/components/dashboard/ui/LoadingState';
+// Removed environmentStorage - using API-first approach
 import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
+import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
 
@@ -249,7 +250,8 @@ const Dashboard = () => {
 
   // Consolidated return with conditional content
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       {/* Loading State */}
       {isLoading && (
         <div className="py-8">
@@ -704,6 +706,7 @@ const Dashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };

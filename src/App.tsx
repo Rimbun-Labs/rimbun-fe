@@ -1,10 +1,11 @@
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SessionProvider } from "./contexts/SessionContext";
-import { AuthProvider } from "./contexts/AuthContext";
+// Removed environment-aware storage - using API-first approach
 import { ThemeProvider } from "./hooks/useTheme";
 import { AppLayout, ContentLayout } from "./components/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -23,11 +24,10 @@ import InvestmentExplorer from "./pages/InvestmentExplorer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import MetricLibraryDetail from "./components/learning/library/MetricLibraryDetail";
-import { useAuth } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useSession } from "./contexts/SessionContext";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
-import { useEffect, useState } from "react";
 import QuizFlowDemo from "./components/debug/QuizFlowDemo";
 import TestLayout from "./pages/TestLayout";
 
@@ -39,7 +39,7 @@ const RootRedirect = () => {
   const { hasCompletedAssessment } = useSession();
   const [isCheckingAssessment, setIsCheckingAssessment] = useState(false);
   const [assessmentStatus, setAssessmentStatus] = useState<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean } | null>(null);
-  
+
   // 🔑 SMART ROUTE PROTECTION: Only redirect if we're on the root path
   // This prevents aggressive redirects when users intentionally navigate to specific routes
   const isRootPath = window.location.pathname === '/';
@@ -73,7 +73,7 @@ const RootRedirect = () => {
     // 🔑 MODIFIED: Only redirect to dashboard if we're on root path AND user has complete assessment
     if (isRootPath && assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete) {
       return <Navigate to={`/dashboard/${assessmentStatus.sessionId}`} replace />;
-    } 
+    }
     // If user has incomplete assessment, redirect to assessment to complete it
     else if (assessmentStatus?.isIncomplete) {
       return <Navigate to="/assessment" replace />;
@@ -104,7 +104,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="/assessment" element={<Assessment />} />
         <Route path="/assessment-results" element={<AssessmentResultsPage />} />
         <Route path="/quiz-demo" element={<QuizFlowDemo />} />
       </Route>
@@ -117,6 +116,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
+        {/* Assessment Routes */}
+        <Route path="/assessment" element={<Assessment />} />
+        
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:sessionId" element={<Dashboard />} />
@@ -143,26 +145,29 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <GlobalErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider>
+const App = () => {
+  // Environment-aware storage removed - using API-first approach
+  return (
+    <GlobalErrorBoundary>
+      <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <ThemeProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <AssessmentPersistenceProvider>
-                  <AppRoutes />
-                </AssessmentPersistenceProvider>
-              </TooltipProvider>
-            </ThemeProvider>
+            <SessionProvider>
+              <ThemeProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <AssessmentPersistenceProvider>
+                    <AppRoutes />
+                  </AssessmentPersistenceProvider>
+                </TooltipProvider>
+              </ThemeProvider>
+            </SessionProvider>
           </AuthProvider>
         </BrowserRouter>
-      </SessionProvider>
-    </QueryClientProvider>
-  </GlobalErrorBoundary>
-);
+      </QueryClientProvider>
+    </GlobalErrorBoundary>
+  );
+};
 
 export default App;

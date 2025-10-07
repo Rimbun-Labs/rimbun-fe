@@ -20,7 +20,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   const progress = Math.round((currentStep / totalSteps) * 100);
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-8 animate-fade-in">
+    <div className="w-full mb-8 animate-fade-in">
       <div className="flex justify-between mb-4 text-sm">
         <div className="flex items-center">
           <span className="font-medium text-foreground">Question {currentStep} of {totalSteps}</span>

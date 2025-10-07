@@ -19,7 +19,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
   const progress = (currentQuestion / questionCount) * 100;
   
   return (
-    <div className="w-full max-w-3xl mx-auto mb-8 animate-fade-in">
+    <div className="w-full mb-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div>
           <h2 className="text-xl font-bold text-primary mb-2">{category.name}</h2>

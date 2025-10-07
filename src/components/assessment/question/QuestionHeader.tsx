@@ -48,7 +48,7 @@ export const QuestionHeader: React.FC<QuestionHeaderProps> = ({ question }) => {
       
       {/* Question Text */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold leading-relaxed text-foreground max-w-4xl">
+        <h2 className="text-xl font-semibold leading-relaxed text-foreground w-full">
           {question.questionText}
         </h2>
         

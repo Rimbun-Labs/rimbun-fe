@@ -1,55 +1,52 @@
+import { environmentStorage } from '@/utils/environmentStorage';
+
 /**
- * Simplified localStorage utilities for non-React contexts
- * Removed complex performance monitoring and caching to fix assessment flow
+ * Environment-aware localStorage utilities for non-React contexts
+ * Uses environment prefixes to separate dev/prod data
  */
 export const storageUtils = {
   /**
-   * Get item from localStorage
+   * Get item from localStorage with environment prefix
    * @param key - Storage key
    * @returns The stored value or null if not found
    */
   getItem: (key: string): string | null => {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.error(`Error getting item from localStorage: ${key}`, error);
-      return null;
-    }
+    return environmentStorage.getItem(key);
   },
 
   /**
-   * Set item in localStorage
+   * Set item in localStorage with environment prefix
    * @param key - Storage key
    * @param value - Value to store
    */
   setItem: (key: string, value: string): void => {
-    try {
-      localStorage.setItem(key, value);
-    } catch (error) {
-      console.error(`Error setting item in localStorage: ${key}`, error);
-    }
+    environmentStorage.setItem(key, value);
   },
 
   /**
-   * Remove item from localStorage
+   * Remove item from localStorage with environment prefix
    * @param key - Storage key
    */
   removeItem: (key: string): void => {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error(`Error removing item from localStorage: ${key}`, error);
-    }
+    environmentStorage.removeItem(key);
   },
 
   /**
-   * Clear all items from localStorage
+   * Clear all items from localStorage for current environment
    */
   clear: (): void => {
+    environmentStorage.clearEnvironment();
+  },
+
+  /**
+   * Clear all items from localStorage (all environments)
+   * Use with caution - this affects all environments
+   */
+  clearAll: (): void => {
     try {
       localStorage.clear();
     } catch (error) {
-      console.error('Error clearing localStorage', error);
+      console.error('Error clearing all localStorage', error);
     }
   }
 }; 

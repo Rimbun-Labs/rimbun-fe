@@ -26,7 +26,7 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
 
   if (mode === 'resume') {
     return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full py-12">
         <div className="space-y-10">
           <div className="space-y-6">
             <h1 className="text-3xl font-bold text-foreground">Continue Your Assessment</h1>
@@ -69,7 +69,7 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
 
   if (mode === 'retake') {
     return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full py-12">
         <div className="space-y-10">
           <div className="space-y-6">
             <h1 className="text-3xl font-bold text-foreground">Retake Assessment</h1>
@@ -110,7 +110,7 @@ export const AssessmentStartPage: React.FC<AssessmentStartPageProps> = ({
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 w-full">
+        <div className="grid md:grid-cols-3 gap-6 w-full max-w-none">
           <div className="flex items-start gap-4 p-6 rounded-lg bg-primary/10 border border-primary/20">
             <div className="flex-shrink-0">
               <Clock className="h-8 w-8 text-primary" />

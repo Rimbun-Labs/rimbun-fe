@@ -130,7 +130,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border border-border shadow-lg hover:shadow-xl transition-all duration-300">
+    <Card className="w-full border border-border shadow-lg hover:shadow-xl transition-all duration-300">
       <CardContent className="p-8 space-y-8">
         {/* Question Header with better typography */}
         <div className="space-y-8">

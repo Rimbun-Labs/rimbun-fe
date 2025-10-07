@@ -41,8 +41,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
                 </div>
               )}
               <main 
-                className={`min-w-0 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
-                style={{ flex: '1 1 auto' }} // Override flex-1 (1 1 0%) with industry standard (1 1 auto)
+                className={`flex-1 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
               >
                 {/* Debug indicator - remove this after confirming layout works */}
                 {process.env.NODE_ENV === 'development' && (

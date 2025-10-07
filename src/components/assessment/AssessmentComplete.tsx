@@ -12,7 +12,7 @@ interface AssessmentCompleteProps {
 
 const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session }) => {
   return (
-    <div className="w-full max-w-4xl mx-auto animate-fade-in">
+    <div className="w-full py-8 animate-fade-in">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold mb-2">Assessment Complete!</h1>
         <p className="text-muted-foreground">

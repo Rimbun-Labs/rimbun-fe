@@ -13,10 +13,23 @@ export const isAssessmentComplete = (result: AssessmentResult): boolean => {
 
   const { scoreData } = result;
 
-  // Check if finalScore exists and is a number
-  if (typeof scoreData.finalScore !== 'number' || scoreData.finalScore < 0) {
-    console.log('❌ Assessment validation: Missing or invalid finalScore');
-    return false;
+  // Check if basic required fields exist (like original working version)
+  const requiredFields = [
+    'riskProfile',
+    'knowledgeLevel', 
+    'leverageAptitude',
+    'riskCapacity',
+    'investmentHorizon',
+    'finalScore',
+    'profile',
+    'overallConfidence'
+  ];
+
+  for (const field of requiredFields) {
+    if (!(field in scoreData) || scoreData[field] === undefined || scoreData[field] === null) {
+      console.log(`❌ Assessment validation: Missing required field: ${field}`);
+      return false;
+    }
   }
 
   // Check if profile is not empty

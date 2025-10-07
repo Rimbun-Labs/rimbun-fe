@@ -20,8 +20,19 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load session from localStorage on mount
+  // Load session from localStorage on mount - WITH STALE DATA CLEANUP
   useEffect(() => {
+    // Clear any stale localStorage data from previous environments
+    const staleKeys = ['assessmentSessionId', 'databaseUserId', 'hasSeenWelcome'];
+    staleKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) {
+        console.log(`🧹 Clearing stale localStorage data: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+
+    // Now check for current session
     const savedSessionId = localStorage.getItem('assessmentSessionId');
     if (savedSessionId) {
       setSessionId(savedSessionId);
@@ -118,4 +129,4 @@ export const useSession = () => {
     throw new Error('useSession must be used within a SessionProvider');
   }
   return context;
-}; 
+};

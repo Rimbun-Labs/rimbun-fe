@@ -18,7 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
-import { getAssessmentResumeStatus } from '@/utils/assessmentValidation';
+// Removed environmentStorage - using API-first approach
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
@@ -68,18 +68,8 @@ const Assessment: React.FC = () => {
       if (!userRegistrationComplete) return;
       
       try {
-        const status = await getAssessmentResumeStatus();
-        
-        if (status.isIncomplete && status.canResume) {
-          setAssessmentMode('resume');
-          setExistingSessionId(status.sessionId!);
-          setExistingAnswers(status.answers || {});
-          setExistingProgress(status.progress || null);
-        } else if (status.isComplete) {
-          setAssessmentMode('retake');
-        } else {
-          setAssessmentMode('new');
-        }
+        // For now, just set to new mode - the resume functionality can be implemented later
+        setAssessmentMode('new');
       } catch (error) {
         console.error('Failed to check assessment status:', error);
         setAssessmentMode('new');
@@ -303,7 +293,8 @@ const Assessment: React.FC = () => {
 
   // Consolidated return with conditional content
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       {/* Loading State */}
       {isCheckingExistingAssessment && (
         <div className="py-12">
@@ -393,6 +384,7 @@ const Assessment: React.FC = () => {
           onPrevious={handlePrevious}
         />
       )}
+      </div>
     </div>
   );
 };

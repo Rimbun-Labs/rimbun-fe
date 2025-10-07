@@ -40,13 +40,13 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
   ) + 1;
   
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="w-full">
       {/* Main Header */}
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-foreground mb-4">
+      <div className="w-full space-y-4 mb-10">
+        <h1 className="text-3xl font-bold text-foreground">
           Investment Profile Assessment
         </h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+        <p className="text-muted-foreground text-lg">
           Let's understand your investment preferences to provide personalized recommendations
         </p>
       </div>
@@ -83,7 +83,7 @@ export const AssessmentContainer: React.FC<AssessmentContainerProps> = ({
         
         {/* Error Display */}
         {error && (
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full">
             <div className="p-6 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center">
               <AlertCircle className="h-5 w-5 text-destructive mr-3" />
               <span className="text-destructive font-medium">{error}</span>

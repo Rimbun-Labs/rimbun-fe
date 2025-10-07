@@ -235,18 +235,18 @@ const ProfileContent = () => {
                   {/* Account Information - Spans 2 columns */}
                   <Card className="w-full lg:col-span-2">
                     <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-6">
-                      <div className="flex-1">
-                        <CardTitle className="text-foreground">Account Information</CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                          Update your account details and manage your profile
-                        </CardDescription>
-                      </div>
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                    <div className="flex-1">
+                      <CardTitle className="text-foreground">Account Information</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Update your account details and manage your profile
+                      </CardDescription>
+                    </div>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-none">
                       <div className="space-y-3">
                         <Label htmlFor="email" className="text-foreground font-medium">Email Address</Label>
                         <Input 
@@ -320,7 +320,7 @@ const ProfileContent = () => {
                 </Card>
 
                 {/* Account Statistics - Third column */}
-                  <Card className="w-full">
+                <Card className="w-full">
                     <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                       <div className="flex-1">
                         <CardTitle className="text-foreground">Account Statistics</CardTitle>
@@ -370,69 +370,69 @@ const ProfileContent = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-none">
                   {/* Password & Security - Spans 2 columns */}
                   <Card className="w-full lg:col-span-2">
-                    <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
-                      <div className="flex-1">
-                        <CardTitle className="text-foreground">Password & Security</CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                          Change your password and manage security settings
-                        </CardDescription>
-                      </div>
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Shield className="h-5 w-5 text-primary" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6 w-full">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-                        <div className="space-y-3">
-                          <Label htmlFor="current-password" className="text-foreground font-medium">Current Password</Label>
-                          <Input 
-                            id="current-password" 
-                            type="password"
-                            value={passwordData.currentPassword}
-                            onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                  <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-foreground">Password & Security</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Change your password and manage security settings
+                      </CardDescription>
+                    </div>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Shield className="h-5 w-5 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 w-full">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-none">
+                      <div className="space-y-3">
+                        <Label htmlFor="current-password" className="text-foreground font-medium">Current Password</Label>
+                        <Input 
+                          id="current-password" 
+                          type="password"
+                          value={passwordData.currentPassword}
+                          onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
                             className="border-border focus:border-primary h-11 w-full"
-                          />
-                        </div>
-                        <div className="space-y-3">
-                          <Label htmlFor="new-password" className="text-foreground font-medium">New Password</Label>
-                          <Input 
-                            id="new-password" 
-                            type="password"
-                            value={passwordData.newPassword}
-                            onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
-                            className="border-border focus:border-primary h-11 w-full"
-                          />
-                        </div>
-                        <div className="space-y-3">
-                          <Label htmlFor="confirm-password" className="text-foreground font-medium">Confirm New Password</Label>
-                          <Input 
-                            id="confirm-password" 
-                            type="password"
-                            value={passwordData.confirmPassword}
-                            onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
-                            className="border-border focus:border-primary h-11 w-full"
-                          />
-                        </div>
+                        />
                       </div>
-                      <Separator />
-                      <div className="flex justify-end">
-                        <Button 
-                          onClick={handlePasswordChange}
-                          disabled={isChangingPassword}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8"
-                        >
-                          {isChangingPassword ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-3 animate-spin" />
-                              Changing...
-                            </>
-                          ) : (
-                            'Change Password'
-                          )}
-                        </Button>
+                      <div className="space-y-3">
+                        <Label htmlFor="new-password" className="text-foreground font-medium">New Password</Label>
+                        <Input 
+                          id="new-password" 
+                          type="password"
+                          value={passwordData.newPassword}
+                          onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                            className="border-border focus:border-primary h-11 w-full"
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="space-y-3">
+                        <Label htmlFor="confirm-password" className="text-foreground font-medium">Confirm New Password</Label>
+                        <Input 
+                          id="confirm-password" 
+                          type="password"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                            className="border-border focus:border-primary h-11 w-full"
+                        />
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-end">
+                      <Button 
+                        onClick={handlePasswordChange}
+                        disabled={isChangingPassword}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8"
+                      >
+                        {isChangingPassword ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-3 animate-spin" />
+                            Changing...
+                          </>
+                        ) : (
+                          'Change Password'
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
                   {/* Account Actions - Third column */}
                   <Card className="w-full">
@@ -529,7 +529,7 @@ const ProfileContent = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6 w-full">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-none">
                       <div className="space-y-3">
                         <Label htmlFor="theme" className="text-foreground font-medium">Theme</Label>
                         <Select value={preferences.theme} onValueChange={(value) => setPreferences(prev => ({ ...prev, theme: value }))}>
@@ -666,60 +666,60 @@ const ProfileContent = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-4">
-                  <Button variant="outline" className="h-11 px-8">
-                    Reset to Defaults
-                  </Button>
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8">
-                    Save Preferences
-                  </Button>
-                </div>
+                    <div className="flex justify-end gap-4">
+                      <Button variant="outline" className="h-11 px-8">
+                        Reset to Defaults
+                      </Button>
+                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8">
+                        Save Preferences
+                      </Button>
+                    </div>
               </TabsContent>
 
               {/* Notifications Tab */}
               <TabsContent value="notifications" className="space-y-8 w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-none">
                   {/* Email & Push Notifications */}
-                  <Card className="w-full">
-                    <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
-                      <div className="flex-1">
+                <Card className="w-full">
+                  <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
+                    <div className="flex-1">
                         <CardTitle className="text-foreground">Email & Push Notifications</CardTitle>
-                        <CardDescription className="text-muted-foreground">
+                      <CardDescription className="text-muted-foreground">
                           Manage digital notifications
-                        </CardDescription>
-                      </div>
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Bell className="h-5 w-5 text-primary" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6 w-full">
+                      </CardDescription>
+                    </div>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Bell className="h-5 w-5 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 w-full">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
-                          <div className="space-y-1">
-                            <Label className="text-foreground font-medium">Email Notifications</Label>
-                            <p className="text-sm text-muted-foreground">Receive updates and alerts via email</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.notifications.email}
-                            onCheckedChange={(checked) => setPreferences(prev => ({ 
-                              ...prev, 
-                              notifications: { ...prev.notifications, email: checked } 
-                            }))}
-                          />
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="space-y-1">
+                          <Label className="text-foreground font-medium">Email Notifications</Label>
+                          <p className="text-sm text-muted-foreground">Receive updates and alerts via email</p>
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
-                          <div className="space-y-1">
-                            <Label className="text-foreground font-medium">Push Notifications</Label>
-                            <p className="text-sm text-muted-foreground">Receive push notifications in your browser</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.notifications.push}
-                            onCheckedChange={(checked) => setPreferences(prev => ({ 
-                              ...prev, 
-                              notifications: { ...prev.notifications, push: checked } 
-                            }))}
-                          />
+                        <Switch 
+                          checked={preferences.notifications.email}
+                          onCheckedChange={(checked) => setPreferences(prev => ({ 
+                            ...prev, 
+                            notifications: { ...prev.notifications, email: checked } 
+                          }))}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="space-y-1">
+                          <Label className="text-foreground font-medium">Push Notifications</Label>
+                          <p className="text-sm text-muted-foreground">Receive push notifications in your browser</p>
                         </div>
+                        <Switch 
+                          checked={preferences.notifications.push}
+                          onCheckedChange={(checked) => setPreferences(prev => ({ 
+                            ...prev, 
+                            notifications: { ...prev.notifications, push: checked } 
+                          }))}
+                        />
+                      </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -739,20 +739,20 @@ const ProfileContent = () => {
                     </CardHeader>
                     <CardContent className="space-y-6 w-full">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
-                          <div className="space-y-1">
-                            <Label className="text-foreground font-medium">SMS Notifications</Label>
-                            <p className="text-sm text-muted-foreground">Receive important alerts via SMS</p>
-                          </div>
-                          <Switch 
-                            checked={preferences.notifications.sms}
-                            onCheckedChange={(checked) => setPreferences(prev => ({ 
-                              ...prev, 
-                              notifications: { ...prev.notifications, sms: checked } 
-                            }))}
-                          />
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
+                        <div className="space-y-1">
+                          <Label className="text-foreground font-medium">SMS Notifications</Label>
+                          <p className="text-sm text-muted-foreground">Receive important alerts via SMS</p>
                         </div>
+                        <Switch 
+                          checked={preferences.notifications.sms}
+                          onCheckedChange={(checked) => setPreferences(prev => ({ 
+                            ...prev, 
+                            notifications: { ...prev.notifications, sms: checked } 
+                          }))}
+                        />
                       </div>
+                    </div>
                     </CardContent>
                   </Card>
 
@@ -803,14 +803,14 @@ const ProfileContent = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-4">
-                  <Button variant="outline" className="h-11 px-8">
-                    Reset to Defaults
-                  </Button>
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8">
-                    Save Settings
-                  </Button>
-                </div>
+                    <div className="flex justify-end gap-4">
+                      <Button variant="outline" className="h-11 px-8">
+                        Reset to Defaults
+                      </Button>
+                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8">
+                        Save Settings
+                      </Button>
+                    </div>
               </TabsContent>
             </Tabs>
           </div>

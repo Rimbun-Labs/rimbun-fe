@@ -28,7 +28,7 @@ const AssessmentResults: React.FC = () => {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       {/* Loading State */}
       {resultsLoading && (
-        <div className="mx-auto py-8">
+        <div className="w-full py-8">
           <LoadingState 
             variant="expanded"
             showTitle
@@ -40,8 +40,8 @@ const AssessmentResults: React.FC = () => {
 
       {/* Error State */}
       {!resultsLoading && (resultsError || !sessionId) && (
-        <div className="mx-auto py-8 px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
+        <div className="w-full py-8">
+          <div className="w-full space-y-4">
             <Card className="bg-destructive/10">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 text-destructive">
@@ -64,8 +64,8 @@ const AssessmentResults: React.FC = () => {
 
       {/* Main Results Content */}
       {!resultsLoading && !resultsError && sessionId && results && (
-        <div className="mx-auto py-8 px-4">
-          <div className="max-w-4xl mx-auto space-y-6">
+        <div className="w-full py-8">
+          <div className="w-full space-y-6">
             <div className="flex items-center justify-between">
               <Button onClick={handleBack} variant="outline" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
