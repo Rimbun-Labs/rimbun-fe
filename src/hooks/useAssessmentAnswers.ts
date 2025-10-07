@@ -46,7 +46,7 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
 
     try {
       // Format the answer according to the question type
-      const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, question.questionType);
+      const formattedAnswer = userResponsesApi.formatAnswerForApi(answer.answer, question.questionType, question);
       
       // Create the request object with a properly formatted string answer
       const request: SaveUserResponseRequest = {
@@ -55,10 +55,10 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
         answer: formattedAnswer
       };
 
-      // Update answers state immediately
+      // Update answers state immediately with the original answer (label for UI)
       setAnswers(prev => ({
         ...prev,
-        [answer.questionId]: formattedAnswer
+        [answer.questionId]: answer.answer
       }));
       
       setError(null);
@@ -67,7 +67,7 @@ export const useAssessmentAnswers = (sessionId: string | null) => {
       // Submit the answer
       await submitAnswerMutation.mutateAsync(request);
       
-      return formattedAnswer;
+      return answer.answer;
     } catch (error) {
       console.error('Error handling answer:', error);
       setError(error instanceof Error ? error.message : "Failed to save your answer. Please try again.");

@@ -21,7 +21,7 @@ const validateRequest = (request: SaveUserResponseRequest): void => {
   }
 };
 
-const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
+const formatAnswerForApi = (value: any, questionType: QuestionType, question?: Question): string => {
   if (value === null || value === undefined) return '';
 
   // Handle case where value is an object with a value property
@@ -33,8 +33,13 @@ const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
   switch (questionType) {
     case 'multiple_choice':
     case 'select':
-      // Send option ID as string
-      formattedAnswer = String(value);
+      // Convert option label to option ID if question data is available
+      if (question?.options) {
+        const selectedOption = question.options.find(opt => opt.optionLabel === value);
+        formattedAnswer = selectedOption?.id || String(value);
+      } else {
+        formattedAnswer = String(value);
+      }
       break;
 
     case 'number':
