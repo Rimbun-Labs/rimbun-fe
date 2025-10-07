@@ -32,8 +32,9 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
           question={question}
           value={answer as string}
           onChange={(value: string) => {
-            // Now we receive option labels directly, not UUIDs
-            onAnswerChange(value);
+            // Find the option by label and send its ID
+            const selectedOption = question.options?.find(opt => opt.optionLabel === value);
+            onAnswerChange(selectedOption?.id || value);
           }}
         />
       );
@@ -44,8 +45,9 @@ export const AnswerInputs: React.FC<AnswerInputsProps> = ({
           question={question}
           value={answer as string}
           onChange={(value: string) => {
-            // Now we receive option labels directly, not UUIDs
-            onAnswerChange(value);
+            // Find the option by label and send its ID
+            const selectedOption = question.options?.find(opt => opt.optionLabel === value);
+            onAnswerChange(selectedOption?.id || value);
           }}
         />
       );

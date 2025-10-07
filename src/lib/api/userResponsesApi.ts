@@ -33,7 +33,7 @@ const formatAnswerForApi = (value: any, questionType: QuestionType): string => {
   switch (questionType) {
     case 'multiple_choice':
     case 'select':
-      // Always convert to string - the frontend now sends option labels, not UUIDs
+      // Send option ID as string
       formattedAnswer = String(value);
       break;
 
