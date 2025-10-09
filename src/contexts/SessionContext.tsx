@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ResponseGroup } from '@/lib/api/types/assessment';
 import { getAssessmentResults, getUserSessions as getUserSessionsByUserId } from '@/lib/api/assessmentApi';
-import { getAssessmentResumeStatus } from '@/utils/assessmentValidation';
+import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { userService } from '@/lib/api/userService';
 import { useAuth } from './AuthContext';
 
@@ -86,13 +86,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
                  return;
                }
 
-        // ✅ FIXED: Use resume endpoint instead of user sessions endpoint
-        const resumeData = await getAssessmentResumeStatus();
+        const results = await getAssessmentResults(sessionId);
         
-        if (resumeData?.isComplete && resumeData.sessionId === sessionId) {
-          console.log('✅ SessionContext: Session is complete (resume endpoint confirmed), setting session');
-          // Get results for metadata
-          const results = await getAssessmentResults(sessionId);
+        // Use comprehensive assessment validation
+        if (isAssessmentComplete(results)) {
+          console.log('✅ SessionContext: Assessment is complete, setting session');
           setSession({
             id: sessionId,
             userId: results.responseGroupId,
@@ -112,7 +110,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
             updatedAt: results.updatedAt
           });
         } else {
-          console.log('⚠️ SessionContext: Session exists but is incomplete (resume endpoint confirmed)');
+          console.log('⚠️ SessionContext: Assessment is incomplete');
           // Don't set session for incomplete assessments
         }
       } catch (error) {

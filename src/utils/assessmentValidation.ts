@@ -1,5 +1,5 @@
 import { AssessmentResult } from '@/lib/api/types/assessment';
-// REMOVED: getLatestAssessmentResults import - replaced by useSessionState hook
+import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { config } from '@/lib/api/config';
 
 /**
@@ -145,9 +145,8 @@ export const getAssessmentResumeStatus = async (): Promise<{
   answers?: Record<string, any>;
 }> => {
   try {
-    // REMOVED: getLatestAssessmentResults call - replaced by useSessionState hook
-    // This function is deprecated - use useSessionState hook instead
-    const latestResults = null;
+    // Use CORRECT function to get latest results
+    const latestResults = await getLatestAssessmentResults(); // ✅ CORRECT: Uses session-based approach
     
     if (!latestResults) {
       return {

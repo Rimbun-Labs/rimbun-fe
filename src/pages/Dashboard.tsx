@@ -183,7 +183,7 @@ const Dashboard = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Check for incomplete sessions
+  // Check for incomplete sessions (efficiently using isCompleted field)
   const { data: incompleteSessions } = useQuery({
     queryKey: ['incomplete-sessions', userService.getDatabaseUserId()],
     queryFn: async () => {
@@ -191,19 +191,8 @@ const Dashboard = () => {
       if (!databaseUserId) return [];
       
       const userSessions = await getUserSessions(databaseUserId);
-      const incompleteSessions = [];
-      
-      for (const session of userSessions) {
-        try {
-          const scoreResponse = await fetch(`${config.API_BASE_URL}/assessment/response-group/${session.id}/score`);
-          if (scoreResponse.status === 404) {
-            // Score endpoint 404 means session is incomplete
-            incompleteSessions.push(session);
-          }
-        } catch (error) {
-          // Skip sessions that can't be checked
-        }
-      }
+      // Filter incomplete sessions using isCompleted field (efficient)
+      const incompleteSessions = userSessions.filter((session: any) => session.isCompleted === false);
       
       return incompleteSessions;
     },
@@ -259,12 +248,13 @@ const Dashboard = () => {
     navigate('/assessment');
   }, [navigate]);
 
-  // Resume functionality - use session from our hook
+  // Resume functionality - navigate to assessment with session ID
   const handleResumeAssessment = useCallback(() => {
-    if (session && !session.isCompleted) {
-      navigate(`/assessment?sessionId=${effectiveSessionId}`);
+    if (incompleteSessions && incompleteSessions.length > 0) {
+      const mostRecentIncomplete = incompleteSessions[0]; // Most recent incomplete session
+      navigate(`/assessment?sessionId=${mostRecentIncomplete.id}`);
     }
-  }, [navigate, session, effectiveSessionId]);
+  }, [navigate, incompleteSessions]);
 
   // Consolidated return with conditional content
   return (
@@ -402,8 +392,8 @@ const Dashboard = () => {
           {/* Header Section */}
           <DashboardHeader />
           
-          {/* Resume Assessment Section */}
-          {session && !session.isCompleted && (
+          {/* Resume Assessment Section - Only show if user has incomplete session but no completed session */}
+          {incompleteSessions && incompleteSessions.length > 0 && !effectiveSessionId && (
             <Card className="border-orange-200 bg-orange-50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -417,7 +407,7 @@ const Dashboard = () => {
                     onClick={handleResumeAssessment} 
                     className="bg-orange-600 hover:bg-orange-700"
                   >
-                    Resume Assessment (100% Complete)
+                    Resume Assessment
                   </Button>
                 </div>
               </CardContent>
@@ -740,8 +730,11 @@ const Dashboard = () => {
             <Button variant="outline" onClick={handleCloseWelcome} className="flex-1 sm:flex-none">
               Maybe Later
             </Button>
-            <Button onClick={session && !session.isCompleted ? handleResumeAssessment : handleStartAssessment} className="flex-1 sm:flex-none">
-              {session && !session.isCompleted ? 'Resume Assessment (100% Complete)' : 'Start Assessment'}
+            <Button 
+              onClick={incompleteSessions && incompleteSessions.length > 0 && !effectiveSessionId ? handleResumeAssessment : handleStartAssessment} 
+              className="flex-1 sm:flex-none"
+            >
+              {incompleteSessions && incompleteSessions.length > 0 && !effectiveSessionId ? 'Resume Assessment' : 'Start Assessment'}
             </Button>
           </DialogFooter>
         </DialogContent>

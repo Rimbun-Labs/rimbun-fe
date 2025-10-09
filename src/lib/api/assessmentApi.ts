@@ -108,20 +108,8 @@ export const getLatestAssessmentResults = async (): Promise<AssessmentResult | n
       return null;
     }
 
-    // Step 2: Check each session using score endpoint to find completed ones
-    const completedSessions = [];
-    
-    for (const session of userSessions) {
-      try {
-        const scoreResponse = await fetch(`${config.API_BASE_URL}/assessment/response-group/${session.id}/score`);
-        if (scoreResponse.ok) {
-          // Score endpoint returns 200 OK for completed sessions
-          completedSessions.push(session);
-        }
-      } catch (error) {
-        // Silently skip sessions that can't be checked
-      }
-    }
+    // Step 2: Find the latest completed session
+    const completedSessions = userSessions.filter(session => session.isCompleted);
     
     if (completedSessions.length === 0) {
       console.log('No completed sessions found for user');

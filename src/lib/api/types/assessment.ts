@@ -240,6 +240,7 @@ export interface UserSession {
   questionnaireType: string;
   description?: string;
   createdAt: string;
+  isCompleted: boolean | null;
   scoreData?: {
     profile: string;
     finalScore: number;
