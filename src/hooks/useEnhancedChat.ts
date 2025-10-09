@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { chatApi } from '@/lib/api/enhancedChatApi';
 import { ChatMessageDto } from '@/lib/api/enhancedChatApi';
-import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
+// REMOVED: getLatestAssessmentResults import - replaced by useSessionState hook
 import { useAuth } from '@/contexts/AuthContext';
 import { useSession } from '@/contexts/SessionContext';
 
@@ -43,14 +43,9 @@ export const useChat = (sessionId: string) => {
     if (!user?.uid) return;
 
     try {
-      // Try to get the latest assessment results to get the real response group ID
-      const latestResults = await getLatestAssessmentResults(); // ✅ CORRECT: Uses session-based approach
-      if (latestResults?.responseGroupId) {
-        console.log('✅ Found real response group ID for chat:', latestResults.responseGroupId);
-        setRealResponseGroupId(latestResults.responseGroupId);
-      } else {
-        console.log('⚠️ No assessment results found, chat will work without response group context');
-      }
+      // REMOVED: getLatestAssessmentResults call - replaced by useSessionState hook
+      // Chat will work without response group context for now
+      console.log('⚠️ Chat will work without response group context (useSessionState integration pending)');
     } catch (error) {
       console.error('Failed to load real response group ID:', error);
       // Don't set error, just log it

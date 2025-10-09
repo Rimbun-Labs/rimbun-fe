@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
-import { isAssessmentComplete } from '@/utils/assessmentValidation';
+import { useAssessmentResume } from '@/hooks/useAssessmentResume';
 // Removed environmentStorage - using API-first approach
 
 const Assessment: React.FC = () => {
@@ -33,10 +33,37 @@ const Assessment: React.FC = () => {
   const { sessionId, setSessionId, setSession, hasCompletedAssessment } = useSession();
   const { userRegistrationComplete } = useAuth();
   
+  // Simple resume functionality
+  const urlParams = new URLSearchParams(window.location.search);
+  const resumeSessionId = urlParams.get('sessionId');
+  const { data: resumeData } = useAssessmentResume(resumeSessionId);
+  
+  // Check URL parameters for retake mode and resume functionality
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const resumeSessionId = urlParams.get('sessionId');
+    
+    if (mode === 'retake') {
+      setAssessmentMode('retake');
+      setIsCheckingExistingAssessment(false); // Skip redirect check for retake
+      return;
+    }
+    
+    if (resumeSessionId) {
+      setAssessmentMode('resume');
+      setSessionId(resumeSessionId);
+      localStorage.setItem('assessmentSessionId', resumeSessionId);
+      setShowStartPage(false);
+      setHasStarted(true);
+      console.log('🔄 Resuming assessment from session:', resumeSessionId);
+    }
+  }, [setSessionId]);
+
   // Check if user already has completed assessment on mount
   useEffect(() => {
     const checkExistingAssessment = async () => {
-      if (!userRegistrationComplete) {
+      if (!userRegistrationComplete || assessmentMode === 'retake' || assessmentMode === 'resume') {
         setIsCheckingExistingAssessment(false);
         return;
       }
@@ -60,24 +87,27 @@ const Assessment: React.FC = () => {
     };
 
     checkExistingAssessment();
-  }, [navigate, userRegistrationComplete]);
-
+  }, [navigate, userRegistrationComplete, assessmentMode]);
+  
   // Check assessment status for resume functionality
   useEffect(() => {
     const checkAssessmentStatus = async () => {
       if (!userRegistrationComplete) return;
       
+      // Don't override retake mode if it's already set
+      if (assessmentMode === 'retake') return;
+      
       try {
-        // For now, just set to new mode - the resume functionality can be implemented later
-        setAssessmentMode('new');
+        // ✅ FIXED: Don't override assessment mode - let URL parameters control it
+        console.log('✅ Assessment status check complete, keeping current mode:', assessmentMode);
       } catch (error) {
         console.error('Failed to check assessment status:', error);
-        setAssessmentMode('new');
+        // ✅ FIXED: Don't override assessment mode on error either
       }
     };
 
     checkAssessmentStatus();
-  }, [userRegistrationComplete]);
+  }, [navigate, userRegistrationComplete, assessmentMode]);
   
   // Create session mutation
   const createSessionMutation = useMutation({
@@ -96,7 +126,7 @@ const Assessment: React.FC = () => {
   
   // Fetch questions
   const { data: questions, isPending: questionsLoading, error: questionsError } = useQuery({
-    queryKey: ['assessment-questions'],
+    queryKey: ['assessment-questions-v2'], // Changed key to force fresh fetch
     queryFn: getQuestions,
     enabled: hasStarted, // Only fetch questions after user starts the assessment
   });
@@ -121,6 +151,51 @@ const Assessment: React.FC = () => {
     setError,
     setAnswers
   } = useAssessmentAnswers(sessionId);
+  
+  // Set resume index when questions are loaded and we're in resume mode
+  useEffect(() => {
+    console.log('🔍 Resume useEffect triggered:', {
+      questionsLoaded: !!questions,
+      questionsLength: questions?.length,
+      assessmentMode,
+      resumeData,
+      resumeSessionId
+    });
+    
+    if (questions && assessmentMode === 'resume' && resumeData) {
+      console.log('🔍 Resume data received:', resumeData);
+      
+      // ✅ FIXED: Check if assessment is completed first
+      if (resumeData.isCompleted) {
+        console.log('✅ Assessment completed - redirecting to results');
+        setIsComplete(true);
+        return;
+      }
+      
+      // ✅ FIXED: Use nextQuestionId from backend for precise resume point
+      if (resumeData.nextQuestionId) {
+        const questionIndex = questions.findIndex(q => q.id === resumeData.nextQuestionId);
+        console.log('🔍 Question lookup:', {
+          nextQuestionId: resumeData.nextQuestionId,
+          questionIndex,
+          totalQuestions: questions.length
+        });
+        
+        if (questionIndex !== -1) {
+          setCurrentQuestionIndex(questionIndex);
+          console.log('📍 Starting resume from specific question ID:', resumeData.nextQuestionId, 'at index:', questionIndex);
+        } else {
+          // Fallback to resumeIndex if question ID not found
+          setCurrentQuestionIndex(resumeData.resumeIndex || 0);
+          console.log('📍 Fallback: Starting resume from index:', resumeData.resumeIndex || 0);
+        }
+      } else {
+        // Fallback to resumeIndex if no nextQuestionId
+        setCurrentQuestionIndex(resumeData.resumeIndex || 0);
+        console.log('📍 Fallback: Starting resume from index:', resumeData.resumeIndex || 0);
+      }
+    }
+  }, [questions, assessmentMode, resumeData, resumeSessionId]);
   
   // Get results query (activated when assessment completes)
   const { data: results, isPending: resultsLoading, error: resultsError } = useQuery({
@@ -159,38 +234,12 @@ const Assessment: React.FC = () => {
     retry: false // We handle retries manually
   });
   
-  // Handle results success in useEffect
+  // Handle results success - navigate to dashboard when complete
   useEffect(() => {
     if (results && sessionId) {
-      // Use comprehensive assessment validation
-      if (isAssessmentComplete(results)) {
-        console.log('✅ Assessment: Results are complete, setting session');
-        // Set session with the nested structure
-        setSession({
-          id: sessionId,
-          userId: results.responseGroupId,
-          questionnaireType: "ONBOARDING",
-          isCompleted: true,
-          metadata: {
-            score: results.scoreData.finalScore,
-            profile: results.scoreData.profile,
-            riskProfile: results.scoreData.riskProfile,
-            knowledgeLevel: results.scoreData.knowledgeLevel,
-            leverageAptitude: results.scoreData.leverageAptitude,
-            riskCapacity: results.scoreData.riskCapacity,
-            investmentHorizon: results.scoreData.investmentHorizon,
-            overallConfidence: results.scoreData.overallConfidence
-          },
-          createdAt: results.createdAt,
-          updatedAt: results.updatedAt
-        });
-        
-        // Navigate directly to dashboard with session ID
-        navigate(`/dashboard/${sessionId}`);
-      } else {
-        console.log('⚠️ Assessment: Results exist but are incomplete, not setting session');
-        // Don't set session for incomplete results
-      }
+      // Results are available, assessment is complete - navigate to dashboard
+      console.log('✅ Assessment: Results loaded, navigating to dashboard');
+      navigate(`/dashboard/${sessionId}`);
     }
   }, [results, sessionId, navigate]);
 
@@ -217,16 +266,8 @@ const Assessment: React.FC = () => {
       // Load existing answers into the assessment state
       setAnswers(existingAnswers);
       
-      // Set current question to next unanswered question
-      if (questions) {
-        const answeredQuestionIds = Object.keys(existingAnswers);
-        const nextUnansweredIndex = questions.findIndex(q => !answeredQuestionIds.includes(q.id));
-        if (nextUnansweredIndex !== -1) {
-          // Set the current question index to resume from the correct question
-          setCurrentQuestionIndex(nextUnansweredIndex);
-          console.log('Resuming from question:', nextUnansweredIndex + 1);
-        }
-      }
+      // ✅ FIXED: Trust backend resume data completely - no frontend calculations
+      console.log('🔄 Resume mode: Trusting backend resume data completely');
     } else {
       // Create new session (for new or retake)
       console.log('✅ Assessment: User registration complete, creating session');

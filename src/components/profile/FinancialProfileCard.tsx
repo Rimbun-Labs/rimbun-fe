@@ -130,7 +130,7 @@ const FinancialProfileCard = () => {
             </div>
             
             <Button asChild variant="outline" className="w-full mt-2">
-              <Link to="/assessment" className="flex items-center justify-center">
+              <Link to="/assessment?mode=retake" className="flex items-center justify-center">
                 <span>Retake Assessment</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

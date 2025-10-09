@@ -48,7 +48,9 @@ export const useAssessmentProgress = (questions: Question[] | undefined) => {
 
   // Add function to set current question index externally (for resume)
   const setCurrentQuestionIndex = (index: number) => {
-    if (!questions || index < 0 || index >= questions.length) return;
+    if (!questions || index < 0 || index >= questions.length) {
+      return;
+    }
     
     const question = questions[index];
     const category = question.category.id;
@@ -73,6 +75,7 @@ export const useAssessmentProgress = (questions: Question[] | undefined) => {
         }
       }
     }));
+    
   };
 
   const handleNext = () => {

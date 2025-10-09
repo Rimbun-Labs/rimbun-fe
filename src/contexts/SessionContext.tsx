@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ResponseGroup } from '@/lib/api/types/assessment';
-import { getAssessmentResults } from '@/lib/api/assessmentApi';
-import { isAssessmentComplete } from '@/utils/assessmentValidation';
+import { getAssessmentResults, getUserSessions as getUserSessionsByUserId } from '@/lib/api/assessmentApi';
+import { getAssessmentResumeStatus } from '@/utils/assessmentValidation';
+import { userService } from '@/lib/api/userService';
+import { useAuth } from './AuthContext';
 
 interface SessionContextType {
   sessionId: string | null;
@@ -19,6 +21,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { userRegistrationComplete, loading: authLoading } = useAuth();
 
   // Load session from localStorage on mount - WITH STALE DATA CLEANUP
   useEffect(() => {
@@ -49,11 +52,47 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       try {
         setIsLoading(true);
-        const results = await getAssessmentResults(sessionId);
         
-        // Use comprehensive assessment validation
-        if (isAssessmentComplete(results)) {
-          console.log('✅ SessionContext: Assessment is complete, setting session');
+        // ✅ FIXED: Wait for auth loading to complete before checking sessions
+        if (authLoading) {
+          console.log('⏳ SessionContext: Auth still loading, waiting...');
+          setIsLoading(false);
+          return;
+        }
+        
+        // ✅ FIXED: Wait for user registration to complete before checking sessions
+        if (!userRegistrationComplete) {
+          console.log('⚠️ SessionContext: User registration not complete yet, waiting...');
+          setIsLoading(false);
+          return;
+        }
+        
+               // ✅ FIXED: Use environment-aware storage instead of direct localStorage
+               const databaseUserId = userService.getDatabaseUserId();
+               if (!databaseUserId) {
+                 console.log('⚠️ SessionContext: No database user ID found, retrying in 100ms...');
+                 // Retry after a short delay in case localStorage hasn't been updated yet
+                 setTimeout(() => {
+                   const retryDatabaseUserId = userService.getDatabaseUserId();
+                   if (retryDatabaseUserId) {
+                     console.log('✅ SessionContext: Found database user ID on retry:', retryDatabaseUserId);
+                     // Retry the session check
+                     fetchSessionData();
+                   } else {
+                     console.log('⚠️ SessionContext: Still no database user ID found after retry');
+                     setIsLoading(false);
+                   }
+                 }, 100);
+                 return;
+               }
+
+        // ✅ FIXED: Use resume endpoint instead of user sessions endpoint
+        const resumeData = await getAssessmentResumeStatus();
+        
+        if (resumeData?.isComplete && resumeData.sessionId === sessionId) {
+          console.log('✅ SessionContext: Session is complete (resume endpoint confirmed), setting session');
+          // Get results for metadata
+          const results = await getAssessmentResults(sessionId);
           setSession({
             id: sessionId,
             userId: results.responseGroupId,
@@ -73,7 +112,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
             updatedAt: results.updatedAt
           });
         } else {
-          console.log('⚠️ SessionContext: Assessment exists but is incomplete, not setting session');
+          console.log('⚠️ SessionContext: Session exists but is incomplete (resume endpoint confirmed)');
           // Don't set session for incomplete assessments
         }
       } catch (error) {
@@ -85,7 +124,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     fetchSessionData();
-  }, [sessionId]);
+  }, [sessionId, userRegistrationComplete, authLoading]);
 
   const clearSession = () => {
     setSessionId(null);

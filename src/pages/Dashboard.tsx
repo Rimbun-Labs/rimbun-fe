@@ -2,14 +2,17 @@ import React, { useEffect, useState, useReducer, useCallback, useMemo } from 're
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { getUserSessions } from '@/lib/api/userResponsesApi';
 import { getRecommendations } from '@/lib/api/recommendationApi';
-import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { userService } from '@/lib/api/userService';
 // Removed environmentStorage - using API-first approach
 import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
-import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
+import { useAssessmentResume } from '@/hooks/useAssessmentResume';
+import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { config } from '@/lib/api/config';
 
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -154,21 +157,58 @@ const Dashboard = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { session, setSession } = useSession();
+  const { userRegistrationComplete } = useAuth();
   
   // Use sessionId from params or fall back to session context
   const effectiveSessionId = sessionId || session?.id;
+  
+  // Debug logging
+  console.log('🔍 Dashboard Debug:', {
+    sessionIdFromParams: sessionId,
+    sessionFromContext: session,
+    effectiveSessionId: effectiveSessionId,
+    userRegistrationComplete: userRegistrationComplete
+  });
   
   // Use reducer for state management
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const { expandedSections, showWelcome, loading } = state;
   
-  // Get assessment results
-  const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError, refetch: refetchAssessment } = useQuery({
-    queryKey: ['assessmentResults', effectiveSessionId],
+  // Get assessment results for the current session
+  const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError } = useQuery({
+    queryKey: ['assessment-results', effectiveSessionId],
     queryFn: () => getAssessmentResults(effectiveSessionId!),
     enabled: !!effectiveSessionId,
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Check for incomplete sessions
+  const { data: incompleteSessions } = useQuery({
+    queryKey: ['incomplete-sessions', userService.getDatabaseUserId()],
+    queryFn: async () => {
+      const databaseUserId = userService.getDatabaseUserId();
+      if (!databaseUserId) return [];
+      
+      const userSessions = await getUserSessions(databaseUserId);
+      const incompleteSessions = [];
+      
+      for (const session of userSessions) {
+        try {
+          const scoreResponse = await fetch(`${config.API_BASE_URL}/assessment/response-group/${session.id}/score`);
+          if (scoreResponse.status === 404) {
+            // Score endpoint 404 means session is incomplete
+            incompleteSessions.push(session);
+          }
+        } catch (error) {
+          // Skip sessions that can't be checked
+        }
+      }
+      
+      return incompleteSessions;
+    },
+    enabled: !!userService.getDatabaseUserId(),
+    staleTime: 30 * 1000, // 30 seconds
   });
 
   // Get recommendations
@@ -181,41 +221,12 @@ const Dashboard = () => {
   });
 
   // Memoize loading state
-  const isLoading = useMemo(() => 
-    (assessmentLoading || recommendationsLoading) && effectiveSessionId, 
+  const isLoading = useMemo(() =>
+    (assessmentLoading || recommendationsLoading) && effectiveSessionId,
     [assessmentLoading, recommendationsLoading, effectiveSessionId]
   );
 
-  // Update session when results are loaded
-  useEffect(() => {
-    if (assessmentResults && effectiveSessionId) {
-      // Use comprehensive assessment validation
-      if (isAssessmentComplete(assessmentResults)) {
-        console.log('✅ Dashboard: Assessment is complete, setting session');
-        setSession({
-          id: effectiveSessionId,
-          userId: assessmentResults.responseGroupId,
-          questionnaireType: "ONBOARDING",
-          isCompleted: true,
-          metadata: {
-            score: assessmentResults.scoreData.finalScore,
-            profile: assessmentResults.scoreData.profile,
-            riskProfile: assessmentResults.scoreData.riskProfile,
-            knowledgeLevel: assessmentResults.scoreData.knowledgeLevel,
-            leverageAptitude: assessmentResults.scoreData.leverageAptitude,
-            riskCapacity: assessmentResults.scoreData.riskCapacity,
-            investmentHorizon: assessmentResults.scoreData.investmentHorizon,
-            overallConfidence: assessmentResults.scoreData.overallConfidence
-          },
-          createdAt: assessmentResults.createdAt,
-          updatedAt: assessmentResults.updatedAt
-        });
-      } else {
-        console.log('⚠️ Dashboard: Assessment exists but is incomplete, not setting session');
-        // Don't set session for incomplete assessments
-      }
-    }
-  }, [assessmentResults, effectiveSessionId, setSession]);
+  // Session state is managed by SessionContext
 
   // Show welcome modal for new users without assessment
   useEffect(() => {
@@ -247,6 +258,13 @@ const Dashboard = () => {
   const handleStartAssessment = useCallback(() => {
     navigate('/assessment');
   }, [navigate]);
+
+  // Resume functionality - use session from our hook
+  const handleResumeAssessment = useCallback(() => {
+    if (session && !session.isCompleted) {
+      navigate(`/assessment?sessionId=${effectiveSessionId}`);
+    }
+  }, [navigate, session, effectiveSessionId]);
 
   // Consolidated return with conditional content
   return (
@@ -360,7 +378,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button 
-                    onClick={() => refetchAssessment()}
+                    onClick={() => window.location.reload()}
                     variant="outline"
                   >
                     Retry Assessment Data
@@ -384,6 +402,28 @@ const Dashboard = () => {
           {/* Header Section */}
           <DashboardHeader />
           
+          {/* Resume Assessment Section */}
+          {session && !session.isCompleted && (
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold text-orange-900">Continue Your Assessment</h3>
+                    <p className="text-sm text-orange-700">
+                      You have an incomplete assessment. Resume where you left off.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleResumeAssessment} 
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Resume Assessment (100% Complete)
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* Main Content */}
           <div className="space-y-6">
             {/* Investment Profile Section */}
@@ -405,13 +445,13 @@ const Dashboard = () => {
                 <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full mb-6">
                   <RiskProfileChart 
                     data={{
-                      riskProfile: assessmentResults?.scoreData.riskProfile || 0,
-                      knowledgeLevel: assessmentResults?.scoreData.knowledgeLevel || 0,
-                      leverageAptitude: assessmentResults?.scoreData.leverageAptitude || 0,
-                      decisionStyleScore: assessmentResults?.scoreData.decisionStyleScore || 0,
-                      personalityScore: assessmentResults?.scoreData.personalityScore || 0
+                      riskProfile: Math.min(assessmentResults?.scoreData?.riskProfile || 0, 100),
+                      knowledgeLevel: Math.min(assessmentResults?.scoreData?.knowledgeLevel || 0, 100),
+                      leverageAptitude: Math.min(assessmentResults?.scoreData?.leverageAptitude || 0, 100),
+                      decisionStyleScore: Math.min(assessmentResults?.scoreData?.decisionStyleScore || 0, 100),
+                      personalityScore: Math.min(assessmentResults?.scoreData?.personalityScore || 0, 100)
                     }}
-                    confidenceMetrics={assessmentResults?.scoreData.confidenceMetrics}
+                    confidenceMetrics={assessmentResults?.scoreData?.confidenceMetrics}
                   />
                 </div>
 
@@ -700,8 +740,8 @@ const Dashboard = () => {
             <Button variant="outline" onClick={handleCloseWelcome} className="flex-1 sm:flex-none">
               Maybe Later
             </Button>
-            <Button onClick={handleStartAssessment} className="flex-1 sm:flex-none">
-              Start Assessment
+            <Button onClick={session && !session.isCompleted ? handleResumeAssessment : handleStartAssessment} className="flex-1 sm:flex-none">
+              {session && !session.isCompleted ? 'Resume Assessment (100% Complete)' : 'Start Assessment'}
             </Button>
           </DialogFooter>
         </DialogContent>

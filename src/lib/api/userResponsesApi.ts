@@ -102,10 +102,10 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
   }
 };
 
-export const getUserSessions = async (responseGroupId: string): Promise<UserSession[]> => {
+export const getUserSessions = async (userId: string): Promise<UserSession[]> => {
   try {
     const response = await apiClient.get<UserSession[]>(
-      `/user-responses/response-group/${responseGroupId}/sessions`
+      `/user-responses/user/${userId}/sessions`
     );
     return response.data;
   } catch (error) {

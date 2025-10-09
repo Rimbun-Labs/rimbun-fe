@@ -50,7 +50,7 @@ const DashboardHeader = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link to="/assessment" className="flex items-center">
+              <Link to="/assessment?mode=retake" className="flex items-center">
                 <BarChart className="h-4 w-4 mr-2" />
                 Retake Assessment
               </Link>

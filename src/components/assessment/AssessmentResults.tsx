@@ -5,6 +5,7 @@ import { AssessmentResult } from '@/lib/api/types/assessment';
 import { Button } from '@/components/ui/button';
 import { Download, Share2, RefreshCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Link } from 'react-router-dom';
 import ProfileDetermination from './ProfileDetermination';
 import { ResultsTabs } from './results/ResultsTabs';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
@@ -64,9 +65,11 @@ const AssessmentResults: React.FC<AssessmentResultsProps> = ({ result: propResul
           </p>
         </div>
         <div className="mt-4 md:mt-0">
-          <Button variant="outline" onClick={handleRetakeAssessment}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retake Assessment
+          <Button variant="outline" asChild>
+            <Link to="/assessment?mode=retake">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retake Assessment
+            </Link>
           </Button>
         </div>
       </div>

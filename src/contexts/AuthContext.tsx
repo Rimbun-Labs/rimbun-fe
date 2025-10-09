@@ -36,23 +36,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: user.email 
           });
           
-          // First, try to get the database user ID for existing users
-          const existingDatabaseUserId = await userService.getDatabaseUserIdForExistingUser(user.uid);
+          // Ensure user exists in database
+          const result = await userService.ensureUserExists({
+            authProviderId: user.uid,
+            displayName: user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+          });
           
-          if (existingDatabaseUserId) {
-            console.log('✅ AuthContext: Found existing user in database');
-            setUserRegistrationComplete(true);
-          } else {
-            // User doesn't exist, create them
-            const result = await userService.ensureUserExists({
-              authProviderId: user.uid,
-              displayName: user.displayName || user.email?.split('@')[0] || 'User',
-              email: user.email || '',
-            });
-            
-            setUserRegistrationComplete(true); // Mark as complete
-            console.log('✅ AuthContext: User registration completed:', result);
-          }
+          setUserRegistrationComplete(true); // Mark as complete
+          console.log('✅ AuthContext: User registration completed:', result);
         } catch (backendError) {
           console.error('❌ AuthContext: Failed to ensure user exists in backend:', backendError);
           

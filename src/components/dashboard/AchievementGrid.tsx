@@ -135,7 +135,7 @@ const AchievementCard: React.FC<{
                   progress={achievement.progress}
                   size={36}
                   strokeWidth={4}
-                  color={`var(--${categoryStyle.progress.substring(3)})`}
+                  color={`var(--${categoryStyle.progress?.substring(3) || 'blue-500'})`}
                 />
                 
                 <div className="ml-3 text-xs">
