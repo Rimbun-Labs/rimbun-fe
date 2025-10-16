@@ -15,11 +15,18 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const LearningLibraryDetail: React.FC = () => {
-  const { folderId, assetClass } = useParams<{ folderId: string; assetClass: string }>();
+  const { folderId, assetClass, moduleId, metricId } = useParams<{ folderId: string; assetClass?: string; moduleId?: string; metricId?: string }>();
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState<number[]>([]);
 
-  const content = learningPathsContent[assetClass || ''];
+  // Determine the folderId from the URL path if not available in params
+  const currentPath = window.location.pathname;
+  const pathSegments = currentPath.split('/');
+  const actualFolderId = folderId || pathSegments[2]; // /learning/{folderId}/...
+
+  // Determine the content key based on the route
+  const contentKey = assetClass || moduleId || metricId || '';
+  const content = learningPathsContent[contentKey];
   
   if (!content) {
     return (
@@ -28,10 +35,10 @@ const LearningLibraryDetail: React.FC = () => {
           <h1 className="text-2xl font-bold">Module not found</h1>
           <Button 
             variant="link" 
-            onClick={() => navigate('/learning/asset-classes')}
+            onClick={() => navigate(`/learning/${actualFolderId}`)}
             className="mt-4"
           >
-            Return to Asset Classes
+            Return to {actualFolderId?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Learning'}
           </Button>
         </div>
       </div>
@@ -120,7 +127,7 @@ const LearningLibraryDetail: React.FC = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate('/learning/asset-classes')}
+                onClick={() => navigate(`/learning/${actualFolderId}`)}
                 className="hover:bg-accent"
               >
                 <ChevronLeft className="h-5 w-5" />

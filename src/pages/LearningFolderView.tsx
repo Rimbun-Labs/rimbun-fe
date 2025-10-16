@@ -2,13 +2,12 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, BookOpen, BarChart } from 'lucide-react';
+import { ChevronLeft, BookOpen, BarChart, GraduationCap, Lightbulb, Trophy, Star, Leaf } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { learningPathsContent } from '@/lib/api/types/learningPaths';
 import { metricContent, MetricExplanation } from '@/lib/api/types/metricContent';
 import { MetricCategory } from '@/lib/api/types/metrics';
 import LibraryModuleCard from '@/components/learning/library/LibraryModuleCard';
-import MetricLibraryCard from '@/components/learning/library/MetricLibraryCard';
 import MetricCategoryFilter from '@/components/learning/library/MetricCategoryFilter';
 
 // Asset class images mapping
@@ -38,6 +37,36 @@ const folders: Record<string, LearningFolder> = {
     title: 'Investment Metrics',
     description: 'Learn about key metrics used in investment analysis',
     icon: <BarChart className="h-6 w-6" />
+  },
+  'risk-management': {
+    id: 'risk-management',
+    title: 'Risk Management',
+    description: 'Understand risk assessment and portfolio protection strategies',
+    icon: <GraduationCap className="h-6 w-6" />
+  },
+  'market-analysis': {
+    id: 'market-analysis',
+    title: 'Market Analysis',
+    description: 'Learn fundamental and technical analysis techniques',
+    icon: <Lightbulb className="h-6 w-6" />
+  },
+  'portfolio-optimization': {
+    id: 'portfolio-optimization',
+    title: 'Portfolio Optimization',
+    description: 'Master portfolio construction and rebalancing strategies',
+    icon: <Trophy className="h-6 w-6" />
+  },
+  'islamic-finance': {
+    id: 'islamic-finance',
+    title: 'Islamic Finance',
+    description: 'Learn about Sharia-compliant investment principles and ethical finance',
+    icon: <Star className="h-6 w-6" />
+  },
+  'esg-investing': {
+    id: 'esg-investing',
+    title: 'ESG Investing',
+    description: 'Explore Environmental, Social, and Governance investing principles',
+    icon: <Leaf className="h-6 w-6" />
   }
 };
 
@@ -114,26 +143,70 @@ const LearningFolderView: React.FC = () => {
 
   // Get modules for this folder
   const modules: Module[] = folderId === 'metrics'
-    ? Object.entries(metricContent).map(([metricName, content]) => ({
-        id: metricName,
-        title: metricName,
-        description: content.content.overview,
-        category: content.category,
-        content: content.content
-      }))
-    : folderId === 'asset-classes' 
-      ? Object.entries(learningPathsContent).map(([assetClass, content]) => ({
-          id: assetClass,
+    ? Object.entries(learningPathsContent)
+        .filter(([key]) => [
+          'historicalReturn', 'appreciation', 'volatility', 'beta', 'peRatio', 'dividendYield',
+          'sharpeRatio', 'trackingError', 'expenseRatio', 'creditRating', 'duration', 'ytm',
+          'couponRate', 'aum', 'tradingVolume', 'capRate', 'cashFlow', 'noi', 'accessibility',
+          'interestRate', 'inflationRisk'
+        ].includes(key))
+        .map(([metricName, content]) => ({
+          id: metricName,
           title: content.title,
           description: content.description,
           duration: content.sections.length * 5,
           difficulty: content.sections[0].difficulty.toUpperCase() as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
-          imageUrl: assetClassImages[assetClass as keyof typeof assetClassImages] || assetClassImages.equities,
+          imageUrl: assetClassImages.equities, // Use default image for metrics
           metrics: content.keyMetrics.map(metric => ({
             name: metric,
             category: metricContent[metric]?.category || 'Growth'
           }))
         }))
+    : folderId === 'asset-classes' 
+      ? Object.entries(learningPathsContent)
+          .filter(([key]) => ['equities', 'bonds', 'realestate', 'cash'].includes(key))
+          .map(([assetClass, content]) => ({
+            id: assetClass,
+            title: content.title,
+            description: content.description,
+            duration: content.sections.length * 5,
+            difficulty: content.sections[0].difficulty.toUpperCase() as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
+            imageUrl: assetClassImages[assetClass as keyof typeof assetClassImages] || assetClassImages.equities,
+            metrics: content.keyMetrics.map(metric => ({
+              name: metric,
+              category: metricContent[metric]?.category || 'Growth'
+            }))
+          }))
+    : folderId === 'islamic-finance' || folderId === 'esg-investing'
+      ? Object.entries(learningPathsContent)
+          .filter(([key]) => key === folderId.replace('-', ''))
+          .map(([assetClass, content]) => ({
+            id: assetClass,
+            title: content.title,
+            description: content.description,
+            duration: content.sections.length * 5,
+            difficulty: content.sections[0].difficulty.toUpperCase() as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
+            imageUrl: assetClassImages.equities, // Use default image for now
+            metrics: content.keyMetrics.map(metric => ({
+              name: metric,
+              category: metricContent[metric]?.category || 'Growth'
+            }))
+          }))
+    : ['risk-management', 'market-analysis', 'portfolio-optimization'].includes(folderId)
+      ? Object.entries(learningPathsContent)
+          .filter(([key]) => key === folderId)
+          .map(([assetClass, content]) => ({
+            id: assetClass,
+            title: content.title,
+            description: content.description,
+            duration: content.sections.length * 5,
+            difficulty: content.sections[0].difficulty.toUpperCase() as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
+            imageUrl: assetClassImages.equities, // Use default image for now
+            metrics: content.keyMetrics.map(metric => ({
+              name: metric,
+              category: metricContent[metric]?.category || 'Growth'
+            }))
+          }))
       : [];
 
   // Filter modules based on search query and selected categories
@@ -195,19 +268,11 @@ const LearningFolderView: React.FC = () => {
         {/* Modules Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredModules.map((module) => (
-            folderId === 'metrics' ? (
-              <MetricLibraryCard
-                key={module.id}
-                metric={module as any}
-                onStart={() => navigate(`/learning/metrics/${module.id}`)}
-              />
-            ) : (
-              <LibraryModuleCard
-                key={module.id}
-                module={module as any}
-                onStart={() => navigate(`/learning/asset-classes/${module.id}`)}
-              />
-            )
+            <LibraryModuleCard
+              key={module.id}
+              module={module as any}
+              onStart={() => navigate(`/learning/${folderId}/${module.id}`)}
+            />
           ))}
         </div>
 

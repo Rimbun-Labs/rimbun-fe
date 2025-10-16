@@ -75,27 +75,6 @@ export const CTASection = ({ className }: CTASectionProps) => {
               ))}
             </motion.div>
 
-            {/* Stats */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-12 mt-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-            >
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">10,000+</div>
-                <div className="text-sm text-muted-foreground">Active Learners</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">98%</div>
-                <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">15,000+</div>
-                <div className="text-sm text-muted-foreground">Assessments Completed</div>
-              </div>
-            </motion.div>
 
             {/* CTA Buttons */}
             <motion.div 

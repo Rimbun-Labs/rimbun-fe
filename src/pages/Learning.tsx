@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, BookOpen, GraduationCap, Lightbulb, Trophy, BarChart } from 'lucide-react';
+import { Search, BookOpen, GraduationCap, Lightbulb, Trophy, BarChart, Leaf, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { metricContent } from '@/lib/api/types/metricContent';
 
@@ -49,8 +49,21 @@ const folders: LearningFolder[] = [
     description: 'Master portfolio construction and rebalancing strategies',
     icon: <Trophy className="h-6 w-6" />,
     moduleCount: 5
+  },
+  {
+    id: 'islamic-finance',
+    title: 'Islamic Finance',
+    description: 'Learn about Sharia-compliant investment principles and ethical finance',
+    icon: <Star className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'esg-investing',
+    title: 'ESG Investing',
+    description: 'Explore Environmental, Social, and Governance investing principles',
+    icon: <Leaf className="h-6 w-6" />,
+    moduleCount: 7
   }
-  // We can add more folders here later
 ];
 
 const Learning: React.FC = () => {

@@ -23,7 +23,6 @@ import NotFound from "./pages/NotFound";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import MetricLibraryDetail from "./components/learning/library/MetricLibraryDetail";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useSession } from "./contexts/SessionContext";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
@@ -129,7 +128,12 @@ const AppRoutes = () => {
         <Route path="/learning" element={<Learning />} />
         <Route path="/learning/:folderId" element={<LearningFolderView />} />
         <Route path="/learning/asset-classes/:assetClass" element={<LearningLibraryDetail />} />
-        <Route path="/learning/metrics/:metricId" element={<MetricLibraryDetail />} />
+        <Route path="/learning/metrics/:metricId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/islamic-finance/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/esg-investing/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/risk-management/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/market-analysis/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/portfolio-optimization/:moduleId" element={<LearningLibraryDetail />} />
         
         {/* Learning Paths Routes */}
         <Route path="/learning-path/:sessionId" element={<LearningPaths />} />

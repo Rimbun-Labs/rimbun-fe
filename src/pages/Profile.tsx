@@ -24,6 +24,10 @@ import {
   BookOpen
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { getUserSessions } from '@/lib/api/assessmentApi';
+import { getLearningProgress } from '@/lib/api/profileApi';
+import { userService } from '@/lib/api/userService';
 
 const ProfileContent = () => {
   const { profile, isLoading, error, updateProfileData } = useProfile();
@@ -31,6 +35,28 @@ const ProfileContent = () => {
   const [activeTab, setActiveTab] = useState('account');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Get database user ID for API calls
+  const databaseUserId = userService.getDatabaseUserId();
+
+  // Fetch assessment count (completed sessions)
+  const { data: userSessions, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['user-sessions', databaseUserId],
+    queryFn: () => getUserSessions(databaseUserId!),
+    enabled: !!databaseUserId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Calculate assessment count from completed sessions
+  const assessmentCount = userSessions?.filter((session: any) => session.isCompleted === true).length || 0;
+
+  // Fetch learning progress
+  const { data: learningProgress, isLoading: learningLoading } = useQuery({
+    queryKey: ['learning-progress', databaseUserId],
+    queryFn: () => getLearningProgress(databaseUserId!),
+    enabled: !!databaseUserId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -336,17 +362,14 @@ const ProfileContent = () => {
                       <div className="space-y-4">
                         <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
                           <div className="space-y-1">
-                            <Label className="text-foreground font-medium">Member Since</Label>
-                            <p className="text-sm text-muted-foreground">January 2024</p>
-                          </div>
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <Calendar className="h-4 w-4 text-green-600" />
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
-                          <div className="space-y-1">
                             <Label className="text-foreground font-medium">Assessments Completed</Label>
-                            <p className="text-sm text-muted-foreground">1 assessment</p>
+                            <p className="text-sm text-muted-foreground">
+                              {sessionsLoading ? (
+                                <Loader2 className="h-3 w-3 animate-spin inline" />
+                              ) : (
+                                `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''}`
+                              )}
+                            </p>
                           </div>
                           <div className="p-2 bg-blue-100 rounded-lg">
                             <CheckCircle className="h-4 w-4 text-blue-600" />
@@ -355,7 +378,13 @@ const ProfileContent = () => {
                         <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Learning Progress</Label>
-                            <p className="text-sm text-muted-foreground">3 modules completed</p>
+                            <p className="text-sm text-muted-foreground">
+                              {learningLoading ? (
+                                <Loader2 className="h-3 w-3 animate-spin inline" />
+                              ) : (
+                                `${learningProgress?.completedModules || 0} module${(learningProgress?.completedModules || 0) !== 1 ? 's' : ''} completed`
+                              )}
+                            </p>
                           </div>
                           <div className="p-2 bg-purple-100 rounded-lg">
                             <BookOpen className="h-4 w-4 text-purple-600" />
