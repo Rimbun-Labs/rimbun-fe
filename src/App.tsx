@@ -28,7 +28,6 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useSession } from "./contexts/SessionContext";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
-import QuizFlowDemo from "./components/debug/QuizFlowDemo";
 import TestLayout from "./pages/TestLayout";
 
 const queryClient = new QueryClient();
@@ -43,6 +42,10 @@ const RootRedirect = () => {
   // 🔑 SMART ROUTE PROTECTION: Only redirect if we're on the root path
   // This prevents aggressive redirects when users intentionally navigate to specific routes
   const isRootPath = window.location.pathname === '/';
+  
+  // 🔑 NEW: Check if user is in retake mode to prevent redirect conflicts
+  const isRetakeMode = window.location.pathname === '/assessment' && 
+                      new URLSearchParams(window.location.search).get('mode') === 'retake';
 
   useEffect(() => {
     const checkUserAssessment = async () => {
@@ -70,8 +73,8 @@ const RootRedirect = () => {
 
   // If user is authenticated, check assessment status
   if (user) {
-    // 🔑 MODIFIED: Only redirect to dashboard if we're on root path AND user has complete assessment
-    if (isRootPath && assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete) {
+    // 🔑 FIXED: Only redirect to dashboard if we're on root path AND user has complete assessment AND not in retake mode
+    if (isRootPath && assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete && !isRetakeMode) {
       return <Navigate to={`/dashboard/${assessmentStatus.sessionId}`} replace />;
     }
     // If user has incomplete assessment, redirect to assessment to complete it
@@ -105,7 +108,6 @@ const AppRoutes = () => {
         }
       >
         <Route path="/assessment-results" element={<AssessmentResultsPage />} />
-        <Route path="/quiz-demo" element={<QuizFlowDemo />} />
       </Route>
 
       {/* Protected routes with AppLayout (full width) */}

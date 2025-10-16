@@ -63,7 +63,12 @@ const Assessment: React.FC = () => {
   // Check if user already has completed assessment on mount
   useEffect(() => {
     const checkExistingAssessment = async () => {
-      if (!userRegistrationComplete || assessmentMode === 'retake' || assessmentMode === 'resume') {
+      // 🔑 FIXED: Also check URL parameters directly to prevent race conditions
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+      const isRetakeMode = mode === 'retake';
+      
+      if (!userRegistrationComplete || assessmentMode === 'retake' || assessmentMode === 'resume' || isRetakeMode) {
         setIsCheckingExistingAssessment(false);
         return;
       }

@@ -162,14 +162,6 @@ const Dashboard = () => {
   // Use sessionId from params or fall back to session context
   const effectiveSessionId = sessionId || session?.id;
   
-  // Debug logging
-  console.log('🔍 Dashboard Debug:', {
-    sessionIdFromParams: sessionId,
-    sessionFromContext: session,
-    effectiveSessionId: effectiveSessionId,
-    userRegistrationComplete: userRegistrationComplete
-  });
-  
   // Use reducer for state management
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const { expandedSections, showWelcome, loading } = state;

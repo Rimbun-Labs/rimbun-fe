@@ -9,14 +9,10 @@ import { useSession } from '@/contexts/SessionContext';
 
 interface BaseLayoutProps {
   useContainer?: boolean; // Controls whether to use container mx-auto (ContentLayout) or w-full (AppLayout)
-  layoutName: string; // For debug indicators
-  debugColor: string; // For debug indicator styling
 }
 
 const BaseLayout: React.FC<BaseLayoutProps> = ({ 
-  useContainer = false, 
-  layoutName, 
-  debugColor 
+  useContainer = false
 }) => {
   const { session } = useSession();
   const location = useLocation();
@@ -43,12 +39,6 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
               <main 
                 className={`flex-1 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
               >
-                {/* Debug indicator - remove this after confirming layout works */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className={`mb-4 p-2 ${debugColor} text-xs rounded border`}>
-                    {layoutName} - Current path: {location.pathname}
-                  </div>
-                )}
                 <div 
                   className={useContainer ? "max-w-7xl mx-auto pb-16" : "w-full"}
                   style={!useContainer ? {maxWidth: 'none'} : {}}
