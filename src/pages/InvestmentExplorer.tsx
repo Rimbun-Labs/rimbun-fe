@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Sparkles,
@@ -11,9 +12,13 @@ import {
   Target,
   TrendingUp,
   LineChart,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  BarChart3,
+  Lightbulb
 } from 'lucide-react';
 import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplorerChat';
+import { AssetAnalyzerTab } from '@/components/asset-analyzer';
 import { motion } from 'framer-motion';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
@@ -25,6 +30,7 @@ const InvestmentExplorer: React.FC = () => {
   const navigate = useNavigate();
   const { session, isLoading, error: sessionError } = useSession();
   const [showWelcome, setShowWelcome] = useState(true);
+  const [activeTab, setActiveTab] = useState<'chat' | 'analyzer'>('chat');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,7 +94,7 @@ const InvestmentExplorer: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full px-2 sm:px-4 lg:px-6 py-12">
         <div className="flex items-center gap-6 mb-10">
           <Button
             variant="ghost"
@@ -267,14 +273,33 @@ const InvestmentExplorer: React.FC = () => {
               </MotionCard>
             </div>
           ) : (
-            <Card className="border border-border shadow-lg">
-              <CardContent className="p-8">
-                <InvestmentExplorerChat 
-                  sessionId={sessionId!} 
-                  onError={(error) => setError(error.message)}
-                />
-              </CardContent>
-            </Card>
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'chat' | 'analyzer')} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="chat" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  AI Chat
+                </TabsTrigger>
+                <TabsTrigger value="analyzer" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Asset Analyzer
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="chat" className="space-y-6 w-full">
+                <div className="grid grid-cols-1 w-full max-w-none">
+                  <InvestmentExplorerChat 
+                    sessionId={sessionId!} 
+                    onError={(error) => setError(error.message)}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="analyzer" className="space-y-6 w-full">
+                <div className="grid grid-cols-1 w-full max-w-none">
+                  <AssetAnalyzerTab />
+                </div>
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </div>

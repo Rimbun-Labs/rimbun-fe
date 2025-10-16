@@ -259,43 +259,46 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
   const smartSuggestions = getSmartTopicSuggestions(uiMessages, session);
 
   return (
-    <div className="flex flex-col h-[600px] bg-background rounded-lg border border-border">
-      {/* Header */}
-      <div className="flex items-center gap-4 p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">AI Investment Assistant</h3>
-        </div>
-        {behavioralInsights && (
-          <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
-            <Sparkles className="h-3 w-3" />
-            <span>AI Enhanced</span>
-          </div>
-        )}
-      </div>
+    <div className="space-y-6 w-full">
+      <Card className="w-full">
+        <CardContent className="p-0">
+          <div className="flex flex-col bg-background rounded-lg border-0 w-full min-w-0 flex-grow">
+            {/* Header */}
+            <div className="flex items-center gap-4 p-6 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">AI Investment Assistant</h3>
+              </div>
+              {behavioralInsights && (
+                <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+                  <Sparkles className="h-3 w-3" />
+                  <span>AI Enhanced</span>
+                </div>
+              )}
+            </div>
 
-      {error && (
-        <Alert className="m-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>{error}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRetry}
-              className="h-6 px-3"
-            >
-              <RefreshCw className="h-3 w-3 mr-2" />
-              Retry
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+            {error && (
+              <Alert className="m-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{error}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRetry}
+                    className="h-6 px-3"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-2" />
+                    Retry
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
 
-      <ScrollArea ref={scrollRef} className="flex-1 p-6">
-        <div className="space-y-6">
+            <ScrollArea ref={scrollRef} className="flex-1 p-6 w-full min-w-0 flex-grow">
+              <div className="space-y-6 w-full">
           <AnimatePresence>
             {uiMessages.map((message, index) => (
               <motion.div
@@ -353,12 +356,12 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
         </div>
       </ScrollArea>
 
-      <div className="p-6 border-t border-border bg-muted/20">
+      <div className="p-6 border-t border-border bg-muted/20 w-full">
         {/* Smart Suggestions */}
         {uiMessages.length === 0 && (
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <h4 className="text-sm font-medium text-muted-foreground mb-4">Suggested topics to explore:</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
               {smartSuggestions.map((suggestion, index) => {
                 const IconComponent = getTopicIcon(suggestion);
                 return (
@@ -379,12 +382,12 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
         )}
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex gap-3">
+        <form onSubmit={handleSubmit} className="flex gap-3 w-full">
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask anything about investing..."
-            className="flex-1"
+            className="flex-1 w-full"
             disabled={isLoading}
           />
           <Button
@@ -406,7 +409,10 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
             <Send className="h-5 w-5" />
           </Button>
         </form>
-      </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }; 
