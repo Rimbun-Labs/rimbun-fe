@@ -13,7 +13,8 @@ import {
   User,
   Compass,
   X,
-  LogOut
+  LogOut,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -88,6 +89,19 @@ const MobileMenu: React.FC = () => {
             >
               <BarChart3 className="h-4 w-4" />
               Assessment
+            </Link>
+            <Link
+              to="/spending-analysis"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/spending-analysis') 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <DollarSign className="h-4 w-4" />
+              Spending
             </Link>
           </div>
 

@@ -21,6 +21,7 @@ import LearningPaths from "./pages/LearningPaths";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
+import SpendingAnalysis from "./pages/SpendingAnalysis";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -141,6 +142,7 @@ const AppRoutes = () => {
         
         {/* Application Pages */}
         <Route path="/profile" element={<Profile />} />
+        <Route path="/spending-analysis" element={<SpendingAnalysis />} />
         <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
 
       </Route>

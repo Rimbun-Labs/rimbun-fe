@@ -22,7 +22,7 @@ import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield } from "lucide-react";
+import { ChevronDown, ChevronUp, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield, PieChart, DollarSign } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,10 @@ import {
   CashExplanation
 } from '@/components/dashboard/explanations/assetAllocation';
 import InvestmentScenarios from '@/components/dashboard/InvestmentScenarios';
+import SpendingOverview from '@/components/spending/SpendingOverview';
+import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
+import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
+import { useSpendingData, useSpendingRecommendations } from '@/hooks/useSpendingData';
 
 // Types
 interface LowercaseAssetAllocations {
@@ -64,6 +68,7 @@ interface DashboardState {
     profile: boolean;
     portfolio: boolean;
     insights: boolean;
+    spending: boolean;
   };
   showWelcome: boolean;
   loading: boolean;
@@ -106,7 +111,8 @@ const initialState: DashboardState = {
   expandedSections: {
     profile: false,
     portfolio: false,
-    insights: false
+    insights: false,
+    spending: false
   },
   showWelcome: false,
   loading: false
@@ -200,6 +206,18 @@ const Dashboard = () => {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
+
+  // Get spending data
+  const { 
+    data: spendingData, 
+    isLoading: spendingLoading, 
+    error: spendingError 
+  } = useSpendingData(userService.getDatabaseUserId() || '');
+
+  const { 
+    data: spendingRecommendations, 
+    isLoading: spendingRecommendationsLoading 
+  } = useSpendingRecommendations(userService.getDatabaseUserId() || '');
 
   // Memoize loading state
   const isLoading = useMemo(() =>
@@ -682,6 +700,92 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                     )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Spending Analysis Section */}
+            <Card>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <CardTitle className="text-xl">💰 Spending Analysis</CardTitle>
+                {spendingData && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleSection('spending')}
+                    className="flex items-center gap-2 self-start sm:self-auto"
+                  >
+                    {expandedSections.spending ? 'Show Less' : 'Learn More'}
+                    {expandedSections.spending ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {spendingLoading ? (
+                  <div className="py-8">
+                    <LoadingState variant="expanded" lines={2} />
+                  </div>
+                ) : spendingData ? (
+                  <>
+                    {/* Always Visible: Spending Overview */}
+                    <div className="mb-6">
+                      <SpendingOverview 
+                        data={spendingData}
+                        loading={spendingLoading}
+                      />
+                    </div>
+
+                    {/* Expanded Content: Detailed Analysis */}
+                    {expandedSections.spending && (
+                      <div className="space-y-6">
+                        {/* Emergency Fund Analysis */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Emergency Fund Analysis</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <EmergencyFundAnalysis 
+                              data={spendingData}
+                              loading={spendingLoading}
+                            />
+                          </CardContent>
+                        </Card>
+
+                        {/* Spending Recommendations */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Spending Recommendations</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <SpendingRecommendations 
+                              recommendations={spendingRecommendations}
+                              loading={spendingRecommendationsLoading}
+                            />
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* No Data State */
+                  <div className="text-center py-8 space-y-4">
+                    <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto">
+                      <DollarSign className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">Start Your Spending Analysis</h3>
+                      <p className="text-muted-foreground">
+                        Track your spending habits and get personalized insights to optimize your financial plan.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => window.location.href = '/spending-analysis'}
+                      className="mt-4"
+                    >
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Get Started
+                    </Button>
                   </div>
                 )}
               </CardContent>
