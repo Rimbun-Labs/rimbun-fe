@@ -58,9 +58,8 @@ export const useChat = (sessionId: string) => {
     const newMessage: ChatMessageDto = {
       id: Date.now().toString(),
       content: message,
-      role: 'user',
+      isAIResponse: false,
       timestamp: new Date().toISOString(),
-      userId: user.uid,
       responseGroupId: responseGroupId || realResponseGroupId || sessionId
     };
 
@@ -69,22 +68,24 @@ export const useChat = (sessionId: string) => {
     setError(null);
 
     try {
-      const response = await chatApi.sendMessage(message, responseGroupId || realResponseGroupId || sessionId);
+      const response = await chatApi.sendMessage(user.uid, {
+        message: message,
+        responseGroupId: responseGroupId || realResponseGroupId || sessionId
+      });
       
       const assistantMessage: ChatMessageDto = {
         id: (Date.now() + 1).toString(),
-        content: response.content,
-        role: 'assistant',
+        content: response.data.aiResponse.content,
+        isAIResponse: true,
         timestamp: new Date().toISOString(),
-        userId: user.uid,
         responseGroupId: responseGroupId || realResponseGroupId || sessionId
       };
 
       setMessages(prev => [...prev, assistantMessage]);
       
       // Extract behavioral insights if available
-      if (response.behavioralInsights) {
-        setBehavioralInsights(response.behavioralInsights);
+      if (response.data.behavioralInsights) {
+        setBehavioralInsights(response.data.behavioralInsights);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -94,12 +95,22 @@ export const useChat = (sessionId: string) => {
     }
   }, [user?.uid, realResponseGroupId, sessionId]);
 
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     messages,
     isLoading,
     error,
     behavioralInsights,
     sendMessage,
-    loadMessages
+    loadMessages,
+    clearMessages,
+    clearError
   };
 }; 

@@ -8,7 +8,8 @@ import {
   BarChart3,
   User,
   Compass,
-  DollarSign
+  DollarSign,
+  TrendingUp
 } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
 
@@ -103,6 +104,18 @@ const AppSidebar: React.FC = () => {
           >
             <DollarSign className="h-4 w-4" />
             Spending
+          </NavLink>
+          <NavLink
+            to="/cash-flow-projections"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
+              )
+            }
+          >
+            <TrendingUp className="h-4 w-4" />
+            Cash Flow
           </NavLink>
         </div>
 

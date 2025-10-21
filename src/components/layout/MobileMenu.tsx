@@ -14,7 +14,8 @@ import {
   Compass,
   X,
   LogOut,
-  DollarSign
+  DollarSign,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -102,6 +103,19 @@ const MobileMenu: React.FC = () => {
             >
               <DollarSign className="h-4 w-4" />
               Spending
+            </Link>
+            <Link
+              to="/cash-flow-projections"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/cash-flow-projections') 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Cash Flow
             </Link>
           </div>
 

@@ -46,6 +46,8 @@ import SpendingOverview from '@/components/spending/SpendingOverview';
 import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
 import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
 import { useSpendingData, useSpendingRecommendations } from '@/hooks/useSpendingData';
+import CashFlowSummary from '@/components/cashflow/CashFlowSummary';
+import { useCashFlowProjections, useRefreshCashFlowProjections } from '@/hooks/useCashFlowData';
 
 // Types
 interface LowercaseAssetAllocations {
@@ -69,6 +71,7 @@ interface DashboardState {
     portfolio: boolean;
     insights: boolean;
     spending: boolean;
+    cashFlow: boolean;
   };
   showWelcome: boolean;
   loading: boolean;
@@ -112,7 +115,8 @@ const initialState: DashboardState = {
     profile: false,
     portfolio: false,
     insights: false,
-    spending: false
+    spending: false,
+    cashFlow: false
   },
   showWelcome: false,
   loading: false
@@ -218,6 +222,15 @@ const Dashboard = () => {
     data: spendingRecommendations, 
     isLoading: spendingRecommendationsLoading 
   } = useSpendingRecommendations(userService.getDatabaseUserId() || '');
+
+  // Get cash flow data
+  const { 
+    data: cashFlowData, 
+    isLoading: cashFlowLoading, 
+    error: cashFlowError 
+  } = useCashFlowProjections(userService.getDatabaseUserId() || '');
+
+  const refreshCashFlowMutation = useRefreshCashFlowProjections(userService.getDatabaseUserId() || '');
 
   // Memoize loading state
   const isLoading = useMemo(() =>
@@ -790,6 +803,14 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Cash Flow Projections Section */}
+            <CashFlowSummary
+              data={cashFlowData}
+              loading={cashFlowLoading}
+              onRefresh={() => refreshCashFlowMutation.mutate()}
+              isRefreshing={refreshCashFlowMutation.isPending}
+            />
           </div>
         </>
       )}
