@@ -152,7 +152,7 @@ const CashFlowProjectionsPage: React.FC = () => {
                             <div className="space-y-1 text-sm text-muted-foreground">
                               <p>Goal Achieved: {data.goalAchieved ? 'Yes' : 'No'}</p>
                               <p>Months to Goal: {data.monthsToGoal}</p>
-                              <p>Avg Return: {formatPercentage(data.averageMonthlyReturn)}</p>
+                              <p>Avg Return: {formatCurrency(data.averageMonthlyReturn)}</p>
                             </div>
                           </div>
                         </div>
@@ -293,7 +293,7 @@ const CashFlowProjectionsPage: React.FC = () => {
                         </div>
                         <div className="p-4 border rounded-lg">
                           <h4 className="font-medium mb-2">Average Return</h4>
-                          <p className="text-2xl font-bold">{formatPercentage(selectedScenarioData.averageMonthlyReturn)}</p>
+                          <p className="text-2xl font-bold">{formatCurrency(selectedScenarioData.averageMonthlyReturn)}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -386,7 +386,7 @@ const CashFlowProjectionsPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Avg Monthly Return</span>
-                      <span className="font-medium">{formatPercentage(selectedScenarioData.averageMonthlyReturn)}</span>
+                      <span className="font-medium">{formatCurrency(selectedScenarioData.averageMonthlyReturn)}</span>
                     </div>
                   </div>
                 </CardContent>
