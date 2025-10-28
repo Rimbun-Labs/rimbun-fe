@@ -243,10 +243,10 @@ const Dashboard = () => {
 
   const refreshCashFlowMutation = useRefreshCashFlowProjections(userService.getDatabaseUserId() || '');
 
-  // Memoize loading state
+  // Memoize loading state - include checking for completed assessments
   const isLoading = useMemo(() =>
-    (assessmentLoading || recommendationsLoading) && effectiveSessionId,
-    [assessmentLoading, recommendationsLoading, effectiveSessionId]
+    checkingCompletedAssessment || ((assessmentLoading || recommendationsLoading) && effectiveSessionId),
+    [assessmentLoading, recommendationsLoading, effectiveSessionId, checkingCompletedAssessment]
   );
 
   // Session state is managed by SessionContext
@@ -325,7 +325,7 @@ const Dashboard = () => {
       )}
 
       {/* Welcome/No Session State */}
-      {!isLoading && (!effectiveSessionId || assessmentError) && (
+      {!isLoading && !checkingCompletedAssessment && (!effectiveSessionId || assessmentError) && (
         <div className="py-12">
           <div className="w-full space-y-8">
             {/* Welcome Header */}
