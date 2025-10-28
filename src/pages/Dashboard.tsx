@@ -11,7 +11,7 @@ import { RecommendedMetricsWithWeights } from '@/lib/api/types/metrics';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
 import { useAssessmentResume } from '@/hooks/useAssessmentResume';
-import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { getAssessmentResults, getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { config } from '@/lib/api/config';
 
 // Component imports
@@ -202,6 +202,17 @@ const Dashboard = () => {
     staleTime: 30 * 1000, // 30 seconds
   });
 
+  // Check for completed assessments before showing welcome modal
+  const { data: hasCompletedAssessment, isLoading: checkingCompletedAssessment } = useQuery({
+    queryKey: ['check-completed-assessment', userService.getDatabaseUserId()],
+    queryFn: async () => {
+      const results = await getLatestAssessmentResults();
+      return !!results; // Return true if there are any completed assessments
+    },
+    enabled: !!userService.getDatabaseUserId() && !effectiveSessionId && !session?.isCompleted,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Get recommendations
   const { data: recommendations, isLoading: recommendationsLoading, refetch: refetchRecommendations } = useQuery({
     queryKey: ['recommendations', effectiveSessionId],
@@ -242,13 +253,31 @@ const Dashboard = () => {
 
   // Show welcome modal for new users without assessment
   useEffect(() => {
-    if (!effectiveSessionId && !session?.isCompleted) {
-      const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-      if (!hasSeenWelcome) {
-        dispatch({ type: 'SET_WELCOME', show: true });
-      }
+    // Only check after user registration is complete
+    if (!userRegistrationComplete) {
+      return;
     }
-  }, [effectiveSessionId, session?.isCompleted]);
+
+    // Wait for assessment check to complete
+    if (checkingCompletedAssessment) {
+      return;
+    }
+
+    // Don't show modal if user has completed assessment
+    if (hasCompletedAssessment === true) {
+      return;
+    }
+
+    // Don't show modal if there's an effective session or current session is completed
+    if (effectiveSessionId || session?.isCompleted) {
+      return;
+    }
+
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome) {
+      dispatch({ type: 'SET_WELCOME', show: true });
+    }
+  }, [effectiveSessionId, session?.isCompleted, hasCompletedAssessment, userRegistrationComplete, checkingCompletedAssessment]);
 
   // Memoize utility functions
   const getReadableProfile = useMemo(() => (profile: string): string => {
