@@ -88,10 +88,17 @@ export const userService = {
 
       if (!response.ok) {
         const error = await response.json();
-        // If user already exists, that's fine - just log it
+        // If user already exists, that's fine - parse the response to get Database ID
         if (response.status === 409) {
           console.log('ℹ️ userService.ensureUserExists - user already exists');
-          return { message: 'User already exists' };
+          
+          // ✅ Parse the response to get the Database ID
+          if (error.data?.id) {
+            storageUtils.setItem('databaseUserId', error.data.id);
+            console.log('🔵 Stored existing database user ID:', error.data.id);
+          }
+          
+          return error; // ✅ Return the full response with Database ID
         }
         console.error('❌ userService.ensureUserExists failed:', error);
         throw new Error(error.message || 'Failed to ensure user exists');

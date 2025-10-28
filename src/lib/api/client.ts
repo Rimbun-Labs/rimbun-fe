@@ -11,12 +11,23 @@ export const apiClient = axios.create({
 
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
-  (config) => {
-    // You can add auth tokens here if needed
-    const token = storageUtils.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    // Get current user and fresh token
+    const { auth } = await import('../firebase/config');
+    const user = auth.currentUser;
+    
+    if (user) {
+      // Get fresh token (Firebase SDK auto-refreshes if needed)
+      const idToken = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${idToken}`;
+    } else {
+      // Fallback to stored token if no current user
+      const firebaseToken = storageUtils.getItem('firebaseIdToken');
+      if (firebaseToken) {
+        config.headers.Authorization = `Bearer ${firebaseToken}`;
+      }
     }
+    
     return config;
   },
   (error) => {

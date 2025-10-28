@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useSession } from '@/contexts/SessionContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { userService } from '@/lib/api/userService';
 
 export const useUserAssessmentPersistence = () => {
   const { setSession } = useSession();
+  const { user, userRegistrationComplete, loading } = useAuth();
   const [hasCheckedPersistence, setHasCheckedPersistence] = useState(false);
 
   useEffect(() => {
     const checkPersistence = async () => {
+      // Wait for auth to complete before checking persistence
+      if (loading || !user || !userRegistrationComplete) {
+        console.log('⏳ useUserAssessmentPersistence: Waiting for auth completion');
+        return;
+      }
+
       if (hasCheckedPersistence) return;
 
       try {
@@ -58,7 +66,7 @@ export const useUserAssessmentPersistence = () => {
     };
 
     checkPersistence();
-  }, [setSession, hasCheckedPersistence]);
+  }, [setSession, hasCheckedPersistence, user, userRegistrationComplete, loading]);
 
   return { hasCheckedPersistence };
 };

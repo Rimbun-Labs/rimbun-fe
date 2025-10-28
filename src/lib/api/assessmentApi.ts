@@ -4,7 +4,7 @@ export * from './responseApi';
 export * from './resultsApi';
 
 import { AssessmentResults } from './types/assessment';
-import axios from 'axios';
+import { apiClient } from './client';
 import { config } from './config';
 import { AssessmentResult, UserAnswer, SaveUserResponseRequest } from './types/assessment';
 import { userResponsesApi } from './userResponsesApi';
@@ -12,13 +12,8 @@ import { userService } from './userService';
 
 export const getAssessmentResults = async (sessionId: string): Promise<AssessmentResult> => {
   try {
-    const response = await axios.get<AssessmentResult>(
-      `${config.API_BASE_URL}/assessment/response-group/${sessionId}/score`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
+    const response = await apiClient.get<AssessmentResult>(
+      `/assessment/response-group/${sessionId}/score`
     );
     
     if (!response.data) {
@@ -39,9 +34,9 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
     }
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch assessment results:', error);
-    if (axios.isAxiosError(error)) {
+    if (error.response) {
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
       console.error('Error headers:', error.response?.headers);
@@ -53,13 +48,8 @@ export const getAssessmentResults = async (sessionId: string): Promise<Assessmen
 // ✅ CORRECT: Get user sessions by database user ID (this API exists)
 export const getUserSessions = async (databaseUserId: string): Promise<any[]> => {
   try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/user-responses/user/${databaseUserId}/sessions`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
+    const response = await apiClient.get(
+      `/user-responses/user/${databaseUserId}/sessions`
     );
     
     return response.data || [];
@@ -72,13 +62,8 @@ export const getUserSessions = async (databaseUserId: string): Promise<any[]> =>
 // ✅ CORRECT: Get session questions and answers (this API exists)
 export const getSessionQuestionsAnswers = async (sessionId: string): Promise<any> => {
   try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/user-responses/session/${sessionId}/questions-answers`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
+    const response = await apiClient.get(
+      `/user-responses/session/${sessionId}/questions-answers`
     );
     
     return response.data;
@@ -136,18 +121,12 @@ export const getLatestAssessmentResults = async (): Promise<AssessmentResult | n
 
 export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promise<any> => {
   try {
-    const response = await axios.post(
-      `${config.API_BASE_URL}/user-responses/answer`,
+    const response = await apiClient.post(
+      `/user-responses/answer`,
       {
         responseGroupId: sessionId,
         questionId: answer.questionId,
         answer: answer.answer
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
       }
     );
     
@@ -160,13 +139,8 @@ export const submitAnswer = async (sessionId: string, answer: UserAnswer): Promi
 
 export const getQuestions = async (): Promise<any[]> => {
   try {
-    const response = await axios.get(
-      `${config.API_BASE_URL}/questionnaire/questions`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
+    const response = await apiClient.get(
+      `/questionnaire/questions`
     );
     
     return response.data;

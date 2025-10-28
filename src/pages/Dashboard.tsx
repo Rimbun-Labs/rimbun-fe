@@ -167,7 +167,7 @@ const Dashboard = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { session, setSession } = useSession();
-  const { userRegistrationComplete } = useAuth();
+  const { userRegistrationComplete, user } = useAuth();
   
   // Use sessionId from params or fall back to session context
   const effectiveSessionId = sessionId || session?.id;
