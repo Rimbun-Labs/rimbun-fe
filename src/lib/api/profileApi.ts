@@ -1,4 +1,4 @@
-
+import { apiClient } from './client';
 import { config } from './config';
 
 export interface UserProfile {
@@ -45,19 +45,21 @@ export interface UserProfile {
 
 export const getProfile = async (userId: string): Promise<UserProfile> => {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/users/${userId}/profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch profile');
+    // Use Firebase UID, not database ID
+    const { auth } = await import('../firebase/config');
+    const user = auth.currentUser;
+    
+    if (!user) {
+      throw new Error('User not authenticated');
     }
 
-    return await response.json();
+    const response = await apiClient.get(`/users/me/${user.uid}`);
+    
+    if (!response.data) {
+      throw new Error('No data received from the API');
+    }
+
+    return response.data.data;
   } catch (error) {
     console.error('Failed to fetch profile:', error);
     // Return a default profile structure if API fails
@@ -93,20 +95,21 @@ export const getProfile = async (userId: string): Promise<UserProfile> => {
 
 export const updateProfile = async (userId: string, data: Partial<UserProfile>): Promise<UserProfile> => {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/users/${userId}/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update profile');
+    // Use Firebase UID, not database ID
+    const { auth } = await import('../firebase/config');
+    const user = auth.currentUser;
+    
+    if (!user) {
+      throw new Error('User not authenticated');
     }
 
-    return await response.json();
+    const response = await apiClient.put(`/users/me/${user.uid}`, data);
+
+    if (!response.data) {
+      throw new Error('No data received from the API');
+    }
+
+    return response.data.data;
   } catch (error) {
     console.error('Failed to update profile:', error);
     throw error;
@@ -121,19 +124,13 @@ export const getAssessmentHistory = async (userId: string): Promise<Array<{
   profile: string;
 }>> => {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/users/${userId}/assessments`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await apiClient.get(`/users/${userId}/assessments`);
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch assessment history');
+    if (!response.data) {
+      return [];
     }
 
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error('Failed to fetch assessment history:', error);
     return [];
@@ -153,19 +150,36 @@ export const getLearningProgress = async (userId: string): Promise<{
   }>;
 }> => {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/users/${userId}/learning-progress`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch learning progress');
+    // Use Firebase UID for quiz progress endpoint
+    const { auth } = await import('../firebase/config');
+    const user = auth.currentUser;
+    
+    if (!user) {
+      return {
+        completedModules: 0,
+        totalModules: 0,
+        achievements: []
+      };
     }
 
-    return await response.json();
+    // Use the correct endpoint: /quiz/progress
+    const response = await apiClient.get(`/quiz/progress?userId=${user.uid}`);
+
+    if (!response.data) {
+      return {
+        completedModules: 0,
+        totalModules: 0,
+        achievements: []
+      };
+    }
+
+    // Transform quiz progress to learning progress format
+    const quizProgress = response.data;
+    return {
+      completedModules: quizProgress.completedQuizzes || 0,
+      totalModules: quizProgress.totalQuizzes || 0,
+      achievements: []
+    };
   } catch (error) {
     console.error('Failed to fetch learning progress:', error);
     return {

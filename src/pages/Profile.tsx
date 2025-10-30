@@ -21,20 +21,26 @@ import {
   BarChart3,
   Calendar,
   CheckCircle,
-  BookOpen
+  BookOpen,
+  Download
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { getUserSessions } from '@/lib/api/assessmentApi';
-import { getLearningProgress } from '@/lib/api/profileApi';
 import { userService } from '@/lib/api/userService';
+import { config } from '@/lib/api/config';
+import { auth } from '@/lib/firebase/config';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { SubscriptionTier } from '@/lib/api/types/subscription';
 
 const ProfileContent = () => {
   const { profile, isLoading, error, updateProfileData } = useProfile();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Get database user ID for API calls
   const databaseUserId = userService.getDatabaseUserId();
@@ -49,14 +55,6 @@ const ProfileContent = () => {
 
   // Calculate assessment count from completed sessions
   const assessmentCount = userSessions?.filter((session: any) => session.isCompleted === true).length || 0;
-
-  // Fetch learning progress
-  const { data: learningProgress, isLoading: learningLoading } = useQuery({
-    queryKey: ['learning-progress', databaseUserId],
-    queryFn: () => getLearningProgress(databaseUserId!),
-    enabled: !!databaseUserId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -150,6 +148,100 @@ const ProfileContent = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) {
+      toast.error('Unable to delete account. Please log in again.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone. All your data including assessments, learning progress, and recommendations will be permanently deleted.'
+    );
+
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      // Get Firebase JWT token for authentication
+      const idToken = await user.getIdToken();
+
+      // Call backend API to delete user and all associated data
+      const response = await fetch(`${config.API_BASE_URL}/users/me`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete account');
+      }
+
+      const result = await response.json();
+      toast.success(result.data?.message || 'Your account has been deleted successfully');
+      
+      // Clear local storage
+      userService.clearDatabaseUserId();
+      
+      // Sign out from Firebase
+      await signOut();
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete account');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!user) {
+      toast.error('Unable to export data. Please log in again.');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      // Get Firebase JWT token for authentication
+      const idToken = await user.getIdToken();
+
+      const response = await fetch(`${config.API_BASE_URL}/users/me/export`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to export data');
+      }
+
+      const data = await response.json();
+      
+      // Create a downloadable JSON file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('.')[0];
+      a.download = `my-investlearn-data-${timestamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success('Your data has been exported successfully');
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to export data');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Consolidated return with conditional content
@@ -248,10 +340,11 @@ const ProfileContent = () => {
           {/* Main Content */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6 w-full">
+              <TabsList className="grid grid-cols-4 mb-6 w-full">
                 <TabsTrigger value="account">Account</TabsTrigger>
                 <TabsTrigger value="preferences">Preferences</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="subscription">Subscription</TabsTrigger>
               </TabsList>
 
               {/* Account Tab */}
@@ -294,16 +387,7 @@ const ProfileContent = () => {
                           className="border-border focus:border-primary h-11 w-full" 
                         />
                       </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="phone" className="text-foreground font-medium">Phone Number</Label>
-                        <Input 
-                          id="phone" 
-                          value={formData.phone}
-                          onChange={(e) => handleInputChange('phone', e.target.value)}
-                          placeholder="+1 (555) 123-4567"
-                          className="border-border focus:border-primary h-11 w-full" 
-                        />
-                      </div>
+                      {/** Phone Number removed (feature not implemented) **/}
                       <div className="space-y-3">
                         <Label htmlFor="occupation" className="text-foreground font-medium">Occupation</Label>
                         <Input 
@@ -314,16 +398,7 @@ const ProfileContent = () => {
                           className="border-border focus:border-primary h-11 w-full" 
                         />
                       </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="company" className="text-foreground font-medium">Company</Label>
-                        <Input 
-                          id="company" 
-                          value={formData.company}
-                          onChange={(e) => handleInputChange('company', e.target.value)}
-                          placeholder="Your company name"
-                          className="border-border focus:border-primary h-11 w-full" 
-                        />
-                      </div>
+                      {/** Company removed (feature not implemented) **/}
                     </div>
                     <Separator />
                     <div className="flex justify-end">
@@ -377,12 +452,12 @@ const ProfileContent = () => {
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
                           <div className="space-y-1">
-                            <Label className="text-foreground font-medium">Learning Progress</Label>
+                            <Label className="text-foreground font-medium">Assessment Progress</Label>
                             <p className="text-sm text-muted-foreground">
-                              {learningLoading ? (
+                              {sessionsLoading ? (
                                 <Loader2 className="h-3 w-3 animate-spin inline" />
                               ) : (
-                                `${learningProgress?.completedModules || 0} module${(learningProgress?.completedModules || 0) !== 1 ? 's' : ''} completed`
+                                `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''} completed`
                               )}
                             </p>
                           </div>
@@ -478,16 +553,7 @@ const ProfileContent = () => {
                     </CardHeader>
                     <CardContent className="space-y-6 w-full">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
-                          <div className="space-y-1">
-                            <Label className="text-foreground font-medium">Two-Factor Authentication</Label>
-                            <p className="text-sm text-muted-foreground">Add extra security to your account</p>
-                          </div>
-                          <Switch 
-                            checked={false}
-                            onCheckedChange={() => {}}
-                          />
-                        </div>
+                        {/** Two-Factor Authentication removed (not functional) **/}
                         <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Login Notifications</Label>
@@ -532,9 +598,60 @@ const ProfileContent = () => {
                     <div className="flex justify-end">
                       <Button 
                         variant="destructive"
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8"
                       >
-                        Delete Account
+                        {isDeleting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Account
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Export Data */}
+                <Card className="w-full">
+                  <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-foreground">Export My Data</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Download a copy of all your personal data (GDPR/CCPA compliance)
+                      </CardDescription>
+                    </div>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Download className="h-5 w-5 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 w-full">
+                    <p className="text-sm text-muted-foreground">
+                      Export all your account data including profile information, assessments, learning progress, and recommendations in JSON format.
+                    </p>
+                    <div className="flex justify-end">
+                      <Button 
+                        onClick={handleExportData}
+                        disabled={isExporting}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 h-11 px-8"
+                      >
+                        {isExporting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Export My Data
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -841,9 +958,250 @@ const ProfileContent = () => {
                       </Button>
                     </div>
               </TabsContent>
+
+              {/* Subscription Tab */}
+              <TabsContent value="subscription" className="space-y-8 w-full">
+                <SubscriptionTab />
+              </TabsContent>
             </Tabs>
           </div>
         </>
+      )}
+    </div>
+  );
+};
+
+// Subscription Tab Component
+const SubscriptionTab: React.FC = () => {
+  const { subscription, isLoading, isPremium, isBusiness } = useSubscription();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!subscription) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">Unable to load subscription data</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getTierDisplayName = (tier: SubscriptionTier) => {
+    switch (tier) {
+      case SubscriptionTier.BUSINESS:
+        return 'Business';
+      case SubscriptionTier.PREMIUM:
+        return 'Premium';
+      default:
+        return 'Free';
+    }
+  };
+
+  const getTierBadgeClass = (tier: SubscriptionTier) => {
+    switch (tier) {
+      case SubscriptionTier.BUSINESS:
+        return 'bg-purple-500 text-white';
+      case SubscriptionTier.PREMIUM:
+        return 'bg-yellow-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+
+  const featureComparison = {
+    'AI Recommendations': { free: false, premium: true, business: true },
+    'Advanced Analytics': { free: false, premium: true, business: true },
+    'Priority Support': { free: false, premium: true, business: true },
+    'Unlimited Requests': { free: false, premium: false, business: true },
+    'Dedicated Manager': { free: false, premium: false, business: true },
+  };
+
+  return (
+    <div className="space-y-8 w-full max-w-5xl">
+      {/* Current Plan */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl">Current Plan</CardTitle>
+              <CardDescription>Your active subscription details</CardDescription>
+            </div>
+            <Badge className={`${getTierBadgeClass(subscription.tier)} text-lg px-4 py-2`}>
+              {getTierDisplayName(subscription.tier)}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-muted-foreground">Status</Label>
+              <div className="flex items-center gap-2 mt-1">
+                {subscription.isActive ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="font-medium">Active</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                    <span className="font-medium">Inactive</span>
+                  </>
+                )}
+              </div>
+            </div>
+            {subscription.expiresAt && (
+              <div>
+                <Label className="text-muted-foreground">Expires</Label>
+                <div className="mt-1 font-medium">
+                  {new Date(subscription.expiresAt).toLocaleDateString()}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Active Features */}
+          <div>
+            <Label className="text-muted-foreground mb-2 block">Active Features</Label>
+            <div className="flex flex-wrap gap-2">
+              {subscription.features.length > 0 ? (
+                subscription.features.map((feature, index) => (
+                  <Badge key={index} variant="secondary">{feature}</Badge>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground">No premium features</span>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Current Limits */}
+          <div>
+            <Label className="text-muted-foreground mb-2 block">Current Limits</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm font-medium">AI Requests (15 min)</div>
+                <div className="text-sm text-muted-foreground">{subscription.limits.aiRequestsPer15min}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium">AI Requests (Day)</div>
+                <div className="text-sm text-muted-foreground">{subscription.limits.aiRequestsPerDay}</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Upgrade Options */}
+      {subscription.tier !== SubscriptionTier.BUSINESS && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Upgrade Your Plan</CardTitle>
+            <CardDescription>Choose the plan that's right for you</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Free Plan Card */}
+              <Card className={`${subscription.tier === SubscriptionTier.FREE ? 'border-primary' : ''}`}>
+                <CardHeader>
+                  <CardTitle>Free</CardTitle>
+                  <div className="text-3xl font-bold">$0/mo</div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Basic Features</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Limited AI Requests</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Community Support</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.FREE ? 'default' : 'outline'}>
+                    {subscription.tier === SubscriptionTier.FREE ? 'Current Plan' : 'Downgrade'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Premium Plan Card */}
+              <Card className={`${subscription.tier === SubscriptionTier.PREMIUM ? 'border-primary' : ''}`}>
+                <CardHeader>
+                  <CardTitle>Premium</CardTitle>
+                  <div className="text-3xl font-bold">$6.99/mo</div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">AI Recommendations</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Advanced Analytics</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Priority Support</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">More AI Requests</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.PREMIUM ? 'default' : 'outline'}>
+                    {subscription.tier === SubscriptionTier.PREMIUM ? 'Current Plan' : 'Upgrade'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Business Plan Card */}
+              <Card className={`${subscription.tier === SubscriptionTier.BUSINESS ? 'border-primary' : ''}`}>
+                <CardHeader>
+                  <CardTitle>Business</CardTitle>
+                  <div className="text-3xl font-bold">Custom</div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Everything in Premium</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Unlimited Requests</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Dedicated Manager</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Custom Integrations</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.BUSINESS ? 'default' : 'outline'}>
+                    {isBusiness ? 'Current Plan' : 'Upgrade'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

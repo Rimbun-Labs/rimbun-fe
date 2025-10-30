@@ -333,14 +333,25 @@ const LearningPathDetail: React.FC = () => {
       p.toLowerCase().includes('use')
     );
 
+    // Exclude filtered sentences from overview to avoid duplication
+    const overviewSentences = paragraphs.filter(
+      p => !keyPoints.includes(p) && !practicalTips.includes(p)
+    );
+
     return (
       <div className="space-y-6">
         {/* Overview */}
-        <div className="prose prose-slate max-w-none">
-          <p className="text-foreground leading-relaxed">
-            {paragraphs[0]}
-          </p>
-        </div>
+        {overviewSentences.length > 0 && (
+          <div className="prose prose-slate max-w-none">
+            <div className="space-y-3">
+              {overviewSentences.map((p, i) => (
+                <p key={i} className="text-foreground leading-relaxed">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Key Points */}
         {keyPoints.length > 0 && (

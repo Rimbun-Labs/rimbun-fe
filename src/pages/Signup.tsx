@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { userService } from '@/lib/api/userService';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { AlertCircle } from 'lucide-react';
+import { authService } from '@/lib/auth/authService';
 
 const Signup = () => {
   const { signUp, signInWithGoogle } = useAuth();
@@ -48,12 +49,16 @@ const Signup = () => {
         authProviderId: firebaseUser.uid
       });
 
+      // Send email verification
+      await authService.sendEmailVerification(firebaseUser);
+
       toast({
         title: "Success",
-        description: "Account created successfully",
+        description: "Account created successfully. Please check your email to verify your account.",
       });
 
-      navigate('/dashboard');
+      // Navigate to email confirmation page
+      navigate('/signup/check-email');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       setError(errorMessage);

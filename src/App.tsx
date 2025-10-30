@@ -23,12 +23,19 @@ import NotFound from "./pages/NotFound";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
 import SpendingAnalysis from "./pages/SpendingAnalysis";
 import CashFlowProjections from "./pages/CashFlowProjections";
+import BankAnalyticsDashboard from "./pages/BankAnalyticsDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import EmailConfirmation from "./pages/EmailConfirmation";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useSession } from "./contexts/SessionContext";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import TestLayout from "./pages/TestLayout";
 
 const queryClient = new QueryClient();
@@ -98,7 +105,12 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/signup/check-email" element={<EmailConfirmation />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
 
       {/* Protected routes with ContentLayout (contained, centered) */}
       <Route
@@ -136,6 +148,11 @@ const AppRoutes = () => {
         <Route path="/learning/risk-management/:moduleId" element={<LearningLibraryDetail />} />
         <Route path="/learning/market-analysis/:moduleId" element={<LearningLibraryDetail />} />
         <Route path="/learning/portfolio-optimization/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/retirement-planning/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/financial-planning/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/value-growth-investing/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/economic-fundamentals/:moduleId" element={<LearningLibraryDetail />} />
+        <Route path="/learning/behavioral-finance/:moduleId" element={<LearningLibraryDetail />} />
         
         {/* Learning Paths Routes */}
         <Route path="/learning-path/:sessionId" element={<LearningPaths />} />
@@ -146,6 +163,9 @@ const AppRoutes = () => {
         <Route path="/spending-analysis" element={<SpendingAnalysis />} />
         <Route path="/cash-flow-projections" element={<CashFlowProjections />} />
         <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
+        
+        {/* Bank Analytics (Protected by backend - will show error if no permission) */}
+        <Route path="/analytics" element={<BankAnalyticsDashboard />} />
 
       </Route>
 
@@ -163,15 +183,17 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             <SessionProvider>
-              <ThemeProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AssessmentPersistenceProvider>
-                    <AppRoutes />
-                  </AssessmentPersistenceProvider>
-                </TooltipProvider>
-              </ThemeProvider>
+              <SubscriptionProvider>
+                <ThemeProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <AssessmentPersistenceProvider>
+                      <AppRoutes />
+                    </AssessmentPersistenceProvider>
+                  </TooltipProvider>
+                </ThemeProvider>
+              </SubscriptionProvider>
             </SessionProvider>
           </AuthProvider>
         </BrowserRouter>

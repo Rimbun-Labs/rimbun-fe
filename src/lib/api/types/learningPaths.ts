@@ -27,37 +27,37 @@ export interface LearningPathSection {
       sections: [
         {
           title: "What are Equities?",
-          content: "Equities are shares of ownership in a company, like stocks you can buy on the stock market. When you buy a stock, you own a small piece of that company and can benefit if it grows. For example, if you buy Apple stock, you're an Apple shareholder! Equities can grow your money over time through `historicalReturn`, which measures past performance (e.g., Apple's stock grew 233% from 2000–2005). However, they can also be risky because prices change daily. This section introduces you to the basics of stocks and ETFs (Exchange-Traded Funds), which bundle many stocks together for easier investing. You'll learn how equities can fit into your investment goals.",
+          content: "Equities are shares of ownership in a company, like stocks you can buy on the stock market. When you buy a stock, you own a small piece of that company and can benefit if it grows. For example, if you buy Apple stock, you're an Apple shareholder! Equities can grow your money over time through historical returns, which measure past performance (e.g., Apple's stock grew 233% from 2000–2005). However, they can also be risky because prices change daily. This section introduces you to the basics of stocks and ETFs (Exchange-Traded Funds), which bundle many stocks together for easier investing. You'll learn how equities can fit into your investment goals.",
           difficulty: "Beginner",
           relatedMetrics: ["historicalReturn"]
         },
         {
           title: "Understanding Volatility",
-          content: "Equities can be exciting, but their prices move up and down—sometimes a lot! This movement is called `volatility`, and it measures how much a stock's price swings. A stock with high `volatility` (e.g., 30%) might drop or gain 30% in a year, which can feel risky. A low `volatility` stock (e.g., 15%) is steadier, better for cautious investors. Another metric, `beta`, shows how a stock moves compared to the market (e.g., a `beta` of 1.0 means it moves with the market). In this section, you'll learn how to check these metrics and decide if a stock's ups and downs match your comfort level.",
+          content: "Equities can be exciting, but their prices move up and down—sometimes a lot! This movement is called volatility, and it measures how much a stock's price swings. A stock with high volatility (e.g., 30%) might drop or gain 30% in a year, which can feel risky. A low volatility stock (e.g., 15%) is steadier, better for cautious investors. Another metric, beta, shows how a stock moves compared to the market (e.g., a beta of 1.0 means it moves with the market). In this section, you'll learn how to check these metrics and decide if a stock's ups and downs match your comfort level.",
           difficulty: "Beginner",
           relatedMetrics: ["volatility", "beta"]
         },
         {
           title: "Key Metrics for Stocks",
-          content: "Picking stocks means looking at numbers that tell you about a company's value and growth. One key metric is the `peRatio` (Price-to-Earnings Ratio), which shows how much you're paying for each dollar of the company's earnings. A lower `peRatio` (e.g., 15) might mean a stock is undervalued, while a higher one (e.g., 30) might mean it's pricey but growing fast, like tech stocks. Another metric, `dividendYield`, tells you how much a company pays in dividends per share (e.g., 2% means $2 per $100 invested). This section teaches you how to use these metrics to compare stocks and find ones that fit your goals, whether you want growth or steady income.",
+          content: "Picking stocks means looking at numbers that tell you about a company's value and growth. One key metric is the P/E ratio (Price-to-Earnings Ratio), which shows how much you're paying for each dollar of the company's earnings. A lower P/E ratio (e.g., 15) might mean a stock is undervalued, while a higher one (e.g., 30) might mean it's pricey but growing fast, like tech stocks. Another metric, dividend yield, tells you how much a company pays in dividends per share (e.g., 2% means $2 per $100 invested). This section teaches you how to use these metrics to compare stocks and find ones that fit your goals, whether you want growth or steady income.",
           difficulty: "Intermediate",
           relatedMetrics: ["peRatio", "dividendYield"]
         },
         {
           title: "Diversifying with ETFs",
-          content: "Buying individual stocks can be risky, but ETFs (Exchange-Traded Funds) let you invest in many stocks at once, spreading out your risk. For example, an S&P 500 ETF holds shares in 500 big companies, so you're not betting on just one! ETFs have an `expenseRatio`, a small fee you pay yearly (e.g., 0.1% means $1 per $1,000 invested), which you'll want to keep low. They also cover different sectors, like tech or healthcare, so you can choose what fits your interests. This section explains how ETFs work, how to pick ones with a low `expenseRatio`, and why diversification lowers risk.",
+          content: "Buying individual stocks can be risky, but ETFs (Exchange-Traded Funds) let you invest in many stocks at once, spreading out your risk. For example, an S&P 500 ETF holds shares in 500 big companies, so you're not betting on just one! ETFs have an expense ratio, a small fee you pay yearly (e.g., 0.1% means $1 per $1,000 invested), which you'll want to keep low. They also cover different sectors, like tech or healthcare, so you can choose what fits your interests. This section explains how ETFs work, how to pick ones with a low expense ratio, and why diversification lowers risk.",
           difficulty: "Intermediate",
           relatedMetrics: ["expenseRatio"]
         },
         {
           title: "Growth vs. Value Investing",
-          content: "There are two main styles of stock investing: growth and value. Growth stocks, like many tech companies, focus on fast earnings increases, often with high `peRatio` values (e.g., 40) because investors expect big future gains. Value stocks are undervalued gems, with lower `peRatio` values (e.g., 10), offering steady returns through dividends or price increases. Both have risks: growth stocks can crash if they don't meet expectations, while value stocks might stay undervalued. This section helps you decide which style suits your goals and risk tolerance, using metrics like `growthRate` for growth stocks and `dividendYield` for value stocks. It's a step toward building a strategy that matches your investor profile.",
+          content: "There are two main styles of stock investing: growth and value. Growth stocks, like many tech companies, focus on fast earnings increases, often with high P/E ratio values (e.g., 40) because investors expect big future gains. Value stocks are undervalued gems, with lower P/E ratio values (e.g., 10), offering steady returns through dividends or price increases. Both have risks: growth stocks can crash if they don't meet expectations, while value stocks might stay undervalued. This section helps you decide which style suits your goals and risk tolerance, using metrics like growth rate for growth stocks and dividend yield for value stocks. It's a step toward building a strategy that matches your investor profile.",
           difficulty: "Advanced",
           relatedMetrics: ["peRatio", "dividendYield", "growthRate"]
         },
         {
           title: "Market Timing Risks",
-          content: "Some investors try to 'time' the market—buying low and selling high—but this is tricky! Markets go through cycles (`bullMarket` for rising prices, `bearMarket` for falling ones), and guessing the right moment is hard. The `timingRisk` means you might miss out on gains if you wait too long or sell too early. For example, if you sold during a 2008 dip, you'd miss the 2009 recovery. This section explores why long-term investing often beats timing, using historical data to show how market cycles work. You'll learn to focus on your goals, not short-term price changes, and avoid common mistakes.",
+          content: "Some investors try to 'time' the market—buying low and selling high—but this is tricky! Markets go through cycles (bull markets for rising prices, bear markets for falling ones), and guessing the right moment is hard. The timing risk means you might miss out on gains if you wait too long or sell too early. For example, if you sold during a 2008 dip, you'd miss the 2009 recovery. This section explores why long-term investing often beats timing, using historical data to show how market cycles work. You'll learn to focus on your goals, not short-term price changes, and avoid common mistakes.",
           difficulty: "Advanced",
           relatedMetrics: ["timingRisk"]
         }
@@ -70,31 +70,31 @@ export interface LearningPathSection {
       sections: [
         {
           title: "What are Bonds?",
-          content: "Bonds are like loans you give to companies or governments. In return, they pay you interest over time, called the `couponRate` (e.g., 3% means $30 yearly per $1,000 invested), and return your money at the end, called maturity. The `ytm` (Yield to Maturity) shows your total return if you hold the bond until it matures, combining interest and price changes. Bonds are generally safer than stocks, making them great for steady income and preserving your money. This section covers the basics of how bonds work, why they're a safe choice, and how to understand `ytm` to pick the right ones. It's perfect for beginners looking for stability in their investments.",
+          content: "Bonds are like loans you give to companies or governments. In return, they pay you interest over time, called the coupon rate (e.g., 3% means $30 yearly per $1,000 invested), and return your money at the end, called maturity. The yield to maturity (YTM) shows your total return if you hold the bond until it matures, combining interest and price changes. Bonds are generally safer than stocks, making them great for steady income and preserving your money. This section covers the basics of how bonds work, why they're a safe choice, and how to understand yield to maturity to pick the right ones. It's perfect for beginners looking for stability in their investments.",
           difficulty: "Beginner",
           relatedMetrics: ["couponRate", "ytm"]
         },
         {
           title: "Safety and Income",
-          content: "Bonds are often chosen for their safety, but not all bonds are equal! The `creditRating` tells you how likely the issuer is to pay you back—AAA is the safest (like U.S. Treasury bonds), while lower ratings (e.g., BB) are riskier but pay higher interest. Treasury bonds are backed by the government, making them super safe, with a `couponRate` like 2%. This section explains how to pick bonds based on `creditRating` to match your risk comfort, and why bonds provide steady income through interest payments. It's a great starting point for cautious investors.",
+          content: "Bonds are often chosen for their safety, but not all bonds are equal! The credit rating tells you how likely the issuer is to pay you back—AAA is the safest (like U.S. Treasury bonds), while lower ratings (e.g., BB) are riskier but pay higher interest. Treasury bonds are backed by the government, making them super safe, with a coupon rate like 2%. This section explains how to pick bonds based on credit rating to match your risk comfort, and why bonds provide steady income through interest payments. It's a great starting point for cautious investors.",
           difficulty: "Beginner",
           relatedMetrics: ["creditRating", "couponRate"]
         },
         {
           title: "Interest Rate Risks",
-          content: "Bonds are safe, but they're not risk-free! When interest rates rise, bond prices fall, and the `duration` metric shows how much. A bond with a `duration` of 5 will drop 5% in price if rates rise 1%. For example, in 2022, rates rose, and many bonds lost value temporarily. This section teaches you how `duration` and `convexity` (a measure of price sensitivity) help you understand this risk, so you can pick bonds that won't swing too much if rates change. It's a key skill for planning your investments, especially if you're worried about price drops.",
+          content: "Bonds are safe, but they're not risk-free! When interest rates rise, bond prices fall, and the duration metric shows how much. A bond with a duration of 5 will drop 5% in price if rates rise 1%. For example, in 2022, rates rose, and many bonds lost value temporarily. This section teaches you how duration and convexity (a measure of price sensitivity) help you understand this risk, so you can pick bonds that won't swing too much if rates change. It's a key skill for planning your investments, especially if you're worried about price drops.",
           difficulty: "Intermediate",
           relatedMetrics: ["duration", "convexity"]
         },
         {
           title: "Corporate vs. Government Bonds",
-          content: "Bonds come in two main types: government (like Treasuries) and corporate (issued by companies). Government bonds are safer, with high `creditRating` (e.g., AAA), but offer lower yields (e.g., 2% `ytm`). Corporate bonds can pay more (e.g., 4% `ytm`), but carry `defaultRisk`—the chance the company can't pay you back, especially if their `creditRating` is lower (e.g., BBB). This section compares the two, helping you decide which fits your risk level and income goals. You'll learn how to balance safety and returns, a crucial step for building a bond portfolio.",
+          content: "Bonds come in two main types: government (like Treasuries) and corporate (issued by companies). Government bonds are safer, with high credit ratings (e.g., AAA), but offer lower yields (e.g., 2% YTM). Corporate bonds can pay more (e.g., 4% YTM), but carry default risk—the chance the company can't pay you back, especially if their credit rating is lower (e.g., BBB). This section compares the two, helping you decide which fits your risk level and income goals. You'll learn how to balance safety and returns, a crucial step for building a bond portfolio.",
           difficulty: "Intermediate",
           relatedMetrics: ["creditRating", "ytm", "defaultRisk"]
         },
         {
           title: "Bond Laddering Strategy",
-          content: "A bond ladder is a smart way to manage your bond investments. You buy bonds with different maturities (e.g., 1, 3, 5 years), creating a `maturityLadder`. When one bond matures, you reinvest the money, keeping your income steady and reducing interest rate risk. For example, if rates rise, only part of your money is affected, not all of it. This section teaches you how to build a bond ladder, using metrics like `duration` to pick bonds and plan your cash flow. It's an advanced strategy that ensures you're prepared for changing rates while earning consistent interest.",
+          content: "A bond ladder is a smart way to manage your bond investments. You buy bonds with different maturities (e.g., 1, 3, 5 years), creating a maturity ladder. When one bond matures, you reinvest the money, keeping your income steady and reducing interest rate risk. For example, if rates rise, only part of your money is affected, not all of it. This section teaches you how to build a bond ladder, using metrics like duration to pick bonds and plan your cash flow. It's an advanced strategy that ensures you're prepared for changing rates while earning consistent interest.",
           difficulty: "Advanced",
           relatedMetrics: ["duration", "maturityLadder"]
         }
@@ -107,31 +107,31 @@ export interface LearningPathSection {
       sections: [
         {
           title: "Real Estate Basics",
-          content: "Real estate investing means buying property to earn money, either through rent or price growth. When a property's value rises over time, that's called `appreciation`—for example, a house bought for $200,000 in 2010 might be worth $300,000 by 2020, a 50% increase! You can also earn `rentalIncome` by leasing it out, like $1,000 a month. Real estate can be a great way to grow your money, but it's less liquid than stocks—you can't sell it as quickly. This section covers the basics of real estate, how `appreciation` and `rentalIncome` work, and why it's a popular investment. It's perfect for beginners curious about property.",
+          content: "Real estate investing means buying property to earn money, either through rent or price growth. When a property's value rises over time, that's called appreciation—for example, a house bought for $200,000 in 2010 might be worth $300,000 by 2020, a 50% increase! You can also earn rental income by leasing it out, like $1,000 a month. Real estate can be a great way to grow your money, but it's less liquid than stocks—you can't sell it as quickly. This section covers the basics of real estate, how appreciation and rental income work, and why it's a popular investment. It's perfect for beginners curious about property.",
           difficulty: "Beginner",
           relatedMetrics: ["appreciation", "rentalIncome"]
         },
         {
           title: "Understanding Cap Rates",
-          content: "A key metric in real estate is the `capRate` (Capitalization Rate), which shows your yearly return from a property, not counting price changes. It's calculated as annual `rentalIncome` divided by the property's price. For example, a $200,000 property earning $12,000 a year in rent has a `capRate` of 6% ($12,000 / $200,000). A higher `capRate` means better returns, but often more risk (e.g., a less desirable area). This section explains how to use `capRate` to compare properties and decide if a real estate investment is worth it for your goals.",
+          content: "A key metric in real estate is the cap rate (capitalization rate), which shows your yearly return from a property, not counting price changes. It's calculated as annual rental income divided by the property's price. For example, a $200,000 property earning $12,000 a year in rent has a cap rate of 6% ($12,000 / $200,000). A higher cap rate means better returns, but often more risk (e.g., a less desirable area). This section explains how to use cap rate to compare properties and decide if a real estate investment is worth it for your goals.",
           difficulty: "Beginner",
           relatedMetrics: ["capRate", "rentalIncome"]
         },
         {
           title: "REITs for Beginners",
-          content: "Don't want to buy a whole property? REITs (Real Estate Investment Trusts) let you invest in real estate without owning it directly. They're like ETFs for property—you buy shares in a company that owns buildings, and they pay you a `dividendYield` (e.g., 4% means $4 per $100 invested). REITs are more liquid than physical property, with `liquidity` meaning you can sell shares easily on the stock market. This section introduces REITs, how they work, and why they're a great way to start in real estate. You'll learn to check `dividendYield` and `liquidity` to pick REITs that fit your needs.",
+          content: "Don't want to buy a whole property? REITs (Real Estate Investment Trusts) let you invest in real estate without owning it directly. They're like ETFs for property—you buy shares in a company that owns buildings, and they pay you a dividend yield (e.g., 4% means $4 per $100 invested). REITs are more liquid than physical property, with liquidity meaning you can sell shares easily on the stock market. This section introduces REITs, how they work, and why they're a great way to start in real estate. You'll learn to check dividend yield and liquidity to pick REITs that fit your needs.",
           difficulty: "Intermediate",
           relatedMetrics: ["dividendYield", "liquidity"]
         },
         {
           title: "Market Cycles in Real Estate",
-          content: "Real estate prices don't always go up—they follow cycles, just like stocks. The `housingIndex` (e.g., FHFA HPI) tracks price changes over time; for example, prices fell 20% during the 2008 crisis but rose 50% from 2012–2020. These `economicCycles` are influenced by interest rates, jobs, and demand. This section teaches you how to understand these cycles and their impact on real estate investments. You'll learn why timing matters and how to spot opportunities (e.g., buying in a dip) or risks (e.g., overpaying in a boom). It's a step toward smarter property investing.",
+          content: "Real estate prices don't always go up—they follow cycles, just like stocks. The housing index (e.g., FHFA HPI) tracks price changes over time; for example, prices fell 20% during the 2008 crisis but rose 50% from 2012–2020. These economic cycles are influenced by interest rates, jobs, and demand. This section teaches you how to understand these cycles and their impact on real estate investments. You'll learn why timing matters and how to spot opportunities (e.g., buying in a dip) or risks (e.g., overpaying in a boom). It's a step toward smarter property investing.",
           difficulty: "Intermediate",
           relatedMetrics: ["housingIndex", "economicCycles"]
         },
         {
           title: "Leverage in Real Estate",
-          content: "Many real estate investors use loans to buy properties, a strategy called leverage. The `loanToValue` ratio (LTV) shows how much you're borrowing—e.g., borrowing $150,000 for a $200,000 property is a 75% LTV. Leverage can boost returns (if the property grows in value), but it also adds risk: you'll owe `debtService` (monthly loan payments), which can strain your budget if rent doesn't cover it. This section explains how leverage works, how to calculate `loanToValue`, and why `debtService` matters for cash flow. It's an advanced topic for those ready to take on bigger real estate investments.",
+          content: "Many real estate investors use loans to buy properties, a strategy called leverage. The loan-to-value ratio (LTV) shows how much you're borrowing—e.g., borrowing $150,000 for a $200,000 property is a 75% LTV. Leverage can boost returns (if the property grows in value), but it also adds risk: you'll owe debt service (monthly loan payments), which can strain your budget if rent doesn't cover it. This section explains how leverage works, how to calculate loan-to-value, and why debt service matters for cash flow. It's an advanced topic for those ready to take on bigger real estate investments.",
           difficulty: "Advanced",
           relatedMetrics: ["loanToValue", "debtService"]
         }
@@ -144,25 +144,25 @@ export interface LearningPathSection {
       sections: [
         {
           title: "Liquidity and Safety",
-          content: "Cash investments, like savings accounts, are the safest way to keep your money. They offer high `liquidity`, meaning you can access your funds anytime, and they earn a small amount of interest, called the `interestRate` (e.g., 1% means $10 per year on $1,000). Cash is perfect for emergencies or short-term goals because there's almost no risk of losing money. However, the returns are low compared to stocks or bonds, so it's not great for long-term growth. This section covers why cash is a safe choice, how `interestRate` works, and when to use it in your plan. It's a great starting point for cautious investors looking for stability.",
+          content: "Cash investments, like savings accounts, are the safest way to keep your money. They offer high liquidity, meaning you can access your funds anytime, and they earn a small amount of interest, called the interest rate (e.g., 1% means $10 per year on $1,000). Cash is perfect for emergencies or short-term goals because there's almost no risk of losing money. However, the returns are low compared to stocks or bonds, so it's not great for long-term growth. This section covers why cash is a safe choice, how interest rate works, and when to use it in your plan. It's a great starting point for cautious investors looking for stability.",
           difficulty: "Beginner",
           relatedMetrics: ["liquidity", "interestRate"]
         },
         {
           title: "Inflation Risks",
-          content: "While cash is safe, it has a hidden risk: inflation. The `inflationRisk` happens when prices rise faster than your `interestRate`. For example, if your savings account earns 1% but inflation is 3%, your money loses 2% in buying power each year—$1,000 feels like $980 after a year. This section explains how inflation erodes your savings over time and why keeping too much in cash can hurt your long-term goals. You'll learn to watch `inflationRisk` and decide when to move money into other investments, like bonds, for better returns.",
+          content: "While cash is safe, it has a hidden risk: inflation. The inflation risk happens when prices rise faster than your interest rate. For example, if your savings account earns 1% but inflation is 3%, your money loses 2% in buying power each year—$1,000 feels like $980 after a year. This section explains how inflation erodes your savings over time and why keeping too much in cash can hurt your long-term goals. You'll learn to watch inflation risk and decide when to move money into other investments, like bonds, for better returns.",
           difficulty: "Beginner",
           relatedMetrics: ["inflationRisk", "interestRate"]
         },
         {
           title: "High-Yield Savings Options",
-          content: "Not all cash investments are the same! Beyond regular savings accounts, you can use high-yield savings accounts or `moneyMarket` funds, which often pay higher `interestRate` (e.g., 2% instead of 0.5%). Certificates of Deposit (CDs) lock your money for a set time (e.g., 1 year) but offer better `cdRates`, like 3%. These options still keep your money safe and liquid, but they help you earn more. This section explores these alternatives, teaching you how to compare `interestRate` and `cdRates` to get the most from your cash. It's a step toward making your savings work harder.",
+          content: "Not all cash investments are the same! Beyond regular savings accounts, you can use high-yield savings accounts or money market funds, which often pay higher interest rates (e.g., 2% instead of 0.5%). Certificates of Deposit (CDs) lock your money for a set time (e.g., 1 year) but offer better CD rates, like 3%. These options still keep your money safe and liquid, but they help you earn more. This section explores these alternatives, teaching you how to compare interest rates and CD rates to get the most from your cash. It's a step toward making your savings work harder.",
           difficulty: "Intermediate",
           relatedMetrics: ["interestRate", "cdRates"]
         },
         {
           title: "Opportunity Costs of Cash",
-          content: "Holding too much cash can cost you more than you think! The `opportunityCost` is what you miss out on by not investing elsewhere—like earning 5% in bonds or 8% in stocks instead of 1% in cash. For example, $10,000 in cash at 1% grows to $10,100 in a year, but in stocks at 8%, it could've been $10,800—a $700 difference! This section explains how `opportunityCost` affects your long-term goals and why balancing cash with other investments can grow your money faster. It's an advanced concept for users ready to think beyond safety.",
+          content: "Holding too much cash can cost you more than you think! The opportunity cost is what you miss out on by not investing elsewhere—like earning 5% in bonds or 8% in stocks instead of 1% in cash. For example, $10,000 in cash at 1% grows to $10,100 in a year, but in stocks at 8%, it could've been $10,800—a $700 difference! This section explains how opportunity cost affects your long-term goals and why balancing cash with other investments can grow your money faster. It's an advanced concept for users ready to think beyond safety.",
           difficulty: "Advanced",
           relatedMetrics: ["opportunityCost", "interestRate"]
         }
@@ -175,37 +175,37 @@ export interface LearningPathSection {
       sections: [
         {
           title: "Introduction to Islamic Finance",
-          content: "Islamic finance follows Sharia (Islamic law) principles that prohibit interest (riba) and promote ethical investing. Instead of traditional interest-based loans, Islamic finance uses `profitSharing` arrangements where both parties share in profits and losses. This creates a more equitable system where risk is shared fairly. Islamic finance also avoids investments in prohibited industries like alcohol, gambling, or weapons. This section introduces the core principles of Islamic finance and how they differ from conventional banking.",
+          content: "Islamic finance follows Sharia (Islamic law) principles that prohibit interest (riba) and promote ethical investing. Instead of traditional interest-based loans, Islamic finance uses profit-sharing arrangements where both parties share in profits and losses. This creates a more equitable system where risk is shared fairly. Islamic finance also avoids investments in prohibited industries like alcohol, gambling, or weapons. This section introduces the core principles of Islamic finance and how they differ from conventional banking.",
           difficulty: "Beginner",
           relatedMetrics: ["profitSharing", "shariaCompliance"]
         },
         {
           title: "Sharia-Compliant Investment Vehicles",
-          content: "Islamic investments use unique structures like Mudarabah (profit-sharing), Musharakah (partnership), and Sukuk (Islamic bonds). Mudarabah allows one party to provide capital while the other provides expertise, sharing profits according to agreed ratios. Musharakah creates true partnerships where all parties contribute capital and share both profits and losses. Sukuk are asset-backed securities that comply with Sharia law. These structures ensure `shariaCompliance` while providing investment opportunities that align with Islamic values.",
+          content: "Islamic investments use unique structures like Mudarabah (profit-sharing), Musharakah (partnership), and Sukuk (Islamic bonds). Mudarabah allows one party to provide capital while the other provides expertise, sharing profits according to agreed ratios. Musharakah creates true partnerships where all parties contribute capital and share both profits and losses. Sukuk are asset-backed securities that comply with Sharia law. These structures ensure Sharia compliance while providing investment opportunities that align with Islamic values.",
           difficulty: "Beginner",
           relatedMetrics: ["shariaCompliance", "profitSharing"]
         },
         {
           title: "Screening and Compliance",
-          content: "Islamic investment screening involves checking companies for Sharia compliance through `ethicalScreening` processes. This includes avoiding companies with high `debtRatio` (typically over 33%), those involved in prohibited activities, or those earning significant interest income. Islamic funds use specialized screening committees to ensure investments meet Sharia standards. This section explains how to evaluate investments for Islamic compliance and understand the screening criteria used by Islamic financial institutions.",
+          content: "Islamic investment screening involves checking companies for Sharia compliance through ethical screening processes. This includes avoiding companies with high debt ratios (typically over 33%), those involved in prohibited activities, or those earning significant interest income. Islamic funds use specialized screening committees to ensure investments meet Sharia standards. This section explains how to evaluate investments for Islamic compliance and understand the screening criteria used by Islamic financial institutions.",
           difficulty: "Intermediate",
           relatedMetrics: ["ethicalScreening", "debtRatio", "shariaCompliance"]
         },
         {
           title: "Islamic Banking Products",
-          content: "Islamic banking offers alternatives to conventional products. Instead of savings accounts earning interest, Islamic banks offer `interestFree` savings accounts that may share profits from halal investments. Home financing uses diminishing Musharakah where the bank and customer jointly own the property, with the customer gradually buying out the bank's share. Islamic credit cards avoid interest charges, instead charging fixed fees for services. This section covers the main Islamic banking products and how they work differently from conventional banking.",
+          content: "Islamic banking offers alternatives to conventional products. Instead of savings accounts earning interest, Islamic banks offer interest-free savings accounts that may share profits from halal investments. Home financing uses diminishing Musharakah where the bank and customer jointly own the property, with the customer gradually buying out the bank's share. Islamic credit cards avoid interest charges, instead charging fixed fees for services. This section covers the main Islamic banking products and how they work differently from conventional banking.",
           difficulty: "Intermediate",
           relatedMetrics: ["interestFree", "profitSharing"]
         },
         {
           title: "Global Islamic Finance Markets",
-          content: "The global Islamic finance market has grown significantly, with Malaysia, Saudi Arabia, and the UAE leading in Islamic banking assets. Islamic finance principles are increasingly adopted by conventional institutions seeking ethical investment options. The market includes Islamic mutual funds, ETFs, and even Islamic fintech solutions. Understanding `shariaCompliance` requirements across different jurisdictions helps investors navigate this growing market. This section explores the global landscape of Islamic finance and emerging opportunities.",
+          content: "The global Islamic finance market has grown significantly, with Malaysia, Saudi Arabia, and the UAE leading in Islamic banking assets. Islamic finance principles are increasingly adopted by conventional institutions seeking ethical investment options. The market includes Islamic mutual funds, ETFs, and even Islamic fintech solutions. Understanding Sharia compliance requirements across different jurisdictions helps investors navigate this growing market. This section explores the global landscape of Islamic finance and emerging opportunities.",
           difficulty: "Advanced",
           relatedMetrics: ["shariaCompliance", "ethicalScreening"]
         },
         {
           title: "Risk Management in Islamic Finance",
-          content: "Islamic finance faces unique risks including Sharia compliance risk, where investments may become non-compliant due to business changes. Operational risk is higher due to complex `profitSharing` structures requiring careful monitoring. Liquidity risk can be challenging since Islamic banks cannot access conventional interbank lending. However, Islamic finance promotes more stable, asset-backed investments that can reduce overall portfolio risk. This section covers risk management strategies specific to Islamic finance investments.",
+          content: "Islamic finance faces unique risks including Sharia compliance risk, where investments may become non-compliant due to business changes. Operational risk is higher due to complex profit-sharing structures requiring careful monitoring. Liquidity risk can be challenging since Islamic banks cannot access conventional interbank lending. However, Islamic finance promotes more stable, asset-backed investments that can reduce overall portfolio risk. This section covers risk management strategies specific to Islamic finance investments.",
           difficulty: "Advanced",
           relatedMetrics: ["profitSharing", "shariaCompliance", "debtRatio"]
         }
@@ -218,31 +218,31 @@ export interface LearningPathSection {
       sections: [
         {
           title: "Understanding ESG Investing",
-          content: "ESG (Environmental, Social, Governance) investing considers how companies impact the world beyond just financial returns. Environmental factors include `carbonFootprint`, energy efficiency, and waste management. Social factors cover labor practices, community relations, and product safety. Governance examines board diversity, executive compensation, and transparency. Companies with strong ESG practices often show better long-term performance and lower risk. This section introduces ESG investing and why it matters for both returns and impact.",
+          content: "ESG (Environmental, Social, Governance) investing considers how companies impact the world beyond just financial returns. Environmental factors include carbon footprint, energy efficiency, and waste management. Social factors cover labor practices, community relations, and product safety. Governance examines board diversity, executive compensation, and transparency. Companies with strong ESG practices often show better long-term performance and lower risk. This section introduces ESG investing and why it matters for both returns and impact.",
           difficulty: "Beginner",
           relatedMetrics: ["esgScore", "carbonFootprint"]
         },
         {
           title: "Environmental Factors",
-          content: "Environmental criteria focus on how companies manage their impact on the planet. Key metrics include `carbonFootprint` (greenhouse gas emissions), water usage, renewable energy adoption, and waste reduction. Companies with low `carbonFootprint` and strong environmental policies often have competitive advantages as regulations tighten. Environmental investing also includes clean energy, sustainable agriculture, and green technology sectors. This section explains how to evaluate companies' environmental performance and identify sustainable investment opportunities.",
+          content: "Environmental criteria focus on how companies manage their impact on the planet. Key metrics include carbon footprint (greenhouse gas emissions), water usage, renewable energy adoption, and waste reduction. Companies with low carbon footprint and strong environmental policies often have competitive advantages as regulations tighten. Environmental investing also includes clean energy, sustainable agriculture, and green technology sectors. This section explains how to evaluate companies' environmental performance and identify sustainable investment opportunities.",
           difficulty: "Beginner",
           relatedMetrics: ["carbonFootprint", "sustainabilityRating"]
         },
         {
           title: "Social Impact Investing",
-          content: "Social factors examine how companies treat people - employees, customers, and communities. This includes fair labor practices, workplace diversity, product safety, and community engagement. `socialImpact` investing goes further by actively seeking investments that create positive social change, such as affordable housing, education technology, or healthcare access. Companies with strong social practices often have better employee retention, customer loyalty, and brand reputation. This section covers social investing strategies and how to measure social impact.",
+          content: "Social factors examine how companies treat people - employees, customers, and communities. This includes fair labor practices, workplace diversity, product safety, and community engagement. Social impact investing goes further by actively seeking investments that create positive social change, such as affordable housing, education technology, or healthcare access. Companies with strong social practices often have better employee retention, customer loyalty, and brand reputation. This section covers social investing strategies and how to measure social impact.",
           difficulty: "Intermediate",
           relatedMetrics: ["socialImpact", "esgScore"]
         },
         {
           title: "Governance and Corporate Ethics",
-          content: "Governance examines how companies are managed and controlled. Key factors include board independence, executive compensation alignment, shareholder rights, and transparency. Strong `governanceScore` indicates companies with ethical leadership, clear policies, and accountability mechanisms. Poor governance can lead to scandals, regulatory issues, and financial losses. This section explains how to assess corporate governance and why it's crucial for long-term investment success.",
+          content: "Governance examines how companies are managed and controlled. Key factors include board independence, executive compensation alignment, shareholder rights, and transparency. Strong governance scores indicate companies with ethical leadership, clear policies, and accountability mechanisms. Poor governance can lead to scandals, regulatory issues, and financial losses. This section explains how to assess corporate governance and why it's crucial for long-term investment success.",
           difficulty: "Intermediate",
           relatedMetrics: ["governanceScore", "esgScore"]
         },
         {
           title: "ESG Rating Systems",
-          content: "ESG ratings help investors compare companies' sustainability performance. Major rating agencies use different methodologies, so understanding their approaches is important. `sustainabilityRating` systems typically score companies on environmental, social, and governance factors, often using letter grades or numerical scores. Some focus on risk management while others emphasize positive impact. This section explains how to interpret ESG ratings and use them in investment decisions.",
+          content: "ESG ratings help investors compare companies' sustainability performance. Major rating agencies use different methodologies, so understanding their approaches is important. Sustainability rating systems typically score companies on environmental, social, and governance factors, often using letter grades or numerical scores. Some focus on risk management while others emphasize positive impact. This section explains how to interpret ESG ratings and use them in investment decisions.",
           difficulty: "Intermediate",
           relatedMetrics: ["sustainabilityRating", "esgScore"]
         },
@@ -254,7 +254,7 @@ export interface LearningPathSection {
         },
         {
           title: "Measuring ESG Performance",
-          content: "Measuring ESG performance requires both quantitative metrics and qualitative assessment. `carbonFootprint` reduction, `socialImpact` metrics, and `governanceScore` improvements can be tracked over time. However, ESG impact often takes years to materialize, requiring patient capital and long-term thinking. Investors should look for companies with clear ESG targets, regular reporting, and third-party verification. This section covers how to measure and track ESG performance in your investment portfolio.",
+          content: "Measuring ESG performance requires both quantitative metrics and qualitative assessment. Carbon footprint reduction, social impact metrics, and governance score improvements can be tracked over time. However, ESG impact often takes years to materialize, requiring patient capital and long-term thinking. Investors should look for companies with clear ESG targets, regular reporting, and third-party verification. This section covers how to measure and track ESG performance in your investment portfolio.",
           difficulty: "Advanced",
           relatedMetrics: ["carbonFootprint", "socialImpact", "governanceScore", "sustainabilityRating"]
         }
@@ -268,27 +268,38 @@ export interface LearningPathSection {
         {
           title: "Introduction to Investment Risk",
           difficulty: "Beginner",
-          content: "Investment risk refers to the possibility of losing money or not achieving expected returns. Understanding different types of risk is crucial for making informed investment decisions and protecting your portfolio from significant losses."
+          relatedMetrics: ["volatility"],
+          content: "Investment risk is the possibility of losing money or not achieving expected returns. Every investment carries some degree of risk - the key is understanding and managing it appropriately. For example, a stock with high volatility of 30% can swing 30% up or down in a single year, creating significant potential for both gains and losses. Understanding risk helps you make informed decisions and protects your portfolio from significant downturns. Risk and return go hand-in-hand: generally, higher potential returns come with higher risk. This section introduces the fundamental concepts of investment risk and why it's essential to understand before investing."
         },
         {
           title: "Types of Investment Risk",
           difficulty: "Beginner",
-          content: "Common types of investment risk include market risk (overall market movements), credit risk (borrower default), liquidity risk (difficulty selling assets), inflation risk (purchasing power erosion), and concentration risk (overexposure to specific assets or sectors)."
+          relatedMetrics: ["inflationRisk", "defaultRisk"],
+          content: "Different types of risk affect investments in various ways. Market risk refers to overall market movements that affect all stocks - for example, during the 2008 financial crisis, the S&P 500 dropped 37%, impacting nearly every stock regardless of individual company quality. Credit risk involves the chance that a borrower defaults - corporate bonds with BBB ratings carry higher credit risk than AAA-rated bonds, but pay higher interest to compensate. Liquidity risk means you might not be able to sell an asset quickly - a house is less liquid than a stock, which you can sell instantly. Inflation risk erodes purchasing power - if inflation is 3% and your investment returns 1%, you're losing 2% in real value. Concentration risk occurs when too much capital is in one investment, sector, or geographic region. This section explains these risk types with practical examples to help you identify and assess risks in your own portfolio."
         },
         {
           title: "Risk Measurement Tools",
           difficulty: "Intermediate",
-          content: "Key risk measurement tools include volatility (price fluctuation), beta (sensitivity to market movements), Value at Risk (VaR) (potential loss over a time period), maximum drawdown (largest peak-to-trough decline), and Sharpe ratio (risk-adjusted returns)."
+          relatedMetrics: ["volatility", "beta", "sharpeRatio", "maxDrawdown"],
+          content: "Understanding risk requires measuring it using specific tools and metrics. Volatility measures how much an asset's price fluctuates - a stock with 15% volatility is steadier than one with 30% volatility. Beta shows how a stock moves relative to the market - a beta of 1.5 means the stock typically moves 50% more than the overall market. If the market drops 10%, a stock with beta 1.5 usually falls about 15%. The Sharpe ratio measures risk-adjusted returns - a ratio above 1.0 indicates you're being well compensated for risk, while below 0.5 suggests poor risk-adjusted performance. Maximum drawdown reveals the largest peak-to-trough decline an asset has experienced, showing your potential worst-case scenario. Value at Risk (VaR) estimates potential losses over a specific time period - for example, a 5% VaR at $10,000 means there's a 5% chance of losing more than $10,000 in a given time frame. This section explains these metrics in practical terms and how to use them to assess portfolio risk."
         },
         {
           title: "Diversification Strategies",
           difficulty: "Intermediate",
-          content: "Diversification reduces risk by spreading investments across different asset classes, sectors, geographic regions, and investment styles. Effective diversification can help reduce portfolio volatility while maintaining return potential."
+          relatedMetrics: ["volatility", "beta"],
+          content: "Diversification is the most powerful risk management tool available to individual investors. By spreading investments across different asset classes, sectors, geographic regions, and investment styles, you reduce portfolio volatility without sacrificing too much return potential. For example, a portfolio of 100% stocks might have 20% volatility, but adding 30% bonds reduces volatility to approximately 12% while maintaining 70% of the expected returns. Correlation is key - investing in two tech stocks isn't true diversification since they move together. Better diversification mixes stocks and bonds, which historically have low correlation. Geographic diversification across developed and emerging markets provides exposure to different economic cycles. Sector diversification ensures you're not overexposed to one industry. Studies show that adding just 10% bonds to an all-stock portfolio can reduce volatility by 25% while only reducing returns by about 5%. This section teaches you practical diversification strategies and how to implement them in your portfolio."
         },
         {
           title: "Risk Management Techniques",
           difficulty: "Advanced",
-          content: "Advanced risk management techniques include hedging (using derivatives to offset risk), position sizing (limiting exposure to individual investments), stop-loss orders (automatic selling at predetermined prices), and dynamic asset allocation (adjusting portfolio based on market conditions)."
+          relatedMetrics: ["maxDrawdown", "sharpeRatio"],
+          content: "Advanced risk management techniques help protect your portfolio during downturns. Hedging uses derivatives like options to offset potential losses - for example, buying put options can protect against a 10% decline in your stock holdings, though it costs roughly 2-3% of portfolio value annually. Position sizing limits exposure to any single investment - a common rule is never putting more than 5% of your portfolio in one stock, which limits damage if that stock crashes 50%. Stop-loss orders automatically sell if prices drop below a threshold - setting a 10% stop-loss means you'll sell before losses exceed that level, though it can trigger during temporary dips. Dynamic asset allocation adjusts your stock/bond mix based on market conditions - reducing stock exposure when markets are expensive and increasing it when markets are cheap. Dollar-cost averaging reduces timing risk by investing fixed amounts regularly regardless of prices. This section explores these techniques and how to implement them based on your risk tolerance and investment goals."
+        },
+        {
+          title: "Building Your Risk Management Plan",
+          difficulty: "Advanced",
+          relatedMetrics: ["sharpeRatio", "volatility", "maxDrawdown"],
+          content: "A comprehensive risk management plan helps you navigate markets successfully. Start by assessing your risk capacity - someone with 30 years to retirement can handle more volatility than someone retiring in 5 years. Your risk tolerance determines asset allocation - aggressive investors might choose 90% stocks, moderate investors 60-70%, while conservative investors might prefer 40% stocks with the rest in bonds and cash. Set appropriate position limits to prevent overexposure - professional investors rarely put more than 5% in any single stock. Establish rebalancing rules to maintain your target allocation - when stocks outperform and push your allocation from 70% to 80%, rebalance back. Monitor your Sharpe ratio to ensure you're getting adequate risk-adjusted returns - aim for at least 0.75, with 1.0 or higher being excellent. Prepare for maximum drawdown scenarios - if your portfolio has historically dropped 30%, ensure you can emotionally and financially handle that before investing. This section guides you through creating a personalized risk management framework that protects your investments while allowing for growth."
         }
       ]
     },
@@ -300,27 +311,38 @@ export interface LearningPathSection {
         {
           title: "Introduction to Market Analysis",
           difficulty: "Beginner",
-          content: "Market analysis involves evaluating securities, sectors, or entire markets to make informed investment decisions. It combines fundamental analysis (examining company financials and business prospects) with technical analysis (studying price patterns and market trends)."
+          relatedMetrics: ["peRatio"],
+          content: "Market analysis helps you evaluate securities, sectors, and entire markets to make informed investment decisions rather than guessing. Fundamental analysis examines company financials and business fundamentals to determine if a stock is undervalued or overvalued. Technical analysis studies price patterns and trends to identify entry and exit points. Combining both approaches gives you a complete picture - fundamental analysis answers 'what to buy' while technical analysis helps with 'when to buy'. For example, you might use fundamental analysis to identify a great company trading at a fair price, then use technical analysis to wait for an optimal entry point, potentially saving 5-10% on your purchase price. Understanding market analysis is essential for avoiding emotional decisions and building confidence in your investment choices."
         },
         {
           title: "Fundamental Analysis Basics",
           difficulty: "Beginner",
-          content: "Fundamental analysis evaluates a company's intrinsic value by examining financial statements, business model, competitive position, management quality, and industry trends. This approach helps identify undervalued or overvalued investments."
+          relatedMetrics: ["peRatio", "roe", "debtToEquity"],
+          content: "Fundamental analysis evaluates a company's intrinsic value by examining financial statements, business model, competitive position, management quality, and industry trends. Key metrics include the P/E ratio (Price-to-Earnings), which shows how much you're paying for earnings - a P/E of 15 means you pay $15 for each dollar of earnings. ROE (Return on Equity) measures profitability - good companies typically have ROE above 15%. Debt-to-equity ratio shows financial health - a ratio under 1.0 is generally conservative, while over 2.0 suggests high leverage risk. Current ratio measures short-term solvency - companies should have a ratio above 1.0 to cover immediate obligations. For example, analyzing a company with P/E of 12, ROE of 18%, and debt-to-equity of 0.8 suggests a healthy, profitable investment at a reasonable price. This section teaches you how to read financial statements and use these metrics to identify quality investments."
         },
         {
           title: "Technical Analysis Basics",
           difficulty: "Intermediate",
-          content: "Technical analysis studies price movements, volume patterns, and market indicators to predict future price direction. Common tools include chart patterns, moving averages, support and resistance levels, and momentum indicators."
+          relatedMetrics: ["volatility"],
+          content: "Technical analysis studies price movements, volume patterns, and market indicators to identify optimal entry and exit points. Chart patterns like 'head and shoulders' or 'double bottoms' signal potential price reversals. Moving averages smooth out price volatility - a stock trading above its 200-day moving average often indicates an uptrend. Support levels are price points where buying typically emerges, while resistance levels are where selling often occurs - buying near support and selling near resistance can improve returns. Momentum indicators like RSI (Relative Strength Index) show when stocks are overbought (above 70) or oversold (below 30), suggesting potential reversal points. Volume confirms price movements - price increases on high volume are more reliable than on low volume. For example, if a stock breaks above $50 with volume 50% above average, this is stronger than the same move on weak volume. This section teaches you how to use these tools to time your investments more effectively."
         },
         {
           title: "Economic Analysis",
           difficulty: "Intermediate",
-          content: "Economic analysis examines macroeconomic factors that affect markets, including interest rates, inflation, GDP growth, employment data, and central bank policies. Understanding these factors helps assess overall market conditions and sector opportunities."
+          relatedMetrics: ["interestRate", "inflationRisk"],
+          content: "Economic analysis examines macroeconomic factors that significantly affect markets and individual investments. Interest rate changes have profound impacts - when central banks raise rates from 2% to 4%, bond prices typically fall while high-dividend stocks become more attractive relative to growth stocks. Inflation erodes purchasing power - running at 3% means your investments need to return at least 3% just to maintain real value. GDP growth rates signal economic strength - during expansion periods, stocks typically outperform bonds. Employment data provides context for consumer spending - strong employment usually supports stock markets. Understanding how these factors interact helps you position your portfolio appropriately. For example, when economic indicators suggest rising inflation and interest rates, reducing bond exposure and increasing inflation-hedge assets like real estate or commodities can protect your portfolio. This section explains how to monitor economic indicators and adjust your investments accordingly."
         },
         {
           title: "Sector Analysis",
           difficulty: "Advanced",
-          content: "Sector analysis evaluates different industry groups to identify trends, opportunities, and risks. This involves understanding sector-specific drivers, regulatory changes, technological disruption, and cyclical patterns that affect performance."
+          relatedMetrics: ["historicalReturn"],
+          content: "Sector analysis evaluates different industry groups to identify trends, opportunities, and risks that affect investment performance. Different sectors perform differently through economic cycles - defensive sectors like utilities and consumer staples tend to outperform during recessions, while cyclical sectors like technology and industrials typically lead during expansions. Technological disruption can dramatically shift sector dynamics - the rise of electric vehicles has created opportunities in energy storage while challenging traditional automotive suppliers. Regulatory changes significantly impact sectors - healthcare policy changes affect pharmaceutical and insurance companies, while environmental regulations reshape energy sectors. Sector rotation strategies attempt to position in outperforming sectors while avoiding underperforming ones - for example, shifting from growth to value sectors when interest rates rise. Understanding sector correlations helps with portfolio construction - energy and technology sectors often have low correlation, providing diversification benefits. This section teaches you how to analyze sectors and position your portfolio to benefit from sector trends."
+        },
+        {
+          title: "Putting It All Together",
+          difficulty: "Advanced",
+          relatedMetrics: ["peRatio", "volatility", "historicalReturn"],
+          content: "Successful market analysis combines fundamental, technical, and economic analysis into a cohesive investment framework. Start with fundamental analysis to identify quality companies with strong financials, competitive advantages, and good management - these are your 'buy list'. Then use economic analysis to assess timing - avoid buying during economic downturns if you can't handle volatility. Technical analysis helps with entry points - buy quality stocks during technical oversold conditions when they dip below support levels. A practical example: you identify a great company with strong fundamentals (low P/E, high ROE) during favorable economic conditions, then wait for a technical entry when the stock breaks above its 50-day moving average on increasing volume. Handling contradictory signals requires judgment - if fundamentals are strong but technicals are weak, consider dollar-cost averaging rather than lump-sum investing. Monitor your investments regularly, adjusting when fundamentals deteriorate or economic conditions change. This section guides you through integrating all analytical approaches to make informed, confident investment decisions."
         }
       ]
     },
@@ -332,27 +354,38 @@ export interface LearningPathSection {
         {
           title: "Portfolio Theory Fundamentals",
           difficulty: "Beginner",
-          content: "Modern Portfolio Theory (MPT) suggests that investors can construct optimal portfolios by combining assets with different risk-return characteristics. The goal is to maximize expected return for a given level of risk or minimize risk for a given level of expected return."
+          relatedMetrics: ["sharpeRatio", "historicalReturn"],
+          content: "Modern Portfolio Theory (MPT) demonstrates that combining assets with different risk-return characteristics creates optimal portfolios superior to individual assets. The fundamental insight is that diversification reduces risk without proportionally reducing returns. For example, a portfolio of 100% stocks might have 20% volatility, but adding 30% bonds reduces volatility to approximately 12% while maintaining 70% of the expected returns. The efficient frontier represents the optimal balance - it shows portfolios offering the highest expected return for each level of risk. An investor choosing between two portfolios with the same expected return should always choose the one with lower volatility. Historical data shows that proper diversification has reduced portfolio volatility by 30-40% compared to single-asset portfolios while preserving 60-80% of returns. This section introduces the core concepts of portfolio theory and why diversification works."
         },
         {
           title: "Asset Allocation Strategies",
           difficulty: "Beginner",
-          content: "Asset allocation involves dividing investments among different asset classes (stocks, bonds, real estate, commodities). Common strategies include strategic allocation (long-term target weights), tactical allocation (short-term adjustments), and dynamic allocation (rules-based rebalancing)."
+          relatedMetrics: ["historicalReturn", "volatility"],
+          content: "Asset allocation is the most important factor in portfolio performance, determining how you divide investments among different asset classes based on your goals, time horizon, and risk tolerance. Age-based allocation follows the rule of thumb: percentage of stocks equals 110 minus your age - so at age 30, hold 80% stocks; at age 50, hold 60% stocks. Risk-based allocation adjusts for risk tolerance: conservative investors might choose 40% stocks and 60% bonds, moderate investors 60% stocks and 40% bonds, while aggressive investors might prefer 90% stocks and 10% bonds. Strategic allocation sets long-term target weights and sticks to them regardless of short-term market movements. Tactical allocation makes short-term adjustments to exploit opportunities - for example, temporarily increasing stock allocation when markets are cheap. Studies show that strategic allocation can achieve 85% of optimal portfolio returns with much less trading and lower costs. This section helps you choose an allocation strategy that matches your situation."
         },
         {
           title: "Risk-Return Optimization",
           difficulty: "Intermediate",
-          content: "Portfolio optimization uses mathematical models to find the optimal combination of assets. The efficient frontier represents portfolios that offer the highest expected return for each level of risk. Investors choose portfolios based on their risk tolerance and return objectives."
+          relatedMetrics: ["sharpeRatio", "volatility", "historicalReturn"],
+          content: "Portfolio optimization uses mathematical models to find the optimal combination of assets that maximizes expected return for a given level of risk. The core concept is correlation - assets with low or negative correlation provide better diversification than highly correlated ones. For example, stocks and bonds have historically had low correlation (around 0.3), meaning when stocks drop 10%, bonds typically fall only 3%, providing cushion during market downturns. The Sharpe ratio measures risk-adjusted returns - optimizing for this ratio helps create portfolios that provide superior returns per unit of risk. A portfolio with a Sharpe ratio of 1.0 is excellent, meaning returns substantially exceed risk-free rates adjusted for volatility. Modern optimization techniques use historical return data and correlations to construct efficient portfolios - for example, a 70/30 stock/bond portfolio might have expected returns of 8% with 12% volatility and Sharpe ratio of 0.8. This section explains optimization concepts in practical terms and how to apply them to your portfolio."
         },
         {
           title: "Rebalancing Strategies",
           difficulty: "Intermediate",
-          content: "Rebalancing involves periodically adjusting portfolio weights to maintain target allocations. Strategies include calendar-based rebalancing (quarterly, annually), threshold-based rebalancing (when allocations drift significantly), and momentum-based rebalancing (adjusting based on performance trends)."
+          relatedMetrics: ["volatility", "sharpeRatio"],
+          content: "Rebalancing maintains target allocation by selling outperforming assets and buying underperforming ones to restore original weights. Calendar-based rebalancing adjusts at fixed intervals - quarterly or annually - which is simple but may rebalance too frequently (triggering taxes and fees) or too infrequently (allowing drift). Threshold-based rebalancing triggers when allocations drift significantly from targets - for example, if your 70% stock target moves to 75% due to market gains, rebalance back to 70%. This approach is more tax-efficient and captures market momentum while preventing excessive drift. A 5% drift threshold works well for most investors. Momentum-based rebalancing adjusts based on performance trends - letting winners run and cutting losers short. Tax-efficient rebalancing uses new contributions to adjust allocations rather than selling assets, avoiding capital gains taxes. Studies show rebalancing 1-2 times annually captures 90% of optimization benefits while minimizing transaction costs. This section teaches you how to choose and implement rebalancing strategies that work for your situation."
         },
         {
           title: "Advanced Portfolio Techniques",
           difficulty: "Advanced",
-          content: "Advanced techniques include factor investing (targeting specific risk factors), alternative investments (hedge funds, private equity, commodities), international diversification, and risk parity (equal risk contribution from each asset). These strategies can enhance diversification and potentially improve risk-adjusted returns."
+          relatedMetrics: ["sharpeRatio", "treynorRatio", "historicalReturn"],
+          content: "Advanced techniques can enhance portfolio diversification and potentially improve risk-adjusted returns beyond traditional asset allocation. Factor investing targets specific risk factors like value, size, momentum, and quality - these factors have historically outperformed markets, with value factors showing 2-3% annual outperformance over long periods. Alternative investments like private equity, hedge funds, and commodities provide low correlation with stocks and bonds - adding 10-15% alternatives can reduce portfolio volatility by 15-20%. International diversification across developed and emerging markets exposes you to different economic cycles, regulations, and growth opportunities - developed markets provide stability while emerging markets offer higher growth potential. Risk parity portfolios allocate based on risk contribution rather than capital - aiming for equal risk from each asset class creates more balanced portfolios that typically perform better during market stress. These advanced techniques require more research and potentially higher fees, but can significantly improve portfolio efficiency for sophisticated investors willing to learn and implement them."
+        },
+        {
+          title: "Building Your Optimal Portfolio",
+          difficulty: "Advanced",
+          relatedMetrics: ["sharpeRatio", "volatility", "historicalReturn"],
+          content: "Constructing your optimal portfolio requires systematically combining theory with practical constraints. Start with your risk capacity and tolerance to determine target asset allocation - someone with 30 years to retirement and moderate risk tolerance might target 70% stocks, 25% bonds, 5% alternatives. Next, diversify within each asset class: within stocks, spread across market caps (large, mid, small), sectors, and geographies (domestic and international). Use low-cost index funds and ETFs to implement your allocation efficiently. Calculate your expected portfolio volatility using weighted averages - a 70/25/5 stock/bond/alternatives portfolio might have 13% annual volatility. Monitor your Sharpe ratio to ensure you're getting adequate risk-adjusted returns - aim for 0.75 or higher. Rebalance annually or when allocations drift 5% from targets. Review and adjust quarterly: if your risk tolerance or circumstances change, modify allocation accordingly. Track performance against benchmarks to ensure you're on track. This section provides a practical, step-by-step framework for building a portfolio optimized for your specific goals and constraints."
         }
       ]
     },
@@ -879,6 +912,209 @@ export interface LearningPathSection {
           content: "If inflation is 4% and your investment returns 2%, what's your real return? Options: A) +6% B) +2% C) -2% D) -4%. The correct answer is C) -2%. Real return = Nominal return - Inflation = 2% - 4% = -2%. You're losing purchasing power despite the positive nominal return.",
           difficulty: "Advanced",
           relatedMetrics: ["inflationRisk"]
+        }
+      ]
+    },
+    'retirement-planning': {
+      title: "Retirement Planning",
+      description: "Build your retirement strategy with systematic savings and smart withdrawal planning",
+      keyMetrics: ['historicalReturn', 'inflationRisk', 'dividendYield', 'interestRate'],
+      sections: [
+        {
+          title: "Why Retirement Planning Matters",
+          content: "Retirement planning is about building enough wealth to sustain your lifestyle after you stop working. The key is starting early and being consistent. The concept of historical return shows us that stocks have historically returned around 7-10% annually, which can significantly grow your retirement nest egg over decades. For example, if you invest $500 monthly for 30 years at 7% annual returns, you'd accumulate over $1 million by retirement time - all from just $180,000 in contributions. Starting early gives compound interest more time to work, where your earnings generate their own earnings. This magical effect of compounding is what makes retirement planning achievable for most people. Time is your greatest asset because it allows modest contributions to grow into substantial retirement funds. This section will help you understand why retirement planning matters, how compound interest works, and why every year you delay costs you significantly in the long run.",
+          difficulty: "Beginner",
+          relatedMetrics: ["historicalReturn"]
+        },
+        {
+          title: "Understanding Retirement Needs",
+          content: "To plan effectively, you need to estimate how much you'll actually need in retirement. A common rule of thumb is that you'll need 70-80% of your pre-retirement income to maintain your lifestyle, accounting for reduced expenses like commuting, work clothes, and payroll taxes. For someone earning $50,000 annually, this means planning for $35,000 to $40,000 per year in retirement expenses. With rising life expectancy, you might need to plan for 20-30 years of retirement expenses. Understanding inflation risk is crucial here - what costs $40,000 today might cost $80,000 in 25 years if inflation averages 3% annually. This section helps you calculate your retirement number and understand how inflation risk affects your long-term financial needs.",
+          difficulty: "Beginner",
+          relatedMetrics: ["inflationRisk"]
+        },
+        {
+          title: "Retirement Savings Vehicles",
+          content: "Different retirement accounts offer different tax advantages and contribution limits. Employer-sponsored 401(k) plans allow you to contribute pre-tax dollars up to $23,000 annually, with some employers matching your contributions for additional growth. Individual Retirement Accounts (IRAs) provide tax benefits whether traditional (pre-tax contributions) or Roth (post-tax contributions with tax-free withdrawals). The dividend yield of your investments within these accounts can help grow your retirement savings through passive income. For example, a portfolio with a 3% dividend yield means you're earning $3,000 annually for every $100,000 invested, which can be reinvested to accelerate growth. This section explains how different retirement accounts work, their tax implications, and how to choose the best options for your situation.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["dividendYield", "historicalReturn"]
+        },
+        {
+          title: "Withdrawal Strategies",
+          content: "How you withdraw money in retirement is just as important as how you save it. The 4% rule suggests withdrawing 4% of your portfolio value in the first year, adjusted for inflation annually. This rule assumes your investments will generate historical returns sufficient to sustain withdrawals over 30 years. However, this isn't guaranteed - market conditions affect the sustainability of your withdrawal rate. Dividend yield becomes important here because income-producing investments can help sustain withdrawals without needing to sell assets during market downturns. A portfolio generating 3-4% dividend yield might allow you to withdraw income without touching principal, preserving your capital for future needs. This section covers withdrawal strategies that help your retirement savings last throughout your lifetime while managing inflation risk.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["dividendYield", "historicalReturn", "inflationRisk"]
+        },
+        {
+          title: "Building Your Retirement Portfolio",
+          content: "A successful retirement portfolio balances growth and safety, gradually shifting toward more conservative assets as you approach retirement age. The concept of historical return guides asset allocation - you need stocks for growth but bonds for stability. In your 20s and 30s, a 80-90% stock allocation makes sense because historical returns show stocks outperform over long periods. As you approach retirement, shifting to 50-60% stocks helps protect what you've built. Interest rate movements affect bond values in retirement portfolios, requiring understanding of how changing interest rates impact your fixed-income holdings. This section explains how to build and adjust your retirement portfolio over time, using a combination of historical return data, dividend yield income, and understanding of inflation risk to create a sustainable retirement plan.",
+          difficulty: "Advanced",
+          relatedMetrics: ["historicalReturn", "interestRate", "dividendYield", "inflationRisk"]
+        }
+      ]
+    },
+    'financial-planning': {
+      title: "Financial Planning",
+      description: "Build a solid financial foundation before investing",
+      keyMetrics: ['interestRate', 'inflationRisk', 'historicalReturn', 'volatility'],
+      sections: [
+        {
+          title: "The Foundation of Financial Planning",
+          content: "Financial planning is about creating a roadmap for your money that aligns with your life goals. It's not just about investing - it's about managing cash flow, reducing debt, building emergency funds, and ensuring financial stability before taking investment risks. Understanding how interest rates affect your debts is crucial - high credit card debt at 20% interest can destroy wealth faster than most investments can create it. The interest rate you pay on debt determines how quickly you should prioritize paying it off versus investing. This foundation includes budgeting, debt management, and emergency fund building, creating the stability needed for successful investing. This section introduces the core principles of financial planning and why a strong financial foundation is essential before taking on investment risks.",
+          difficulty: "Beginner",
+          relatedMetrics: ["interestRate"]
+        },
+        {
+          title: "Emergency Funds and Cash Management",
+          content: "An emergency fund is your financial safety net, protecting you from unexpected expenses without derailing your investment plans. The general recommendation is 3-6 months of essential expenses, but this varies based on job security, family situation, and overall financial stability. The interest rate on high-yield savings accounts affects how quickly your emergency fund grows - while typically low, every little bit helps. Understanding inflation risk is important even for emergency funds because money sitting in low-yield accounts loses purchasing power over time. The trade-off is maintaining liquidity and safety versus earning higher returns elsewhere. This section explains how to build an emergency fund, where to keep it, and how to balance liquidity needs with inflation risk management to maintain your financial foundation.",
+          difficulty: "Beginner",
+          relatedMetrics: ["interestRate", "inflationRisk"]
+        },
+        {
+          title: "Debt Management Strategies",
+          content: "Effective debt management involves understanding interest rates and prioritizing which debts to pay off first. High-interest credit card debt (often 15-25% interest rates) should typically be paid before investing, because guaranteed savings from eliminating debt often exceed investment returns. Understanding how interest rates compound against you helps prioritize debt payoff - a $10,000 credit card balance at 20% interest costs $2,000 annually in interest alone. Reducing debt creates a guaranteed return equivalent to the interest rate you're paying. This section covers the debt avalanche method (paying highest interest rates first), debt snowball method (paying smallest balances first), and how to decide between investing and paying down debt based on interest rate comparisons with expected investment returns.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["interestRate"]
+        },
+        {
+          title: "Before You Start Investing",
+          content: "Before investing, ensure you have adequate insurance coverage, manageable debt loads, and a stable income source. Understanding volatility is crucial for new investors - you need to mentally and financially prepare for market ups and downs before committing capital. Reviewing historical return data helps set realistic expectations rather than expecting quick riches. An investment's historical return provides context but doesn't guarantee future performance, so you need financial stability to weather potential losses. This section explains what financial planning milestones to reach before starting to invest, including debt-to-income ratios, emergency fund adequacy, and how to mentally prepare for the volatility inherent in investing. Building a strong financial foundation first ensures that investment setbacks won't derail your overall financial security.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["volatility", "historicalReturn"]
+        },
+        {
+          title: "Integrating Financial Planning with Investing",
+          content: "Financial planning and investing work together, not separately. Your financial plan determines how much you can safely invest, what your time horizon is, and what level of volatility you can handle. Understanding both inflation risk and investment volatility helps align your financial plan with your investment strategy - you need enough growth to beat inflation but enough stability to sleep at night. The interest rate environment affects both your debts and your investment returns, requiring an integrated view of your entire financial picture. Historical return data guides your expectations, but your financial plan determines your ability to take risks and stay invested during downturns. This section explains how to integrate financial planning with investing, ensuring your investment strategy supports your overall financial goals while managing inflation risk and volatility through diversification and proper asset allocation.",
+          difficulty: "Advanced",
+          relatedMetrics: ["historicalReturn", "volatility", "inflationRisk", "interestRate"]
+        }
+      ]
+    },
+    'value-growth-investing': {
+      title: "Value vs Growth Investing",
+      description: "Compare different investment styles and learn when to use each strategy",
+      keyMetrics: ['peRatio', 'growthRate', 'dividendYield', 'historicalReturn'],
+      sections: [
+        {
+          title: "Understanding Value and Growth Styles",
+          content: "Value and growth represent two fundamental approaches to stock investing, each with different philosophies and expected outcomes. Value investing focuses on finding stocks trading below their intrinsic worth, looking for bargains in the market. Growth investing targets companies with strong potential for future earnings expansion, often willing to pay premium prices for rapid growth prospects. The P/E ratio is a key metric for distinguishing between value and growth stocks - value stocks typically have lower P/E ratios (often under 15), while growth stocks have higher P/E ratios (often 30-100 or more) reflecting future growth expectations. This section introduces the core differences between value and growth investing, explaining the P/E ratio and how it helps identify which style a stock represents.",
+          difficulty: "Beginner",
+          relatedMetrics: ["peRatio"]
+        },
+        {
+          title: "Value Investing Principles",
+          content: "Value investing seeks to buy stocks for less than they're worth, often focusing on companies with strong fundamentals that are temporarily out of favor. Value investors look for low P/E ratios, suggesting the stock price hasn't caught up with earnings potential. Dividend yield often factors into value investing, as many value stocks are mature companies paying regular dividends, providing income while you wait for price appreciation. Historical returns show that value stocks have outperformed growth over very long periods, though with significant periods of underperformance. The strategy requires patience and emotional discipline, buying when others are selling and holding through market cycles. This section explains value investing principles, how P/E ratios and dividend yield help identify value opportunities, and what historical return patterns tell us about value investing performance.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["peRatio", "dividendYield", "historicalReturn"]
+        },
+        {
+          title: "Growth Investing Principles",
+          content: "Growth investing focuses on companies with exceptional potential for earnings expansion, often in emerging industries or rapidly expanding sectors. These stocks often have high P/E ratios because investors pay premium prices for fast-growing companies, betting on continued expansion. Growth stocks typically have lower or no dividend yields because the companies reinvest profits into expansion rather than paying shareholders. Growth investors prioritize the growth rate of earnings and revenue over current valuations, willing to pay up for companies with strong expansion prospects. Historical returns for growth stocks show periods of outperformance, particularly in bull markets, but also higher volatility and sharper declines during downturns. This section explains growth investing principles, how to identify growth opportunities using P/E ratios and growth rate metrics, and what to expect from growth-oriented portfolios.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["peRatio", "growthRate"]
+        },
+        {
+          title: "When to Use Each Strategy",
+          content: "Choosing between value and growth depends on your investment goals, risk tolerance, and market conditions. Value investing suits those seeking steady returns with less volatility, often attracting investors in or near retirement who need income through dividend yield. Growth investing appeals to investors with longer time horizons who can weather higher volatility in pursuit of superior returns. Market cycles matter - value tends to outperform during economic recoveries while growth excels during expansion phases. The P/E ratio environment matters too - when value stocks have unusually low P/E ratios relative to growth, historical return patterns suggest value may outperform going forward. This section helps you decide which style fits your situation and how market conditions affect the relative attractiveness of value versus growth approaches.",
+          difficulty: "Advanced",
+          relatedMetrics: ["peRatio", "growthRate", "dividendYield", "historicalReturn"]
+        },
+        {
+          title: "Building a Balanced Approach",
+          content: "Many successful investors combine both value and growth strategies rather than choosing exclusively between them. A balanced portfolio might include 60% value stocks for stability and dividend income, and 40% growth stocks for appreciation potential. Monitoring P/E ratios helps maintain appropriate valuation exposure, avoiding overconcentration in either expensive growth or excessively cheap value names. Dividend yield from value holdings provides income while growth holdings offer capital appreciation potential. Historical return data supports diversification across both styles rather than betting entirely on one approach. This section explains how to build a balanced portfolio incorporating both value and growth styles, using P/E ratios to maintain valuation discipline and dividend yield to provide income, while leveraging historical return patterns to guide allocation decisions.",
+          difficulty: "Advanced",
+          relatedMetrics: ["peRatio", "dividendYield", "growthRate", "historicalReturn"]
+        },
+        {
+          title: "Market Cycles and Style Performance",
+          content: "Neither value nor growth consistently outperforms - market cycles drive style leadership. During bull markets, growth stocks often surge as investors chase momentum and expansion stories. During bear markets and recessions, value stocks often hold up better due to lower valuations and income from dividend yield. The P/E ratio spread between growth and value provides signals about market sentiment and potential reversals. Historical returns show that extreme P/E ratio differences between value and growth often correct over time, with whichever style is more undervalued tending to outperform in subsequent periods. Understanding these cycles helps you position your portfolio appropriately and avoid chasing recent winners. This section explores how market cycles affect value versus growth performance, using P/E ratio analysis and historical return patterns to guide style allocation decisions based on market conditions and relative valuations.",
+          difficulty: "Advanced",
+          relatedMetrics: ["peRatio", "growthRate", "dividendYield", "historicalReturn"]
+        }
+      ]
+    },
+    'economic-fundamentals': {
+      title: "Economic Fundamentals",
+      description: "Understand how economic factors affect your investments",
+      keyMetrics: ['interestRate', 'inflationRisk', 'historicalReturn', 'dividendYield'],
+      sections: [
+        {
+          title: "How Economics Impact Investments",
+          content: "Economic fundamentals directly affect investment returns through multiple channels. Interest rate movements influence bond prices and stock valuations - rising rates typically hurt bonds and growth stocks while helping value stocks. Inflation risk erodes purchasing power, making it essential to invest in assets that historically outpace inflation. Understanding economic fundamentals helps you position your portfolio for different market environments and anticipate how economic changes might affect your investments. Historical return data shows how different asset classes respond to economic cycles, providing guidance for portfolio adjustments. This section introduces the key economic concepts that affect investments and how interest rate changes, inflation risk, and economic growth impact the historical returns of various asset classes.",
+          difficulty: "Beginner",
+          relatedMetrics: ["interestRate", "inflationRisk", "historicalReturn"]
+        },
+        {
+          title: "Interest Rates and Investment Markets",
+          content: "Interest rates are among the most influential economic factors affecting investments. When the central bank raises interest rates, bond prices typically fall because existing bonds with lower yields become less attractive. Higher rates also increase the discount rate used to value stocks, typically reducing stock prices, especially for growth stocks with distant earnings. However, higher rates often benefit value stocks and dividend-paying companies that provide current income. The interest rate environment affects every asset class - real estate becomes less attractive when rates rise, cash holdings earn more but still face inflation risk. Understanding how interest rate movements affect different investments helps you position your portfolio appropriately. This section explains the relationship between interest rates and investment performance, covering how rate changes affect bonds, stocks, real estate, and cash, helping you make informed decisions based on interest rate outlooks.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["interestRate", "dividendYield"]
+        },
+        {
+          title: "Inflation's Impact on Investments",
+          content: "Inflation risk is a critical consideration because it erodes the purchasing power of fixed-income investments and cash holdings. When inflation rises, assets that provide fixed payments like bonds lose real value, though higher coupon payments help offset this. Stocks often provide some inflation protection because companies can raise prices and grow revenue. Historical return data shows that stocks have outpaced inflation over long periods, with average annual returns of 7-10% compared to average inflation of 2-3%. Dividend yield helps combat inflation because companies typically increase dividend payments over time, providing rising income streams. Real estate and certain commodities also tend to keep pace with inflation. Understanding how different investments respond to inflation risk helps you build portfolios that maintain purchasing power over time. This section explores inflation's impact on various assets and how to position your portfolio to manage inflation risk while pursuing historical returns that outpace rising costs of living.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["inflationRisk", "dividendYield", "historicalReturn"]
+        },
+        {
+          title: "Economic Cycles and Your Portfolio",
+          content: "Economic expansions and contractions create investment opportunities and risks that vary by asset class. During expansions, stocks typically perform well as earnings grow and investor confidence rises. During recessions, bonds and defensive stocks often outperform while cyclical companies struggle. The interest rate environment reflects economic conditions - central banks typically lower rates during slowdowns to stimulate growth and raise rates during expansions to control inflation. Understanding these cycles helps you adjust your asset allocation between stocks, bonds, and cash based on economic signals. Historical return data shows that recession-resistant portfolios (heavy in bonds and defensive stocks) underperform during expansions but provide stability during downturns. Dividend yield becomes particularly valuable during recessions when capital appreciation is scarce but income helps support returns. This section explains economic cycles and how to adjust your portfolio using interest rate signals, inflation risk assessment, and historical return patterns to position for different economic environments.",
+          difficulty: "Advanced",
+          relatedMetrics: ["interestRate", "inflationRisk", "dividendYield", "historicalReturn"]
+        },
+        {
+          title: "Global Economic Factors",
+          content: "In today's interconnected world, global economic factors affect your investments regardless of where you invest. Currency movements impact international investments when you convert foreign returns back to your home currency. Global interest rate differences drive capital flows, affecting asset prices worldwide. Inflation risk varies by country but affects all investments through global supply chains and currency impacts. International diversification helps manage country-specific risks while exposing you to different economic cycles and dividend yield environments. Historical return patterns differ significantly across countries and regions, with emerging markets showing higher volatility and potential returns than developed markets. Understanding global economic fundamentals helps you navigate international investing and position for different regional opportunities. This section covers global economic factors affecting investments, including currency impacts, interest rate differentials, how inflation risk varies internationally, and how international diversification can improve portfolio historical returns while managing volatility.",
+          difficulty: "Advanced",
+          relatedMetrics: ["interestRate", "inflationRisk", "historicalReturn"]
+        },
+        {
+          title: "Using Economic Indicators for Investment Decisions",
+          content: "Economic indicators provide signals about market direction and investment opportunities. Unemployment rates, GDP growth, consumer spending, and manufacturing activity all signal economic health and potential asset performance. Central bank policy regarding interest rates provides clear signals about economic stimulus or restraint. Monitoring inflation risk indicators helps you assess whether your portfolio is positioned to outpace rising costs. These indicators don't provide perfect market timing signals, but they help you understand the economic context for your investment decisions. Historical return data combined with economic indicators helps validate investment strategies and set realistic expectations. For example, when economic indicators suggest recession risk, reducing stock exposure and increasing bond allocation can protect capital, though it might mean missing some historical return potential. This section explains key economic indicators, how to interpret them, and how to use this information along with interest rate outlooks, inflation risk assessments, and historical return patterns to make informed investment decisions.",
+          difficulty: "Advanced",
+          relatedMetrics: ["interestRate", "inflationRisk", "historicalReturn"]
+        }
+      ]
+    },
+    'behavioral-finance': {
+      title: "Behavioral Finance",
+      description: "Master the psychology of investing to avoid common mistakes",
+      keyMetrics: ['volatility', 'historicalReturn', 'timingRisk', 'sharpeRatio'],
+      sections: [
+        {
+          title: "Understanding Investment Psychology",
+          content: "Behavioral finance explores how psychology affects investment decisions, often in ways that hurt returns. Our brains evolved for survival in ancient environments, not for navigating modern financial markets. This mismatch causes systematic investing mistakes that historical return data shows reduce investor performance. Key psychological factors include overconfidence (believing our stock-picking ability exceeds reality), loss aversion (feeling losses twice as strongly as gains), and herd mentality (following the crowd into hot investments). Understanding these psychological factors is the first step toward better investment decisions. This section introduces behavioral finance and explains how human psychology creates common investing mistakes that hinder portfolio performance despite understanding volatility and historical return principles.",
+          difficulty: "Beginner",
+          relatedMetrics: ["volatility", "historicalReturn"]
+        },
+        {
+          title: "Common Behavioral Biases",
+          content: "Investment psychology includes many biases that lead to poor decisions. Confirmation bias makes us seek information confirming our existing beliefs while ignoring contradictory evidence. Anchoring causes us to fixate on entry prices, making it hard to cut losses or take profits. Recency bias leads us to extrapolate recent trends, buying after rallies and selling after corrections. These biases often cause investors to buy high and sell low, the opposite of wealth-building behavior. Volatility triggers emotional responses that amplify these biases - seeing portfolio values drop during market corrections can trigger panic selling despite historical return patterns showing recovery. This section explores common behavioral biases affecting investors and how understanding them can help you make more rational decisions despite emotional reactions to volatility and historical return variations.",
+          difficulty: "Beginner",
+          relatedMetrics: ["volatility", "historicalReturn"]
+        },
+        {
+          title: "Emotions and Market Timing",
+          content: "Attempting to time markets emotionally leads to the timing risk that damages long-term returns. When markets rise, greed drives investors to buy at peaks after missing initial gains. When markets fall, fear drives investors to sell at bottoms after volatility becomes unbearable. Historical return data consistently shows that missing just a few of the market's best days significantly reduces overall returns. Despite understanding this, emotional reactions to volatility often override rational analysis. The psychological desire to avoid losses leads investors to take actions that ultimately destroy wealth - selling during volatility-induced corrections even when historical return patterns suggest holding would be wiser. This section explains how emotions drive poor market timing decisions and why understanding both volatility and historical return patterns helps you avoid emotional investing mistakes.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["volatility", "historicalReturn", "timingRisk"]
+        },
+        {
+          title: "Overconfidence and Excessive Trading",
+          content: "Overconfidence leads investors to believe they can time markets, pick winning stocks, or outsmart professional portfolio managers. This results in excessive trading that generates commissions and taxes while reducing returns. Historical return data shows that individual investors severely underperform market averages, largely due to frequent trading driven by overconfidence. The illusion of control makes investors think they can navigate volatility better than the market, leading to actions that reduce rather than enhance returns. Studies consistently show that less confident, buy-and-hold investors achieve better outcomes despite experiencing the same volatility. This section explores how overconfidence damages investment performance and why understanding historical return patterns supports a patient, disciplined approach rather than active trading attempts. Learning to recognize overconfidence helps you make fewer, better decisions.",
+          difficulty: "Intermediate",
+          relatedMetrics: ["volatility", "historicalReturn", "timingRisk"]
+        },
+        {
+          title: "Building Better Investment Habits",
+          content: "Overcoming behavioral finance pitfalls requires systematic approaches to counteract psychology's negative effects. Dollar-cost averaging reduces timing risk by investing fixed amounts regularly regardless of market conditions, neutralizing emotional reactions to volatility. Creating an investment plan and sticking to it prevents emotional deviations during stressful periods. Understanding historical return patterns and expected volatility helps set realistic expectations that reduce panic during inevitable market downturns. Regular portfolio reviews based on predetermined criteria rather than market movements help maintain discipline. Focusing on long-term historical return goals rather than short-term volatility helps maintain perspective. This section provides practical strategies for overcoming psychological investing traps, including how to use automatic investing, maintain perspective on volatility and historical returns, and build habits that support wealth accumulation despite emotional challenges.",
+          difficulty: "Advanced",
+          relatedMetrics: ["volatility", "historicalReturn", "timingRisk"]
+        },
+        {
+          title: "Risk-Adjusted Thinking",
+          content: "True investment sophistication involves understanding risk-adjusted returns, not just raw performance. The Sharpe ratio measures returns per unit of risk, helping you compare investments fairly. Understanding that volatility can be both a risk and an opportunity helps you maintain perspective during market fluctuations. Historical return data adjusted for volatility shows which investments provide superior risk-adjusted performance, guiding portfolio construction. Behavioral finance research shows that investors often make poor decisions when they focus on raw returns without considering risk-adjusted metrics. Understanding the relationship between volatility and historical returns helps you appreciate the risk-reward tradeoff inherent in all investments. This section explains risk-adjusted thinking using metrics like the Sharpe ratio, how to evaluate investments considering both volatility and historical returns, and why this perspective helps avoid behavioral finance pitfalls by focusing on long-term efficiency rather than short-term emotional reactions.",
+          difficulty: "Advanced",
+          relatedMetrics: ["volatility", "historicalReturn", "sharpeRatio", "timingRisk"]
         }
       ]
     }

@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, BookOpen, BarChart, GraduationCap, Lightbulb, Trophy, Star, Leaf } from 'lucide-react';
+import { ChevronLeft, BookOpen, BarChart, GraduationCap, Lightbulb, Trophy, Star, Leaf, Heart, Wallet, TrendingUp, Globe2, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { learningPathsContent } from '@/lib/api/types/learningPaths';
 import { metricContent, MetricExplanation } from '@/lib/api/types/metricContent';
@@ -67,6 +67,36 @@ const folders: Record<string, LearningFolder> = {
     title: 'ESG Investing',
     description: 'Explore Environmental, Social, and Governance investing principles',
     icon: <Leaf className="h-6 w-6" />
+  },
+  'retirement-planning': {
+    id: 'retirement-planning',
+    title: 'Retirement Planning',
+    description: 'Build your retirement strategy with systematic savings and smart withdrawal planning',
+    icon: <Heart className="h-6 w-6" />
+  },
+  'financial-planning': {
+    id: 'financial-planning',
+    title: 'Financial Planning',
+    description: 'Build a solid financial foundation before investing',
+    icon: <Wallet className="h-6 w-6" />
+  },
+  'value-growth-investing': {
+    id: 'value-growth-investing',
+    title: 'Value vs Growth Investing',
+    description: 'Compare different investment styles and learn when to use each strategy',
+    icon: <TrendingUp className="h-6 w-6" />
+  },
+  'economic-fundamentals': {
+    id: 'economic-fundamentals',
+    title: 'Economic Fundamentals',
+    description: 'Understand how economic factors affect your investments',
+    icon: <Globe2 className="h-6 w-6" />
+  },
+  'behavioral-finance': {
+    id: 'behavioral-finance',
+    title: 'Behavioral Finance',
+    description: 'Master the psychology of investing to avoid common mistakes',
+    icon: <Brain className="h-6 w-6" />
   }
 };
 
@@ -192,7 +222,7 @@ const LearningFolderView: React.FC = () => {
               category: metricContent[metric]?.category || 'Growth'
             }))
           }))
-    : ['risk-management', 'market-analysis', 'portfolio-optimization'].includes(folderId)
+    : ['risk-management', 'market-analysis', 'portfolio-optimization', 'retirement-planning', 'financial-planning', 'value-growth-investing', 'economic-fundamentals', 'behavioral-finance'].includes(folderId)
       ? Object.entries(learningPathsContent)
           .filter(([key]) => key === folderId)
           .map(([assetClass, content]) => ({

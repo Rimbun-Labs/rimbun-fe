@@ -1,4 +1,6 @@
 import { config } from './config';
+import apiClient from './client';
+import { auth } from '../firebase/config';
 
 export interface ChatMessageDto {
   id: string;
@@ -52,40 +54,18 @@ class ChatApi {
 
   async sendMessage(userId: string, request: ChatRequest): Promise<ChatResponse> {
     try {
-      const url = `${this.baseUrl}/chat/${userId}/send`;
-      const body = JSON.stringify(request);
-      
       // Debug logging
       console.log('🔍 Chat API Call:', {
-        url,
+        url: `/chat/${userId}/send`,
         method: 'POST',
         userId,
         requestBody: request
       });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      });
+      const response = await apiClient.post(`/chat/${userId}/send`, request);
 
-      console.log('🔍 Chat API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('🔍 Chat API Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('🔍 Chat API Success Response:', data);
-      return data;
+      console.log('🔍 Chat API Success Response:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Chat API error:', error);
       throw new Error('Failed to send message to chat');
@@ -94,19 +74,8 @@ class ChatApi {
 
   async getMessages(userId: string): Promise<ChatMessageDto[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/chat/${userId}/messages`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.data || [];
+      const response = await apiClient.get(`/chat/${userId}/messages`);
+      return response.data.data || [];
     } catch (error) {
       console.error('Get messages API error:', error);
       throw new Error('Failed to get chat messages');
@@ -115,19 +84,8 @@ class ChatApi {
 
   async getConversation(userId: string): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/chat/${userId}/conversation`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.data;
+      const response = await apiClient.get(`/chat/${userId}/conversation`);
+      return response.data.data;
     } catch (error) {
       console.error('Get conversation API error:', error);
       throw new Error('Failed to get conversation summary');
@@ -136,16 +94,7 @@ class ChatApi {
 
   async clearConversation(userId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/chat/${userId}/conversation`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await apiClient.delete(`/chat/${userId}/conversation`);
     } catch (error) {
       console.error('Clear conversation API error:', error);
       throw new Error('Failed to clear conversation');
@@ -154,20 +103,8 @@ class ChatApi {
 
   async testChat(request: TestChatRequest): Promise<TestChatResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/chat/test`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
+      const response = await apiClient.post('/chat/test', request);
+      return response.data;
     } catch (error) {
       console.error('Chat test API error:', error);
       throw new Error('Failed to test chat');

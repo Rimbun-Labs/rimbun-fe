@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBankPermission } from '@/hooks/useBankPermission';
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
 import { 
@@ -15,7 +16,8 @@ import {
   X,
   LogOut,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  LineChart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -27,6 +29,7 @@ const MobileMenu: React.FC = () => {
   const { toast } = useToast();
   const location = useLocation();
   const hasCompletedAssessment = Boolean(session?.isCompleted);
+  const { hasPermission: hasBankPermission, isLoading: isLoadingPermission } = useBankPermission();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -186,6 +189,28 @@ const MobileMenu: React.FC = () => {
               Profile
             </Link>
           </div>
+
+          {/* Administration Section - Only shown if user has bank permission */}
+          {!isLoadingPermission && hasBankPermission && (
+            <div className="space-y-2">
+              <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                Administration
+              </h3>
+              <Link
+                to="/analytics"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                  isActive('/analytics') 
+                    ? "bg-accent text-accent-foreground" 
+                    : "text-muted-foreground sidebar-nav-inactive"
+                )}
+                onClick={closeMobileMenu}
+              >
+                <LineChart className="h-4 w-4" />
+                Analytics
+              </Link>
+            </div>
+          )}
 
           {/* Logout Section */}
           <div className="space-y-2 pt-6 border-t">

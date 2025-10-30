@@ -36,8 +36,8 @@ const footerLinks = {
     { name: "Status", href: "#status" }
   ],
   legal: [
-    { name: "Privacy Policy", href: "#privacy" },
-    { name: "Terms of Service", href: "#terms" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
     { name: "Cookie Policy", href: "#cookies" },
     { name: "GDPR", href: "#gdpr" }
   ]
@@ -178,16 +178,32 @@ export const Footer = ({ className }: FooterProps) => {
           >
             <h3 className="font-semibold text-foreground">Legal</h3>
             <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
+              {footerLinks.legal.map((link) => {
+                // Use Link component for internal routes, anchor tags for external/hash links
+                const isInternalLink = link.href.startsWith('/');
+                if (isInternalLink) {
+                  return (
+                    <li key={link.name}>
+                      <Link 
+                        to={link.href}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  );
+                }
+                return (
+                  <li key={link.name}>
+                    <a 
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </motion.div>
         </div>

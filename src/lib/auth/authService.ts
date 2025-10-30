@@ -7,7 +7,10 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
   UserCredential,
-  updateProfile
+  updateProfile,
+  sendEmailVerification as firebaseSendEmailVerification,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  confirmPasswordReset as firebaseConfirmPasswordReset
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { storageUtils } from '../storage/storageUtils';
@@ -100,5 +103,45 @@ export const authService = {
     return onAuthStateChanged(auth, (user) => {
       callback(user);
     });
+  },
+
+  async sendEmailVerification(user: FirebaseUser): Promise<{ error: Error | null }> {
+    try {
+      await firebaseSendEmailVerification(user);
+      return { error: null };
+    } catch (error) {
+      console.error('Email verification error:', error);
+      return { error: error as Error };
+    }
+  },
+
+  async resendVerificationEmail(user: FirebaseUser): Promise<{ error: Error | null }> {
+    try {
+      await firebaseSendEmailVerification(user);
+      return { error: null };
+    } catch (error) {
+      console.error('Resend verification email error:', error);
+      return { error: error as Error };
+    }
+  },
+
+  async sendPasswordResetEmail(email: string): Promise<{ error: Error | null }> {
+    try {
+      await firebaseSendPasswordResetEmail(auth, email);
+      return { error: null };
+    } catch (error) {
+      console.error('Password reset email error:', error);
+      return { error: error as Error };
+    }
+  },
+
+  async confirmPasswordReset(code: string, newPassword: string): Promise<{ error: Error | null }> {
+    try {
+      await firebaseConfirmPasswordReset(auth, code, newPassword);
+      return { error: null };
+    } catch (error) {
+      console.error('Password reset confirmation error:', error);
+      return { error: error as Error };
+    }
   }
 }; 

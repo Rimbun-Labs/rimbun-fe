@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, BookOpen, GraduationCap, Lightbulb, Trophy, BarChart, Leaf, Star } from 'lucide-react';
+import { Search, BookOpen, GraduationCap, Lightbulb, Trophy, BarChart, Leaf, Star, Heart, Wallet, TrendingUp, Globe2, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { metricContent } from '@/lib/api/types/metricContent';
 
@@ -63,6 +63,41 @@ const folders: LearningFolder[] = [
     description: 'Explore Environmental, Social, and Governance investing principles',
     icon: <Leaf className="h-6 w-6" />,
     moduleCount: 7
+  },
+  {
+    id: 'retirement-planning',
+    title: 'Retirement Planning',
+    description: 'Build your retirement strategy with systematic savings and smart withdrawal planning',
+    icon: <Heart className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'financial-planning',
+    title: 'Financial Planning',
+    description: 'Build a solid financial foundation before investing',
+    icon: <Wallet className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'value-growth-investing',
+    title: 'Value vs Growth',
+    description: 'Compare different investment styles and learn when to use each strategy',
+    icon: <TrendingUp className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'economic-fundamentals',
+    title: 'Economic Fundamentals',
+    description: 'Understand how economic factors affect your investments',
+    icon: <Globe2 className="h-6 w-6" />,
+    moduleCount: 6
+  },
+  {
+    id: 'behavioral-finance',
+    title: 'Behavioral Finance',
+    description: 'Master the psychology of investing to avoid common mistakes',
+    icon: <Brain className="h-6 w-6" />,
+    moduleCount: 6
   }
 ];
 
