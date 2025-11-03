@@ -79,25 +79,19 @@ const submitAnswer = async (response: SaveUserResponseRequest): Promise<void> =>
       response.answer = String(response.answer || '');
     }
 
-    const res = await fetch(`${config.API_BASE_URL}/user-responses/answer`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(response),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
+    // Use apiClient instead of fetch to include Authorization header
+    await apiClient.post('/user-responses/answer', response);
+  } catch (error: any) {
+    console.error('Error submitting answer:', error);
+    if (error.response) {
+      const errorData = error.response.data;
       console.error('API Error Response:', {
-        status: res.status,
-        statusText: res.statusText,
+        status: error.response.status,
+        statusText: error.response.statusText,
         errorData: errorData
       });
-      throw new Error(errorData.message || 'Failed to submit answer');
+      throw new Error(errorData?.message || 'Failed to submit answer');
     }
-  } catch (error) {
-    console.error('Error submitting answer:', error);
     throw error;
   }
 };

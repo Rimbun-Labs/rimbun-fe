@@ -292,3 +292,4 @@ Both features are now fully functional. Test the complete flows:
 
 All Firebase email handling is automatic - no backend work required!
 
+

@@ -90,3 +90,4 @@ export const EmailVerificationBanner: React.FC<EmailVerificationBannerProps> = (
     </Alert>
   );
 };
+

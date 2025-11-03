@@ -375,3 +375,4 @@ VITE_FIREBASE_AUTH_DOMAIN=...
 - Audit logs are preserved but anonymized
 - Full GDPR/CCPA compliance maintained
 
+

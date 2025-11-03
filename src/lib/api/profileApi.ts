@@ -195,20 +195,20 @@ export const updateProfilePicture = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('profilePicture', file);
 
-    const response = await fetch(`${config.API_BASE_URL}/users/profile-picture`, {
-      method: 'POST',
-      body: formData,
-    });
+    // Use apiClient.post with FormData - apiClient will include Authorization header
+    // Note: axios automatically handles FormData and sets Content-Type to multipart/form-data
+    // Don't manually set Content-Type - let axios handle it for FormData
+    const response = await apiClient.post<{ profilePictureUrl: string }>(
+      '/users/profile-picture',
+      formData
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to upload profile picture');
-    }
-
-    const result = await response.json();
-    return result.profilePictureUrl;
-  } catch (error) {
+    return response.data.profilePictureUrl;
+  } catch (error: any) {
     console.error('Failed to upload profile picture:', error);
-    throw error;
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error('Failed to upload profile picture');
   }
 };
