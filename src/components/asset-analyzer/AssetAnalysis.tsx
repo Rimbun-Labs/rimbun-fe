@@ -1,16 +1,11 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  Minus,
   AlertTriangle,
   Info,
   Star,
-  Loader2,
-  ExternalLink
+  Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -205,27 +200,6 @@ export const AssetAnalysis: React.FC<AssetAnalysisProps> = ({
               </Card>
             </motion.div>
           )}
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-wrap gap-3"
-          >
-            <Button variant="default" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Add to Watchlist
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View Full Report
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              Learn More
-            </Button>
-          </motion.div>
         </div>
     </div>
   );

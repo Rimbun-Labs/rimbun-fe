@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { 
   Bell, 
@@ -7,21 +7,23 @@ import {
   Moon,
   User,
   Menu,
-  LogOut,
-  ArrowRight
+  LogOut
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from '@/hooks/useTheme';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
+import { useNotifications, useNotificationCount, useMarkAllNotificationsAsRead, useMarkNotificationAsRead } from '@/hooks/useNotifications';
 import MobileMenu from './MobileMenu';
+import { formatDistanceToNow } from 'date-fns';
 
 interface AppHeaderProps {
   showFullNav?: boolean;
@@ -31,10 +33,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { theme, setTheme } = useTheme();
   const { toggleMobileMenu } = useMobileMenu();
   const { session } = useSession();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+
+  // Fetch notifications
+  const { data: notifications = [], isLoading: notificationsLoading } = useNotifications();
+  const { data: unreadCount = 0 } = useNotificationCount();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
+  const markAsRead = useMarkNotificationAsRead();
+
+  // Show latest 5 notifications
+  const displayNotifications = notifications.slice(0, 5);
 
   const handleLogout = async () => {
     try {
@@ -49,6 +61,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to log out",
       });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount > 0) {
+      await markAllAsRead.mutateAsync();
+    }
+  };
+
+  const handleNotificationClick = async (notification: typeof notifications[0]) => {
+    // Mark as read if unread
+    if (!notification.isRead) {
+      await markAsRead.mutateAsync(notification.id);
+    }
+    
+    // Navigate if action URL exists
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
     }
   };
 
@@ -73,42 +103,81 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </Link>
           </div>
           <div className="flex-1 flex justify-end items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
-                    3
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="flex justify-between items-center p-2 border-b">
-                  <span className="font-medium">Notifications</span>
-                  <Button variant="ghost" size="sm">Mark all as read</Button>
-                </div>
-                <div className="py-2">
-                  <DropdownMenuItem>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium">Complete your risk assessment</span>
-                      <span className="text-sm text-muted-foreground">Finish your assessment to see personalized recommendations</span>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium">New learning module available</span>
-                      <span className="text-sm text-muted-foreground">Check out our latest content on ETF investing</span>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium">Weekly investment digest</span>
-                      <span className="text-sm text-muted-foreground">Your market summary for this week is ready</span>
-                    </div>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <div className="flex justify-between items-center p-2 border-b">
+                    <span className="font-medium">Notifications</span>
+                    {unreadCount > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={handleMarkAllAsRead}
+                        disabled={markAllAsRead.isPending}
+                      >
+                        {markAllAsRead.isPending ? 'Marking...' : 'Mark all as read'}
+                      </Button>
+                    )}
+                  </div>
+                  <div className="py-2 max-h-96 overflow-y-auto">
+                    {notificationsLoading ? (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        Loading notifications...
+                      </div>
+                    ) : displayNotifications.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        No notifications
+                      </div>
+                    ) : (
+                      displayNotifications.map((notification) => (
+                        <DropdownMenuItem
+                          key={notification.id}
+                          className={`cursor-pointer ${!notification.isRead ? 'bg-muted/50' : ''}`}
+                          onClick={() => handleNotificationClick(notification)}
+                        >
+                          <div className="flex flex-col gap-1 w-full">
+                            <div className="flex items-start justify-between gap-2">
+                              <span className={`font-medium ${!notification.isRead ? 'font-semibold' : ''}`}>
+                                {notification.title}
+                              </span>
+                              {!notification.isRead && (
+                                <span className="h-2 w-2 rounded-full bg-primary mt-1 flex-shrink-0" />
+                              )}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {notification.message}
+                            </span>
+                            <span className="text-xs text-muted-foreground mt-1">
+                              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                    {notifications.length > 5 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/notifications" className="w-full text-center text-sm text-primary">
+                            View all notifications
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             <Button
               variant="ghost"

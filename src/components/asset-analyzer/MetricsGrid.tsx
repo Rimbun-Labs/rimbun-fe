@@ -50,13 +50,19 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
     if (lowerName.includes('market cap') || lowerName.includes('marketcap')) {
       return formatMarketCap(value);
     }
-    if (lowerName.includes('yield') || lowerName.includes('return') || lowerName.includes('ratio')) {
+    // P/E Ratio should be formatted as a number, not percentage
+    if (lowerName.includes('p/e ratio') || lowerName === 'pe ratio') {
+      return formatNumber(value);
+    }
+    // Format yields and returns as percentages
+    if (lowerName.includes('yield') || lowerName.includes('return')) {
       return formatPercentage(value);
     }
     if (lowerName.includes('price') || lowerName.includes('eps') || lowerName.includes('revenue')) {
       return formatCurrency(value);
     }
     
+    // Default: format as number (this includes ratios like Sharpe Ratio, Beta, etc.)
     return formatNumber(value);
   };
 
