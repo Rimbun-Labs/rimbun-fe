@@ -13,6 +13,26 @@ const SpendingRecommendations: React.FC<SpendingRecommendationsProps> = ({
   recommendations, 
   loading 
 }) => {
+  // Format primary action for user readability
+  const formatPrimaryAction = (action: string): string => {
+    switch (action) {
+      case 'increase_savings':
+        return 'Increase Savings';
+      case 'adjust_strategy':
+        return 'Adjust Strategy';
+      case 'extend_timeline':
+        return 'Extend Timeline';
+      case 'on_track':
+        return 'On Track';
+      default:
+        // Fallback: convert snake_case to Title Case
+        return action
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -149,7 +169,7 @@ const SpendingRecommendations: React.FC<SpendingRecommendationsProps> = ({
           <CardContent className="space-y-4">
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
               <h5 className="font-medium text-primary mb-2">Primary Action</h5>
-              <p className="text-sm">{combinedRecommendations.primaryAction}</p>
+              <p className="text-sm font-medium">{formatPrimaryAction(combinedRecommendations.primaryAction)}</p>
             </div>
 
             {combinedRecommendations.spendingOptimizations && combinedRecommendations.spendingOptimizations.length > 0 && (
