@@ -37,9 +37,12 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
     monthlySpending,
     savingsRate,
     emergencyFundStatus,
-    recommendedEmergencyFund,
     spendingCategories
   } = data;
+
+  // Extract emergency fund data from the status object
+  const recommendedEmergencyFund = emergencyFundStatus?.recommendedTarget || 0;
+  const emergencyFundStatusString = emergencyFundStatus?.status || 'unknown';
 
   // Calculate remaining amount
   const remainingAmount = monthlyIncome - monthlySpending;
@@ -82,7 +85,7 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
   };
 
   const savingsStatus = getSavingsRateStatus(savingsRate);
-  const emergencyStatus = getEmergencyFundStatus(emergencyFundStatus);
+  const emergencyStatus = getEmergencyFundStatus(emergencyFundStatusString);
   const EmergencyIcon = emergencyStatus.icon;
 
   return (
@@ -216,7 +219,7 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
               </div>
             </div>
 
-            {emergencyFundStatus === 'insufficient' && (
+            {emergencyFundStatusString === 'insufficient' && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
                   Consider building your emergency fund to cover unexpected expenses.
