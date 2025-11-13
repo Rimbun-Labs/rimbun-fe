@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Removed - no longer using tabs
 import { 
   ArrowLeft, 
   Sparkles,
@@ -14,11 +14,12 @@ import {
   LineChart,
   AlertCircle,
   MessageSquare,
-  BarChart3,
+  // BarChart3, // Disabled - Asset Analyzer not ready
   Lightbulb
 } from 'lucide-react';
 import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplorerChat';
-import { AssetAnalyzerTab } from '@/components/asset-analyzer';
+// import { AssetAnalyzerTab } from '@/components/asset-analyzer'; // Disabled - capability not ready yet
+// import { ProtectedFeature } from '@/components/subscription/ProtectedFeature'; // Removed - AI Chat now available to all tiers
 import { motion } from 'framer-motion';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
@@ -30,7 +31,7 @@ const InvestmentExplorer: React.FC = () => {
   const navigate = useNavigate();
   const { session, isLoading, error: sessionError } = useSession();
   const [showWelcome, setShowWelcome] = useState(true);
-  const [activeTab, setActiveTab] = useState<'chat' | 'analyzer'>('chat');
+  // const [activeTab, setActiveTab] = useState<'chat' | 'analyzer'>('chat'); // Disabled analyzer tab
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -273,33 +274,15 @@ const InvestmentExplorer: React.FC = () => {
               </MotionCard>
             </div>
           ) : (
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'chat' | 'analyzer')} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="chat" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  AI Chat
-                </TabsTrigger>
-                <TabsTrigger value="analyzer" className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Asset Analyzer
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="chat" className="space-y-6 w-full">
-                <div className="grid grid-cols-1 w-full max-w-none">
-                  <InvestmentExplorerChat 
-                    sessionId={sessionId!} 
-                    onError={(error) => setError(error.message)}
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="analyzer" className="space-y-6 w-full">
-                <div className="grid grid-cols-1 w-full max-w-none">
-                  <AssetAnalyzerTab />
-                </div>
-              </TabsContent>
-            </Tabs>
+            <div className="w-full">
+              {/* Asset Analyzer tab removed - capability not ready yet */}
+              <div className="grid grid-cols-1 w-full max-w-none">
+                <InvestmentExplorerChat 
+                  sessionId={sessionId!} 
+                  onError={(error) => setError(error.message)}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>

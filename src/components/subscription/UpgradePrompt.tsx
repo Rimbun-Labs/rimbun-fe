@@ -29,7 +29,8 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   if (isPremium && !showForPremiumUsers) return null;
 
   const handleUpgrade = () => {
-    navigate('/profile?tab=subscription');
+    // Subscription tab disabled for testbed launch - navigate to profile instead
+    navigate('/profile');
   };
 
   const getUpgradeContent = () => {

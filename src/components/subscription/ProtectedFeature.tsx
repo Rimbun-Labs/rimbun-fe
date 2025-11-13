@@ -44,7 +44,8 @@ export const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
   }
 
   const handleUpgrade = () => {
-    navigate('/profile?tab=subscription');
+    // Subscription tab disabled for testbed launch - navigate to profile instead
+    navigate('/profile');
   };
 
   return (

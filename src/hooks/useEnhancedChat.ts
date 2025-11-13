@@ -87,7 +87,7 @@ export const useChat = (sessionId: string) => {
       if (response.data.behavioralInsights) {
         setBehavioralInsights(response.data.behavioralInsights);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
     } finally {

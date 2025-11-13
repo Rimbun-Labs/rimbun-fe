@@ -32,6 +32,7 @@ import { config } from '@/lib/api/config';
 import { auth } from '@/lib/firebase/config';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { SubscriptionTier } from '@/lib/api/types/subscription';
+import { updateSubscription } from '@/lib/api/subscriptionApi';
 
 const ProfileContent = () => {
   const { profile, isLoading, error, updateProfileData } = useProfile();
@@ -340,11 +341,12 @@ const ProfileContent = () => {
           {/* Main Content */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid grid-cols-4 mb-6 w-full">
+              <TabsList className="grid grid-cols-3 mb-6 w-full">
                 <TabsTrigger value="account">Account</TabsTrigger>
                 <TabsTrigger value="preferences">Preferences</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                {/* Subscription tab disabled for testbed launch */}
+                {/* <TabsTrigger value="subscription">Subscription</TabsTrigger> */}
               </TabsList>
 
               {/* Account Tab */}
@@ -959,10 +961,10 @@ const ProfileContent = () => {
                     </div>
               </TabsContent>
 
-              {/* Subscription Tab */}
-              <TabsContent value="subscription" className="space-y-8 w-full">
+              {/* Subscription Tab - Disabled for testbed launch */}
+              {/* <TabsContent value="subscription" className="space-y-8 w-full">
                 <SubscriptionTab />
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </div>
         </>
@@ -973,7 +975,8 @@ const ProfileContent = () => {
 
 // Subscription Tab Component
 const SubscriptionTab: React.FC = () => {
-  const { subscription, isLoading, isPremium, isBusiness } = useSubscription();
+  const { subscription, isLoading, isPremium, isBusiness, refetch } = useSubscription();
+  const [updatingTier, setUpdatingTier] = useState<SubscriptionTier | null>(null);
 
   if (isLoading) {
     return (
@@ -1017,11 +1020,36 @@ const SubscriptionTab: React.FC = () => {
   };
 
   const featureComparison = {
-    'AI Recommendations': { free: false, premium: true, business: true },
-    'Advanced Analytics': { free: false, premium: true, business: true },
-    'Priority Support': { free: false, premium: true, business: true },
+    'Recommendations': { free: true, premium: true, business: true },
+    'AI Chat': { free: false, premium: true, business: true },
     'Unlimited Requests': { free: false, premium: false, business: true },
     'Dedicated Manager': { free: false, premium: false, business: true },
+  };
+
+  // Handle plan selection
+  const handleSelectPlan = async (tier: SubscriptionTier) => {
+    // Don't do anything if selecting current plan
+    if (subscription?.tier === tier) {
+      return;
+    }
+
+    setUpdatingTier(tier);
+    try {
+      await updateSubscription({
+        tier,
+        billingPeriod: 'monthly', // Default to monthly
+      });
+      
+      // Refresh subscription data
+      await refetch();
+      
+      toast.success(`Successfully switched to ${getTierDisplayName(tier)} plan`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update subscription';
+      toast.error(errorMessage);
+    } finally {
+      setUpdatingTier(null);
+    }
   };
 
   return (
@@ -1066,38 +1094,55 @@ const SubscriptionTab: React.FC = () => {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
 
-          <Separator />
-
-          {/* Active Features */}
-          <div>
-            <Label className="text-muted-foreground mb-2 block">Active Features</Label>
-            <div className="flex flex-wrap gap-2">
-              {subscription.features.length > 0 ? (
-                subscription.features.map((feature, index) => (
-                  <Badge key={index} variant="secondary">{feature}</Badge>
-                ))
-              ) : (
-                <span className="text-sm text-muted-foreground">No premium features</span>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Current Limits */}
-          <div>
-            <Label className="text-muted-foreground mb-2 block">Current Limits</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm font-medium">AI Requests (15 min)</div>
-                <div className="text-sm text-muted-foreground">{subscription.limits.aiRequestsPer15min}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">AI Requests (Day)</div>
-                <div className="text-sm text-muted-foreground">{subscription.limits.aiRequestsPerDay}</div>
-              </div>
-            </div>
+      {/* Feature Comparison Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Feature Comparison</CardTitle>
+          <CardDescription>See what's included in each plan</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-semibold">Feature</th>
+                  <th className="text-center py-3 px-4 font-semibold">Free</th>
+                  <th className="text-center py-3 px-4 font-semibold">Premium</th>
+                  <th className="text-center py-3 px-4 font-semibold">Business</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(featureComparison).map(([feature, tiers]) => (
+                  <tr key={feature} className="border-b">
+                    <td className="py-3 px-4">{feature}</td>
+                    <td className="text-center py-3 px-4">
+                      {tiers.free ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {tiers.premium ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {tiers.business ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
@@ -1121,19 +1166,37 @@ const SubscriptionTab: React.FC = () => {
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">Basic Features</span>
+                      <span className="text-sm">Basic Questions</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Portfolio View</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Recommendations</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
                       <span className="text-sm">Limited AI Requests</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">Community Support</span>
-                    </li>
                   </ul>
-                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.FREE ? 'default' : 'outline'}>
-                    {subscription.tier === SubscriptionTier.FREE ? 'Current Plan' : 'Downgrade'}
+                  <Button 
+                    className="w-full" 
+                    variant={subscription.tier === SubscriptionTier.FREE ? 'default' : 'outline'}
+                    onClick={() => handleSelectPlan(SubscriptionTier.FREE)}
+                    disabled={subscription.tier === SubscriptionTier.FREE || updatingTier !== null}
+                  >
+                    {updatingTier === SubscriptionTier.FREE ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : subscription.tier === SubscriptionTier.FREE ? (
+                      'Current Plan'
+                    ) : (
+                      'Select Plan'
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -1148,23 +1211,33 @@ const SubscriptionTab: React.FC = () => {
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">AI Recommendations</span>
+                      <span className="text-sm">Everything in Free</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">Advanced Analytics</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">Priority Support</span>
+                      <span className="text-sm">AI Chat</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
                       <span className="text-sm">More AI Requests</span>
                     </li>
                   </ul>
-                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.PREMIUM ? 'default' : 'outline'}>
-                    {subscription.tier === SubscriptionTier.PREMIUM ? 'Current Plan' : 'Upgrade'}
+                  <Button 
+                    className="w-full" 
+                    variant={subscription.tier === SubscriptionTier.PREMIUM ? 'default' : 'outline'}
+                    onClick={() => handleSelectPlan(SubscriptionTier.PREMIUM)}
+                    disabled={subscription.tier === SubscriptionTier.PREMIUM || updatingTier !== null}
+                  >
+                    {updatingTier === SubscriptionTier.PREMIUM ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : subscription.tier === SubscriptionTier.PREMIUM ? (
+                      'Current Plan'
+                    ) : (
+                      'Select Plan'
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -1194,8 +1267,22 @@ const SubscriptionTab: React.FC = () => {
                       <span className="text-sm">Custom Integrations</span>
                     </li>
                   </ul>
-                  <Button className="w-full" variant={subscription.tier === SubscriptionTier.BUSINESS ? 'default' : 'outline'}>
-                    {isBusiness ? 'Current Plan' : 'Upgrade'}
+                  <Button 
+                    className="w-full" 
+                    variant={subscription.tier === SubscriptionTier.BUSINESS ? 'default' : 'outline'}
+                    onClick={() => handleSelectPlan(SubscriptionTier.BUSINESS)}
+                    disabled={subscription.tier === SubscriptionTier.BUSINESS || updatingTier !== null}
+                  >
+                    {updatingTier === SubscriptionTier.BUSINESS ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : subscription.tier === SubscriptionTier.BUSINESS ? (
+                      'Current Plan'
+                    ) : (
+                      'Select Plan'
+                    )}
                   </Button>
                 </CardContent>
               </Card>
