@@ -243,10 +243,13 @@ const Dashboard = () => {
 
   const refreshCashFlowMutation = useRefreshCashFlowProjections(userService.getDatabaseUserId() || '');
 
-  // Memoize loading state - include checking for completed assessments
+  // Memoize loading state - include checking for completed assessments AND data availability
+  // Keep spinner showing until data is actually available, not just when API calls finish
   const isLoading = useMemo(() =>
-    checkingCompletedAssessment || ((assessmentLoading || recommendationsLoading) && effectiveSessionId),
-    [assessmentLoading, recommendationsLoading, effectiveSessionId, checkingCompletedAssessment]
+    checkingCompletedAssessment || 
+    ((assessmentLoading || recommendationsLoading) && effectiveSessionId) ||
+    (effectiveSessionId && (!assessmentResults || !recommendations)),
+    [assessmentLoading, recommendationsLoading, effectiveSessionId, checkingCompletedAssessment, assessmentResults, recommendations]
   );
 
   // Session state is managed by SessionContext
