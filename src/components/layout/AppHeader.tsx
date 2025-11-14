@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { 
-  Bell, 
+  // Bell, // Notifications disabled for testbed launch
   Sun,
   Moon,
   User,
@@ -21,9 +21,10 @@ import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
-import { useNotifications, useNotificationCount, useMarkAllNotificationsAsRead, useMarkNotificationAsRead } from '@/hooks/useNotifications';
+// Notifications disabled for testbed launch - backend endpoints not available
+// import { useNotifications, useNotificationCount, useMarkAllNotificationsAsRead, useMarkNotificationAsRead } from '@/hooks/useNotifications';
 import MobileMenu from './MobileMenu';
-import { formatDistanceToNow } from 'date-fns';
+// import { formatDistanceToNow } from 'date-fns'; // Not needed when notifications disabled
 
 interface AppHeaderProps {
   showFullNav?: boolean;
@@ -39,11 +40,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
-  // Fetch notifications
-  const { data: notifications = [], isLoading: notificationsLoading } = useNotifications();
-  const { data: unreadCount = 0 } = useNotificationCount();
-  const markAllAsRead = useMarkAllNotificationsAsRead();
-  const markAsRead = useMarkNotificationAsRead();
+  // Notifications disabled for testbed launch - backend endpoints not available
+  // const { data: notifications = [], isLoading: notificationsLoading } = useNotifications();
+  // const { data: unreadCount = 0 } = useNotificationCount();
+  // const markAllAsRead = useMarkAllNotificationsAsRead();
+  // const markAsRead = useMarkNotificationAsRead();
+  
+  // Disabled notifications - return empty data
+  const notifications: any[] = [];
+  const notificationsLoading = false;
+  const unreadCount = 0;
+  const markAllAsRead = { mutateAsync: async () => {}, isPending: false };
+  const markAsRead = { mutateAsync: async () => {} };
 
   // Show latest 5 notifications
   const displayNotifications = notifications.slice(0, 5);
@@ -64,23 +72,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    if (unreadCount > 0) {
-      await markAllAsRead.mutateAsync();
-    }
-  };
+  // Notification handlers disabled - backend endpoints not available
+  // const handleMarkAllAsRead = async () => {
+  //   if (unreadCount > 0) {
+  //     await markAllAsRead.mutateAsync();
+  //   }
+  // };
 
-  const handleNotificationClick = async (notification: typeof notifications[0]) => {
-    // Mark as read if unread
-    if (!notification.isRead) {
-      await markAsRead.mutateAsync(notification.id);
-    }
-    
-    // Navigate if action URL exists
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
-    }
-  };
+  // const handleNotificationClick = async (notification: typeof notifications[0]) => {
+  //   // Mark as read if unread
+  //   if (!notification.isRead) {
+  //     await markAsRead.mutateAsync(notification.id);
+  //   }
+  //   
+  //   // Navigate if action URL exists
+  //   if (notification.actionUrl) {
+  //     navigate(notification.actionUrl);
+  //   }
+  // };
 
   return (
     <>
@@ -103,7 +112,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </Link>
           </div>
           <div className="flex-1 flex justify-end items-center space-x-4">
-            {user && (
+            {/* Notifications disabled for testbed launch - backend endpoints not available */}
+            {/* {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
@@ -177,7 +187,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            )} */}
 
             <Button
               variant="ghost"

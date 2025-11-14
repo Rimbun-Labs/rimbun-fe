@@ -10,7 +10,10 @@ import {
   updateProfile,
   sendEmailVerification as firebaseSendEmailVerification,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
-  confirmPasswordReset as firebaseConfirmPasswordReset
+  confirmPasswordReset as firebaseConfirmPasswordReset,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  updatePassword as firebaseUpdatePassword
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { storageUtils } from '../storage/storageUtils';
@@ -141,6 +144,56 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Password reset confirmation error:', error);
+      return { error: error as Error };
+    }
+  },
+
+  async reauthenticateUser(user: FirebaseUser, currentPassword: string): Promise<{ error: Error | null }> {
+    try {
+      if (!user.email) {
+        throw new Error('User email not found');
+      }
+
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Re-authentication error:', error);
+      
+      // Provide user-friendly error messages
+      if (error.code === 'auth/wrong-password') {
+        return { error: new Error('Current password is incorrect') };
+      } else if (error.code === 'auth/user-mismatch') {
+        return { error: new Error('User mismatch') };
+      } else if (error.code === 'auth/user-not-found') {
+        return { error: new Error('User not found') };
+      } else if (error.code === 'auth/invalid-credential') {
+        return { error: new Error('Invalid credentials') };
+      }
+      
+      return { error: error as Error };
+    }
+  },
+
+  async updateUserPassword(user: FirebaseUser, newPassword: string): Promise<{ error: Error | null }> {
+    try {
+      // Validate password length
+      if (newPassword.length < 6) {
+        return { error: new Error('Password must be at least 6 characters long') };
+      }
+
+      await firebaseUpdatePassword(user, newPassword);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Update password error:', error);
+      
+      // Provide user-friendly error messages
+      if (error.code === 'auth/requires-recent-login') {
+        return { error: new Error('Please re-authenticate to change your password') };
+      } else if (error.code === 'auth/weak-password') {
+        return { error: new Error('Password is too weak. Please choose a stronger password') };
+      }
+      
       return { error: error as Error };
     }
   }

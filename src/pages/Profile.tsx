@@ -33,6 +33,7 @@ import { auth } from '@/lib/firebase/config';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { SubscriptionTier } from '@/lib/api/types/subscription';
 import { updateSubscription } from '@/lib/api/subscriptionApi';
+import { authService } from '@/lib/auth/authService';
 
 const ProfileContent = () => {
   const { profile, isLoading, error, updateProfileData } = useProfile();
@@ -128,20 +129,59 @@ const ProfileContent = () => {
   };
 
   const handlePasswordChange = async () => {
-    if (!user) return;
-    
+    if (!user) {
+      toast.error('Please log in to change your password');
+      return;
+    }
+
+    // Validation
+    if (!passwordData.currentPassword) {
+      toast.error('Please enter your current password');
+      return;
+    }
+
+    if (!passwordData.newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error('New passwords do not match');
       return;
     }
 
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error('New password must be different from current password');
+      return;
+    }
+
     setIsChangingPassword(true);
     try {
-      // Implement password change logic
+      // Step 1: Re-authenticate user with current password
+      const reauthResult = await authService.reauthenticateUser(user, passwordData.currentPassword);
+      if (reauthResult.error) {
+        toast.error(reauthResult.error.message || 'Current password is incorrect');
+        return;
+      }
+
+      // Step 2: Update password
+      const updateResult = await authService.updateUserPassword(user, passwordData.newPassword);
+      if (updateResult.error) {
+        toast.error(updateResult.error.message || 'Failed to change password');
+        return;
+      }
+
+      // Success
       toast.success('Password changed successfully!');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      toast.error('Failed to change password');
+      console.error('Password change error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
     }
@@ -341,10 +381,12 @@ const ProfileContent = () => {
           {/* Main Content */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6 w-full">
+              <TabsList className="grid grid-cols-1 mb-6 w-full">
                 <TabsTrigger value="account">Account</TabsTrigger>
-                <TabsTrigger value="preferences">Preferences</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                {/* Preferences tab disabled for testbed launch - keeping profile simple */}
+                {/* <TabsTrigger value="preferences">Preferences</TabsTrigger> */}
+                {/* Notifications tab disabled for testbed launch - no backend connection */}
+                {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
                 {/* Subscription tab disabled for testbed launch */}
                 {/* <TabsTrigger value="subscription">Subscription</TabsTrigger> */}
               </TabsList>
@@ -472,10 +514,10 @@ const ProfileContent = () => {
                   </Card>
                 </div>
 
-                {/* Second Row - 3-column layout for Password & Security and Account Actions */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-none">
-                  {/* Password & Security - Spans 2 columns */}
-                  <Card className="w-full lg:col-span-2">
+                {/* Second Row - Password & Security */}
+                <div className="grid grid-cols-1 gap-8 w-full max-w-none">
+                  {/* Password & Security */}
+                  <Card className="w-full">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
                       <CardTitle className="text-foreground">Password & Security</CardTitle>
@@ -540,8 +582,8 @@ const ProfileContent = () => {
                   </CardContent>
                 </Card>
 
-                  {/* Account Actions - Third column */}
-                  <Card className="w-full">
+                  {/* Account Actions - Disabled for testbed launch - keeping profile simple */}
+                  {/* <Card className="w-full">
                     <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                       <div className="flex-1">
                         <CardTitle className="text-foreground">Account Actions</CardTitle>
@@ -555,7 +597,7 @@ const ProfileContent = () => {
                     </CardHeader>
                     <CardContent className="space-y-6 w-full">
                       <div className="space-y-4">
-                        {/** Two-Factor Authentication removed (not functional) **/}
+                        Two-Factor Authentication removed (not functional)
                         <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30">
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Login Notifications</Label>
@@ -577,7 +619,7 @@ const ProfileContent = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
+                  </Card> */}
                 </div>
 
                 {/* Delete Account */}
@@ -620,8 +662,8 @@ const ProfileContent = () => {
                   </CardContent>
                 </Card>
 
-                {/* Export Data */}
-                <Card className="w-full">
+                {/* Export Data - Disabled for testbed launch - backend endpoint not available */}
+                {/* <Card className="w-full">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
                       <CardTitle className="text-foreground">Export My Data</CardTitle>
@@ -657,13 +699,13 @@ const ProfileContent = () => {
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
+                </Card> */}
               </TabsContent>
 
-              {/* Preferences Tab */}
-              <TabsContent value="preferences" className="space-y-8 w-full">
+              {/* Preferences Tab - Disabled for testbed launch - keeping profile simple */}
+              {/* <TabsContent value="preferences" className="space-y-8 w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-none">
-                  {/* Display & Language - Spans 2 columns */}
+                  Display & Language - Spans 2 columns
                   <Card className="w-full lg:col-span-2">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
@@ -734,7 +776,7 @@ const ProfileContent = () => {
                   </CardContent>
                 </Card>
 
-                {/* Additional Preferences Card */}
+                Additional Preferences Card
                 <Card className="w-full">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
@@ -773,7 +815,7 @@ const ProfileContent = () => {
                   </CardContent>
                 </Card>
 
-                {/* Data & Privacy - Third column */}
+                Data & Privacy - Third column
                 <Card className="w-full">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
@@ -813,7 +855,7 @@ const ProfileContent = () => {
                 </Card>
                 </div>
 
-                {/* Action Buttons */}
+                Action Buttons
                     <div className="flex justify-end gap-4">
                       <Button variant="outline" className="h-11 px-8">
                         Reset to Defaults
@@ -822,12 +864,12 @@ const ProfileContent = () => {
                         Save Preferences
                       </Button>
                     </div>
-              </TabsContent>
+              </TabsContent> */}
 
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-8 w-full">
+              {/* Notifications Tab - Disabled for testbed launch */}
+              {/* <TabsContent value="notifications" className="space-y-8 w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-none">
-                  {/* Email & Push Notifications */}
+                  Email & Push Notifications
                 <Card className="w-full">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                     <div className="flex-1">
@@ -872,7 +914,7 @@ const ProfileContent = () => {
                     </CardContent>
                   </Card>
 
-                  {/* SMS Notifications */}
+                  SMS Notifications
                   <Card className="w-full">
                     <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                       <div className="flex-1">
@@ -904,7 +946,7 @@ const ProfileContent = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Notification Preferences - Third column */}
+                  Notification Preferences - Third column
                   <Card className="w-full">
                     <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
                       <div className="flex-1">
@@ -950,7 +992,7 @@ const ProfileContent = () => {
                   </Card>
                 </div>
 
-                {/* Action Buttons */}
+                Action Buttons
                     <div className="flex justify-end gap-4">
                       <Button variant="outline" className="h-11 px-8">
                         Reset to Defaults
@@ -959,7 +1001,7 @@ const ProfileContent = () => {
                         Save Settings
                       </Button>
                     </div>
-              </TabsContent>
+              </TabsContent> */}
 
               {/* Subscription Tab - Disabled for testbed launch */}
               {/* <TabsContent value="subscription" className="space-y-8 w-full">
