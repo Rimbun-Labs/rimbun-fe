@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { UserAnswer, Question } from '@/lib/api/types/assessment';
@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { useAssessmentResume } from '@/hooks/useAssessmentResume';
+import { storageUtils } from '@/lib/storage/storageUtils';
 // Removed environmentStorage - using API-first approach
 
 const Assessment: React.FC = () => {
@@ -30,13 +31,13 @@ const Assessment: React.FC = () => {
   const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
   const [existingAnswers, setExistingAnswers] = useState<Record<string, any>>({});
   const [existingProgress, setExistingProgress] = useState<any>(null);
-  const { sessionId, setSessionId, setSession, hasCompletedAssessment } = useSession();
+  const { sessionId, setSessionId, setSession, hasCompletedAssessment, isLoading: sessionLoading } = useSession();
   const { userRegistrationComplete } = useAuth();
   
   // Simple resume functionality
   const urlParams = new URLSearchParams(window.location.search);
   const resumeSessionId = urlParams.get('sessionId');
-  const { data: resumeData } = useAssessmentResume(resumeSessionId);
+  const { data: resumeData } = useAssessmentResume(resumeSessionId, userRegistrationComplete);
   
   // Check URL parameters for retake mode and resume functionality
   useEffect(() => {
@@ -53,7 +54,7 @@ const Assessment: React.FC = () => {
     if (resumeSessionId) {
       setAssessmentMode('resume');
       setSessionId(resumeSessionId);
-      localStorage.setItem('assessmentSessionId', resumeSessionId);
+      storageUtils.setItem('assessmentSessionId', resumeSessionId);
       setShowStartPage(false);
       setHasStarted(true);
       console.log('🔄 Resuming assessment from session:', resumeSessionId);
@@ -68,7 +69,7 @@ const Assessment: React.FC = () => {
       const mode = urlParams.get('mode');
       const isRetakeMode = mode === 'retake';
       
-      if (!userRegistrationComplete || assessmentMode === 'retake' || assessmentMode === 'resume' || isRetakeMode) {
+      if (!userRegistrationComplete || sessionLoading || assessmentMode === 'retake' || assessmentMode === 'resume' || isRetakeMode) {
         setIsCheckingExistingAssessment(false);
         return;
       }
@@ -119,7 +120,7 @@ const Assessment: React.FC = () => {
     mutationFn: createSession,
     onSuccess: (response) => {
       setSessionId(response.id);
-      localStorage.setItem('assessmentSessionId', response.id);
+      storageUtils.setItem('assessmentSessionId', response.id);
       setShowStartPage(false);
       setHasStarted(true);
     },
@@ -154,9 +155,12 @@ const Assessment: React.FC = () => {
     handleAnswer,
     validateCurrentAnswer,
     setError,
-    setAnswers
+    setAnswers,
+    loadExistingAnswers
   } = useAssessmentAnswers(sessionId);
   
+  const hasLoadedResumeAnswers = useRef(false);
+
   // Set resume index when questions are loaded and we're in resume mode
   useEffect(() => {
     console.log('🔍 Resume useEffect triggered:', {
@@ -199,8 +203,12 @@ const Assessment: React.FC = () => {
         setCurrentQuestionIndex(resumeData.resumeIndex || 0);
         console.log('📍 Fallback: Starting resume from index:', resumeData.resumeIndex || 0);
       }
+      if (resumeSessionId && !resumeData.isCompleted && !hasLoadedResumeAnswers.current) {
+        hasLoadedResumeAnswers.current = true;
+        loadExistingAnswers(resumeSessionId);
+      }
     }
-  }, [questions, assessmentMode, resumeData, resumeSessionId]);
+  }, [questions, assessmentMode, resumeData, resumeSessionId, loadExistingAnswers]);
   
   // Get results query (activated when assessment completes)
   const { data: results, isPending: resultsLoading, error: resultsError } = useQuery({

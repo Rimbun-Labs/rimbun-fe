@@ -1,23 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import { config } from '../lib/api/config';
+import apiClient from '@/lib/api/client';
 
-export const useAssessmentResume = (sessionId: string | null) => {
+export const useAssessmentResume = (sessionId: string | null, enabled: boolean) => {
   return useQuery({
     queryKey: ['assessment-resume', sessionId],
     queryFn: async () => {
-      const response = await fetch(`${config.API_BASE_URL}/user-responses/session/${sessionId}/resume`);
-      if (response.status === 404) {
-        // 404 is expected when there's no resume data yet
-        console.log('ℹ️ Resume endpoint returned 404 - no resume data available yet');
-        return null;
+      try {
+        const response = await apiClient.get(
+          `/user-responses/session/${sessionId}/resume`
+        );
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          console.log('ℹ️ Resume endpoint returned 404 - no resume data available yet');
+          return null;
+        }
+        throw error;
       }
-      if (!response.ok) {
-        throw new Error('Failed to get resume data');
-      }
-      return response.json();
     },
-    enabled: !!sessionId,
-    staleTime: 0, // Always fetch fresh data
-    retry: false, // Don't retry 404 errors
+    enabled: !!sessionId && enabled,
+    staleTime: 0,
+    retry: false,
   });
 };

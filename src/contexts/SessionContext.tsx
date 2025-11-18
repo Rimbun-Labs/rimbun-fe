@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ResponseGroup } from '@/lib/api/types/assessment';
-import { getAssessmentResults, getUserSessions as getUserSessionsByUserId } from '@/lib/api/assessmentApi';
+import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { userService } from '@/lib/api/userService';
 import { useAuth } from './AuthContext';
+import { storageUtils } from '@/lib/storage/storageUtils';
+import { initializeEnvironmentStorage } from '@/utils/environmentStorage';
+import apiClient from '@/lib/api/client';
 
 interface SessionContextType {
   sessionId: string | null;
@@ -13,6 +16,7 @@ interface SessionContextType {
   clearSession: () => void;
   isLoading: boolean;
   hasCompletedAssessment: () => Promise<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean }>;
+  isReady: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -21,76 +25,91 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [storageReady, setStorageReady] = useState(false);
   const { userRegistrationComplete, loading: authLoading } = useAuth();
 
-  // Load session from localStorage on mount - WITH STALE DATA CLEANUP
+  // Initialize environment-aware storage and hydrate sessionId
   useEffect(() => {
-    // Clear any stale localStorage data from previous environments
-    const staleKeys = ['assessmentSessionId', 'databaseUserId', 'hasSeenWelcome'];
-    staleKeys.forEach(key => {
-      const value = localStorage.getItem(key);
-      if (value) {
-        console.log(`🧹 Clearing stale localStorage data: ${key}`);
-        localStorage.removeItem(key);
-      }
-    });
-
-    // Now check for current session
-    const savedSessionId = localStorage.getItem('assessmentSessionId');
+    initializeEnvironmentStorage();
+    const savedSessionId = storageUtils.getItem('assessmentSessionId');
     if (savedSessionId) {
       setSessionId(savedSessionId);
     }
+    setStorageReady(true);
   }, []);
 
-  // Fetch session data when sessionId changes
+  // Keep storage in sync with sessionId
   useEffect(() => {
+    if (!storageReady) return;
+
+    if (sessionId) {
+      storageUtils.setItem('assessmentSessionId', sessionId);
+    } else {
+      storageUtils.removeItem('assessmentSessionId');
+    }
+  }, [sessionId, storageReady]);
+
+  const fetchResumeData = async (responseGroupId: string) => {
+    try {
+      const response = await apiClient.get(
+        `/user-responses/session/${responseGroupId}/resume`
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+  // Fetch session data when prerequisites are ready
+  useEffect(() => {
+    if (!storageReady) {
+      return;
+    }
+
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const fetchSessionData = async () => {
       if (!sessionId) {
         setIsLoading(false);
+        setSession(null);
+        return;
+      }
+
+      if (authLoading) {
+        console.log('⏳ SessionContext: Auth still loading, waiting...');
+        return;
+      }
+
+      if (!userRegistrationComplete) {
+        console.log('⚠️ SessionContext: User registration not complete yet, waiting...');
+        return;
+      }
+
+      setIsLoading(true);
+
+      const databaseUserId = userService.getDatabaseUserId();
+      if (!databaseUserId) {
+        console.log('⚠️ SessionContext: No database user ID found, retrying...');
+        retryTimeout = setTimeout(fetchSessionData, 150);
         return;
       }
 
       try {
-        setIsLoading(true);
-        
-        // ✅ FIXED: Wait for auth loading to complete before checking sessions
-        if (authLoading) {
-          console.log('⏳ SessionContext: Auth still loading, waiting...');
+        const resumeData = await fetchResumeData(sessionId);
+
+        if (!resumeData || !resumeData.isCompleted) {
+          console.log('ℹ️ SessionContext: Session incomplete, skipping score fetch');
+          setSession(null);
           setIsLoading(false);
           return;
         }
-        
-        // ✅ FIXED: Wait for user registration to complete before checking sessions
-        if (!userRegistrationComplete) {
-          console.log('⚠️ SessionContext: User registration not complete yet, waiting...');
-          setIsLoading(false);
-          return;
-        }
-        
-               // ✅ FIXED: Use environment-aware storage instead of direct localStorage
-               const databaseUserId = userService.getDatabaseUserId();
-               if (!databaseUserId) {
-                 console.log('⚠️ SessionContext: No database user ID found, retrying in 100ms...');
-                 // Retry after a short delay in case localStorage hasn't been updated yet
-                 setTimeout(() => {
-                   const retryDatabaseUserId = userService.getDatabaseUserId();
-                   if (retryDatabaseUserId) {
-                     console.log('✅ SessionContext: Found database user ID on retry:', retryDatabaseUserId);
-                     // Retry the session check
-                     fetchSessionData();
-                   } else {
-                     console.log('⚠️ SessionContext: Still no database user ID found after retry');
-                     setIsLoading(false);
-                   }
-                 }, 100);
-                 return;
-               }
 
         const results = await getAssessmentResults(sessionId);
-        
-        // Use comprehensive assessment validation
+
         if (isAssessmentComplete(results)) {
-          console.log('✅ SessionContext: Assessment is complete, setting session');
           setSession({
             id: sessionId,
             userId: results.responseGroupId,
@@ -110,8 +129,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
             updatedAt: results.updatedAt
           });
         } else {
-          console.log('⚠️ SessionContext: Assessment is incomplete');
-          // Don't set session for incomplete assessments
+          console.log('⚠️ SessionContext: Assessment data incomplete');
+          setSession(null);
         }
       } catch (error) {
         console.error('Failed to fetch session data:', error);
@@ -122,12 +141,18 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     fetchSessionData();
-  }, [sessionId, userRegistrationComplete, authLoading]);
+
+    return () => {
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
+    };
+  }, [sessionId, userRegistrationComplete, authLoading, storageReady]);
 
   const clearSession = () => {
     setSessionId(null);
     setSession(null);
-    localStorage.removeItem('assessmentSessionId');
+    storageUtils.removeItem('assessmentSessionId');
   };
 
   // Function to check if user has completed an assessment - NO API CALL
@@ -145,6 +170,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
+  const isReady = storageReady && !isLoading;
+
   return (
     <SessionContext.Provider value={{ 
       sessionId, 
@@ -153,7 +180,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       setSession, 
       clearSession,
       isLoading,
-      hasCompletedAssessment
+      hasCompletedAssessment,
+      isReady
     }}>
       {children}
     </SessionContext.Provider>

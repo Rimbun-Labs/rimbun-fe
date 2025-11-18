@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from './client';
 import { Question } from './types/assessment';
 import { mockQuestions } from '../mock/mockQuestions';
 import { config } from './config';
@@ -15,8 +15,8 @@ export const getQuestions = async (): Promise<Question[]> => {
   }
 
   try {
-    const response = await axios.get<Question[]>(
-      `${config.API_BASE_URL}/questionnaire/questions`,
+    const response = await apiClient.get<Question[]>(
+      `/questionnaire/questions`,
       {
         headers: {
           'Accept': 'application/json'

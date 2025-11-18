@@ -166,7 +166,7 @@ const mapGoalGapInsights = (oldInsights: any) => {
 const Dashboard = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { session, setSession } = useSession();
+  const { session, setSession, isLoading: sessionLoading } = useSession();
   const { userRegistrationComplete, user } = useAuth();
   
   // Use sessionId from params or fall back to session context
@@ -246,10 +246,11 @@ const Dashboard = () => {
   // Memoize loading state - include checking for completed assessments AND data availability
   // Keep spinner showing until data is actually available, not just when API calls finish
   const isLoading = useMemo(() =>
+    sessionLoading || // Show loading while SessionContext is determining session
     checkingCompletedAssessment || 
     ((assessmentLoading || recommendationsLoading) && effectiveSessionId) ||
     (effectiveSessionId && (!assessmentResults || !recommendations)),
-    [assessmentLoading, recommendationsLoading, effectiveSessionId, checkingCompletedAssessment, assessmentResults, recommendations]
+    [sessionLoading, assessmentLoading, recommendationsLoading, effectiveSessionId, checkingCompletedAssessment, assessmentResults, recommendations]
   );
 
   // Session state is managed by SessionContext

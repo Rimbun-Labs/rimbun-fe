@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from './client';
 import { CreateResponseGroupRequest, ResponseGroup } from './types/assessment';
 import { config } from './config';
 import { userService } from './userService';
@@ -41,8 +41,8 @@ export const createSession = async (data?: CreateResponseGroupRequest): Promise<
     console.log('🔵 Creating session with database user ID:', databaseUserId);
     console.log('🔵 Firebase user ID:', user.uid);
     
-    const response = await axios.post<ResponseGroup>(
-      `${config.API_BASE_URL}/user-responses/session`,
+    const response = await apiClient.post<ResponseGroup>(
+      `/user-responses/session`,
       {
         userId: databaseUserId, // Use database user ID, not Firebase user ID
         questionnaireType: data?.questionnaireType || "ONBOARDING",
