@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DollarSign, Save, AlertCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DollarSign, Save, AlertCircle, Calendar } from "lucide-react";
 import { SpendingAnalysisDto, SpendingOverviewDto } from '@/lib/api/spendingApi';
-import { useSaveSpendingOverview } from '@/hooks/useSpendingData';
+import { useSaveSpendingOverview, useSaveSpendingPeriod, useSpendingHistory } from '@/hooks/useSpendingData';
 import { useFormatters } from '@/hooks/useFormatters';
 
 // Form validation schema
@@ -44,8 +45,34 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
 }) => {
   const { formatCurrency } = useFormatters();
   const saveSpendingMutation = useSaveSpendingOverview(userId);
+  const savePeriodMutation = useSaveSpendingPeriod(userId);
+  const { data: historyData } = useSpendingHistory(userId, { limit: 12 });
 
-  // Initialize form with current data or defaults
+  // Get current month/year
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+
+  // State for period selection
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const isCurrentPeriod = selectedYear === currentYear && selectedMonth === currentMonth;
+
+  // Generate year options (current year and 2 years back)
+  const yearOptions = Array.from({ length: 3 }, (_, i) => currentYear - i);
+
+  // Month names
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Check if selected period already has data
+  const existingPeriod = historyData?.periods.find(
+    p => p.periodYear === selectedYear && p.periodMonth === selectedMonth
+  );
+
+  // Initialize form with current data or existing period data
   const form = useForm<SpendingFormData>({
     resolver: zodResolver(spendingFormSchema),
     defaultValues: {
@@ -54,6 +81,23 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
       emergencyFundTarget: currentData?.recommendedEmergencyFund || undefined
     }
   });
+
+  // Update form when period changes or existing data is found
+  useEffect(() => {
+    if (existingPeriod) {
+      form.setValue('monthlySpending', existingPeriod.monthlySpending);
+      form.setValue('emergencyFundCurrent', existingPeriod.emergencyFundCurrent);
+      form.setValue('emergencyFundTarget', existingPeriod.emergencyFundTarget);
+    } else if (isCurrentPeriod && currentData) {
+      form.setValue('monthlySpending', currentData.monthlySpending || 0);
+      form.setValue('emergencyFundCurrent', currentData.emergencyFundCurrent || 0);
+      form.setValue('emergencyFundTarget', currentData.recommendedEmergencyFund);
+    } else {
+      form.setValue('monthlySpending', 0);
+      form.setValue('emergencyFundCurrent', 0);
+      form.setValue('emergencyFundTarget', undefined);
+    }
+  }, [selectedYear, selectedMonth, existingPeriod, isCurrentPeriod, currentData, form]);
 
   const { register, handleSubmit, formState: { errors }, watch } = form;
 
@@ -65,13 +109,24 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
 
   const onSubmit = async (data: SpendingFormData) => {
     try {
-      const spendingData: SpendingOverviewDto = {
-        monthlySpending: data.monthlySpending,
-        emergencyFundCurrent: data.emergencyFundCurrent,
-        emergencyFundTarget: data.emergencyFundTarget
-      };
-
-      await saveSpendingMutation.mutateAsync(spendingData);
+      if (isCurrentPeriod) {
+        // Use existing endpoint for current month (backward compatible)
+        const spendingData: SpendingOverviewDto = {
+          monthlySpending: data.monthlySpending,
+          emergencyFundCurrent: data.emergencyFundCurrent,
+          emergencyFundTarget: data.emergencyFundTarget
+        };
+        await saveSpendingMutation.mutateAsync(spendingData);
+      } else {
+        // Use new period endpoint for past/future months
+        await savePeriodMutation.mutateAsync({
+          year: selectedYear,
+          month: selectedMonth,
+          monthlySpending: data.monthlySpending,
+          emergencyFundCurrent: data.emergencyFundCurrent,
+          emergencyFundTarget: data.emergencyFundTarget
+        });
+      }
       onSuccess?.();
     } catch (error) {
       console.error('Failed to save spending data:', error);
@@ -90,6 +145,57 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Period Selection */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Select Period
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Select
+                  value={selectedMonth.toString()}
+                  onValueChange={(value) => setSelectedMonth(parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {monthNames.map((month, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={selectedYear.toString()}
+                  onValueChange={(value) => setSelectedYear(parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {yearOptions.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {existingPeriod && (
+                <p className="text-xs text-blue-600 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  This period already has data. Editing will update it.
+                </p>
+              )}
+              {isCurrentPeriod && (
+                <p className="text-xs text-muted-foreground">
+                  Current month selected
+                </p>
+              )}
+            </div>
+
             {/* Monthly Income Display (Read-only) */}
             <div className="space-y-2">
               <Label htmlFor="monthlyIncome">Monthly Income</Label>
@@ -183,9 +289,9 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
             <Button 
               type="submit" 
               className="w-full"
-              disabled={saveSpendingMutation.isPending}
+              disabled={saveSpendingMutation.isPending || savePeriodMutation.isPending}
             >
-              {saveSpendingMutation.isPending ? (
+              {(saveSpendingMutation.isPending || savePeriodMutation.isPending) ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                   Saving...
@@ -193,7 +299,7 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Spending Data
+                  {existingPeriod ? 'Update' : 'Save'} Spending Data for {monthNames[selectedMonth - 1]} {selectedYear}
                 </>
               )}
             </Button>

@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { spendingApi, SpendingOverviewDto, SpendingCategoryDto } from '@/lib/api/spendingApi';
+import { 
+  spendingApi, 
+  SpendingOverviewDto, 
+  SpendingCategoryDto,
+  SaveSpendingPeriodDto,
+  SpendingPeriodDto
+} from '@/lib/api/spendingApi';
 import { toast } from 'sonner';
 
 /**
@@ -124,6 +130,67 @@ export const useSpendingRecommendations = (userId: string) => {
     queryFn: () => spendingApi.getSpendingRecommendations(userId),
     enabled: !!userId,
     staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 3
+  });
+};
+
+/**
+ * Hook to save spending for a specific period
+ */
+export const useSaveSpendingPeriod = (userId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SaveSpendingPeriodDto) => 
+      spendingApi.saveSpendingPeriod(userId, data),
+    onSuccess: () => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ['spending-history', userId] });
+      queryClient.invalidateQueries({ queryKey: ['spending-trends', userId] });
+      queryClient.invalidateQueries({ queryKey: ['spending-overview', userId] });
+      queryClient.invalidateQueries({ queryKey: ['spending-recommendations', userId] });
+      toast.success('Spending period saved successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to save spending period: ${error.message}`);
+    }
+  });
+};
+
+/**
+ * Hook to get spending history
+ */
+export const useSpendingHistory = (
+  userId: string,
+  options?: {
+    limit?: number;
+    startYear?: number;
+    startMonth?: number;
+    endYear?: number;
+    endMonth?: number;
+  }
+) => {
+  return useQuery({
+    queryKey: ['spending-history', userId, options],
+    queryFn: () => spendingApi.getSpendingHistory(userId, options),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3
+  });
+};
+
+/**
+ * Hook to get spending trends analysis
+ */
+export const useSpendingTrends = (
+  userId: string,
+  period: '3m' | '6m' | '12m' = '6m'
+) => {
+  return useQuery({
+    queryKey: ['spending-trends', userId, period],
+    queryFn: () => spendingApi.getSpendingTrends(userId, period),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3
   });
 };

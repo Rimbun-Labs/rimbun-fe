@@ -43,6 +43,57 @@ export interface SpendingRecommendationDto {
   };
 }
 
+// Time-series DTOs
+export interface SpendingPeriodDto {
+  id: string;
+  userId: string;
+  periodYear: number;
+  periodMonth: number; // 1-12
+  monthlySpending: number;
+  emergencyFundCurrent: number;
+  emergencyFundTarget?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SpendingHistoryTrendsDto {
+  momChange: number | null; // Month-over-month %
+  threeMonthAverage: number | null;
+  sixMonthAverage: number | null;
+  twelveMonthAverage: number | null;
+}
+
+export interface SpendingHistoryDto {
+  periods: SpendingPeriodDto[];
+  trends: SpendingHistoryTrendsDto;
+}
+
+export interface SpendingTrendsDto {
+  periods: Array<{
+    periodYear: number;
+    periodMonth: number;
+    monthlySpending: number;
+  }>;
+  trends: {
+    momChange: number | null;
+    yoyChange: number | null; // Year-over-year (not implemented yet)
+    threeMonthAverage: number | null;
+    sixMonthAverage: number | null;
+    twelveMonthAverage: number | null;
+    velocity: 'increasing' | 'decreasing' | 'stable';
+    trendDirection: 'up' | 'down' | 'flat';
+  };
+  insights: string[];
+}
+
+export interface SaveSpendingPeriodDto {
+  year: number;
+  month: number; // 1-12
+  monthlySpending: number;
+  emergencyFundCurrent?: number;
+  emergencyFundTarget?: number;
+}
+
 // API response wrapper
 interface ApiResponse<T> {
   success: boolean;
@@ -128,6 +179,60 @@ export const spendingApi = {
   getSpendingRecommendations: async (userId: string): Promise<SpendingRecommendationDto> => {
     const response = await apiClient.get<ApiResponse<SpendingRecommendationDto>>(
       `/spending/recommendations?userId=${userId}`
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Save spending for a specific period (month/year)
+   */
+  saveSpendingPeriod: async (
+    userId: string,
+    data: SaveSpendingPeriodDto
+  ): Promise<SpendingPeriodDto> => {
+    const response = await apiClient.post<ApiResponse<SpendingPeriodDto>>(
+      `/spending/periods?userId=${userId}`,
+      data
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Get spending history with trends
+   */
+  getSpendingHistory: async (
+    userId: string,
+    options?: {
+      limit?: number;
+      startYear?: number;
+      startMonth?: number;
+      endYear?: number;
+      endMonth?: number;
+    }
+  ): Promise<SpendingHistoryDto> => {
+    const params = new URLSearchParams();
+    params.append('userId', userId);
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.startYear) params.append('startYear', options.startYear.toString());
+    if (options?.startMonth) params.append('startMonth', options.startMonth.toString());
+    if (options?.endYear) params.append('endYear', options.endYear.toString());
+    if (options?.endMonth) params.append('endMonth', options.endMonth.toString());
+
+    const response = await apiClient.get<ApiResponse<SpendingHistoryDto>>(
+      `/spending/history?${params.toString()}`
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Get spending trends analysis
+   */
+  getSpendingTrends: async (
+    userId: string,
+    period: '3m' | '6m' | '12m' = '6m'
+  ): Promise<SpendingTrendsDto> => {
+    const response = await apiClient.get<ApiResponse<SpendingTrendsDto>>(
+      `/spending/trends?userId=${userId}&period=${period}`
     );
     return response.data.data;
   }
