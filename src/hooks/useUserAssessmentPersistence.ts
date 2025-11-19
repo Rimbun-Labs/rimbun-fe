@@ -5,7 +5,7 @@ import { getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { userService } from '@/lib/api/userService';
 
 export const useUserAssessmentPersistence = () => {
-  const { setSession } = useSession();
+  const { setSession, setSessionId, session } = useSession();
   const { user, userRegistrationComplete, loading } = useAuth();
   const [hasCheckedPersistence, setHasCheckedPersistence] = useState(false);
 
@@ -17,22 +17,26 @@ export const useUserAssessmentPersistence = () => {
         return;
       }
 
-      if (hasCheckedPersistence) return;
+      // Skip if already checked or if session is already loaded (avoid duplicate work)
+      if (hasCheckedPersistence || (session?.isCompleted && session?.id)) {
+        return;
+      }
 
       try {
         console.log('🔍 useUserAssessmentPersistence: Checking for existing assessment results');
         
         const latestResults = await getLatestAssessmentResults();
         
-        if (latestResults && !hasCheckedPersistence) {
+        if (latestResults) {
           try {
             console.log('✅ Found existing assessment results for user, checking completeness');
             
             // If getLatestAssessmentResults() returned data, it means the session is complete
             // (since we fixed that function to use score endpoint)
+            const sessionId = latestResults.responseGroupId;
             const sessionData = {
-              id: latestResults.responseGroupId,
-              userId: latestResults.responseGroupId,
+              id: sessionId,
+              userId: sessionId,
               questionnaireType: "ONBOARDING",
               isCompleted: true,
               metadata: {
@@ -49,13 +53,15 @@ export const useUserAssessmentPersistence = () => {
               updatedAt: latestResults.updatedAt
             };
             
+            // Set both session and sessionId together to keep them in sync
             setSession(sessionData);
+            setSessionId(sessionId);
             console.log('✅ Assessment is complete (backend confirmed), restoring session');
           } catch (error) {
             console.error('Failed to restore session from assessment results:', error);
           }
           setHasCheckedPersistence(true);
-        } else if (latestResults === null && !hasCheckedPersistence) {
+        } else {
           console.log('ℹ️ No existing assessment results found for user');
           setHasCheckedPersistence(true);
         }
@@ -66,7 +72,7 @@ export const useUserAssessmentPersistence = () => {
     };
 
     checkPersistence();
-  }, [setSession, hasCheckedPersistence, user, userRegistrationComplete, loading]);
+  }, [setSession, setSessionId, session, hasCheckedPersistence, user, userRegistrationComplete, loading]);
 
   return { hasCheckedPersistence };
 };

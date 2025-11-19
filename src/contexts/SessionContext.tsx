@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { ResponseGroup } from '@/lib/api/types/assessment';
-import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { getAssessmentResults, getLatestAssessmentResults } from '@/lib/api/assessmentApi';
 import { isAssessmentComplete } from '@/utils/assessmentValidation';
 import { userService } from '@/lib/api/userService';
 import { useAuth } from './AuthContext';
@@ -27,6 +27,9 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isLoading, setIsLoading] = useState(true);
   const [storageReady, setStorageReady] = useState(false);
   const { userRegistrationComplete, loading: authLoading } = useAuth();
+  
+  // Shared in-flight promise to prevent duplicate API calls
+  const assessmentCheckPromiseRef = useRef<Promise<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean }> | null>(null);
 
   // Initialize environment-aware storage and hydrate sessionId
   useEffect(() => {
@@ -155,19 +158,94 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     storageUtils.removeItem('assessmentSessionId');
   };
 
-  // Function to check if user has completed an assessment - NO API CALL
+  // Helper function to create session data from assessment results
+  const createSessionFromResults = (results: any): ResponseGroup => {
+    return {
+      id: results.responseGroupId,
+      userId: results.responseGroupId,
+      questionnaireType: "ONBOARDING",
+      isCompleted: true,
+      metadata: {
+        score: results.scoreData.finalScore,
+        profile: results.scoreData.profile,
+        riskProfile: results.scoreData.riskProfile,
+        knowledgeLevel: results.scoreData.knowledgeLevel,
+        leverageAptitude: results.scoreData.leverageAptitude,
+        riskCapacity: results.scoreData.riskCapacity,
+        investmentHorizon: results.scoreData.investmentHorizon,
+        overallConfidence: results.scoreData.overallConfidence
+      },
+      createdAt: results.createdAt,
+      updatedAt: results.updatedAt
+    };
+  };
+
+  // Function to check if user has completed an assessment
+  // Checks cache first, then queries database if needed
   const hasCompletedAssessment = async (): Promise<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean }> => {
-    // Use the session state directly - no API call needed
+    // Fast path: Check cached session first
     if (session?.isCompleted && session?.id) {
       console.log('✅ hasCompletedAssessment: Using cached session data');
       return { hasAssessment: true, sessionId: session.id };
     } else if (session && !session.isCompleted && session.id) {
       // Session exists but is incomplete
       return { hasAssessment: true, sessionId: session.id, isIncomplete: true };
-    } else {
-      // No session or no assessment
+    }
+
+    // If we have an in-flight promise, return it to prevent duplicate calls
+    if (assessmentCheckPromiseRef.current) {
+      console.log('⏳ hasCompletedAssessment: Reusing in-flight check');
+      return assessmentCheckPromiseRef.current;
+    }
+
+    // Check prerequisites before querying database
+    if (!userRegistrationComplete || authLoading) {
+      console.log('⏳ hasCompletedAssessment: Waiting for auth to complete');
       return { hasAssessment: false };
     }
+
+    const databaseUserId = userService.getDatabaseUserId();
+    if (!databaseUserId) {
+      console.log('⚠️ hasCompletedAssessment: No database user ID found');
+      return { hasAssessment: false };
+    }
+
+    // Create the promise for database query
+    const checkPromise = (async () => {
+      try {
+        console.log('🔍 hasCompletedAssessment: Querying database for completed assessment');
+        const latestResults = await getLatestAssessmentResults();
+        
+        if (!latestResults) {
+          console.log('ℹ️ hasCompletedAssessment: No completed assessment found in database');
+          return { hasAssessment: false };
+        }
+
+        const foundSessionId = latestResults.responseGroupId;
+        console.log('✅ hasCompletedAssessment: Found completed assessment in database:', foundSessionId);
+
+        // Create session data from results
+        const sessionData = createSessionFromResults(latestResults);
+
+        // Set both session and sessionId together to keep them in sync
+        setSession(sessionData);
+        setSessionId(foundSessionId);
+
+        return { hasAssessment: true, sessionId: foundSessionId };
+      } catch (error) {
+        console.error('❌ hasCompletedAssessment: Error querying database:', error);
+        // Return false on error - safe fallback
+        return { hasAssessment: false };
+      } finally {
+        // Clear the in-flight promise
+        assessmentCheckPromiseRef.current = null;
+      }
+    })();
+
+    // Store the promise so concurrent calls can reuse it
+    assessmentCheckPromiseRef.current = checkPromise;
+    
+    return checkPromise;
   };
 
   const isReady = storageReady && !isLoading;

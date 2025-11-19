@@ -8,6 +8,7 @@ import { AssessmentError } from '@/components/assessment/AssessmentError';
 import { AssessmentContainer } from '@/components/assessment/AssessmentContainer';
 import AssessmentComplete from '@/components/assessment/AssessmentComplete';
 import { AssessmentStartPage } from '@/components/assessment/AssessmentStartPage';
+import { AssessmentCompletedInterstitial } from '@/components/assessment/AssessmentCompletedInterstitial';
 import { Button } from '@/components/ui/button';
 import { createSession } from '@/lib/api/sessionApi';
 import { getQuestions } from '@/lib/api/questionnaireApi';
@@ -27,6 +28,10 @@ const Assessment: React.FC = () => {
   const [showStartPage, setShowStartPage] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
   const [isCheckingExistingAssessment, setIsCheckingExistingAssessment] = useState(true);
+  const [showCompletedInterstitial, setShowCompletedInterstitial] = useState(false);
+  const [completedSessionId, setCompletedSessionId] = useState<string | null>(null);
+  const [hasExistingCompletedAssessment, setHasExistingCompletedAssessment] = useState(false);
+  const [hasNewlyCompletedAssessment, setHasNewlyCompletedAssessment] = useState(false);
   const [assessmentMode, setAssessmentMode] = useState<'new' | 'resume' | 'retake'>('new');
   const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
   const [existingAnswers, setExistingAnswers] = useState<Record<string, any>>({});
@@ -77,8 +82,14 @@ const Assessment: React.FC = () => {
       try {
         const status = await hasCompletedAssessment();
         if (status.hasAssessment && status.sessionId && !status.isIncomplete) {
-          // User already has completed assessment, redirect to dashboard
-          navigate(`/dashboard/${status.sessionId}`);
+          // User already has completed assessment, show interstitial instead of redirecting
+          setCompletedSessionId(status.sessionId);
+          setHasExistingCompletedAssessment(true);
+          setHasNewlyCompletedAssessment(false);
+          setShowCompletedInterstitial(true);
+          setShowStartPage(false);
+          setIsComplete(false);
+          setIsCheckingExistingAssessment(false);
           return;
         }
         // If incomplete assessment, let them stay on assessment page to complete it
@@ -171,13 +182,23 @@ const Assessment: React.FC = () => {
       resumeSessionId
     });
     
+    if (hasExistingCompletedAssessment) {
+      return;
+    }
+
     if (questions && assessmentMode === 'resume' && resumeData) {
       console.log('🔍 Resume data received:', resumeData);
       
       // ✅ FIXED: Check if assessment is completed first
       if (resumeData.isCompleted) {
-        console.log('✅ Assessment completed - redirecting to results');
-        setIsComplete(true);
+        console.log('✅ Assessment completed - showing interstitial for completed resume');
+        setHasExistingCompletedAssessment(true);
+        setHasNewlyCompletedAssessment(false);
+        setCompletedSessionId(resumeSessionId || sessionId);
+        setShowCompletedInterstitial(true);
+        setIsComplete(false);
+        setIsCheckingExistingAssessment(false);
+        setShowStartPage(false);
         return;
       }
       
@@ -208,7 +229,7 @@ const Assessment: React.FC = () => {
         loadExistingAnswers(resumeSessionId);
       }
     }
-  }, [questions, assessmentMode, resumeData, resumeSessionId, loadExistingAnswers]);
+  }, [questions, assessmentMode, resumeData, resumeSessionId, loadExistingAnswers, hasExistingCompletedAssessment, sessionId]);
   
   // Get results query (activated when assessment completes)
   const { data: results, isPending: resultsLoading, error: resultsError } = useQuery({
@@ -243,18 +264,18 @@ const Assessment: React.FC = () => {
       
       throw new Error('Failed to fetch results after multiple attempts');
     },
-    enabled: isComplete && !!sessionId,
+    enabled: hasNewlyCompletedAssessment && !!sessionId,
     retry: false // We handle retries manually
   });
   
   // Handle results success - navigate to dashboard when complete
   useEffect(() => {
-    if (results && sessionId) {
+    if (results && sessionId && hasNewlyCompletedAssessment) {
       // Results are available, assessment is complete - navigate to dashboard
       console.log('✅ Assessment: Results loaded, navigating to dashboard');
       navigate(`/dashboard/${sessionId}`);
     }
-  }, [results, sessionId, navigate]);
+  }, [results, sessionId, hasNewlyCompletedAssessment, navigate]);
 
   // Handle errors in useEffect
   useEffect(() => {
@@ -264,6 +285,12 @@ const Assessment: React.FC = () => {
   }, [resultsError]);
 
   const handleStartAssessment = async () => {
+    // Reset completion flags when starting/restarting assessment
+    setHasExistingCompletedAssessment(false);
+    setHasNewlyCompletedAssessment(false);
+    setShowCompletedInterstitial(false);
+    setIsComplete(false);
+
     if (!userRegistrationComplete) {
       toast.error('Please wait while we set up your account...');
       console.log('❌ Assessment: User registration not complete yet');
@@ -306,6 +333,8 @@ const Assessment: React.FC = () => {
       handleNext();
     } else {
       setIsComplete(true);
+      setHasNewlyCompletedAssessment(true);
+      setHasExistingCompletedAssessment(false);
       // Show loading state immediately
       toast.info('Processing your assessment results...');
     }
@@ -331,6 +360,26 @@ const Assessment: React.FC = () => {
     return answerResult;
   };
 
+  // Handlers for completed assessment interstitial
+  const handleViewResults = () => {
+    if (completedSessionId) {
+      navigate(`/dashboard/${completedSessionId}`);
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const handleRetake = () => {
+    setShowCompletedInterstitial(false);
+    setHasExistingCompletedAssessment(false);
+    setHasNewlyCompletedAssessment(false);
+    setIsComplete(false);
+    setAssessmentMode('retake');
+    setShowStartPage(true);
+    // Update URL to include retake mode
+    navigate('/assessment?mode=retake', { replace: true });
+  };
+
   // Show loading while checking existing assessment
   if (isCheckingExistingAssessment) {
     return (
@@ -340,6 +389,19 @@ const Assessment: React.FC = () => {
           showTitle
           showSubtitle
           lines={3}
+        />
+      </div>
+    );
+  }
+
+  // Show completed assessment interstitial
+  if (showCompletedInterstitial && completedSessionId) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AssessmentCompletedInterstitial
+          sessionId={completedSessionId}
+          onViewResults={handleViewResults}
+          onRetake={handleRetake}
         />
       </div>
     );
