@@ -103,11 +103,15 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       try {
         const resumeData = await fetchResumeData(sessionId);
 
-        if (!resumeData || !resumeData.isCompleted) {
+        if (resumeData && !resumeData.isCompleted) {
           console.log('ℹ️ SessionContext: Session incomplete, skipping score fetch');
           setSession(null);
           setIsLoading(false);
           return;
+        }
+
+        if (!resumeData) {
+          console.log('ℹ️ SessionContext: No resume data found, falling back to score endpoint for completed session');
         }
 
         const results = await getAssessmentResults(sessionId);
