@@ -37,6 +37,8 @@ import { AssessmentPersistenceProvider } from '@/components/assessment/Assessmen
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import TestLayout from "./pages/TestLayout";
+import GoalsPage from "./pages/Goals";
+import GoalDetailPage from "./pages/GoalDetail";
 
 const queryClient = new QueryClient();
 
@@ -162,6 +164,8 @@ const AppRoutes = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/spending-analysis" element={<SpendingAnalysis />} />
         <Route path="/cash-flow-projections" element={<CashFlowProjections />} />
+        <Route path="/goals" element={<GoalsPage />} />
+        <Route path="/goals/:goalId" element={<GoalDetailPage />} />
         <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
         
         {/* Bank Analytics (Protected by backend - will show error if no permission) */}

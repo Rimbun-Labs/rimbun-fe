@@ -17,7 +17,8 @@ import {
   LogOut,
   DollarSign,
   TrendingUp,
-  LineChart
+  LineChart,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -80,6 +81,19 @@ const MobileMenu: React.FC = () => {
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
+            </Link>
+            <Link
+              to="/goals"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/goals') 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <Target className="h-4 w-4" />
+              Goals
             </Link>
             <Link
               to="/assessment"

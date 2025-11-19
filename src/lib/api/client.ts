@@ -45,6 +45,20 @@ apiClient.interceptors.response.use(
     
     // Handle specific error codes
     if (error.response) {
+      // Log all error responses for debugging
+      const errorData = error.response.data;
+      console.error('API Error Response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        url: error.config?.url,
+        method: error.config?.method,
+        message: errorData?.message || errorData?.error || error.message,
+        fullErrorData: errorData,
+      });
+      
+      // Also log the full error data as a separate object for easier inspection
+      console.error('Full Backend Error Data:', JSON.stringify(errorData, null, 2));
+      
       // Handle 401 Unauthorized - e.g., redirect to login
       if (error.response.status === 401 && !originalRequest._retry) {
         // Handle token refresh or redirect to login
@@ -53,8 +67,18 @@ apiClient.interceptors.response.use(
       
       // Handle 500 errors
       if (error.response.status >= 500) {
-        console.error('Server error');
+        console.error('Server error (500+) - Full error details logged above');
       }
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('API Request Error (no response):', {
+        url: error.config?.url,
+        method: error.config?.method,
+        message: error.message,
+      });
+    } else {
+      // Something else happened
+      console.error('API Error (other):', error.message);
     }
     
     return Promise.reject(error);

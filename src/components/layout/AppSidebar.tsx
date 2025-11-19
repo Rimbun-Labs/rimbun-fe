@@ -10,7 +10,8 @@ import {
   Compass,
   DollarSign,
   TrendingUp,
-  LineChart
+  LineChart,
+  Target
 } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
 import { useBankPermission } from '@/hooks/useBankPermission';
@@ -83,6 +84,18 @@ const AppSidebar: React.FC = () => {
           >
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </NavLink>
+          <NavLink
+            to="/goals"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
+              )
+            }
+          >
+            <Target className="h-4 w-4" />
+            Goals
           </NavLink>
           <NavLink
             to="/assessment"

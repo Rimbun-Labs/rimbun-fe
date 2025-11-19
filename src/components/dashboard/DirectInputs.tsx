@@ -5,6 +5,8 @@ import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info, AlertCircle, ArrowRight, Target, PiggyBank, Shield, TrendingUp, Clock } from "lucide-react";
 import { useFormatters } from '@/hooks/useFormatters';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface GoalGapInsights {
   currentGap: number;
@@ -129,9 +131,16 @@ const DirectInputs: React.FC<DirectInputsProps> = React.memo(({ inputs, goalGapI
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Your Investment Profile</CardTitle>
-        <CardDescription>Your assessment inputs and goal analysis</CardDescription>
+      <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <CardTitle>Your Investment Profile</CardTitle>
+          <CardDescription>Your assessment inputs and goal analysis</CardDescription>
+        </div>
+        <Button variant="outline" size="sm" asChild className="lg:self-start">
+          <Link to="/goals">
+            View Goals Hub
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
