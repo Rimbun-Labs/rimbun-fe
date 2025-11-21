@@ -5,6 +5,8 @@ import {
   GoalWithInsightsDto,
   UpdateGoalRequest,
   UserGoalsResponse,
+  SimulateStrategyRequest,
+  SimulateStrategyResponse,
 } from './types/goals';
 
 interface ApiResponse<T> {
@@ -86,6 +88,18 @@ export const goalsApi = {
 
     const response = await apiClient.get<ApiResponse<GoalProgressHistoryDto>>(
       `/goals/${goalId}/progress?${params.toString()}`
+    );
+    return response.data.data;
+  },
+
+  simulateStrategy: async (
+    userId: string,
+    request: SimulateStrategyRequest
+  ): Promise<SimulateStrategyResponse> => {
+    const params = buildUserParams(userId);
+    const response = await apiClient.post<ApiResponse<SimulateStrategyResponse>>(
+      `/goals/simulate-strategy?${params.toString()}`,
+      request
     );
     return response.data.data;
   },

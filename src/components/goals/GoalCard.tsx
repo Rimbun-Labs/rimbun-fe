@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getGoalFamilyConfigBySlug } from '@/lib/constants/goalFamilies';
 
 interface GoalCardProps {
   goal: GoalWithInsightsDto;
@@ -61,6 +62,11 @@ export const GoalCard = ({
   })();
 
   const isOffTrack = savingsRate && savingsRate < 0.8;
+  // primaryFamilyId is a UUID, so we need to get the slug from the goal's family object or look it up
+  // For now, try to get config by slug if goal has family info, otherwise try by ID
+  const familyConfig = goal.primaryFamily?.slug 
+    ? getGoalFamilyConfigBySlug(goal.primaryFamily.slug)
+    : getGoalFamilyConfigBySlug(goal.primaryFamilyId); // Fallback: might be a slug
 
   return (
     <Card className="h-full border-muted bg-card/60">
@@ -68,6 +74,14 @@ export const GoalCard = ({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="text-xl">{goal.goalName}</CardTitle>
+            {familyConfig && (
+              <Badge
+                variant="outline"
+                className="border-primary/40 text-xs font-medium uppercase tracking-wide text-primary"
+              >
+                {familyConfig.label}
+              </Badge>
+            )}
             {goal.priority && (
               <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200">
                 Priority {goal.priority}

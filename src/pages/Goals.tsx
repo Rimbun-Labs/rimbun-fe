@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   useCreateGoal,
   useDeleteGoal,
+  useGoalFamilySummaries,
   useGoalsOverview,
   useUpdateGoal,
 } from '@/hooks/useGoals';
@@ -11,6 +12,9 @@ import GoalSummaryCards from '@/components/goals/GoalSummaryCards';
 import GoalCard from '@/components/goals/GoalCard';
 import GoalFormDialog from '@/components/goals/GoalFormDialog';
 import BudgetOptimizationCard from '@/components/goals/BudgetOptimizationCard';
+import GoalFamiliesOverview from '@/components/goals/families/GoalFamiliesOverview';
+import GoalProgressTimeline from '@/components/goals/GoalProgressTimeline';
+import { AllocationStrategySimulator } from '@/components/goals/AllocationStrategySimulator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -53,6 +57,10 @@ const GoalsPage = () => {
   const [goalToDelete, setGoalToDelete] = useState<GoalWithInsightsDto | null>(null);
 
   const { data, isLoading, isError, refetch } = useGoalsOverview(userId, includeInactive);
+  const {
+    data: familySummaries,
+    isLoading: isFamilySummaryLoading,
+  } = useGoalFamilySummaries(userId);
   const createGoal = useCreateGoal(userId);
   const updateGoal = useUpdateGoal(userId, editingGoal?.id);
   const deleteGoal = useDeleteGoal(userId);
@@ -114,40 +122,26 @@ const GoalsPage = () => {
         <BudgetOptimizationCard budgetValidation={data.budgetValidation} />
       )}
 
-      <div className="rounded-xl border bg-card/60 p-4 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
-            <Input
-              placeholder="Search goals..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="md:max-w-xs"
-            />
-            <Select value={typeFilter} onValueChange={(value: GoalType | 'all') => setTypeFilter(value)}>
-              <SelectTrigger className="md:w-48">
-                <SelectValue placeholder="Goal type" />
-              </SelectTrigger>
-              <SelectContent>
-                {goalTypeFilters.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="include-inactive" className="text-sm text-muted-foreground">
-              Include inactive
-            </Label>
-            <Switch
-              id="include-inactive"
-              checked={includeInactive}
-              onCheckedChange={setIncludeInactive}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Goal Progress Timeline Chart */}
+      <GoalProgressTimeline
+        goals={data?.goals}
+        isLoading={isLoading}
+        familySummaries={familySummaries?.families}
+      />
+
+      {/* Allocation Strategy Simulator */}
+      <AllocationStrategySimulator
+        goals={data?.goals ?? []}
+        budgetValidation={data?.budgetValidation}
+        familySummaries={familySummaries?.families}
+        isLoading={isLoading}
+      />
+
+      <GoalFamiliesOverview
+        summaries={familySummaries}
+        isLoading={isFamilySummaryLoading}
+        onSelectFamily={(family) => navigate(`/goals/family/${family.slug}`)}
+      />
 
       {isError && (
         <Alert variant="destructive">
@@ -156,31 +150,6 @@ const GoalsPage = () => {
           <AlertDescription>Check your connection and try again.</AlertDescription>
         </Alert>
       )}
-
-      {!isLoading && filteredGoals.length === 0 && (
-        <div className="rounded-2xl border border-dashed bg-muted/30 p-12 text-center">
-          <p className="text-lg font-medium">No goals yet</p>
-          <p className="mt-2 text-muted-foreground">
-            Create a goal to see personalized insights, gaps, and timelines.
-          </p>
-          <Button className="mt-4" onClick={handleCreateClick}>
-            Start a goal
-          </Button>
-        </div>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {filteredGoals.map((goal) => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onView={(selected) => navigate(`/goals/${selected.id}`)}
-            onEdit={handleEditGoal}
-            onDelete={(selected) => setGoalToDelete(selected)}
-            disableDelete={goal.isFromAssessment}
-          />
-        ))}
-      </div>
 
       <GoalFormDialog
         open={isFormOpen}

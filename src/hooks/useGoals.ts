@@ -2,12 +2,18 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { goalsApi } from '@/lib/api/goalsApi';
+import { goalFamiliesApi } from '@/lib/api/goalFamiliesApi';
 import {
   CreateGoalRequest,
   GoalProgressHistoryDto,
   GoalWithInsightsDto,
+  GoalFamilySummariesResponse,
+  GoalFamilyBoardDto,
   UpdateGoalRequest,
   UserGoalsResponse,
+  SimulateStrategyRequest,
+  SimulateStrategyResponse,
+  GoalFamilyMappingResponse,
 } from '@/lib/api/types/goals';
 
 export const useGoalsOverview = (userId: string, includeInactive = false) => {
@@ -143,6 +149,38 @@ export const useDeleteGoal = (userId: string) => {
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete goal');
     },
+  });
+};
+
+export const useGoalFamilySummaries = (userId: string) => {
+  return useQuery<GoalFamilySummariesResponse>({
+    queryKey: ['goal-families', 'summaries', userId],
+    queryFn: () => goalFamiliesApi.listSummaries(userId),
+    enabled: Boolean(userId),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGoalFamilyBoard = (userId: string, familyId?: string) => {
+  return useQuery<GoalFamilyBoardDto>({
+    queryKey: ['goal-families', 'board', userId, familyId],
+    queryFn: () => goalFamiliesApi.getBoard(userId, familyId!),
+    enabled: Boolean(userId && familyId),
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useSimulateStrategy = (userId: string) => {
+  return useMutation<SimulateStrategyResponse, Error, SimulateStrategyRequest>({
+    mutationFn: (request) => goalsApi.simulateStrategy(userId, request),
+  });
+};
+
+export const useGoalFamilyMapping = () => {
+  return useQuery<GoalFamilyMappingResponse>({
+    queryKey: ['goal-family-mapping'],
+    queryFn: () => goalFamiliesApi.getMapping(),
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
   });
 };
 

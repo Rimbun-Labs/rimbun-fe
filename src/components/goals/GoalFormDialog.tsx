@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   Dialog,
@@ -20,7 +20,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CreateGoalRequest, GoalWithInsightsDto } from '@/lib/api/types/goals';
+import { CreateGoalRequest, GoalWithInsightsDto, GoalFamilyId, GoalType, GoalFamilySlug, GoalFamilySummaryDto } from '@/lib/api/types/goals';
+import { getGoalFamilyConfigBySlug } from '@/lib/constants/goalFamilies';
+import { useGoalFamilyMapping } from '@/hooks/useGoals';
 import { cn } from '@/lib/utils';
 
 type GoalFormValues = {
@@ -30,7 +32,7 @@ type GoalFormValues = {
   currentAmount: number;
   monthlyContribution: number;
   investmentHorizon?: number | null;
-  targetDate?: string;
+  targetYear?: number | null;
   priority?: number;
   initialInvestment?: number;
   notes?: string;
@@ -45,6 +47,8 @@ interface GoalFormDialogProps {
   isSubmitting?: boolean;
   title?: string;
   description?: string;
+  preSelectedFamilyId?: GoalFamilyId | string; // UUID or slug - Pre-select family when creating from family page
+  familySummaries?: GoalFamilySummaryDto[]; // Optional: to look up family slug from UUID
 }
 
 const goalTypeOptions: Array<{ value: GoalFormValues['goalType']; label: string }> = [
@@ -55,6 +59,44 @@ const goalTypeOptions: Array<{ value: GoalFormValues['goalType']; label: string 
   { value: 'other', label: 'Other' },
 ];
 
+// Extract year from targetDate if it exists
+const getTargetYear = (targetDate?: string | null): number | undefined => {
+  if (!targetDate) return undefined;
+  try {
+    const date = new Date(targetDate);
+    return date.getFullYear();
+  } catch {
+    return undefined;
+  }
+};
+
+// Helper to get default goal type from family slug using API mapping
+const useDefaultGoalTypeForFamily = (familySlug?: GoalFamilySlug | string | null, mapping?: { familyToGoalTypes: Record<string, string[]> }): GoalType => {
+  if (!familySlug || !mapping) return 'other';
+  
+  const slug = typeof familySlug === 'string' ? familySlug : familySlug;
+  const goalTypes = mapping.familyToGoalTypes[slug];
+  
+  // Return first suggested goal type, or 'other' as fallback
+  if (goalTypes && goalTypes.length > 0) {
+    // Map API goal types to our GoalType enum
+    const apiToGoalType: Record<string, GoalType> = {
+      'retirement': 'retirement',
+      'house': 'house',
+      'education': 'education',
+      'emergency_fund': 'emergency_fund',
+      'wealth_building': 'retirement', // Map to retirement
+      'debt_payoff': 'other',
+      'insurance': 'other',
+      'charitable_giving': 'other',
+      'other': 'other',
+    };
+    return apiToGoalType[goalTypes[0]] || 'other';
+  }
+  
+  return 'other';
+};
+
 export const GoalFormDialog = ({
   open,
   onOpenChange,
@@ -64,16 +106,53 @@ export const GoalFormDialog = ({
   isSubmitting,
   title,
   description,
+  preSelectedFamilyId,
+  familySummaries,
 }: GoalFormDialogProps) => {
+  // Fetch mapping from API
+  const { data: mapping } = useGoalFamilyMapping();
+
+  // Get family slug from preSelectedFamilyId
+  // If it's a UUID, look it up from familySummaries
+  // If it's already a slug, use it directly
+  const familySlug = useMemo(() => {
+    if (!preSelectedFamilyId) return undefined;
+    
+    // Check if it's a UUID (contains hyphens and is long)
+    const isLikelyUUID = preSelectedFamilyId.includes('-') && preSelectedFamilyId.length > 20;
+    
+    if (isLikelyUUID && familySummaries) {
+      // Look up family by UUID to get slug
+      const family = familySummaries.find(f => f.id === preSelectedFamilyId);
+      if (family?.slug) {
+        return family.slug as GoalFamilySlug;
+      }
+    }
+    
+    // Assume it's a slug (or try to use it as-is)
+    // Check if it matches a valid slug format
+    const slugPattern = /^[a-z-]+$/;
+    if (typeof preSelectedFamilyId === 'string' && slugPattern.test(preSelectedFamilyId)) {
+      return preSelectedFamilyId as GoalFamilySlug;
+    }
+    
+    return undefined;
+  }, [preSelectedFamilyId, familySummaries]);
+
+  // Determine default goal type: use family mapping if pre-selected, otherwise use initial goal or default
+  const defaultGoalType = familySlug && mapping
+    ? useDefaultGoalTypeForFamily(familySlug, mapping)
+    : (initialGoal?.goalType ?? 'retirement');
+
   const form = useForm<GoalFormValues>({
     defaultValues: {
       goalName: initialGoal?.goalName ?? '',
-      goalType: initialGoal?.goalType ?? 'retirement',
+      goalType: defaultGoalType,
       targetAmount: initialGoal?.targetAmount ?? 0,
       currentAmount: initialGoal?.currentAmount ?? 0,
       monthlyContribution: initialGoal?.monthlyContribution ?? 0,
       investmentHorizon: initialGoal?.investmentHorizon ?? undefined,
-      targetDate: initialGoal?.targetDate ? initialGoal.targetDate.slice(0, 10) : undefined,
+      targetYear: getTargetYear(initialGoal?.targetDate) ?? undefined,
       priority: initialGoal?.priority ?? 3,
       initialInvestment: initialGoal?.metadata?.initialInvestment ?? undefined,
       notes: initialGoal?.metadata?.notes ?? '',
@@ -81,21 +160,30 @@ export const GoalFormDialog = ({
   });
 
   useEffect(() => {
+    const goalType = familySlug && mapping
+      ? useDefaultGoalTypeForFamily(familySlug, mapping)
+      : (initialGoal?.goalType ?? 'retirement');
+    
     form.reset({
       goalName: initialGoal?.goalName ?? '',
-      goalType: initialGoal?.goalType ?? 'retirement',
+      goalType: goalType,
       targetAmount: initialGoal?.targetAmount ?? 0,
       currentAmount: initialGoal?.currentAmount ?? 0,
       monthlyContribution: initialGoal?.monthlyContribution ?? 0,
       investmentHorizon: initialGoal?.investmentHorizon ?? undefined,
-      targetDate: initialGoal?.targetDate ? initialGoal.targetDate.slice(0, 10) : undefined,
+      targetYear: getTargetYear(initialGoal?.targetDate) ?? undefined,
       priority: initialGoal?.priority ?? 3,
       initialInvestment: initialGoal?.metadata?.initialInvestment ?? undefined,
       notes: initialGoal?.metadata?.notes ?? '',
     });
-  }, [initialGoal, form]);
+  }, [initialGoal, form, familySlug, mapping]);
 
   const handleSubmit = async (values: GoalFormValues) => {
+    // Convert targetYear to targetDate string (format: YYYY-01-01)
+    const targetDate = values.targetYear 
+      ? `${values.targetYear}-01-01` 
+      : undefined;
+
     const payload: CreateGoalRequest = {
       goalName: values.goalName,
       goalType: values.goalType,
@@ -103,12 +191,14 @@ export const GoalFormDialog = ({
       currentAmount: Number(values.currentAmount ?? 0),
       monthlyContribution: Number(values.monthlyContribution),
       investmentHorizon: values.investmentHorizon ? Number(values.investmentHorizon) : undefined,
-      targetDate: values.targetDate ? new Date(values.targetDate).toISOString() : undefined,
+      targetDate: targetDate,
       priority: values.priority ? Number(values.priority) : undefined,
       metadata: {
         initialInvestment: values.initialInvestment ? Number(values.initialInvestment) : undefined,
         notes: values.notes?.trim() || undefined,
       },
+      // Include pre-selected family ID if provided (for create mode) or use existing goal's family
+      primaryFamilyId: (preSelectedFamilyId as GoalFamilyId) || initialGoal?.primaryFamilyId,
     };
 
     await onSubmit(payload);
@@ -144,30 +234,60 @@ export const GoalFormDialog = ({
               <FormField
                 control={form.control}
                 name="goalType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Goal type</FormLabel>
-                    <Select
-                      onValueChange={(val) => field.onChange(val)}
-                      value={field.value}
-                      disabled={isSubmitting}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a goal type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {goalTypeOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const familyConfig = familySlug 
+                    ? getGoalFamilyConfigBySlug(familySlug)
+                    : null;
+                  
+                  // Show read-only if we have a pre-selected family (even if config lookup failed)
+                  const shouldShowReadOnly = Boolean(preSelectedFamilyId);
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Goal type</FormLabel>
+                      {shouldShowReadOnly ? (
+                        <div className="space-y-1">
+                          <FormControl>
+                            <Input 
+                              value={goalTypeOptions.find(opt => opt.value === field.value)?.label || field.value}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </FormControl>
+                          {familyConfig ? (
+                            <p className="text-xs text-muted-foreground">
+                              Auto-selected for {familyConfig.label} family
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Auto-selected based on family
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <Select
+                          onValueChange={(val) => field.onChange(val)}
+                          value={field.value}
+                          disabled={isSubmitting}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a goal type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {goalTypeOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
@@ -225,12 +345,22 @@ export const GoalFormDialog = ({
               />
               <FormField
                 control={form.control}
-                name="targetDate"
+                name="targetYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Target date</FormLabel>
+                    <FormLabel>Target year</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} disabled={isSubmitting} />
+                      <Input 
+                        type="number" 
+                        min={new Date().getFullYear()} 
+                        max={2100}
+                        step="1"
+                        placeholder="e.g., 2035"
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                        disabled={isSubmitting} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -302,4 +432,5 @@ export const GoalFormDialog = ({
 };
 
 export default GoalFormDialog;
+
 

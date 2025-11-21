@@ -39,6 +39,7 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import TestLayout from "./pages/TestLayout";
 import GoalsPage from "./pages/Goals";
 import GoalDetailPage from "./pages/GoalDetail";
+import GoalFamilyPage from "./pages/GoalFamily";
 
 const queryClient = new QueryClient();
 
@@ -165,6 +166,7 @@ const AppRoutes = () => {
         <Route path="/spending-analysis" element={<SpendingAnalysis />} />
         <Route path="/cash-flow-projections" element={<CashFlowProjections />} />
         <Route path="/goals" element={<GoalsPage />} />
+        <Route path="/goals/family/:familySlug" element={<GoalFamilyPage />} />
         <Route path="/goals/:goalId" element={<GoalDetailPage />} />
         <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
         

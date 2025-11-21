@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GoalWithInsightsDto } from '@/lib/api/types/goals';
+import { getGoalFamilyConfigBySlug } from '@/lib/constants/goalFamilies';
 
 const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -152,6 +153,11 @@ const GoalDetailPage = () => {
     );
   }
 
+  // primaryFamilyId is a UUID, so we need to get the slug from the goal's family object or look it up
+  const familyConfig = goal.primaryFamily?.slug 
+    ? getGoalFamilyConfigBySlug(goal.primaryFamily.slug)
+    : getGoalFamilyConfigBySlug(goal.primaryFamilyId); // Fallback: might be a slug
+
   const timeStatus = goal.timeAnalysis?.status;
   const timelineCopy = (() => {
     if (!goal.timeAnalysis) return 'Timeline analysis unavailable';
@@ -191,6 +197,14 @@ const GoalDetailPage = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
+            {familyConfig && (
+              <Badge
+                variant="outline"
+                className="border-primary/40 text-xs font-semibold uppercase tracking-wide text-primary"
+              >
+                {familyConfig.label}
+              </Badge>
+            )}
             {goal.isFromAssessment && (
               <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-100">
                 Assessment goal
