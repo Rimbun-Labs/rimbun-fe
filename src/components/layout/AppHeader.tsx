@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { 
   // Bell, // Notifications disabled for testbed launch
   Sun,
@@ -104,7 +105,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </div>
           )}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/home" className="flex items-center space-x-2">
               <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
                 <span className="text-primary-foreground font-bold">IL</span>
               </div>
@@ -112,6 +113,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </Link>
           </div>
           <div className="flex-1 flex justify-end items-center space-x-4">
+            {/* Home Link */}
+            <Link
+              to="/home"
+              className={cn(
+                "hidden md:flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                location.pathname === "/home"
+                  ? "text-foreground bg-accent"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              )}
+            >
+              Home
+            </Link>
             {/* Notifications disabled for testbed launch - backend endpoints not available */}
             {/* {user && (
               <DropdownMenu>

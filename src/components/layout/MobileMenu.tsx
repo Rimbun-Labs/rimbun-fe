@@ -18,7 +18,8 @@ import {
   DollarSign,
   TrendingUp,
   LineChart,
-  Target
+  Target,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -69,6 +70,19 @@ const MobileMenu: React.FC = () => {
             <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
               Overview
             </h3>
+            <Link
+              to="/home"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/home') 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
             <Link
               to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}
               className={cn(

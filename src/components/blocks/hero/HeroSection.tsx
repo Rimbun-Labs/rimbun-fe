@@ -101,13 +101,11 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   <motion.div
                     key={stage.id}
                     className={cn(
-                      "flex items-center gap-4 p-5 rounded-lg border transition-all duration-500 cursor-pointer",
+                      "flex items-center gap-4 p-5 rounded-lg border transition-all duration-500",
                       currentStage === index
                         ? "bg-primary/5 border-primary/30 shadow-lg shadow-primary/10"
-                        : "bg-muted/30 border-border/50 hover:bg-muted/50"
+                        : "bg-muted/30 border-border/50"
                     )}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setCurrentStage(index)}
                   >
                     <motion.div
                       className={cn(

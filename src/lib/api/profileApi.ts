@@ -103,6 +103,7 @@ export const updateProfile = async (userId: string, data: Partial<UserProfile>):
       throw new Error('User not authenticated');
     }
 
+    // Backend expects /users/me/{firebaseUid} - matches getProfile pattern
     const response = await apiClient.put(`/users/me/${user.uid}`, data);
 
     if (!response.data) {

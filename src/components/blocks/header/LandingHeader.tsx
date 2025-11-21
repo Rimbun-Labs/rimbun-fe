@@ -79,7 +79,7 @@ export const LandingHeader = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Link to="/" className="flex items-center space-x-3 group">
+              <Link to="/home" className="flex items-center space-x-3 group">
                 <div className="relative">
                   <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl w-10 h-10 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                     <span className="text-primary-foreground font-bold text-lg">IL</span>

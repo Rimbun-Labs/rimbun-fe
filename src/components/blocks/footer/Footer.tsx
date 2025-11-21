@@ -1,60 +1,61 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
-  Github, 
-  Twitter, 
-  Linkedin, 
   Mail, 
   Heart,
-  Shield,
-  Lock,
-  Users
+  Shield
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface FooterProps {
   className?: string;
 }
 
 const footerLinks = {
-  product: [
-    { name: "Features", href: "#features" },
-    { name: "Assessment", href: "#assessment" },
-    { name: "Learning Paths", href: "#learning" },
-    { name: "Portfolio Tools", href: "#portfolio" }
-  ],
   company: [
-    { name: "About Us", href: "#about" },
-    { name: "Careers", href: "#careers" },
-    { name: "Press", href: "#press" },
-    { name: "Contact", href: "#contact" }
-  ],
-  support: [
-    { name: "Help Center", href: "#help" },
-    { name: "Documentation", href: "#docs" },
-    { name: "Community", href: "#community" },
-    { name: "Status", href: "#status" }
+    { name: "About Us", href: "/about" },
+    { name: "Contact", href: "/contact" }
   ],
   legal: [
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
-    { name: "Cookie Policy", href: "#cookies" },
-    { name: "GDPR", href: "#gdpr" }
+    { name: "Cookie Policy", href: "/cookies" }
   ]
 };
 
-const socialLinks = [
-  { name: "Twitter", href: "#", icon: Twitter },
-  { name: "LinkedIn", href: "#", icon: Linkedin },
-  { name: "GitHub", href: "#", icon: Github },
-  { name: "Email", href: "mailto:contact@investlearn.com", icon: Mail }
-];
+const CONTACT_EMAIL = "investlearnco@gmail.com";
 
 export const Footer = ({ className }: FooterProps) => {
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleSendEmail = () => {
+    const subject = encodeURIComponent(emailSubject || "Contact from Investlearn");
+    const body = encodeURIComponent(emailBody || "");
+    const mailtoLink = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
+    setIsDialogOpen(false);
+    setEmailSubject("");
+    setEmailBody("");
+  };
+
   return (
     <footer className={cn("bg-muted/30 border-t border-border/40", className)}>
       <div className="container px-4 md:px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <motion.div 
             className="lg:col-span-2 space-y-4"
@@ -82,44 +83,68 @@ export const Footer = ({ className }: FooterProps) => {
               Empowering investors with personalized education and AI-driven insights to build confidence and achieve financial goals.
             </p>
 
-            {/* Social Links */}
-            <div className="flex items-center space-x-4">
-              {socialLinks.map((social) => (
-                <motion.a
-                  key={social.name}
-                  href={social.href}
-                  className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200"
-                  whileHover={{ scale: 1.1 }}
+            {/* Email Contact */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <motion.button
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <social.icon className="h-4 w-4" />
-                  <span className="sr-only">{social.name}</span>
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Product Links */}
-          <motion.div 
-            className="space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="font-semibold text-foreground">Product</h3>
-            <ul className="space-y-2">
-              {footerLinks.product.map((link) => (
-                <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
+                  <Mail className="h-4 w-4" />
+                  <span className="text-sm font-medium">Contact Us</span>
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Send us an email</DialogTitle>
+                  <DialogDescription>
+                    Fill out the form below to send an email to {CONTACT_EMAIL}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label htmlFor="email-subject" className="text-sm font-medium">
+                      Subject
+                    </label>
+                    <Input
+                      id="email-subject"
+                      placeholder="What is this regarding?"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="email-body" className="text-sm font-medium">
+                      Message
+                    </label>
+                    <Textarea
+                      id="email-body"
+                      placeholder="Type your message here..."
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                      rows={6}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        setEmailSubject("");
+                        setEmailBody("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSendEmail}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Open Email Client
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </motion.div>
 
           {/* Company Links */}
@@ -127,42 +152,19 @@ export const Footer = ({ className }: FooterProps) => {
             className="space-y-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
             <h3 className="font-semibold text-foreground">Company</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a 
-                    href={link.href}
+                  <Link 
+                    to={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                   >
                     {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Support Links */}
-          <motion.div 
-            className="space-y-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="font-semibold text-foreground">Support</h3>
-            <ul className="space-y-2">
-              {footerLinks.support.map((link) => (
-                <li key={link.name}>
-                  <a 
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                  >
-                    {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -173,37 +175,21 @@ export const Footer = ({ className }: FooterProps) => {
             className="space-y-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
             <h3 className="font-semibold text-foreground">Legal</h3>
             <ul className="space-y-2">
-              {footerLinks.legal.map((link) => {
-                // Use Link component for internal routes, anchor tags for external/hash links
-                const isInternalLink = link.href.startsWith('/');
-                if (isInternalLink) {
-                  return (
-                    <li key={link.name}>
-                      <Link 
-                        to={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  );
-                }
-                return (
-                  <li key={link.name}>
-                    <a 
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                );
-              })}
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link 
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </motion.div>
         </div>
@@ -224,16 +210,6 @@ export const Footer = ({ className }: FooterProps) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-2">
-              <Users className="h-3 w-3" />
-              <span>10,000+ users</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Lock className="h-3 w-3" />
-              <span>SOC 2 Compliant</span>
-            </div>
-          </div>
         </motion.div>
 
         {/* Made with love */}

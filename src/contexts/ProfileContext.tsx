@@ -81,8 +81,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
   
   const updateProfileData = async (data: Partial<UserProfile>) => {
     if (!user) {
+      const error = new Error('User not authenticated');
       setError('User not authenticated');
-      return;
+      throw error;
     }
 
     try {
@@ -91,7 +92,9 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         const databaseUserId = userService.getDatabaseUserId();
         if (!databaseUserId) {
-          throw new Error('User profile not found');
+          const error = new Error('User profile not found');
+          setError('User profile not found');
+          throw error;
         }
         await updateProfile(databaseUserId, data);
         setOriginalProfile(prev => prev ? { ...prev, ...data } : null);
@@ -101,12 +104,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         });
       }
     } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update profile');
       setError('Failed to update profile');
       toast({
         title: 'Error',
-        description: 'Failed to update profile data',
+        description: error.message || 'Failed to update profile data',
         variant: 'destructive',
       });
+      throw error; // Re-throw so caller can handle it
     } finally {
       if (!isEditing) {
         setIsLoading(false);
