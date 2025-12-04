@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,7 @@ import { DollarSign, TrendingDown, PiggyBank, Shield, AlertCircle, CheckCircle }
 import { SpendingAnalysisDto } from '@/lib/api/spendingApi';
 import { useFormatters } from '@/hooks/useFormatters';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
+import { ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface SpendingOverviewProps {
   data: SpendingAnalysisDto | undefined;
@@ -87,6 +88,49 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
   const savingsStatus = getSavingsRateStatus(savingsRate);
   const emergencyStatus = getEmergencyFundStatus(emergencyFundStatusString);
   const EmergencyIcon = emergencyStatus.icon;
+
+  // Color palette for categories
+  const categoryColors = [
+    '#3B82F6', // blue
+    '#10B981', // green
+    '#F59E0B', // amber
+    '#EF4444', // red
+    '#8B5CF6', // purple
+    '#EC4899', // pink
+    '#06B6D4', // cyan
+    '#F97316', // orange
+    '#84CC16', // lime
+    '#6366F1', // indigo
+  ];
+
+  // Prepare data for bar chart
+  const barChartData = useMemo(() => {
+    if (!spendingCategories || spendingCategories.length === 0) return [];
+    
+    return spendingCategories
+      .map((category, index) => ({
+        name: category.categoryName.length > 12 
+          ? category.categoryName.substring(0, 12) + '...' 
+          : category.categoryName,
+        fullName: category.categoryName,
+        value: category.monthlyAmount,
+        percentage: (category.monthlyAmount / monthlySpending) * 100,
+        color: categoryColors[index % categoryColors.length],
+      }))
+      .sort((a, b) => b.value - a.value); // Sort by value descending
+  }, [spendingCategories, monthlySpending]);
+
+  // Prepare data for pie chart
+  const pieChartData = useMemo(() => {
+    if (!spendingCategories || spendingCategories.length === 0) return [];
+    
+    return spendingCategories.map((category, index) => ({
+      name: category.categoryName,
+      value: category.monthlyAmount,
+      percentage: (category.monthlyAmount / monthlySpending) * 100,
+      color: categoryColors[index % categoryColors.length],
+    }));
+  }, [spendingCategories, monthlySpending]);
 
   return (
     <div className="space-y-6">
@@ -230,11 +274,135 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
         </Card>
       </div>
 
-      {/* Spending Categories Summary */}
+      {/* Spending Categories Summary with Charts */}
+      {spendingCategories && spendingCategories.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bar Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Spending by Category</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barChartData} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      className="text-xs"
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => formatCurrency(value)}
+                      className="text-xs"
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-popover p-3 rounded-lg shadow-lg border border-border">
+                              <p className="font-medium text-popover-foreground">
+                                {data.fullName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatCurrency(data.value)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatPercentage(data.percentage)}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    >
+                      {barChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Spending Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={3}
+                      dataKey="value"
+                      label={({ percentage }) => 
+                        percentage > 5 ? `${percentage.toFixed(0)}%` : ''
+                      }
+                      labelLine={false}
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-popover p-3 rounded-lg shadow-lg border border-border">
+                              <p className="font-medium text-popover-foreground">
+                                {data.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatCurrency(data.value)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatPercentage(data.percentage)}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={60}
+                      formatter={(value, entry: any) => (
+                        <span style={{ color: 'hsl(var(--muted-foreground))' }}>
+                          {value}
+                        </span>
+                      )}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Spending Categories List (Detailed) */}
       {spendingCategories && spendingCategories.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Spending Breakdown</CardTitle>
+            <CardTitle className="text-lg">Category Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -243,7 +411,13 @@ const SpendingOverview: React.FC<SpendingOverviewProps> = ({ data, loading }) =>
                 return (
                   <div key={category.id || index} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">{category.categoryName}</span>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
+                        />
+                        <span className="text-sm font-medium">{category.categoryName}</span>
+                      </div>
                       <div className="text-right">
                         <span className="text-sm font-bold">{formatCurrency(category.monthlyAmount)}</span>
                         <span className="text-xs text-muted-foreground ml-2">

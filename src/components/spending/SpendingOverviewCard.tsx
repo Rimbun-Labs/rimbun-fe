@@ -52,6 +52,11 @@ const SpendingOverviewCard: React.FC<SpendingOverviewCardProps> = ({ data, loadi
   const recommendedEmergencyFund = emergencyFundStatus?.recommendedTarget || 0;
   const emergencyFundStatusString = emergencyFundStatus?.status || 'unknown';
   const remainingAmount = monthlyIncome - monthlySpending;
+  
+  // Calculate months of coverage
+  const currentEmergencyFund = emergencyFundStatus?.currentAmount || 0;
+  const monthsOfExpenses = emergencyFundStatus?.monthsOfExpenses || 
+    (monthlySpending > 0 ? currentEmergencyFund / monthlySpending : 0);
 
   // Get status color and message
   const getSavingsRateStatus = (rate: number) => {
@@ -138,7 +143,13 @@ const SpendingOverviewCard: React.FC<SpendingOverviewCardProps> = ({ data, loadi
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Recommended: {formatCurrency(recommendedEmergencyFund)}
+            {monthsOfExpenses > 0 
+              ? `${monthsOfExpenses.toFixed(1)} months coverage`
+              : `Recommended: ${formatCurrency(recommendedEmergencyFund)}`
+            }
+            {recommendedEmergencyFund > 0 && monthsOfExpenses > 0 && (
+              <span className="ml-2">• Target: {formatCurrency(recommendedEmergencyFund)}</span>
+            )}
           </p>
         </div>
       </CardContent>

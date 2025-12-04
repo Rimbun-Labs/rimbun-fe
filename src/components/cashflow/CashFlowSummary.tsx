@@ -85,7 +85,19 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
         {/* Goal Progress */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Goal Progress</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {data.goals?.count && data.goals.count > 1 
+                  ? `${data.goals.count} Goals Progress` 
+                  : 'Goal Progress'
+                }
+              </span>
+              {data.goals?.count && data.goals.count > 1 && (
+                <Badge variant="outline" className="text-xs">
+                  Aggregated
+                </Badge>
+              )}
+            </div>
             <span className="text-sm font-bold">{goalProgress.toFixed(1)}%</span>
           </div>
           <Progress value={goalProgress} className="h-3" />
@@ -93,6 +105,12 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
             <span>{formatCurrency(currentValue)}</span>
             <span>{formatCurrency(targetValue)}</span>
           </div>
+          {data.goals && (
+            <p className="text-xs text-muted-foreground text-center">
+              Based on {data.goals.count} active goal{data.goals.count !== 1 ? 's' : ''} 
+              {data.goals.count > 1 && ` (Total: ${formatCurrency(data.goals.totalTargetAmount)})`}
+            </p>
+          )}
         </div>
 
         {/* Scenario Summary */}
@@ -119,14 +137,14 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
           <Badge 
             className={`text-sm px-3 py-1 ${
               realistic.goalAchieved 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-yellow-100 text-yellow-800'
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
             }`}
           >
             <DollarSign className="h-3 w-3 mr-1" />
             {realistic.goalAchieved 
-              ? 'Goal Achieved!' 
-              : `${realistic.monthsToGoal} months to goal`
+              ? `${data.goals?.count && data.goals.count > 1 ? 'All Goals' : 'Goal'} Achieved!` 
+              : `${realistic.monthsToGoal} months to ${data.goals?.count && data.goals.count > 1 ? 'goals' : 'goal'}`
             }
           </Badge>
         </div>

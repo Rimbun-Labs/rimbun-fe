@@ -35,8 +35,23 @@ export interface CashFlowProjectionsDto {
   };
   assessment: {
     monthlyIncome: number;
-    targetAmount: number;
-    investmentHorizon: number;
+    targetAmount: number; // Now aggregated from all goals
+    investmentHorizon: number; // Now longest horizon from all goals
+  };
+  goals?: {  // Aggregated goals info
+    count: number;
+    totalTargetAmount: number;
+    totalCurrentAmount: number;
+  };
+  metadata?: {  // Data source & freshness info
+    targetSource: 'aggregated_goals' | 'assessment' | 'default';
+    targetSourceDescription: string;
+    dataFreshness: {
+      assessmentAgeDays?: number;
+      assessmentStatus?: 'current' | 'stale' | 'very_stale';
+      goalsLastUpdated?: string;
+      spendingDataLastUpdated?: string;
+    };
   };
   message?: string; // Only present when no assessment
 }

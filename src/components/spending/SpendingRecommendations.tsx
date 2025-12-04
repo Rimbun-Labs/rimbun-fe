@@ -65,10 +65,30 @@ const SpendingRecommendations: React.FC<SpendingRecommendationsProps> = ({
     combinedRecommendations
   } = recommendations;
 
+  // Determine status color based on primary action
+  const getStatusColor = () => {
+    if (!combinedRecommendations?.primaryAction) return '';
+    
+    switch (combinedRecommendations.primaryAction) {
+      case 'on_track':
+        return 'border-green-500 border-l-4 bg-green-50/50 dark:bg-green-950/20';
+      case 'increase_savings':
+        return 'border-yellow-500 border-l-4 bg-yellow-50/50 dark:bg-yellow-950/20';
+      case 'adjust_strategy':
+        return 'border-orange-500 border-l-4 bg-orange-50/50 dark:bg-orange-950/20';
+      case 'extend_timeline':
+        return 'border-red-500 border-l-4 bg-red-50/50 dark:bg-red-950/20';
+      default:
+        return '';
+    }
+  };
+
+  const statusColor = getStatusColor();
+
   return (
     <div className="space-y-6">
       {/* Savings Rate Analysis */}
-      <Card>
+      <Card className={statusColor}>
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -160,45 +180,40 @@ const SpendingRecommendations: React.FC<SpendingRecommendationsProps> = ({
         </Card>
       )}
 
-      {/* Combined Recommendations */}
-      {combinedRecommendations && (
+      {/* Spending Optimizations from combined recommendations */}
+      {combinedRecommendations?.spendingOptimizations && combinedRecommendations.spendingOptimizations.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Your Financial Action Plan</CardTitle>
+            <CardTitle className="text-lg">Spending Optimizations</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <h5 className="font-medium text-primary mb-2">Primary Action</h5>
-              <p className="text-sm font-medium">{formatPrimaryAction(combinedRecommendations.primaryAction)}</p>
+          <CardContent>
+            <div className="space-y-2">
+              {combinedRecommendations.spendingOptimizations.map((optimization, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2" />
+                  <p className="text-sm">{optimization}</p>
+                </div>
+              ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
 
-            {combinedRecommendations.spendingOptimizations && combinedRecommendations.spendingOptimizations.length > 0 && (
-              <div>
-                <h5 className="font-medium mb-2">Spending Optimizations</h5>
-                <div className="space-y-2">
-                  {combinedRecommendations.spendingOptimizations.map((optimization, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                      <p className="text-sm">{optimization}</p>
-                    </div>
-                  ))}
+      {/* Goal Alignment from combined recommendations */}
+      {combinedRecommendations?.goalAlignment && combinedRecommendations.goalAlignment.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Goal Alignment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {combinedRecommendations.goalAlignment.map((goal, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
+                  <p className="text-sm">{goal}</p>
                 </div>
-              </div>
-            )}
-
-            {combinedRecommendations.goalAlignment && combinedRecommendations.goalAlignment.length > 0 && (
-              <div>
-                <h5 className="font-medium mb-2">Goal Alignment</h5>
-                <div className="space-y-2">
-                  {combinedRecommendations.goalAlignment.map((goal, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2" />
-                      <p className="text-sm">{goal}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}

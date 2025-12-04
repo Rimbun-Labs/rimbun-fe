@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PieChart, Plus, Edit, Trash2 } from "lucide-react";
+import { PieChart as PieChartIcon, Plus, Edit, Trash2, List, BarChart3 } from "lucide-react";
 import { SpendingCategoryDto } from '@/lib/api/spendingApi';
 import { useAddSpendingCategory, useUpdateSpendingCategory, useDeleteSpendingCategory } from '@/hooks/useSpendingData';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+import { useFormatters } from '@/hooks/useFormatters';
+import { useTheme } from '@/hooks/useTheme';
 
 // Form validation schema
 const categoryFormSchema = z.object({
@@ -32,6 +35,10 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
 }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<SpendingCategoryDto | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'chart'>('list');
+  const { formatCurrency, formatPercentage } = useFormatters();
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   const addCategoryMutation = useAddSpendingCategory(userId);
   const updateCategoryMutation = useUpdateSpendingCategory(userId);
@@ -99,15 +106,73 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
     reset();
   };
 
+  // Color palette for categories (consistent colors)
+  const categoryColors = [
+    '#3B82F6', // blue
+    '#10B981', // green
+    '#F59E0B', // amber
+    '#EF4444', // red
+    '#8B5CF6', // purple
+    '#EC4899', // pink
+    '#06B6D4', // cyan
+    '#F97316', // orange
+    '#84CC16', // lime
+    '#6366F1', // indigo
+  ];
+
+  // Transform categories data for pie chart
+  const chartData = useMemo(() => {
+    if (!categories || categories.length === 0) return [];
+    
+    const total = categories.reduce((sum, cat) => sum + cat.monthlyAmount, 0);
+    
+    return categories.map((category, index) => ({
+      name: category.categoryName,
+      value: category.monthlyAmount,
+      percentage: total > 0 ? (category.monthlyAmount / total) * 100 : 0,
+      color: categoryColors[index % categoryColors.length],
+      isCustom: category.isCustom,
+    }));
+  }, [categories]);
+
+  // Calculate total spending
+  const totalSpending = useMemo(() => {
+    return categories.reduce((sum, cat) => sum + cat.monthlyAmount, 0);
+  }, [categories]);
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
-            <PieChart className="h-5 w-5" />
+            <PieChartIcon className="h-5 w-5" />
             Spending Categories
           </CardTitle>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <div className="flex items-center gap-2">
+            {/* View Toggle Buttons */}
+            {categories.length > 0 && (
+              <div className="flex items-center space-x-1 bg-muted p-1 rounded-lg mr-2">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="h-8 px-3"
+                >
+                  <List className="h-4 w-4 mr-1" />
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === 'chart' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('chart')}
+                  className="h-8 px-3"
+                >
+                  <BarChart3 className="h-4 w-4 mr-1" />
+                  Chart
+                </Button>
+              </div>
+            )}
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -175,6 +240,7 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -184,48 +250,158 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
             </div>
           ) : categories.length === 0 ? (
             <div className="text-center py-8">
-              <PieChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <PieChartIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No categories added yet</p>
               <p className="text-sm text-muted-foreground">
                 Add spending categories to get detailed insights
               </p>
             </div>
+          ) : viewMode === 'chart' ? (
+            <div className="space-y-4">
+              {/* Total Spending Summary */}
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Total Monthly Spending</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalSpending)}</p>
+              </div>
+
+              {/* Pie Chart */}
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={80}
+                      outerRadius={140}
+                      paddingAngle={3}
+                      dataKey="value"
+                      label={({ name, percentage }) => 
+                        percentage > 5 ? `${name}: ${percentage.toFixed(0)}%` : ''
+                      }
+                      labelLine={false}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-popover p-3 rounded-lg shadow-lg border border-border">
+                              <p className="font-medium text-popover-foreground">
+                                {data.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatCurrency(data.value)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatPercentage(data.percentage)}
+                              </p>
+                              {data.isCustom && (
+                                <p className="text-xs text-blue-600 mt-1">Custom Category</p>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={60}
+                      formatter={(value, entry: any) => (
+                        <span style={{ color: isDarkMode ? '#e2e8f0' : '#64748b' }}>
+                          {value} ({formatPercentage(entry.payload.percentage)})
+                        </span>
+                      )}
+                      payload={chartData.map((item) => ({
+                        value: item.name,
+                        type: 'circle',
+                        color: item.color,
+                        payload: item,
+                      }))}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Category Summary List */}
+              <div className="space-y-2 pt-4 border-t">
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">Category Breakdown</h4>
+                {chartData
+                  .sort((a, b) => b.value - a.value)
+                  .map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <span className="text-sm font-medium">{item.name}</span>
+                        {item.isCustom && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                            Custom
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold">{formatCurrency(item.value)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatPercentage(item.percentage)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
           ) : (
             <div className="space-y-3">
-              {categories.map((category, index) => (
-                <div key={category.id || index} className="flex justify-between items-center p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full bg-primary" />
-                    <span className="font-medium">{category.categoryName}</span>
-                    {category.isCustom && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        Custom
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-right">
-                      <div className="font-bold">${category.monthlyAmount.toLocaleString()}</div>
+              {categories.map((category, index) => {
+                const percentage = totalSpending > 0 ? (category.monthlyAmount / totalSpending) * 100 : 0;
+                return (
+                  <div key={category.id || index} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
+                      ></div>
+                      <span className="font-medium">{category.categoryName}</span>
+                      {category.isCustom && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          Custom
+                        </span>
+                      )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(category)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(category.id!)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <div className="font-bold">{formatCurrency(category.monthlyAmount)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatPercentage(percentage)}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(category)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(category.id!)}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
