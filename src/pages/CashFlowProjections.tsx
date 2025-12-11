@@ -194,14 +194,9 @@ const CashFlowProjectionsPage: React.FC = () => {
                           }`}
                           onClick={() => setSelectedScenario(scenario)}
                         >
-                          <div className="text-center">
-                            <h3 className="font-medium capitalize mb-2">{scenario}</h3>
-                            <p className="text-xl font-bold mb-2">{formatCurrency(data.finalValue)}</p>
-                            <div className="space-y-1 text-sm text-muted-foreground">
-                              <p>Goal Achieved: {data.goalAchieved ? 'Yes' : 'No'}</p>
-                              <p>Months to Goal: {data.monthsToGoal}</p>
-                              <p>Avg Investment Return: {formatCurrency(data.averageMonthlyReturn)}</p>
-                            </div>
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium capitalize">{scenario}</span>
+                            <span className="text-sm font-bold">{formatCurrency(data.finalValue)}</span>
                           </div>
                         </div>
                       );
@@ -209,7 +204,7 @@ const CashFlowProjectionsPage: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-
+                          
               {/* Detailed Analysis Tabs */}
               <Tabs defaultValue="timeline" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-3">
@@ -378,8 +373,8 @@ const CashFlowProjectionsPage: React.FC = () => {
                                             </span>
                                           </p>
                                         </div>
-                              </div>
-                            </div>
+                                      </div>
+                                    </div>
                                   );
                                 }
                                 return null;

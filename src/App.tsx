@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import InvestmentExplorer from "./pages/InvestmentExplorer";
 import SpendingAnalysis from "./pages/SpendingAnalysis";
 import CashFlowProjections from "./pages/CashFlowProjections";
+import FinancialPlanning from "./pages/FinancialPlanning";
 import BankAnalyticsDashboard from "./pages/BankAnalyticsDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -170,8 +171,10 @@ const AppRoutes = () => {
         
         {/* Application Pages */}
         <Route path="/profile" element={<Profile />} />
-        <Route path="/spending-analysis" element={<SpendingAnalysis />} />
-        <Route path="/cash-flow-projections" element={<CashFlowProjections />} />
+        <Route path="/financial-planning" element={<FinancialPlanning />} />
+        {/* Legacy routes - redirect to new consolidated page */}
+        <Route path="/spending-analysis" element={<Navigate to="/financial-planning?tab=current" replace />} />
+        <Route path="/cash-flow-projections" element={<Navigate to="/financial-planning?tab=projections" replace />} />
         <Route path="/goals" element={<GoalsPage />} />
         <Route path="/goals/family/:familySlug" element={<GoalFamilyPage />} />
         <Route path="/goals/:goalId" element={<GoalDetailPage />} />

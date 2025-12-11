@@ -153,7 +153,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
         <div className="text-center">
           <Button 
             variant="outline" 
-            onClick={() => window.location.href = '/cash-flow-projections'}
+            onClick={() => window.location.href = '/financial-planning?tab=projections'}
             className="w-full"
           >
             View Detailed Projections

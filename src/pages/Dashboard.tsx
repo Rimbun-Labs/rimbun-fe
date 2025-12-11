@@ -16,14 +16,16 @@ import { config } from '@/lib/api/config';
 
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import OnboardingChecklist from '@/components/dashboard/OnboardingChecklist';
 import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
-import DirectInputs from '@/components/dashboard/DirectInputs';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield, PieChart, DollarSign } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield, PieChart, DollarSign } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { EnhancedEmptyState } from "@/components/ui/enhanced-empty-state";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -42,12 +44,11 @@ import {
   CashExplanation
 } from '@/components/dashboard/explanations/assetAllocation';
 import InvestmentScenarios from '@/components/dashboard/InvestmentScenarios';
-import SpendingOverview from '@/components/spending/SpendingOverview';
-import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
-import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
-import { useSpendingData, useSpendingRecommendations } from '@/hooks/useSpendingData';
-import CashFlowSummary from '@/components/cashflow/CashFlowSummary';
+import { useSpendingData } from '@/hooks/useSpendingData';
 import { useCashFlowProjections, useRefreshCashFlowProjections } from '@/hooks/useCashFlowData';
+import { useFormatters } from '@/hooks/useFormatters';
+import { useGoalsOverview } from '@/hooks/useGoals';
+import { getLearningProgress } from '@/lib/api/profileApi';
 
 // Types
 interface LowercaseAssetAllocations {
@@ -70,8 +71,6 @@ interface DashboardState {
     profile: boolean;
     portfolio: boolean;
     insights: boolean;
-    spending: boolean;
-    cashFlow: boolean;
   };
   showWelcome: boolean;
   loading: boolean;
@@ -114,9 +113,7 @@ const initialState: DashboardState = {
   expandedSections: {
     profile: false,
     portfolio: false,
-    insights: false,
-    spending: false,
-    cashFlow: false
+    insights: false
   },
   showWelcome: false,
   loading: false
@@ -143,25 +140,6 @@ const getRiskProfileLabel = (riskProfile: number) => {
   return 'Very Conservative';
 };
 
-const mapGoalGapInsights = (oldInsights: any) => {
-  if (!oldInsights) return undefined;
-  
-  // If it already has timeAnalysis, return as is
-  if (oldInsights.timeAnalysis) return oldInsights;
-  
-  // Otherwise, transform the old structure to the new one
-  return {
-    ...oldInsights,
-    timeAnalysis: {
-      actualYears: oldInsights.projectedTimeToGoal,
-      investmentHorizon: oldInsights.investmentHorizon || 15, // Default to 15 if not provided
-      isRealistic: oldInsights.projectedTimeToGoal <= (oldInsights.investmentHorizon || 15),
-      suggestedAdjustments: oldInsights.recommendations.suggestedMonthlySavings ? {
-        monthlySavings: oldInsights.recommendations.suggestedMonthlySavings
-      } : undefined
-    }
-  };
-};
 
 const Dashboard = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -175,6 +153,30 @@ const Dashboard = () => {
   // Use reducer for state management
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const { expandedSections, showWelcome, loading } = state;
+  
+  // Progressive hint state
+  const [showExpandHint, setShowExpandHint] = useState(() => {
+    const hasSeen = localStorage.getItem('hasSeenExpandHint');
+    return !hasSeen;
+  });
+
+  // Onboarding checklist state
+  const [showChecklist, setShowChecklist] = useState(() => {
+    const dismissed = localStorage.getItem('onboardingChecklistDismissed');
+    return !dismissed && effectiveSessionId && session?.isCompleted;
+  });
+
+  // Update checklist visibility when assessment is completed
+  useEffect(() => {
+    if (effectiveSessionId && session?.isCompleted) {
+      const dismissed = localStorage.getItem('onboardingChecklistDismissed');
+      if (!dismissed) {
+        setShowChecklist(true);
+      }
+      // Mark dashboard as visited
+      localStorage.setItem('hasVisitedDashboard', 'true');
+    }
+  }, [effectiveSessionId, session?.isCompleted]);
   
   // Get assessment results for the current session
   const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError } = useQuery({
@@ -229,11 +231,6 @@ const Dashboard = () => {
     error: spendingError 
   } = useSpendingData(userService.getDatabaseUserId() || '');
 
-  const { 
-    data: spendingRecommendations, 
-    isLoading: spendingRecommendationsLoading 
-  } = useSpendingRecommendations(userService.getDatabaseUserId() || '');
-
   // Get cash flow data
   const { 
     data: cashFlowData, 
@@ -242,6 +239,25 @@ const Dashboard = () => {
   } = useCashFlowProjections(userService.getDatabaseUserId() || '');
 
   const refreshCashFlowMutation = useRefreshCashFlowProjections(userService.getDatabaseUserId() || '');
+
+  // Get goals data for checklist
+  const { 
+    data: goalsData, 
+    isLoading: goalsLoading 
+  } = useGoalsOverview(userService.getDatabaseUserId() || '', false);
+
+  // Get learning progress for checklist
+  const { 
+    data: learningProgress, 
+    isLoading: learningProgressLoading 
+  } = useQuery({
+    queryKey: ['learning-progress', userService.getDatabaseUserId()],
+    queryFn: () => getLearningProgress(userService.getDatabaseUserId() || ''),
+    enabled: !!userService.getDatabaseUserId(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const { formatCurrency, formatPercentage } = useFormatters();
 
   // Memoize loading state - include checking for completed assessments AND data availability
   // Keep spinner showing until data is actually available, not just when API calls finish
@@ -448,6 +464,44 @@ const Dashboard = () => {
           {/* Header Section */}
           <DashboardHeader />
           
+          {/* Onboarding Checklist - Show after assessment completion */}
+          {showChecklist && effectiveSessionId && session?.isCompleted && (
+            <OnboardingChecklist
+              assessmentComplete={!!(effectiveSessionId && session?.isCompleted)}
+              hasSpendingData={!!spendingData}
+              hasGoals={!!(goalsData?.goals && goalsData.goals.length > 0)}
+              hasLearningProgress={!!(learningProgress && learningProgress.completedModules > 0)}
+              sessionId={effectiveSessionId}
+              onDismiss={() => {
+                localStorage.setItem('onboardingChecklistDismissed', 'true');
+                setShowChecklist(false);
+              }}
+            />
+          )}
+          
+          {/* Progressive Hint - Show once for first-time users */}
+          {showExpandHint && effectiveSessionId && (
+            <Alert variant="default" className="mb-6 border-primary/20 bg-primary/5">
+              <Lightbulb className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between gap-4">
+                <span>
+                  💡 <strong>Tip:</strong> Click "Learn More" on any section to discover detailed insights about your portfolio
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    localStorage.setItem('hasSeenExpandHint', 'true');
+                    setShowExpandHint(false);
+                  }}
+                  className="shrink-0"
+                >
+                  Got it
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Resume Assessment Section - Only show if user has incomplete session but no completed session */}
           {incompleteSessions && incompleteSessions.length > 0 && !effectiveSessionId && (
             <Card className="border-orange-200 bg-orange-50">
@@ -472,10 +526,149 @@ const Dashboard = () => {
           
           {/* Main Content */}
           <div className="space-y-6">
+            {/* Financial Progress Section - Combined Spending & Cash Flow */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Your Financial Progress
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/financial-planning')}
+                    className="flex items-center gap-2"
+                  >
+                    View Details
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Spending Summary */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <h3 className="font-semibold">Spending Analysis</h3>
+                    </div>
+                    {spendingLoading ? (
+                      <div className="py-4">
+                        <LoadingState variant="compact" lines={2} />
+                      </div>
+                    ) : spendingData ? (
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Monthly Income</span>
+                          <span className="font-medium">{formatCurrency(spendingData.monthlyIncome)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Monthly Spending</span>
+                          <span className="font-medium">{formatCurrency(spendingData.monthlySpending)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-muted-foreground">Savings Rate</span>
+                          <span className="font-medium">{formatPercentage(spendingData.savingsRate || 0)}</span>
+                        </div>
+                        {spendingData.emergencyFundStatus && (
+                          <div className="pt-3 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Emergency Fund</span>
+                              <span className="font-medium">
+                                {formatCurrency(spendingData.emergencyFundStatus.currentAmount || 0)} / {formatCurrency(spendingData.emergencyFundStatus.recommendedTarget || 0)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <EnhancedEmptyState
+                        icon={DollarSign}
+                        title="No Spending Data Yet"
+                        description="Add your spending information to see insights, recommendations, and track your financial progress"
+                        actionText="Set Up Spending Analysis"
+                        onAction={() => navigate('/financial-planning?tab=current')}
+                        variant="compact"
+                      />
+                    )}
+                  </div>
+
+                  {/* Cash Flow Summary */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      <h3 className="font-semibold">Cash Flow Projections</h3>
+                    </div>
+                    {cashFlowLoading ? (
+                      <div className="py-4">
+                        <LoadingState variant="compact" lines={2} />
+                      </div>
+                    ) : cashFlowData && !cashFlowData.message ? (
+                      <div className="space-y-3">
+                        {cashFlowData.cashFlowProjections?.scenarios?.realistic && (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">5-Year Projection</span>
+                              <span className="font-medium">
+                                {formatCurrency(cashFlowData.cashFlowProjections.scenarios.realistic.finalValue)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Goal Progress</span>
+                              <span className="font-medium">
+                                {cashFlowData.cashFlowProjections.scenarios.realistic.goalAchieved 
+                                  ? '100%' 
+                                  : `${((cashFlowData.cashFlowProjections.scenarios.realistic.finalValue / cashFlowData.assessment.targetAmount) * 100).toFixed(1)}%`
+                                }
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">Time to Goal</span>
+                              <span className="font-medium">
+                                {cashFlowData.cashFlowProjections.scenarios.realistic.monthsToGoal} months
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <EnhancedEmptyState
+                        icon={TrendingUp}
+                        title="Complete Assessment to See Projections"
+                        description="Finish your investment assessment to unlock cash flow projections and goal tracking insights"
+                        actionText="Complete Assessment"
+                        onAction={() => navigate('/assessment')}
+                        variant="compact"
+                      />
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Investment Profile Section */}
             <Card>
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <CardTitle className="text-xl">Your Investment Profile</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl">Your Investment Profile</CardTitle>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          aria-label="About your investment profile"
+                        >
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Click 'Learn More' to see detailed explanations of your risk profile, knowledge level, and decision style</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -568,7 +761,25 @@ const Dashboard = () => {
             {/* Portfolio Breakdown Section */}
             <Card>
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          aria-label="About your portfolio breakdown"
+                        >
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Click 'Learn More' to see detailed explanations of each asset class (equities, bonds, real estate, cash) and their role in your portfolio</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -662,7 +873,25 @@ const Dashboard = () => {
             {/* Investment Insights Section */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl">Investment Insights</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl">Investment Insights</CardTitle>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          aria-label="About investment insights"
+                        >
+                          <Info className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Click 'Learn More' to explore investment scenarios, diversification analysis, and portfolio strategy recommendations</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -674,14 +903,99 @@ const Dashboard = () => {
                 </Button>
               </CardHeader>
               <CardContent>
-                {/* Always Visible: Direct Inputs */}
-                <div className="mb-6">
-                  <DirectInputs 
-                    inputs={assessmentResults?.scoreData?.directInputs}
-                    goalGapInsights={mapGoalGapInsights(recommendations?.recommendationCalculationData?.goalGapInsights)}
-                    loading={assessmentLoading}
-                  />
-                </div>
+                {/* Always Visible: Portfolio Strategy Summary */}
+                {recommendationsLoading ? (
+                  <div className="mb-6 py-4">
+                    <LoadingState variant="compact" lines={2} />
+                  </div>
+                ) : recommendations?.diversificationAnalysis ? (
+                  <div className="mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Diversification Score */}
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium">Diversification Score</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-2xl font-bold">
+                                {(recommendations.diversificationAnalysis.diversificationScore * 100).toFixed(0)}%
+                              </span>
+                              <Badge 
+                                className={
+                                  recommendations.diversificationAnalysis.diversificationScore >= 0.8 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    : recommendations.diversificationAnalysis.diversificationScore >= 0.6
+                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                }
+                              >
+                                {recommendations.diversificationAnalysis.diversificationScore >= 0.8 
+                                  ? 'Excellent' 
+                                  : recommendations.diversificationAnalysis.diversificationScore >= 0.6
+                                  ? 'Good'
+                                  : 'Needs Improvement'}
+                              </Badge>
+                            </div>
+                            <Progress 
+                              value={recommendations.diversificationAnalysis.diversificationScore * 100} 
+                              className="h-2" 
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Risk-Adjusted Volatility */}
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium">Risk-Adjusted Volatility</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-2xl font-bold">
+                                {recommendations.diversificationAnalysis.riskAdjustedVolatility.toFixed(2)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Lower is better for risk management
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Portfolio Strategy Insight */}
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium">Portfolio Strategy</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <p className="text-sm text-foreground">
+                              {recommendations.diversificationAnalysis.diversificationScore >= 0.8
+                                ? 'Well-diversified portfolio with balanced risk'
+                                : recommendations.diversificationAnalysis.diversificationScore >= 0.6
+                                ? 'Moderately diversified portfolio'
+                                : 'Consider diversifying across more asset classes'}
+                            </p>
+                            {recommendations.diversificationAnalysis.recommendations && recommendations.diversificationAnalysis.recommendations.length > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {recommendations.diversificationAnalysis.recommendations[0]}
+                              </p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                    <p className="text-sm text-muted-foreground text-center">
+                      Complete your assessment to see portfolio strategy insights
+                    </p>
+                  </div>
+                )}
 
                 {/* Expanded Content: Detailed Analysis */}
                 {expandedSections.insights && (
@@ -750,100 +1064,6 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Spending Analysis Section */}
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <CardTitle className="text-xl">💰 Spending Analysis</CardTitle>
-                {spendingData && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleSection('spending')}
-                    className="flex items-center gap-2 self-start sm:self-auto"
-                  >
-                    {expandedSections.spending ? 'Show Less' : 'Learn More'}
-                    {expandedSections.spending ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent>
-                {spendingLoading ? (
-                  <div className="py-8">
-                    <LoadingState variant="expanded" lines={2} />
-                  </div>
-                ) : spendingData ? (
-                  <>
-                    {/* Always Visible: Spending Overview */}
-                    <div className="mb-6">
-                      <SpendingOverview 
-                        data={spendingData}
-                        loading={spendingLoading}
-                      />
-                    </div>
-
-                    {/* Expanded Content: Detailed Analysis */}
-                    {expandedSections.spending && (
-                      <div className="space-y-6">
-                        {/* Emergency Fund Analysis */}
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-lg">Emergency Fund Analysis</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <EmergencyFundAnalysis 
-                              data={spendingData}
-                              loading={spendingLoading}
-                            />
-                          </CardContent>
-                        </Card>
-
-                        {/* Spending Recommendations */}
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-lg">Spending Recommendations</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <SpendingRecommendations 
-                              recommendations={spendingRecommendations}
-                              loading={spendingRecommendationsLoading}
-                            />
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  /* No Data State */
-                  <div className="text-center py-8 space-y-4">
-                    <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto">
-                      <DollarSign className="h-8 w-8 text-primary" />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">Start Your Spending Analysis</h3>
-                      <p className="text-muted-foreground">
-                        Track your spending habits and get personalized insights to optimize your financial plan.
-                      </p>
-                    </div>
-                    <Button 
-                      onClick={() => window.location.href = '/spending-analysis'}
-                      className="mt-4"
-                    >
-                      <DollarSign className="h-4 w-4 mr-2" />
-                      Get Started
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Cash Flow Projections Section */}
-            <CashFlowSummary
-              data={cashFlowData}
-              loading={cashFlowLoading}
-              onRefresh={() => refreshCashFlowMutation.mutate()}
-              isRefreshing={refreshCashFlowMutation.isPending}
-            />
           </div>
         </>
       )}
