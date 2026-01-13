@@ -35,13 +35,12 @@ import { useTheme } from '@/hooks/useTheme';
 
 const CashFlowProjectionsPage: React.FC = () => {
   const { user } = useAuth();
-  const userId = userService.getDatabaseUserId();
   const [selectedScenario, setSelectedScenario] = useState<'conservative' | 'realistic' | 'optimistic'>('realistic');
   const [timelinePeriod, setTimelinePeriod] = useState<'1Y' | '3Y' | '5Y'>('5Y');
   const [breakdownPeriod, setBreakdownPeriod] = useState<'12M' | '24M' | 'All'>('12M');
 
-  const { data: cashFlowData, isLoading, error } = useCashFlowProjections(userId);
-  const refreshMutation = useRefreshCashFlowProjections(userId);
+  const { data: cashFlowData, isLoading, error } = useCashFlowProjections();
+  const refreshMutation = useRefreshCashFlowProjections();
   const { formatCurrency, formatPercentage } = useFormatters();
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);

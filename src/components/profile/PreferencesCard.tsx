@@ -22,7 +22,7 @@ const PreferencesCard = () => {
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center justify-center py-12">
             <LoadingSpinner size="lg" variant="primary" />
-            <p className="text-sm text-muted-foreground mt-6">Loading your preferences...</p>
+            <p className="text-sm text-muted-foreground mt-6">Loading preferences...</p>
           </div>
         </CardContent>
       </Card>

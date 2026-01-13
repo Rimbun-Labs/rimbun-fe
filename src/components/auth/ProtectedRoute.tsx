@@ -17,7 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         <LoadingSpinner 
           size="md" 
           variant="primary" 
-          text="Loading..."
+          text="Checking authentication..."
         />
       </div>
     );

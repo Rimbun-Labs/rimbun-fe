@@ -21,7 +21,7 @@ const LearningProgressSummary = () => {
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center justify-center py-8">
             <LoadingSpinner size="lg" variant="primary" />
-            <p className="text-sm text-muted-foreground mt-4">Loading your learning progress...</p>
+            <p className="text-sm text-muted-foreground mt-4">Loading learning progress...</p>
           </div>
         </CardContent>
       </Card>

@@ -30,14 +30,14 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
     return (
       <div className={cn("flex items-center gap-2 text-destructive", className)}>
         <AlertCircle className="h-4 w-4" />
-        <span className="text-sm">Something went wrong</span>
+        <span className="text-sm">{context === 'Component' ? 'Unable to load this section' : `${context} error occurred`}</span>
         <Button 
           onClick={handleRetry}
           size="sm"
           variant="ghost"
           className="h-6 px-2 text-xs"
         >
-          Retry
+          {context === 'Component' ? 'Reload Section' : 'Retry'}
         </Button>
       </div>
     );
@@ -86,7 +86,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               className="text-xs"
             >
               <RefreshCw className="h-3 w-3 mr-1" />
-              Try Again
+              {context === 'Component' ? 'Reload Section' : 'Try Again'}
             </Button>
           </div>
         </div>
@@ -104,11 +104,11 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-destructive">
-            Something went wrong
+            <h3 className="text-sm font-medium text-destructive">
+            {context === 'Component' ? 'Unable to load this section' : `${context} error occurred`}
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {error.message || 'An unexpected error occurred'}
+            {error.message || 'This might be a temporary issue. Please try again.'}
           </p>
           
           {showDetails && (
@@ -134,7 +134,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
             onClick={handleRetry}
             className="mt-2 text-xs text-primary hover:text-primary/80 underline"
           >
-            Try again
+            {context === 'Component' ? 'Reload section' : 'Try again'}
           </button>
         </div>
       </div>

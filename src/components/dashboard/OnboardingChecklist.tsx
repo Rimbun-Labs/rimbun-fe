@@ -20,6 +20,7 @@ interface OnboardingChecklistProps {
   hasSpendingData: boolean;
   hasGoals: boolean;
   hasLearningProgress: boolean;
+  hasBankingProducts: boolean;
   sessionId?: string;
   onDismiss?: () => void;
 }
@@ -29,6 +30,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   hasSpendingData,
   hasGoals,
   hasLearningProgress,
+  hasBankingProducts,
   sessionId,
   onDismiss,
 }) => {
@@ -53,11 +55,11 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       route: sessionId ? `/dashboard/${sessionId}` : '/dashboard',
     },
     {
-      id: 'learning',
-      label: 'Start Learning Path',
-      description: 'Begin your personalized investment education',
-      completed: hasLearningProgress,
-      route: sessionId ? `/learning-path/${sessionId}` : '/learning',
+      id: 'financial-planning',
+      label: 'Track Your Spending',
+      description: 'Add spending data to see cash flow projections',
+      completed: hasSpendingData,
+      route: '/financial-planning?tab=current',
     },
     {
       id: 'goals',
@@ -67,13 +69,20 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       route: '/goals',
     },
     {
-      id: 'financial-planning',
-      label: 'Track Your Spending',
-      description: 'Add spending data to see cash flow projections',
-      completed: hasSpendingData,
-      route: '/financial-planning?tab=current',
+      id: 'banking',
+      label: 'Explore Banking Products',
+      description: 'Discover personalized banking recommendations',
+      completed: hasBankingProducts,
+      route: '/banking-products',
     },
-  ], [assessmentComplete, hasVisitedDashboard, hasSpendingData, hasLearningProgress, hasGoals, sessionId]);
+    {
+      id: 'learning',
+      label: 'Start Learning Path',
+      description: 'Begin your personalized investment education',
+      completed: hasLearningProgress,
+      route: sessionId ? `/learning-path/${sessionId}` : '/learning',
+    },
+  ], [assessmentComplete, hasVisitedDashboard, hasSpendingData, hasGoals, hasBankingProducts, hasLearningProgress, sessionId]);
 
   const completedCount = checklistItems.filter(item => item.completed).length;
   const totalCount = checklistItems.length;

@@ -106,9 +106,9 @@ export const spendingApi = {
   /**
    * Get user's spending overview
    */
-  getSpendingOverview: async (userId: string): Promise<SpendingAnalysisDto> => {
+  getSpendingOverview: async (): Promise<SpendingAnalysisDto> => {
     const response = await apiClient.get<ApiResponse<SpendingAnalysisDto>>(
-      `/spending/overview?userId=${userId}`
+      `/spending/overview`
     );
     return response.data.data;
   },
@@ -117,11 +117,10 @@ export const spendingApi = {
    * Save user's spending overview
    */
   saveSpendingOverview: async (
-    userId: string, 
     data: SpendingOverviewDto
   ): Promise<SpendingAnalysisDto> => {
     const response = await apiClient.post<ApiResponse<SpendingAnalysisDto>>(
-      `/spending/overview?userId=${userId}`,
+      `/spending/overview`,
       data
     );
     return response.data.data;
@@ -130,9 +129,9 @@ export const spendingApi = {
   /**
    * Get user's spending categories
    */
-  getSpendingCategories: async (userId: string): Promise<SpendingCategoryDto[]> => {
+  getSpendingCategories: async (): Promise<SpendingCategoryDto[]> => {
     const response = await apiClient.get<ApiResponse<SpendingCategoryDto[]>>(
-      `/spending/categories?userId=${userId}`
+      `/spending/categories`
     );
     return response.data.data;
   },
@@ -141,11 +140,10 @@ export const spendingApi = {
    * Add a new spending category
    */
   addSpendingCategory: async (
-    userId: string, 
     category: Omit<SpendingCategoryDto, 'id'>
   ): Promise<SpendingCategoryDto> => {
     const response = await apiClient.post<ApiResponse<SpendingCategoryDto>>(
-      `/spending/categories?userId=${userId}`,
+      `/spending/categories`,
       category
     );
     return response.data.data;
@@ -156,11 +154,10 @@ export const spendingApi = {
    */
   updateSpendingCategory: async (
     id: string,
-    userId: string, 
     category: Omit<SpendingCategoryDto, 'id'>
   ): Promise<SpendingCategoryDto> => {
     const response = await apiClient.put<ApiResponse<SpendingCategoryDto>>(
-      `/spending/categories/${id}?userId=${userId}`,
+      `/spending/categories/${id}`,
       category
     );
     return response.data.data;
@@ -169,16 +166,16 @@ export const spendingApi = {
   /**
    * Delete a spending category
    */
-  deleteSpendingCategory: async (id: string, userId: string): Promise<void> => {
-    await apiClient.delete(`/spending/categories/${id}?userId=${userId}`);
+  deleteSpendingCategory: async (id: string): Promise<void> => {
+    await apiClient.delete(`/spending/categories/${id}`);
   },
 
   /**
    * Get comprehensive spending recommendations
    */
-  getSpendingRecommendations: async (userId: string): Promise<SpendingRecommendationDto> => {
+  getSpendingRecommendations: async (): Promise<SpendingRecommendationDto> => {
     const response = await apiClient.get<ApiResponse<SpendingRecommendationDto>>(
-      `/spending/recommendations?userId=${userId}`
+      `/spending/recommendations`
     );
     return response.data.data;
   },
@@ -187,11 +184,10 @@ export const spendingApi = {
    * Save spending for a specific period (month/year)
    */
   saveSpendingPeriod: async (
-    userId: string,
     data: SaveSpendingPeriodDto
   ): Promise<SpendingPeriodDto> => {
     const response = await apiClient.post<ApiResponse<SpendingPeriodDto>>(
-      `/spending/periods?userId=${userId}`,
+      `/spending/periods`,
       data
     );
     return response.data.data;
@@ -201,7 +197,6 @@ export const spendingApi = {
    * Get spending history with trends
    */
   getSpendingHistory: async (
-    userId: string,
     options?: {
       limit?: number;
       startYear?: number;
@@ -211,16 +206,14 @@ export const spendingApi = {
     }
   ): Promise<SpendingHistoryDto> => {
     const params = new URLSearchParams();
-    params.append('userId', userId);
     if (options?.limit) params.append('limit', options.limit.toString());
     if (options?.startYear) params.append('startYear', options.startYear.toString());
     if (options?.startMonth) params.append('startMonth', options.startMonth.toString());
     if (options?.endYear) params.append('endYear', options.endYear.toString());
     if (options?.endMonth) params.append('endMonth', options.endMonth.toString());
 
-    const response = await apiClient.get<ApiResponse<SpendingHistoryDto>>(
-      `/spending/history?${params.toString()}`
-    );
+    const url = params.toString() ? `/spending/history?${params.toString()}` : '/spending/history';
+    const response = await apiClient.get<ApiResponse<SpendingHistoryDto>>(url);
     return response.data.data;
   },
 
@@ -228,11 +221,10 @@ export const spendingApi = {
    * Get spending trends analysis
    */
   getSpendingTrends: async (
-    userId: string,
     period: '3m' | '6m' | '12m' = '6m'
   ): Promise<SpendingTrendsDto> => {
     const response = await apiClient.get<ApiResponse<SpendingTrendsDto>>(
-      `/spending/trends?userId=${userId}&period=${period}`
+      `/spending/trends?period=${period}`
     );
     return response.data.data;
   }

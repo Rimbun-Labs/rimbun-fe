@@ -1,38 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/contexts/SessionContext';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Removed - no longer using tabs
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  ArrowLeft, 
-  Sparkles,
-  ChevronRight,
-  Brain,
-  Target,
-  TrendingUp,
-  LineChart,
+  Compass,
   AlertCircle,
   MessageSquare,
-  // BarChart3, // Disabled - Asset Analyzer not ready
-  Lightbulb
+  PieChart,
+  TrendingUp,
+  Info,
+  BarChart3
 } from 'lucide-react';
 import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplorerChat';
-// import { AssetAnalyzerTab } from '@/components/asset-analyzer'; // Disabled - capability not ready yet
-// import { ProtectedFeature } from '@/components/subscription/ProtectedFeature'; // Removed - AI Chat now available to all tiers
-import { motion } from 'framer-motion';
+import { PortfolioSimulator } from '@/components/investment/PortfolioSimulator';
+import { PortfolioQuickReference } from '@/components/investment/PortfolioQuickReference';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
+import { PageHeader, PageContainer } from '@/components/layout';
+import { SPACING } from '@/lib/constants/spacing';
+import { useQuery } from '@tanstack/react-query';
+import { getAssessmentResults } from '@/lib/api/assessmentApi';
+import { getRecommendations } from '@/lib/api/recommendationApi';
+import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
+import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
+import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 
-const MotionCard = motion(Card);
+// Lazy load Asset Analyzer to reduce initial bundle size
+const AssetAnalyzerTab = lazy(() => 
+  import('@/components/asset-analyzer/AssetAnalyzerTab').then(module => ({
+    default: module.AssetAnalyzerTab
+  }))
+);
 
 const InvestmentExplorer: React.FC = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { session, isLoading, error: sessionError } = useSession();
-  const [showWelcome, setShowWelcome] = useState(true);
-  // const [activeTab, setActiveTab] = useState<'chat' | 'analyzer'>('chat'); // Disabled analyzer tab
+  const [activeTab, setActiveTab] = useState<'profile' | 'chat' | 'simulator' | 'analyzer'>('profile');
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch assessment results and recommendations (always fetch for Quick Reference, needed for Simulator)
+  const { data: assessmentResults, isLoading: assessmentLoading } = useQuery({
+    queryKey: ['assessment-results', sessionId],
+    queryFn: () => getAssessmentResults(sessionId!),
+    enabled: !!sessionId,
+    retry: 3,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: recommendations, isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['recommendations', sessionId],
+    queryFn: () => getRecommendations(sessionId!),
+    enabled: !!sessionId,
+    retry: 3,
+    staleTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (isLoading) return;
@@ -54,7 +82,7 @@ const InvestmentExplorer: React.FC = () => {
     return (
       <LoadingState
         title="Loading Investment Explorer"
-        subtitle="Please wait while we prepare your personalized investment insights"
+        subtitle="Analyzing your assessment results and preparing personalized recommendations"
       />
     );
   }
@@ -93,200 +121,264 @@ const InvestmentExplorer: React.FC = () => {
     return null;
   }
 
+  // Helper function to get risk profile label
+  const getRiskProfileLabel = (score?: number): string => {
+    if (!score) return 'N/A';
+    if (score >= 80) return 'Aggressive';
+    if (score >= 60) return 'Growth-Oriented';
+    if (score >= 40) return 'Balanced';
+    if (score >= 20) return 'Conservative';
+    return 'Very Conservative';
+  };
+
+  // Helper function to get knowledge level label
+  const getKnowledgeLevelLabel = (score?: number): string => {
+    if (!score) return 'N/A';
+    if (score >= 80) return 'Expert';
+    if (score >= 60) return 'Advanced';
+    if (score >= 40) return 'Intermediate';
+    if (score >= 20) return 'Beginner';
+    return 'Novice';
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="w-full px-2 sm:px-4 lg:px-6 py-12">
-        <div className="flex items-center gap-6 mb-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="hover:bg-muted hover:text-foreground border-border"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Investment Explorer
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Your AI-Powered Research Hub for Personalized Investing
-            </p>
+    <PageContainer>
+      <PageHeader
+        icon={Compass}
+        title="Investment Explorer"
+        description="Your personalized investment profile, recommendations, and portfolio insights"
+      />
+
+      {error && (
+        <div className={SPACING.page.tight}>
+          <div className="flex items-center gap-3 text-destructive bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+            <AlertCircle className="h-4 w-4" />
+            <p className="text-sm">{error}</p>
           </div>
         </div>
+      )}
 
-        <div className="w-full">
-          {error && (
-            <div className="mb-8">
-              <div className="flex items-center gap-3 text-destructive bg-destructive/10 p-4 rounded-lg border border-destructive/20">
-                <AlertCircle className="h-4 w-4" />
-                <p className="text-sm">{error}</p>
-              </div>
-            </div>
-          )}
+        {/* Quick Reference Card */}
+        {(assessmentResults || recommendations || assessmentLoading || recommendationsLoading) && (
+          <PortfolioQuickReference
+            riskProfile={assessmentResults?.scoreData?.riskProfile}
+            knowledgeLevel={assessmentResults?.scoreData?.knowledgeLevel}
+            allocations={recommendations?.adjustedAllocations}
+            diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore}
+            isLoading={assessmentLoading || recommendationsLoading}
+            sessionId={sessionId}
+          />
+        )}
 
-          {showWelcome ? (
-            <div className="space-y-10">
-              {/* Hero Section */}
-              <MotionCard 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden border border-border bg-gradient-to-br from-primary/5 to-background"
-              >
-                <CardContent className="p-10">
-                  <div className="grid md:grid-cols-2 gap-10 items-center w-full">
-                    <div className="space-y-6">
-                      <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20">
-                        <Sparkles className="h-4 w-4" />
-                        <span>AI-Powered Insights</span>
-                      </div>
-                      <h2 className="text-4xl font-bold tracking-tight text-foreground">
-                        Your Personal Investment AI Assistant
-                      </h2>
-                      <p className="text-lg text-muted-foreground">
-                        Ask anything about investing, get personalized insights, and explore markets with intelligent guidance tailored to your profile.
-                      </p>
-                      <Button 
-                        size="lg" 
-                        className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
-                        onClick={() => setShowWelcome(false)}
-                      >
-                        Start Chatting
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="relative">
-                      <div className="relative grid grid-cols-2 gap-6 w-full">
-                        <MotionCard 
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="bg-background border border-border shadow-lg"
-                        >
-                          <CardContent className="p-6">
-                            <Brain className="h-6 w-6 text-primary mb-3" />
-                            <h3 className="font-semibold text-foreground">Smart AI</h3>
-                            <p className="text-sm text-muted-foreground">Personalized insights</p>
-                          </CardContent>
-                        </MotionCard>
-                        <MotionCard 
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.3 }}
-                          className="bg-background border border-border shadow-lg"
-                        >
-                          <CardContent className="p-6">
-                            <Target className="h-6 w-6 text-primary mb-3" />
-                            <h3 className="font-semibold text-foreground">Goal Focused</h3>
-                            <p className="text-sm text-muted-foreground">Tailored to your profile</p>
-                          </CardContent>
-                        </MotionCard>
-                        <MotionCard 
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="bg-background border border-border shadow-lg"
-                        >
-                          <CardContent className="p-6">
-                            <TrendingUp className="h-6 w-6 text-primary mb-3" />
-                            <h3 className="font-semibold text-foreground">Market Analysis</h3>
-                            <p className="text-sm text-muted-foreground">Real-time insights</p>
-                          </CardContent>
-                        </MotionCard>
-                        <MotionCard 
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.5 }}
-                          className="bg-background border border-border shadow-lg"
-                        >
-                          <CardContent className="p-6">
-                            <LineChart className="h-6 w-6 text-primary mb-3" />
-                            <h3 className="font-semibold text-foreground">Learning</h3>
-                            <p className="text-sm text-muted-foreground">Grow your knowledge</p>
-                          </CardContent>
-                        </MotionCard>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </MotionCard>
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className={SPACING.page.subsection}>
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid h-auto p-1 bg-muted/50">
+            <TabsTrigger 
+              value="profile" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">My Profile</span>
+              <span className="sm:hidden">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="chat" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">AI Chat</span>
+              <span className="sm:hidden">Chat</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="simulator" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <PieChart className="h-4 w-4" />
+              <span className="hidden sm:inline">Portfolio Simulator</span>
+              <span className="sm:hidden">Simulator</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analyzer" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Asset Analyzer</span>
+              <span className="sm:hidden">Analyzer</span>
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Quick Start Guide */}
-              <MotionCard 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-gradient-to-br from-primary/5 to-background border border-border"
-              >
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-semibold mb-6 text-foreground">How to Get Started</h3>
-                  <div className="grid md:grid-cols-2 gap-8 w-full">
-                    <div className="space-y-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-primary font-semibold">1</span>
-                        </div>
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-6 space-y-6">
+            {assessmentLoading || recommendationsLoading ? (
+              <LoadingState 
+                title="Loading Your Investment Profile"
+                subtitle="Analyzing your assessment results and preparing personalized recommendations"
+              />
+            ) : !assessmentResults?.scoreData && !recommendations?.adjustedAllocations ? (
+              <EnhancedEmptyState
+                icon={TrendingUp}
+                title="No Assessment Data Available"
+                description="Complete your investment assessment to see your personalized risk profile, portfolio recommendations, and diversification analysis."
+                actionText="Complete Assessment"
+                onAction={() => navigate('/assessment')}
+              />
+            ) : (
+              <>
+                {/* Risk Profile Section */}
+                {assessmentResults?.scoreData && (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium text-foreground mb-2">Ask Anything</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Start with any investment question - from basics to advanced strategies
+                          <CardTitle className="text-xl">Risk Profile</CardTitle>
+                          <CardDescription>
+                            Your investment risk tolerance and personality assessment
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="text-lg px-4 py-2">
+                          {getRiskProfileLabel(assessmentResults.scoreData.riskProfile)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Risk Profile Score</span>
+                            <span className="text-2xl font-bold">{assessmentResults.scoreData.riskProfile}%</span>
+                          </div>
+                          <Progress value={assessmentResults.scoreData.riskProfile} className="h-2" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Knowledge Level</span>
+                            <span className="text-2xl font-bold">{assessmentResults.scoreData.knowledgeLevel}%</span>
+                          </div>
+                          <Progress value={assessmentResults.scoreData.knowledgeLevel} className="h-2" />
+                          <p className="text-xs text-muted-foreground">
+                            {getKnowledgeLevelLabel(assessmentResults.scoreData.knowledgeLevel)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-primary font-semibold">2</span>
+                      {assessmentResults.scoreData && (
+                        <div className="h-[300px]">
+                          <RiskProfileChart
+                            data={{
+                              riskProfile: assessmentResults.scoreData.riskProfile,
+                              knowledgeLevel: assessmentResults.scoreData.knowledgeLevel,
+                              leverageAptitude: assessmentResults.scoreData.leverageAptitude,
+                              decisionStyleScore: assessmentResults.scoreData.decisionStyleScore,
+                              personalityScore: assessmentResults.scoreData.personalityScore,
+                            }}
+                            confidenceMetrics={assessmentResults.confidence}
+                          />
                         </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Portfolio Allocation Section */}
+                {recommendations?.adjustedAllocations ? (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-medium text-foreground mb-2">Get Personalized Insights</h4>
-                          <p className="text-sm text-muted-foreground">
-                            AI analyzes your profile and provides tailored recommendations
-                          </p>
+                          <CardTitle className="text-xl">Recommended Portfolio Allocation</CardTitle>
+                          <CardDescription>
+                            Optimal asset distribution based on your risk profile and goals
+                          </CardDescription>
                         </div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                aria-label="About portfolio allocation"
+                              >
+                                <Info className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>This allocation is personalized based on your assessment results and investment goals.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
-                    </div>
-                    <div className="space-y-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-primary font-semibold">3</span>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground mb-2">Explore Deeper</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Use suggested follow-up questions to dive into specific topics
-                          </p>
-                        </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="min-h-[400px]">
+                        <PortfolioAllocation
+                          allocations={recommendations.adjustedAllocations}
+                          recommendedMetrics={recommendations.recommendedMetrics}
+                        />
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-primary font-semibold">4</span>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground mb-2">Learn & Grow</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Build your investment knowledge with guided learning paths
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </MotionCard>
-            </div>
-          ) : (
-            <div className="w-full">
-              {/* Asset Analyzer tab removed - capability not ready yet */}
-              <div className="grid grid-cols-1 w-full max-w-none">
-                <InvestmentExplorerChat 
-                  sessionId={sessionId!} 
-                  onError={(error) => setError(error.message)}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <EnhancedEmptyState
+                    icon={PieChart}
+                    title="No Portfolio Recommendations Yet"
+                    description="Complete your assessment to receive personalized portfolio allocation recommendations based on your risk profile and investment goals."
+                    actionText="Complete Assessment"
+                    onAction={() => navigate('/assessment')}
+                    variant="compact"
+                  />
+                )}
+
+                {/* Diversification Analysis Section */}
+                {recommendations?.diversificationAnalysis && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl">Diversification Analysis</CardTitle>
+                      <CardDescription>
+                        Assessment of your portfolio's risk distribution and correlation
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <DiversificationAnalysis
+                        diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
+                        riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
+                        recommendations={recommendations.diversificationAnalysis.recommendations}
+                        correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </TabsContent>
+
+          {/* AI Chat Tab */}
+          <TabsContent value="chat" className="mt-6">
+            <InvestmentExplorerChat 
+              sessionId={sessionId!} 
+              onError={(error) => setError(error.message)}
+            />
+          </TabsContent>
+
+          {/* Portfolio Simulator Tab */}
+          <TabsContent value="simulator" className="mt-6">
+            <PortfolioSimulator
+              currentAllocations={recommendations?.adjustedAllocations}
+              recommendedAllocations={recommendations?.adjustedAllocations}
+              riskProfile={assessmentResults?.scoreData?.riskProfile}
+              targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount}
+              investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon}
+              monthlyContribution={assessmentResults?.scoreData?.directInputs?.monthlyInvestable}
+              isLoading={assessmentLoading || recommendationsLoading}
+            />
+          </TabsContent>
+
+          {/* Asset Analyzer Tab - Lazy loaded */}
+          <TabsContent value="analyzer" className="mt-6">
+            <Suspense fallback={<LoadingState variant="compact" title="Loading Asset Analyzer" subtitle="Preparing analysis tools..." />}>
+              <AssetAnalyzerTab />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
+    </PageContainer>
   );
 };
 

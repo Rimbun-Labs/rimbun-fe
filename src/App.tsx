@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,24 +9,18 @@ import { SessionProvider } from "./contexts/SessionContext";
 import { ThemeProvider } from "./hooks/useTheme";
 import { AppLayout, ContentLayout } from "./components/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { LoadingState } from "@/components/dashboard/ui/LoadingState";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useSession } from "./contexts/SessionContext";
+import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
+import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
+
+// Lightweight pages - keep in main bundle (frequently used, small size)
 import Index from "./pages/Index";
-import Assessment from "./pages/Assessment";
-import AssessmentResultsPage from "./pages/AssessmentResults";
-import Dashboard from "./pages/Dashboard";
-import Learning from "./pages/Learning";
-import LearningFolderView from "./pages/LearningFolderView";
-import LearningLibraryDetail from "./pages/LearningLibraryDetail";
-import LearningPathDetail from "./pages/LearningPathDetail";
-import LearningPaths from "./pages/LearningPaths";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
-import InvestmentExplorer from "./pages/InvestmentExplorer";
-import SpendingAnalysis from "./pages/SpendingAnalysis";
-import CashFlowProjections from "./pages/CashFlowProjections";
-import FinancialPlanning from "./pages/FinancialPlanning";
-import BankAnalyticsDashboard from "./pages/BankAnalyticsDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import NotFound from "./pages/NotFound";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -35,15 +29,29 @@ import TermsOfService from "./pages/TermsOfService";
 import AboutUs from "./pages/AboutUs";
 import CookiePolicy from "./pages/CookiePolicy";
 import Contact from "./pages/Contact";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { useSession } from "./contexts/SessionContext";
-import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
-import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
-import { SubscriptionProvider } from './contexts/SubscriptionContext';
-import TestLayout from "./pages/TestLayout";
-import GoalsPage from "./pages/Goals";
-import GoalDetailPage from "./pages/GoalDetail";
-import GoalFamilyPage from "./pages/GoalFamily";
+
+// Heavy pages - lazy load for code splitting
+const Assessment = lazy(() => import("./pages/Assessment"));
+const AssessmentResultsPage = lazy(() => import("./pages/AssessmentResults"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Learning = lazy(() => import("./pages/Learning"));
+const LearningFolderView = lazy(() => import("./pages/LearningFolderView"));
+const LearningLibraryDetail = lazy(() => import("./pages/LearningLibraryDetail"));
+const LearningPathDetail = lazy(() => import("./pages/LearningPathDetail"));
+const LearningPaths = lazy(() => import("./pages/LearningPaths"));
+const Profile = lazy(() => import("./pages/Profile"));
+const InvestmentExplorer = lazy(() => import("./pages/InvestmentExplorer"));
+const SpendingAnalysis = lazy(() => import("./pages/SpendingAnalysis"));
+const CashFlowProjections = lazy(() => import("./pages/CashFlowProjections"));
+const FinancialPlanning = lazy(() => import("./pages/FinancialPlanning"));
+const BankAnalyticsDashboard = lazy(() => import("./pages/BankAnalyticsDashboard"));
+const GoalsPage = lazy(() => import("./pages/Goals"));
+const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
+const GoalFamilyPage = lazy(() => import("./pages/GoalFamily"));
+const BankingProducts = lazy(() => import("./pages/BankingProducts"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Explore = lazy(() => import("./pages/Explore"));
+const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
 
 const queryClient = new QueryClient();
 
@@ -83,7 +91,7 @@ const RootRedirect = () => {
 
   // Show loading while checking assessment status
   if (user && isCheckingAssessment) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Checking your account...</div>;
   }
 
   // If user is authenticated, check assessment status
@@ -122,6 +130,22 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/cookies" element={<CookiePolicy />} />
+      <Route 
+        path="/explore" 
+        element={
+          <Suspense fallback={<LoadingState variant="expanded" />}>
+            <Explore />
+          </Suspense>
+        } 
+      />
+      <Route 
+        path="/explore/:slug" 
+        element={
+          <Suspense fallback={<LoadingState variant="expanded" />}>
+            <PersonaDetail />
+          </Suspense>
+        } 
+      />
 
       {/* Protected routes with ContentLayout (contained, centered) */}
       <Route
@@ -131,7 +155,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="/assessment-results" element={<AssessmentResultsPage />} />
+        <Route 
+          path="/assessment-results" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <AssessmentResultsPage />
+            </Suspense>
+          } 
+        />
       </Route>
 
       {/* Protected routes with AppLayout (full width) */}
@@ -143,45 +174,243 @@ const AppRoutes = () => {
         }
       >
         {/* Assessment Routes */}
-        <Route path="/assessment" element={<Assessment />} />
+        <Route 
+          path="/assessment" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Assessment />
+            </Suspense>
+          } 
+        />
         
         {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/:sessionId" element={<Dashboard />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Dashboard />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/dashboard/:sessionId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Dashboard />
+            </Suspense>
+          } 
+        />
         
         {/* Learning Library Routes */}
-        <Route path="/learning" element={<Learning />} />
-        <Route path="/learning/:folderId" element={<LearningFolderView />} />
-        <Route path="/learning/asset-classes/:assetClass" element={<LearningLibraryDetail />} />
-        <Route path="/learning/metrics/:metricId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/islamic-finance/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/esg-investing/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/risk-management/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/market-analysis/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/portfolio-optimization/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/retirement-planning/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/financial-planning/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/value-growth-investing/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/economic-fundamentals/:moduleId" element={<LearningLibraryDetail />} />
-        <Route path="/learning/behavioral-finance/:moduleId" element={<LearningLibraryDetail />} />
+        <Route 
+          path="/learning" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Learning />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/:folderId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningFolderView />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/asset-classes/:assetClass" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/metrics/:metricId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/islamic-finance/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/esg-investing/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/risk-management/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/market-analysis/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/portfolio-optimization/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/retirement-planning/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/financial-planning/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/value-growth-investing/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/economic-fundamentals/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning/behavioral-finance/:moduleId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningLibraryDetail />
+            </Suspense>
+          } 
+        />
         
         {/* Learning Paths Routes */}
-        <Route path="/learning-path/:sessionId" element={<LearningPaths />} />
-        <Route path="/learning-path/:sessionId/:assetClass" element={<LearningPathDetail />} />
+        <Route 
+          path="/learning-path/:sessionId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningPaths />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/learning-path/:sessionId/:assetClass" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <LearningPathDetail />
+            </Suspense>
+          } 
+        />
         
         {/* Application Pages */}
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/financial-planning" element={<FinancialPlanning />} />
+        <Route 
+          path="/profile" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Profile />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/financial-planning" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <FinancialPlanning />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/banking-products" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BankingProducts />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/banking-products/:productId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <ProductDetail />
+            </Suspense>
+          } 
+        />
         {/* Legacy routes - redirect to new consolidated page */}
         <Route path="/spending-analysis" element={<Navigate to="/financial-planning?tab=current" replace />} />
         <Route path="/cash-flow-projections" element={<Navigate to="/financial-planning?tab=projections" replace />} />
-        <Route path="/goals" element={<GoalsPage />} />
-        <Route path="/goals/family/:familySlug" element={<GoalFamilyPage />} />
-        <Route path="/goals/:goalId" element={<GoalDetailPage />} />
-        <Route path="/investment-explorer/:sessionId" element={<InvestmentExplorer />} />
+        <Route 
+          path="/goals" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <GoalsPage />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/goals/family/:familySlug" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <GoalFamilyPage />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/goals/:goalId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <GoalDetailPage />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/investment-explorer/:sessionId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <InvestmentExplorer />
+            </Suspense>
+          } 
+        />
         
         {/* Bank Analytics (Protected by backend - will show error if no permission) */}
-        <Route path="/analytics" element={<BankAnalyticsDashboard />} />
+        <Route 
+          path="/analytics" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BankAnalyticsDashboard />
+            </Suspense>
+          } 
+        />
 
       </Route>
 

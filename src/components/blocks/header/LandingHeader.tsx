@@ -9,15 +9,8 @@ import {
   X, 
   Sun, 
   Moon, 
-  ChevronDown,
   ArrowRight
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -25,16 +18,9 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Features", href: "#features" },
   { name: "How It Works", href: "#how-it-works" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "About", href: "#about" },
+  { name: "About", href: "/about" },
 ];
 
-const features = [
-  { name: "Investment Assessment", href: "#assessment", description: "Personalized risk profile analysis" },
-  { name: "Portfolio Insights", href: "#portfolio", description: "AI-powered investment recommendations" },
-  { name: "Learning Paths", href: "#learning", description: "Customized educational content" },
-  { name: "Goal Planning", href: "#goals", description: "Financial goal tracking and analysis" },
-];
 
 export const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -52,9 +38,23 @@ export const LandingHeader = () => {
   }, []);
 
   const scrollToSection = (href: string) => {
+    // Handle route links
+    if (href.startsWith('/')) {
+      window.location.href = href;
+      return;
+    }
+    
+    // Handle anchor links with offset for fixed header
     const element = document.querySelector(href);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      const headerHeight = 64; // Height of fixed header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
     setIsMobileMenuOpen(false);
   };
@@ -90,7 +90,7 @@ export const LandingHeader = () => {
                   <span className="font-bold text-xl text-foreground">
                     Investlearn
                   </span>
-                  <span className="text-xs text-muted-foreground -mt-1">Interactive Investment Education</span>
+                  <span className="text-xs text-muted-foreground -mt-1">Interactive Financial Education</span>
                 </div>
               </Link>
             </motion.div>
@@ -109,31 +109,6 @@ export const LandingHeader = () => {
                   {item.name}
                 </motion.button>
               ))}
-              
-              {/* Features Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <motion.button
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-                  >
-                    Features
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  {features.map((feature) => (
-                    <DropdownMenuItem key={feature.name} asChild>
-                      <Link to={feature.href} className="flex flex-col items-start p-3">
-                        <span className="font-medium text-foreground">{feature.name}</span>
-                        <span className="text-xs text-muted-foreground">{feature.description}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </nav>
 
             {/* Right Side Actions */}
@@ -180,7 +155,7 @@ export const LandingHeader = () => {
                   </Button>
                   <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Link to="/signup">
-                      Get Started
+                      Take Your Assessment
                       <ArrowRight className="ml-2 h-3 w-3" />
                     </Link>
                   </Button>
@@ -227,24 +202,6 @@ export const LandingHeader = () => {
                   {item.name}
                 </Button>
               ))}
-              <div className="pt-4 border-t border-border/40">
-                <div className="space-y-3">
-                  {features.map((feature) => (
-                    <Button
-                      key={feature.name}
-                      variant="ghost"
-                      size="lg"
-                      className="w-full justify-start text-left h-16"
-                      onClick={() => scrollToSection(feature.href)}
-                    >
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{feature.name}</span>
-                        <span className="text-sm text-muted-foreground">{feature.description}</span>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
             </div>
           </motion.div>
         )}

@@ -25,8 +25,6 @@ import {
   Download
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
-import { getUserSessions } from '@/lib/api/assessmentApi';
 import { userService } from '@/lib/api/userService';
 import { config } from '@/lib/api/config';
 import { auth } from '@/lib/firebase/config';
@@ -44,19 +42,8 @@ const ProfileContent = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Get database user ID for API calls
-  const databaseUserId = userService.getDatabaseUserId();
-
-  // Fetch assessment count (completed sessions)
-  const { data: userSessions, isLoading: sessionsLoading } = useQuery({
-    queryKey: ['user-sessions', databaseUserId],
-    queryFn: () => getUserSessions(databaseUserId!),
-    enabled: !!databaseUserId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Calculate assessment count from completed sessions
-  const assessmentCount = userSessions?.filter((session: any) => session.isCompleted === true).length || 0;
+  // Assessment count now comes from profile.summary (no need for separate API call)
+  const assessmentCount = profile?.summary?.totalAssessments || 0;
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -295,7 +282,7 @@ const ProfileContent = () => {
             <div className="space-y-4">
               <h1 className="text-3xl font-bold text-foreground">Account Settings</h1>
               <p className="text-muted-foreground text-lg">
-                Loading your profile information...
+                Loading your profile...
               </p>
             </div>
             <div className="flex items-center justify-center py-12">
@@ -417,7 +404,7 @@ const ProfileContent = () => {
                           type="email" 
                           value={formData.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}
-                          placeholder="your.email@example.com"
+                          placeholder="Enter your email address"
                           className="border-border focus:border-primary h-11 w-full" 
                         />
                       </div>
@@ -483,7 +470,7 @@ const ProfileContent = () => {
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Assessments Completed</Label>
                             <p className="text-sm text-muted-foreground">
-                              {sessionsLoading ? (
+                              {isLoading ? (
                                 <Loader2 className="h-3 w-3 animate-spin inline" />
                               ) : (
                                 `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''}`
@@ -498,7 +485,7 @@ const ProfileContent = () => {
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Assessment Progress</Label>
                             <p className="text-sm text-muted-foreground">
-                              {sessionsLoading ? (
+                              {isLoading ? (
                                 <Loader2 className="h-3 w-3 animate-spin inline" />
                               ) : (
                                 `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''} completed`

@@ -56,14 +56,14 @@ const GoalsPage = () => {
   const [editingGoal, setEditingGoal] = useState<GoalWithInsightsDto | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<GoalWithInsightsDto | null>(null);
 
-  const { data, isLoading, isError, refetch } = useGoalsOverview(userId, includeInactive);
+  const { data, isLoading, isError, refetch } = useGoalsOverview(includeInactive);
   const {
     data: familySummaries,
     isLoading: isFamilySummaryLoading,
-  } = useGoalFamilySummaries(userId);
-  const createGoal = useCreateGoal(userId);
-  const updateGoal = useUpdateGoal(userId, editingGoal?.id);
-  const deleteGoal = useDeleteGoal(userId);
+  } = useGoalFamilySummaries();
+  const createGoal = useCreateGoal();
+  const updateGoal = useUpdateGoal(editingGoal?.id);
+  const deleteGoal = useDeleteGoal();
 
   const handleCreateClick = () => {
     setFormMode('create');

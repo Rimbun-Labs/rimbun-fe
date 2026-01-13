@@ -34,7 +34,7 @@ const DashboardPreview: React.FC = () => {
               <BarChart3 className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Sarah's Investment Dashboard</h3>
+              <h3 className="font-semibold text-lg text-foreground">Nurul's Financial Dashboard</h3>
               <p className="text-sm text-muted-foreground">Personalized for your goals</p>
             </div>
           </div>

@@ -42,9 +42,9 @@ const LearningPaths: React.FC = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl text-red-600">Error Loading Learning Paths</CardTitle>
+            <CardTitle className="text-xl text-red-600">Learning Paths Unavailable</CardTitle>
             <CardDescription>
-              There was a problem loading your learning paths. Please try again.
+              We couldn't load your learning paths. Complete your assessment first, or check your connection and try again.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

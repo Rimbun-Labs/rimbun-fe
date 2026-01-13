@@ -67,9 +67,9 @@ export const cashFlowApi = {
   /**
    * Get cash flow projections for a user
    */
-  getCashFlowProjections: async (userId: string): Promise<CashFlowProjectionsDto> => {
+  getCashFlowProjections: async (): Promise<CashFlowProjectionsDto> => {
     const response = await apiClient.get<ApiResponse<CashFlowProjectionsDto>>(
-      `/spending/cash-flow-projections?userId=${userId}`
+      `/spending/cash-flow-projections`
     );
     return response.data.data;
   },

@@ -6,11 +6,11 @@ import { useFormatters } from '@/hooks/useFormatters';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 
 interface TrendsInsightsCardProps {
-  userId: string;
+  userId?: string; // Kept for backward compatibility but no longer used
 }
 
 const TrendsInsightsCard: React.FC<TrendsInsightsCardProps> = ({ userId }) => {
-  const { data, isLoading } = useSpendingTrends(userId, '6m');
+  const { data, isLoading } = useSpendingTrends('6m');
   const { formatCurrency } = useFormatters();
 
   if (isLoading) {

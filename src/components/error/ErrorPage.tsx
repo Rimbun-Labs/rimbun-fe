@@ -67,10 +67,10 @@ Please provide any additional context about what you were doing when this error 
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <CardTitle className="text-2xl font-bold text-destructive">
-            Oops! Something went wrong
+            We're having trouble loading this page
           </CardTitle>
           <CardDescription className="text-base">
-            We encountered an unexpected error while processing your request
+            Something went wrong while processing your request. This might be a temporary issue.
           </CardDescription>
         </CardHeader>
 
@@ -109,7 +109,7 @@ Please provide any additional context about what you were doing when this error 
                 variant="outline"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Try Again
+                Reload Page
               </Button>
 
               <Button 

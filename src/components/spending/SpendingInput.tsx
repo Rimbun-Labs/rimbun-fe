@@ -33,7 +33,7 @@ const spendingFormSchema = z.object({
 type SpendingFormData = z.infer<typeof spendingFormSchema>;
 
 interface SpendingInputProps {
-  userId: string;
+  userId?: string; // Deprecated: No longer needed, kept for backward compatibility
   currentData?: SpendingAnalysisDto;
   onSuccess?: () => void;
 }
@@ -44,9 +44,9 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
   onSuccess 
 }) => {
   const { formatCurrency } = useFormatters();
-  const saveSpendingMutation = useSaveSpendingOverview(userId);
-  const savePeriodMutation = useSaveSpendingPeriod(userId);
-  const { data: historyData } = useSpendingHistory(userId, { limit: 12 });
+  const saveSpendingMutation = useSaveSpendingOverview();
+  const savePeriodMutation = useSaveSpendingPeriod();
+  const { data: historyData } = useSpendingHistory({ limit: 12 });
 
   // Get current month/year
   const now = new Date();

@@ -75,7 +75,7 @@ export const Footer = ({ className }: FooterProps) => {
                 <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                   Investlearn
                 </span>
-                <span className="text-xs text-muted-foreground -mt-1">AI-Powered Investment Education</span>
+                <span className="text-xs text-muted-foreground -mt-1">AI-Powered Financial Education</span>
               </div>
             </Link>
             
@@ -221,7 +221,7 @@ export const Footer = ({ className }: FooterProps) => {
           viewport={{ once: true }}
         >
           <p className="text-sm text-muted-foreground">
-            Made with <Heart className="inline h-3 w-3 text-red-500" /> for investors worldwide
+            Made with <Heart className="inline h-3 w-3 text-red-500" /> to help you build financial confidence
           </p>
         </motion.div>
       </div>

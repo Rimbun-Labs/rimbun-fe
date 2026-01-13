@@ -98,9 +98,16 @@ const ProfileHeader = () => {
         <div className="space-y-2 flex-1 text-center md:text-left">
           <div className="flex flex-col md:flex-row md:items-center gap-2">
             <h1 className="text-2xl font-bold">{profile.displayName}</h1>
-            <Badge variant="outline" className="max-w-fit mx-auto md:mx-0">
-              {profile.financialProfile.riskProfile} Risk Profile
-            </Badge>
+            {profile.financialProfile.profile && profile.financialProfile.profile !== 'Not Assessed' && (
+              <Badge variant="outline" className="max-w-fit mx-auto md:mx-0">
+                {profile.financialProfile.profile}
+              </Badge>
+            )}
+            {profile.financialProfile.riskProfile > 0 && (
+              <Badge variant="secondary" className="max-w-fit mx-auto md:mx-0">
+                {profile.financialProfile.riskProfile}% Risk
+              </Badge>
+            )}
           </div>
           <p className="text-muted-foreground">{profile.email}</p>
         </div>

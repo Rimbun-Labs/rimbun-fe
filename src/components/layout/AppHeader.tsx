@@ -21,7 +21,6 @@ import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
 import MobileMenu from './MobileMenu';
-import JourneyTracker from '@/components/dashboard/JourneyTracker';
 
 interface AppHeaderProps {
   showFullNav?: boolean;
@@ -76,16 +75,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-16 items-center px-4 md:px-6 gap-4">
-          {showFullNav && (
-            <div className="md:hidden mr-2">
-              <Button onClick={toggleMobileMenu} variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </div>
-          )}
-          <div className="flex items-center shrink-0">
+        <div className="flex h-16 items-center justify-between px-4 md:px-6">
+          {/* Left Section: Logo and Brand */}
+          <div className="flex items-center gap-4">
+            {showFullNav && (
+              <div className="md:hidden">
+                <Button onClick={toggleMobileMenu} variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </div>
+            )}
             <Link to="/home" className="flex items-center space-x-2">
               <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
                 <span className="text-primary-foreground font-bold">IL</span>
@@ -94,14 +94,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             </Link>
           </div>
           
-          {/* Journey Tracker - Only show if assessment is completed */}
-          {showFullNav && hasCompletedAssessment && (
-            <div className="flex-1 flex justify-center items-center min-w-0 mx-2 md:mx-4">
-              <JourneyTracker variant="compact" />
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-4 shrink-0">
+          {/* Right Section: Navigation and Actions */}
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Home Link */}
             <Link
               to="/home"

@@ -102,12 +102,9 @@ const Signup = () => {
           Investlearn
         </div>
         <div className="relative z-20 mt-auto">
-          <blockquote className="space-y-2">
-            <p className="text-lg">
-              "Investlearn has transformed how I understand and approach investing. The personalized learning paths are exactly what I needed."
-            </p>
-            <footer className="text-sm">Sofia Davis</footer>
-          </blockquote>
+          <p className="text-lg">
+            Build your investment confidence through personalized learning and assessment.
+          </p>
         </div>
       </div>
       <div className="lg:p-8">
@@ -190,7 +187,7 @@ const Signup = () => {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@example.com"
+                    placeholder="Enter your email address"
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect="off"

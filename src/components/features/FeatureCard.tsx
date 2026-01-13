@@ -40,7 +40,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
             <p className="text-sm text-muted-foreground mb-2">
               {assessmentRequired 
                 ? "Complete your assessment to unlock this feature"
-                : "This feature is coming soon"}
+                : "This feature is currently unavailable"}
             </p>
             {assessmentRequired && (
               <Button 

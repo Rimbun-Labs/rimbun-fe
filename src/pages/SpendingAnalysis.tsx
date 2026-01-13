@@ -37,23 +37,23 @@ const SpendingAnalysisPage: React.FC = () => {
     data: spendingData, 
     isLoading: spendingLoading, 
     error: spendingError 
-  } = useSpendingData(userId || '');
+  } = useSpendingData();
 
   const { 
     data: categories, 
     isLoading: categoriesLoading 
-  } = useSpendingCategories(userId || '');
+  } = useSpendingCategories();
 
   const { 
     data: recommendations, 
     isLoading: recommendationsLoading 
-  } = useSpendingRecommendations(userId || '');
+  } = useSpendingRecommendations();
 
   // Fetch goals data for Phase 3 integration
   const { 
     data: goalsData, 
     isLoading: goalsLoading 
-  } = useGoalsOverview(userId || '', false);
+  } = useGoalsOverview(false);
 
   // Fetch spending history for data quality calculation
   const { 

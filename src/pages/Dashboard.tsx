@@ -20,6 +20,9 @@ import OnboardingChecklist from '@/components/dashboard/OnboardingChecklist';
 import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
+import BankingProductsSection from '@/components/dashboard/BankingProductsSection';
+import InvestmentHoldingsSection from '@/components/dashboard/InvestmentHoldingsSection';
+import LearningPathSection from '@/components/dashboard/LearningPathSection';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield, PieChart, DollarSign } from "lucide-react";
@@ -28,6 +31,8 @@ import { EnhancedEmptyState } from "@/components/ui/enhanced-empty-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { SPACING } from '@/lib/constants/spacing';
+import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   RiskStyleExplanation,
@@ -49,6 +54,7 @@ import { useCashFlowProjections, useRefreshCashFlowProjections } from '@/hooks/u
 import { useFormatters } from '@/hooks/useFormatters';
 import { useGoalsOverview } from '@/hooks/useGoals';
 import { getLearningProgress } from '@/lib/api/profileApi';
+import { useBankingProfile } from '@/hooks/useBankingProducts';
 
 // Types
 interface LowercaseAssetAllocations {
@@ -68,9 +74,9 @@ interface UppercaseAssetAllocations {
 // Dashboard state interface
 interface DashboardState {
   expandedSections: {
-    profile: boolean;
+    banking: boolean;
     portfolio: boolean;
-    insights: boolean;
+    learning: boolean;
   };
   showWelcome: boolean;
   loading: boolean;
@@ -111,9 +117,9 @@ const dashboardReducer = (state: DashboardState, action: DashboardAction): Dashb
 // Initial state
 const initialState: DashboardState = {
   expandedSections: {
-    profile: false,
+    banking: false,
     portfolio: false,
-    insights: false
+    learning: false
   },
   showWelcome: false,
   loading: false
@@ -229,22 +235,22 @@ const Dashboard = () => {
     data: spendingData, 
     isLoading: spendingLoading, 
     error: spendingError 
-  } = useSpendingData(userService.getDatabaseUserId() || '');
+  } = useSpendingData();
 
   // Get cash flow data
   const { 
     data: cashFlowData, 
     isLoading: cashFlowLoading, 
     error: cashFlowError 
-  } = useCashFlowProjections(userService.getDatabaseUserId() || '');
+  } = useCashFlowProjections();
 
-  const refreshCashFlowMutation = useRefreshCashFlowProjections(userService.getDatabaseUserId() || '');
+  const refreshCashFlowMutation = useRefreshCashFlowProjections();
 
   // Get goals data for checklist
   const { 
     data: goalsData, 
     isLoading: goalsLoading 
-  } = useGoalsOverview(userService.getDatabaseUserId() || '', false);
+  } = useGoalsOverview(false);
 
   // Get learning progress for checklist
   const { 
@@ -256,6 +262,10 @@ const Dashboard = () => {
     enabled: !!userService.getDatabaseUserId(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Get banking profile for checklist
+  const { data: bankingProfile } = useBankingProfile();
+  const hasBankingProducts = !!(bankingProfile && bankingProfile.products && bankingProfile.products.length > 0);
 
   const { formatCurrency, formatPercentage } = useFormatters();
 
@@ -331,7 +341,7 @@ const Dashboard = () => {
   // Consolidated return with conditional content
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className={SPACING.page.container}>
       {/* Loading State */}
       {isLoading && (
         <div className="py-8">
@@ -347,7 +357,7 @@ const Dashboard = () => {
       {/* Welcome/No Session State */}
       {!isLoading && !checkingCompletedAssessment && (!effectiveSessionId || assessmentError) && (
         <div className="py-12">
-          <div className="w-full space-y-8">
+          <div className={cn("w-full", SPACING.page.section)}>
             {/* Welcome Header */}
             <div className="w-full space-y-4">
               <h1 className="text-4xl font-bold">Welcome to Your Investment Journey!</h1>
@@ -428,15 +438,15 @@ const Dashboard = () => {
           <div className="w-full space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl text-destructive">Error Loading Dashboard</CardTitle>
+                <CardTitle className="text-xl text-destructive">Dashboard Unavailable</CardTitle>
                 <CardDescription>
-                  There was a problem loading your dashboard data. Please try again.
+                  We couldn't load your dashboard. Your session may have expired, or there's a connection issue.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2 text-destructive">
                   <AlertCircle className="h-5 w-5" />
-                  <p>Failed to load assessment results. The assessment might not be complete yet.</p>
+                  <p>Your assessment results aren't available yet. Complete your assessment to see your dashboard.</p>
                 </div>
                 <div className="flex gap-2">
                   <Button 
@@ -471,6 +481,7 @@ const Dashboard = () => {
               hasSpendingData={!!spendingData}
               hasGoals={!!(goalsData?.goals && goalsData.goals.length > 0)}
               hasLearningProgress={!!(learningProgress && learningProgress.completedModules > 0)}
+              hasBankingProducts={hasBankingProducts}
               sessionId={effectiveSessionId}
               onDismiss={() => {
                 localStorage.setItem('onboardingChecklistDismissed', 'true');
@@ -526,13 +537,13 @@ const Dashboard = () => {
           
           {/* Main Content */}
           <div className="space-y-6">
-            {/* Financial Progress Section - Combined Spending & Cash Flow */}
+            {/* Financial Status Section - Combined Spending & Cash Flow */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
-                    Your Financial Progress
+                    Your Financial Status
                   </CardTitle>
                   <Button
                     variant="outline"
@@ -583,14 +594,28 @@ const Dashboard = () => {
                         )}
                       </div>
                     ) : (
-                      <EnhancedEmptyState
-                        icon={DollarSign}
-                        title="No Spending Data Yet"
-                        description="Add your spending information to see insights, recommendations, and track your financial progress"
-                        actionText="Set Up Spending Analysis"
-                        onAction={() => navigate('/financial-planning?tab=current')}
-                        variant="compact"
-                      />
+                      <div className="space-y-4">
+                        <EnhancedEmptyState
+                          icon={DollarSign}
+                          title="No Spending Data Yet"
+                          description="Add your spending information to see insights, recommendations, and track your financial status"
+                          actionText="Set Up Spending Analysis"
+                          onAction={() => navigate('/financial-planning?tab=current')}
+                          variant="compact"
+                        />
+                        {/* Preview/Teaser Content */}
+                        <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-foreground">What you'll discover:</p>
+                            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                              <li>Your savings rate and how it supports your investment goals</li>
+                              <li>Emergency fund status and recommendations</li>
+                              <li>Spending trends and optimization opportunities</li>
+                              <li>How your cash flow impacts your portfolio strategy</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -633,437 +658,60 @@ const Dashboard = () => {
                         )}
                       </div>
                     ) : (
-                      <EnhancedEmptyState
-                        icon={TrendingUp}
-                        title="Complete Assessment to See Projections"
-                        description="Finish your investment assessment to unlock cash flow projections and goal tracking insights"
-                        actionText="Complete Assessment"
-                        onAction={() => navigate('/assessment')}
-                        variant="compact"
-                      />
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Investment Profile Section */}
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl">Your Investment Profile</CardTitle>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          aria-label="About your investment profile"
-                        >
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>Click 'Learn More' to see detailed explanations of your risk profile, knowledge level, and decision style</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('profile')}
-                  className="flex items-center gap-2 self-start sm:self-auto"
-                >
-                  {expandedSections.profile ? 'Show Less' : 'Learn More'}
-                  {expandedSections.profile ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {/* Always Visible: Radar Chart */}
-                <div className="h-[300px] sm:h-[350px] md:h-[400px] w-full mb-6">
-                  <RiskProfileChart 
-                    data={{
-                      riskProfile: Math.min(assessmentResults?.scoreData?.riskProfile || 0, 100),
-                      knowledgeLevel: Math.min(assessmentResults?.scoreData?.knowledgeLevel || 0, 100),
-                      leverageAptitude: Math.min(assessmentResults?.scoreData?.leverageAptitude || 0, 100),
-                      decisionStyleScore: Math.min(assessmentResults?.scoreData?.decisionStyleScore || 0, 100),
-                      personalityScore: Math.min(assessmentResults?.scoreData?.personalityScore || 0, 100)
-                    }}
-                    confidenceMetrics={assessmentResults?.scoreData?.confidenceMetrics}
-                  />
-                </div>
-
-                {/* Expanded Content: Question Cards */}
-                {expandedSections.profile && (
-                  <div className="space-y-6">
-                    {/* What's your risk style? */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">What's your risk style?</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="text-2xl font-bold">
-                              {assessmentResults?.scoreData.riskProfile}%
-                            </div>
-                          </div>
-                          <RiskStyleExplanation 
-                            score={assessmentResults?.scoreData.riskProfile || 0}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* How well do you know? */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">How well do you know?</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="text-2xl font-bold">
-                              {assessmentResults?.scoreData.knowledgeLevel}%
-                            </div>
-                          </div>
-                          <KnowledgeLevelExplanation 
-                            score={assessmentResults?.scoreData.knowledgeLevel || 0}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* What's your approach? */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">What's your approach?</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="text-2xl font-bold">
-                              {assessmentResults?.scoreData.decisionStyleScore}%
-                            </div>
-                          </div>
-                          <DecisionStyleExplanation 
-                            score={assessmentResults?.scoreData.decisionStyleScore || 0}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Portfolio Breakdown Section */}
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl">Your Portfolio Breakdown</CardTitle>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          aria-label="About your portfolio breakdown"
-                        >
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>Click 'Learn More' to see detailed explanations of each asset class (equities, bonds, real estate, cash) and their role in your portfolio</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('portfolio')}
-                  className="flex items-center gap-2 self-start sm:self-auto"
-                >
-                  {expandedSections.portfolio ? 'Show Less' : 'Learn More'}
-                  {expandedSections.portfolio ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {/* Always Visible: Portfolio Allocation Chart */}
-                <div className="min-h-[250px] sm:min-h-[300px] mb-6">
-                  <PortfolioAllocation 
-                    allocations={recommendations?.adjustedAllocations || {
-                      equities: 0,
-                      bonds: 0,
-                      realEstate: 0,
-                      cash: 0
-                    }}
-                    recommendedMetrics={recommendations?.recommendedMetrics}
-                    loading={recommendationsLoading}
-                  />
-                </div>
-
-                {/* Expanded Content: Asset Explanations */}
-                {expandedSections.portfolio && (
-                  <div className="space-y-6">
-                    {/* What are you investing in? */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">What are you investing in?</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-6">
-                          {/* Equities */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">Equities</span>
-                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.equities}%</span>
-                            </div>
-                            <EquitiesExplanation 
-                              allocation={recommendations?.adjustedAllocations?.equities || 0}
-                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                            />
-                          </div>
-
-                          {/* Bonds */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">Bonds</span>
-                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.bonds}%</span>
-                            </div>
-                            <BondsExplanation 
-                              allocation={recommendations?.adjustedAllocations?.bonds || 0}
-                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                            />
-                          </div>
-
-                          {/* Real Estate */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">Real Estate</span>
-                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.realEstate}%</span>
-                            </div>
-                            <RealEstateExplanation 
-                              allocation={recommendations?.adjustedAllocations?.realEstate || 0}
-                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                            />
-                          </div>
-
-                          {/* Cash */}
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">Cash</span>
-                              <span className="text-lg font-bold">{recommendations?.adjustedAllocations?.cash}%</span>
-                            </div>
-                            <CashExplanation 
-                              allocation={recommendations?.adjustedAllocations?.cash || 0}
-                              riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                            />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Investment Insights Section */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl">Investment Insights</CardTitle>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          aria-label="About investment insights"
-                        >
-                          <Info className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs">
-                        <p>Click 'Learn More' to explore investment scenarios, diversification analysis, and portfolio strategy recommendations</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('insights')}
-                  className="flex items-center gap-2"
-                >
-                  {expandedSections.insights ? 'Show Less' : 'Learn More'}
-                  {expandedSections.insights ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {/* Always Visible: Portfolio Strategy Summary */}
-                {recommendationsLoading ? (
-                  <div className="mb-6 py-4">
-                    <LoadingState variant="compact" lines={2} />
-                  </div>
-                ) : recommendations?.diversificationAnalysis ? (
-                  <div className="mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Diversification Score */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium">Diversification Score</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-2xl font-bold">
-                                {(recommendations.diversificationAnalysis.diversificationScore * 100).toFixed(0)}%
-                              </span>
-                              <Badge 
-                                className={
-                                  recommendations.diversificationAnalysis.diversificationScore >= 0.8 
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                    : recommendations.diversificationAnalysis.diversificationScore >= 0.6
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }
-                              >
-                                {recommendations.diversificationAnalysis.diversificationScore >= 0.8 
-                                  ? 'Excellent' 
-                                  : recommendations.diversificationAnalysis.diversificationScore >= 0.6
-                                  ? 'Good'
-                                  : 'Needs Improvement'}
-                              </Badge>
-                            </div>
-                            <Progress 
-                              value={recommendations.diversificationAnalysis.diversificationScore * 100} 
-                              className="h-2" 
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Risk-Adjusted Volatility */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium">Risk-Adjusted Volatility</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-2xl font-bold">
-                                {recommendations.diversificationAnalysis.riskAdjustedVolatility.toFixed(2)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Lower is better for risk management
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Portfolio Strategy Insight */}
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium">Portfolio Strategy</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <p className="text-sm text-foreground">
-                              {recommendations.diversificationAnalysis.diversificationScore >= 0.8
-                                ? 'Well-diversified portfolio with balanced risk'
-                                : recommendations.diversificationAnalysis.diversificationScore >= 0.6
-                                ? 'Moderately diversified portfolio'
-                                : 'Consider diversifying across more asset classes'}
-                            </p>
-                            {recommendations.diversificationAnalysis.recommendations && recommendations.diversificationAnalysis.recommendations.length > 0 && (
-                              <p className="text-xs text-muted-foreground">
-                                {recommendations.diversificationAnalysis.recommendations[0]}
-                              </p>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-6 p-4 border rounded-lg bg-muted/50">
-                    <p className="text-sm text-muted-foreground text-center">
-                      Complete your assessment to see portfolio strategy insights
-                    </p>
-                  </div>
-                )}
-
-                {/* Expanded Content: Detailed Analysis */}
-                {expandedSections.insights && (
-                  <div className="space-y-6">
-                    {/* Investment Scenarios */}
-                    {recommendations?.recommendationCalculationData?.goalGapInsights?.investmentScenarios && (
-                      <InvestmentScenarios 
-                        scenarios={recommendations.recommendationCalculationData.goalGapInsights.investmentScenarios}
-                        targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount || 0}
-                        investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
-                        loading={assessmentLoading}
-                      />
-                    )}
-
-                    {/* Diversification Analysis */}
-                    {recommendations?.diversificationAnalysis && (
-                      <DiversificationAnalysis 
-                        diversificationScore={recommendations.diversificationAnalysis.diversificationScore}
-                        riskAdjustedVolatility={recommendations.diversificationAnalysis.riskAdjustedVolatility}
-                        recommendations={recommendations.diversificationAnalysis.recommendations}
-                        correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
-                      />
-                    )}
-
-                    {/* Portfolio Interaction */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">How do your investments work together?</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <PortfolioInteractionExplanation 
-                          riskAdjustedVolatility={recommendations?.diversificationAnalysis?.riskAdjustedVolatility || 0}
-                          riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                          diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore || 0}
+                      <div className="space-y-4">
+                        <EnhancedEmptyState
+                          icon={TrendingUp}
+                          title="Complete Assessment to See Projections"
+                          description="Finish your investment assessment to unlock cash flow projections and goal tracking insights"
+                          actionText="Complete Assessment"
+                          onAction={() => navigate('/assessment')}
+                          variant="compact"
                         />
-                      </CardContent>
-                    </Card>
-
-                    {/* Correlation Analysis */}
-                    {recommendations?.diversificationAnalysis?.correlationMatrix && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Asset Correlation Analysis</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <CorrelationExplanation 
-                            correlationMatrix={recommendations.diversificationAnalysis.correlationMatrix}
-                            allocations={recommendations?.adjustedAllocations || {
-                              equities: 0,
-                              bonds: 0,
-                              realEstate: 0,
-                              cash: 0
-                            }}
-                            riskProfile={assessmentResults?.scoreData.riskProfile || 0}
-                            investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon || 0}
-                            goal={(assessmentResults?.scoreData?.directInputs?.financialGoal as 'retirement' | 'house' | 'wealth' | 'education' | 'other') || 'wealth'}
-                            knowledgeLevel={
-                              (assessmentResults?.scoreData.knowledgeLevel || 0) < 30 ? 'beginner' :
-                              (assessmentResults?.scoreData.knowledgeLevel || 0) < 70 ? 'intermediate' : 'advanced'
-                            }
-                          />
-                        </CardContent>
-                      </Card>
+                        {/* Preview/Teaser Content */}
+                        <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-foreground">What you'll see:</p>
+                            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                              <li>5-year cash flow projections based on your goals</li>
+                              <li>Goal progress tracking and timeline estimates</li>
+                              <li>Scenario analysis (conservative vs aggressive)</li>
+                              <li>How your savings rate affects goal achievement</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
+
+            {/* Banking Products Section */}
+            <BankingProductsSection
+              sessionId={effectiveSessionId}
+              riskProfile={assessmentResults?.scoreData?.riskProfile}
+              investmentGoals={{
+                targetAmount: assessmentResults?.scoreData?.directInputs?.targetAmount,
+                monthlyContribution: assessmentResults?.scoreData?.directInputs?.monthlyInvestable,
+                investmentHorizon: assessmentResults?.scoreData?.directInputs?.investmentHorizon,
+              }}
+              savingsRate={spendingData?.savingsRate}
+            />
+
+            {/* Investment Holdings Section */}
+            <InvestmentHoldingsSection
+              sessionId={effectiveSessionId}
+            />
+
+            {/* Investment Portfolio Section - Moved to Investment Explorer */}
+            {/* Detailed portfolio analysis, charts, and recommendations are now in the Investment Explorer page */}
+
+            {/* Learning Path Section */}
+            <LearningPathSection
+              sessionId={effectiveSessionId}
+              knowledgeLevel={assessmentResults?.scoreData?.knowledgeLevel}
+              portfolioAllocations={recommendations?.adjustedAllocations}
+            />
           </div>
         </>
       )}

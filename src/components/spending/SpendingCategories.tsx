@@ -23,7 +23,7 @@ const categoryFormSchema = z.object({
 type CategoryFormData = z.infer<typeof categoryFormSchema>;
 
 interface SpendingCategoriesProps {
-  userId: string;
+  userId?: string; // Deprecated: No longer needed, kept for backward compatibility
   categories: SpendingCategoryDto[];
   loading: boolean;
 }
@@ -40,9 +40,9 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
-  const addCategoryMutation = useAddSpendingCategory(userId);
-  const updateCategoryMutation = useUpdateSpendingCategory(userId);
-  const deleteCategoryMutation = useDeleteSpendingCategory(userId);
+  const addCategoryMutation = useAddSpendingCategory();
+  const updateCategoryMutation = useUpdateSpendingCategory();
+  const deleteCategoryMutation = useDeleteSpendingCategory();
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categoryFormSchema),

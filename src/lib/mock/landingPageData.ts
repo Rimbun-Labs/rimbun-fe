@@ -1,35 +1,4 @@
 export const landingPageData = {
-  testimonials: [
-    {
-      name: "Sarah Chen",
-      role: "Software Engineer",
-      content: "Investlearn helped me understand my risk tolerance and build a portfolio I'm confident in. The personalized approach made all the difference.",
-      avatar: "/avatars/sarah.jpg",
-      rating: 5
-    },
-    {
-      name: "Michael Rodriguez",
-      role: "Marketing Manager", 
-      content: "I was intimidated by investing before finding Investlearn. The assessment helped me understand my goals and the learning modules are perfect for my schedule.",
-      avatar: "/avatars/michael.jpg",
-      rating: 5
-    },
-    {
-      name: "Emily Watson",
-      role: "Teacher",
-      content: "As someone with limited financial knowledge, Investlearn made investing accessible. The step-by-step guidance and personalized recommendations are invaluable.",
-      avatar: "/avatars/emily.jpg",
-      rating: 5
-    }
-  ],
-  
-  statistics: {
-    users: "10,000+",
-    assessments: "15,000+",
-    satisfaction: "98%",
-    averageScore: "7.2/10"
-  },
-  
   scenarios: {
     conservative: {
       initial: 50000,

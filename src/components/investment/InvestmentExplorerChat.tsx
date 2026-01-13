@@ -9,8 +9,6 @@ import { topics, Topic } from '@/lib/constants/investmentTopics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, 
-  Mic, 
-  MicOff, 
   Sparkles,
   Loader2,
   AlertCircle,
@@ -158,7 +156,6 @@ const getTopicIcon = (suggestion: string) => {
 
 export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ sessionId, onError }) => {
   const [inputValue, setInputValue] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { session } = useSession();
   
@@ -390,16 +387,6 @@ export const InvestmentExplorerChat: React.FC<InvestmentExplorerChatProps> = ({ 
             className="flex-1 w-full"
             disabled={isLoading}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsRecording(!isRecording)}
-            className={isRecording ? 'text-red-500 hover:bg-red-50' : 'hover:bg-muted hover:text-foreground'}
-            disabled={isLoading}
-          >
-            {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-          </Button>
           <Button 
             type="submit" 
             size="icon" 

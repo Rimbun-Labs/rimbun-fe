@@ -61,19 +61,18 @@ const GoalDetailPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [historyRange, setHistoryRange] = useState<'6m' | '12m' | '24m' | 'all'>('12m');
 
-  const { data: goal, isLoading, isError, refetch } = useGoal(userId, goalId);
+  const { data: goal, isLoading, isError, refetch } = useGoal(goalId);
   const progressQueryOptions = useMemo(() => {
     if (historyRange === 'all') return undefined;
     return { limit: parseInt(historyRange, 10) };
   }, [historyRange]);
 
   const { data: progressHistory, isLoading: isProgressLoading } = useGoalProgressHistory(
-    userId,
     goalId,
     progressQueryOptions
   );
-  const updateGoal = useUpdateGoal(userId, goalId);
-  const deleteGoal = useDeleteGoal(userId);
+  const updateGoal = useUpdateGoal(goalId);
+  const deleteGoal = useDeleteGoal();
 
   const insightTiles = useMemo(() => {
     if (!goal) return [];

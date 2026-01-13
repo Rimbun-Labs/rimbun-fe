@@ -81,7 +81,7 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
               )}
             >
               <Link to={isCompleted ? `/dashboard/${session.id}` : "/assessment"}>
-                {isCompleted ? "View Full Profile" : "Get Started"}
+                {isCompleted ? "View Full Profile" : "Take Assessment"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

@@ -6,25 +6,17 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-const buildUserParams = (userId: string) => {
-  const params = new URLSearchParams();
-  params.append('userId', userId);
-  return params;
-};
-
 export const goalFamiliesApi = {
-  listSummaries: async (userId: string): Promise<GoalFamilySummariesResponse> => {
-    const params = buildUserParams(userId);
+  listSummaries: async (): Promise<GoalFamilySummariesResponse> => {
     const response = await apiClient.get<ApiResponse<GoalFamilySummariesResponse>>(
-      `/goal-families?${params.toString()}`
+      `/goal-families`
     );
     return response.data.data;
   },
 
-  getBoard: async (userId: string, familyId: string): Promise<GoalFamilyBoardDto> => {
-    const params = buildUserParams(userId);
+  getBoard: async (familyId: string): Promise<GoalFamilyBoardDto> => {
     const response = await apiClient.get<ApiResponse<GoalFamilyBoardDto>>(
-      `/goal-families/${familyId}/board?${params.toString()}`
+      `/goal-families/${familyId}/board`
     );
     return response.data.data;
   },

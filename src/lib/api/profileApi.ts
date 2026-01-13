@@ -6,41 +6,100 @@ export interface UserProfile {
   displayName: string;
   email: string;
   profilePicture?: string;
+  authProviderId?: string;
+  authProviderType?: string;
+  isActive?: boolean;
+  role?: string;
+  lastLoginAt?: string;
+  // Enhanced financial profile (numeric values, not strings)
   financialProfile: {
-    riskProfile: string;
-    knowledgeLevel: string;
-    investmentHorizon: number;
-    riskCapacity: number;
+    riskProfile: number;        // 0-100 (changed from string)
+    knowledgeLevel: number;      // 0-100 (changed from string)
+    decisionStyleScore: number;  // 0-100 (new field)
     leverageAptitude: number;
+    riskCapacity: number;
+    investmentHorizon: number;
+    profile: string;            // e.g., "Balanced Investor" (new field)
+    overallConfidence: number;   // 0-1 (new field)
+    lastUpdated: string | null; // ISO date string (new field)
+  };
+  // New field: Latest assessment details
+  latestAssessment?: {
+    sessionId: string;
+    completedAt: string;        // ISO date string
+    profile: string;
+    scores: {
+      riskProfile: number;
+      knowledgeLevel: number;
+      decisionStyleScore: number;
+      leverageAptitude: number;
+      riskCapacity: number;
+      investmentHorizon: number;
+      personalityScore: number;
+      finalScore: number;
+    };
+    confidence: {
+      overallConfidence: number;
+      riskProfileConfidence: number;
+      knowledgeLevelConfidence: number;
+      leverageAptitudeConfidence: number;
+      decisionStyleConfidence: number;
+      personalityConfidence: number;
+      riskCapacityConfidence: number;
+      investmentProfileConfidence: number;
+      diversificationConfidence?: number;
+    };
+    directInputs?: {
+      age?: number;
+      financialGoal?: string;
+      monthlyIncome?: string;
+      totalSavings?: string;
+      targetAmount?: number;
+      monthlyInvestable?: number;
+      investmentHorizon?: number;
+      riskCapacity?: number;
+    };
+  };
+  // Enhanced assessment history
+  assessmentHistory: Array<{
+    sessionId: string;        // New field
+    id: string;
+    date: string;              // ISO date string
+    type: string;              // "ONBOARDING", "MONTHLY_CHECKUP", etc.
+    score: number;             // finalScore
+    profile: string;
+    riskProfile: number;       // New field (numeric)
+    knowledgeLevel: number;    // New field (numeric)
+  }>;
+  // New field: Summary stats
+  summary?: {
+    totalAssessments: number;
+    hasActiveProfile: boolean;
   };
   preferences: {
-    notificationSettings: {
+    notificationSettings?: {
       email: boolean;
       push: boolean;
       marketing: boolean;
     };
-    theme: 'light' | 'dark' | 'system';
-    language: string;
+    theme?: 'light' | 'dark' | 'system';
+    language?: string;
+    notifications?: boolean;
   };
   learningProgress: {
-    completedModules: number;
-    totalModules: number;
+    completedModules?: number;
+    totalModules?: number;
     currentModule?: string;
-    achievements: Array<{
+    achievements?: Array<{
       id: string;
       name: string;
       description: string;
       unlocked: boolean;
       unlockedAt?: string;
     }>;
+    completedAssessments?: number;  // New field from backend
+    lastAssessmentDate?: string | null;  // New field from backend
   };
-  assessmentHistory: Array<{
-    id: string;
-    date: string;
-    type: string;
-    score: number;
-    profile: string;
-  }>;
 }
 
 export const getProfile = async (userId: string): Promise<UserProfile> => {
@@ -68,27 +127,33 @@ export const getProfile = async (userId: string): Promise<UserProfile> => {
       displayName: '',
       email: '',
       financialProfile: {
-        riskProfile: 'UNKNOWN',
-        knowledgeLevel: 'BEGINNER',
-        investmentHorizon: 0,
+        riskProfile: 0,
+        knowledgeLevel: 0,
+        decisionStyleScore: 0,
+        leverageAptitude: 0,
         riskCapacity: 0,
-        leverageAptitude: 0
+        investmentHorizon: 0,
+        profile: 'Not Assessed',
+        overallConfidence: 0,
+        lastUpdated: null
       },
       preferences: {
-        notificationSettings: {
-          email: true,
-          push: true,
-          marketing: false
-        },
         theme: 'system',
-        language: 'en'
+        language: 'en',
+        notifications: true
       },
       learningProgress: {
         completedModules: 0,
         totalModules: 0,
+        completedAssessments: 0,
+        lastAssessmentDate: null,
         achievements: []
       },
-      assessmentHistory: []
+      assessmentHistory: [],
+      summary: {
+        totalAssessments: 0,
+        hasActiveProfile: false
+      }
     };
   }
 };

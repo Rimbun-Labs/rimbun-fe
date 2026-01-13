@@ -16,20 +16,19 @@ import {
   GoalFamilyMappingResponse,
 } from '@/lib/api/types/goals';
 
-export const useGoalsOverview = (userId: string, includeInactive = false) => {
+export const useGoalsOverview = (includeInactive = false) => {
   const queryClient = useQueryClient();
   const hasUpdatedRef = useRef<Set<string>>(new Set());
 
   const query = useQuery<UserGoalsResponse>({
-    queryKey: ['goals', 'overview', userId, includeInactive],
-    queryFn: () => goalsApi.listGoals(userId, includeInactive),
-    enabled: Boolean(userId),
+    queryKey: ['goals', 'overview', includeInactive],
+    queryFn: () => goalsApi.listGoals(includeInactive),
     staleTime: 1000 * 60 * 5,
   });
 
   // Automatically set assessment goals to Priority 1
   useEffect(() => {
-    if (!query.data?.goals || !userId) return;
+    if (!query.data?.goals) return;
 
     const assessmentGoalsNeedingUpdate = query.data.goals.filter(
       (goal) =>
@@ -48,12 +47,12 @@ export const useGoalsOverview = (userId: string, includeInactive = false) => {
       // Update all assessment goals to Priority 1
       Promise.all(
         assessmentGoalsNeedingUpdate.map((goal) =>
-          goalsApi.updateGoal(userId, goal.id, { priority: 1 })
+          goalsApi.updateGoal(goal.id, { priority: 1 })
         )
       )
         .then(() => {
           // Invalidate queries to refresh the data
-          queryClient.invalidateQueries({ queryKey: ['goals', 'overview', userId] });
+          queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
         })
         .catch((error) => {
           console.error('Failed to update assessment goal priorities:', error);
@@ -63,22 +62,21 @@ export const useGoalsOverview = (userId: string, includeInactive = false) => {
           });
         });
     }
-  }, [query.data?.goals, userId, queryClient]);
+  }, [query.data?.goals, queryClient]);
 
   return query;
 };
 
-export const useGoal = (userId: string, goalId?: string) => {
+export const useGoal = (goalId?: string) => {
   return useQuery<GoalWithInsightsDto>({
-    queryKey: ['goals', 'detail', userId, goalId],
-    queryFn: () => goalsApi.getGoal(userId, goalId!),
-    enabled: Boolean(userId && goalId),
+    queryKey: ['goals', 'detail', goalId],
+    queryFn: () => goalsApi.getGoal(goalId!),
+    enabled: Boolean(goalId),
     staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useGoalProgressHistory = (
-  userId: string,
   goalId?: string,
   options?: {
     startYear?: number;
@@ -89,23 +87,23 @@ export const useGoalProgressHistory = (
   }
 ) => {
   return useQuery<GoalProgressHistoryDto>({
-    queryKey: ['goals', 'progress', userId, goalId, options],
-    queryFn: () => goalsApi.getGoalProgressHistory(userId, goalId!, options),
-    enabled: Boolean(userId && goalId),
+    queryKey: ['goals', 'progress', goalId, options],
+    queryFn: () => goalsApi.getGoalProgressHistory(goalId!, options),
+    enabled: Boolean(goalId),
     staleTime: 1000 * 60 * 5,
   });
 };
 
-export const useCreateGoal = (userId: string) => {
+export const useCreateGoal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateGoalRequest) => goalsApi.createGoal(userId, payload),
+    mutationFn: (payload: CreateGoalRequest) => goalsApi.createGoal(payload),
     onSuccess: (goal) => {
       toast.success('Goal created successfully');
-      queryClient.invalidateQueries({ queryKey: ['goals', 'overview', userId] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
       queryClient.setQueryData<GoalWithInsightsDto>(
-        ['goals', 'detail', userId, goal.id],
+        ['goals', 'detail', goal.id],
         goal
       );
     },
@@ -115,17 +113,17 @@ export const useCreateGoal = (userId: string) => {
   });
 };
 
-export const useUpdateGoal = (userId: string, goalId?: string) => {
+export const useUpdateGoal = (goalId?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpdateGoalRequest) => goalsApi.updateGoal(userId, goalId!, payload),
+    mutationFn: (payload: UpdateGoalRequest) => goalsApi.updateGoal(goalId!, payload),
     onSuccess: (goal) => {
       toast.success('Goal updated successfully');
-      queryClient.invalidateQueries({ queryKey: ['goals', 'overview', userId] });
-      queryClient.invalidateQueries({ queryKey: ['goals', 'progress', userId, goalId] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'progress', goalId] });
       queryClient.setQueryData<GoalWithInsightsDto>(
-        ['goals', 'detail', userId, goal.id],
+        ['goals', 'detail', goal.id],
         goal
       );
     },
@@ -135,16 +133,16 @@ export const useUpdateGoal = (userId: string, goalId?: string) => {
   });
 };
 
-export const useDeleteGoal = (userId: string) => {
+export const useDeleteGoal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (goalId: string) => goalsApi.deleteGoal(userId, goalId),
+    mutationFn: (goalId: string) => goalsApi.deleteGoal(goalId),
     onSuccess: (_, goalId) => {
       toast.success('Goal deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['goals', 'overview', userId] });
-      queryClient.invalidateQueries({ queryKey: ['goals', 'progress', userId, goalId] });
-      queryClient.removeQueries({ queryKey: ['goals', 'detail', userId, goalId] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'progress', goalId] });
+      queryClient.removeQueries({ queryKey: ['goals', 'detail', goalId] });
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete goal');
@@ -152,27 +150,26 @@ export const useDeleteGoal = (userId: string) => {
   });
 };
 
-export const useGoalFamilySummaries = (userId: string) => {
+export const useGoalFamilySummaries = () => {
   return useQuery<GoalFamilySummariesResponse>({
-    queryKey: ['goal-families', 'summaries', userId],
-    queryFn: () => goalFamiliesApi.listSummaries(userId),
-    enabled: Boolean(userId),
+    queryKey: ['goal-families', 'summaries'],
+    queryFn: () => goalFamiliesApi.listSummaries(),
     staleTime: 1000 * 60 * 5,
   });
 };
 
-export const useGoalFamilyBoard = (userId: string, familyId?: string) => {
+export const useGoalFamilyBoard = (familyId?: string) => {
   return useQuery<GoalFamilyBoardDto>({
-    queryKey: ['goal-families', 'board', userId, familyId],
-    queryFn: () => goalFamiliesApi.getBoard(userId, familyId!),
-    enabled: Boolean(userId && familyId),
+    queryKey: ['goal-families', 'board', familyId],
+    queryFn: () => goalFamiliesApi.getBoard(familyId!),
+    enabled: Boolean(familyId),
     staleTime: 1000 * 60 * 2,
   });
 };
 
-export const useSimulateStrategy = (userId: string) => {
+export const useSimulateStrategy = () => {
   return useMutation<SimulateStrategyResponse, Error, SimulateStrategyRequest>({
-    mutationFn: (request) => goalsApi.simulateStrategy(userId, request),
+    mutationFn: (request) => goalsApi.simulateStrategy(request),
   });
 };
 

@@ -14,62 +14,49 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-const buildUserParams = (userId: string) => {
-  const params = new URLSearchParams();
-  params.append('userId', userId);
-  return params;
-};
-
 export const goalsApi = {
-  listGoals: async (userId: string, includeInactive = false): Promise<UserGoalsResponse> => {
-    const params = buildUserParams(userId);
+  listGoals: async (includeInactive = false): Promise<UserGoalsResponse> => {
+    const params = new URLSearchParams();
     if (includeInactive) {
       params.append('includeInactive', 'true');
     }
 
-    const response = await apiClient.get<ApiResponse<UserGoalsResponse>>(
-      `/goals?${params.toString()}`
-    );
+    const url = params.toString() ? `/goals?${params.toString()}` : '/goals';
+    const response = await apiClient.get<ApiResponse<UserGoalsResponse>>(url);
     return response.data.data;
   },
 
-  getGoal: async (userId: string, goalId: string): Promise<GoalWithInsightsDto> => {
-    const params = buildUserParams(userId);
+  getGoal: async (goalId: string): Promise<GoalWithInsightsDto> => {
     const response = await apiClient.get<ApiResponse<GoalWithInsightsDto>>(
-      `/goals/${goalId}?${params.toString()}`
+      `/goals/${goalId}`
     );
     return response.data.data;
   },
 
-  createGoal: async (userId: string, payload: CreateGoalRequest): Promise<GoalWithInsightsDto> => {
-    const params = buildUserParams(userId);
+  createGoal: async (payload: CreateGoalRequest): Promise<GoalWithInsightsDto> => {
     const response = await apiClient.post<ApiResponse<GoalWithInsightsDto>>(
-      `/goals?${params.toString()}`,
+      `/goals`,
       payload
     );
     return response.data.data;
   },
 
   updateGoal: async (
-    userId: string,
     goalId: string,
     payload: UpdateGoalRequest
   ): Promise<GoalWithInsightsDto> => {
-    const params = buildUserParams(userId);
     const response = await apiClient.put<ApiResponse<GoalWithInsightsDto>>(
-      `/goals/${goalId}?${params.toString()}`,
+      `/goals/${goalId}`,
       payload
     );
     return response.data.data;
   },
 
-  deleteGoal: async (userId: string, goalId: string): Promise<void> => {
-    const params = buildUserParams(userId);
-    await apiClient.delete(`/goals/${goalId}?${params.toString()}`);
+  deleteGoal: async (goalId: string): Promise<void> => {
+    await apiClient.delete(`/goals/${goalId}`);
   },
 
   getGoalProgressHistory: async (
-    userId: string,
     goalId: string,
     options?: {
       startYear?: number;
@@ -79,26 +66,23 @@ export const goalsApi = {
       limit?: number;
     }
   ): Promise<GoalProgressHistoryDto> => {
-    const params = buildUserParams(userId);
+    const params = new URLSearchParams();
     if (options?.startYear) params.append('startYear', options.startYear.toString());
     if (options?.startMonth) params.append('startMonth', options.startMonth.toString());
     if (options?.endYear) params.append('endYear', options.endYear.toString());
     if (options?.endMonth) params.append('endMonth', options.endMonth.toString());
     if (options?.limit) params.append('limit', options.limit.toString());
 
-    const response = await apiClient.get<ApiResponse<GoalProgressHistoryDto>>(
-      `/goals/${goalId}/progress?${params.toString()}`
-    );
+    const url = params.toString() ? `/goals/${goalId}/progress?${params.toString()}` : `/goals/${goalId}/progress`;
+    const response = await apiClient.get<ApiResponse<GoalProgressHistoryDto>>(url);
     return response.data.data;
   },
 
   simulateStrategy: async (
-    userId: string,
     request: SimulateStrategyRequest
   ): Promise<SimulateStrategyResponse> => {
-    const params = buildUserParams(userId);
     const response = await apiClient.post<ApiResponse<SimulateStrategyResponse>>(
-      `/goals/simulate-strategy?${params.toString()}`,
+      `/goals/simulate-strategy`,
       request
     );
     return response.data.data;

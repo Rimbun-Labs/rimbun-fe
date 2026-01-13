@@ -37,6 +37,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { CashFlowProjectionsDto } from '@/lib/api/cashFlowApi';
 import { useFormatters } from '@/hooks/useFormatters';
 import { useTheme } from '@/hooks/useTheme';
+import { PageHeader, PageContainer } from '@/components/layout';
+import { SPACING } from '@/lib/constants/spacing';
 
 // Spending components
 import SpendingOverviewCard from '@/components/spending/SpendingOverviewCard';
@@ -76,28 +78,28 @@ const FinancialPlanningPage: React.FC = () => {
     data: spendingData, 
     isLoading: spendingLoading, 
     error: spendingError 
-  } = useSpendingData(userId || '');
+  } = useSpendingData();
 
   const { 
     data: categories, 
     isLoading: categoriesLoading 
-  } = useSpendingCategories(userId || '');
+  } = useSpendingCategories();
 
   const { 
     data: recommendations, 
     isLoading: recommendationsLoading 
-  } = useSpendingRecommendations(userId || '');
+  } = useSpendingRecommendations();
 
   // Fetch goals data
   const { 
     data: goalsData, 
     isLoading: goalsLoading 
-  } = useGoalsOverview(userId || '', false);
+  } = useGoalsOverview(false);
 
   // Fetch spending history
   const { 
     data: historyData 
-  } = useSpendingHistory(userId || '', { limit: 12 });
+  } = useSpendingHistory({ limit: 12 });
 
   // Fetch cash flow data (only when needed)
   const shouldLoadCashFlow = activeTab === 'projections' || activeTab === 'planning';
@@ -105,9 +107,9 @@ const FinancialPlanningPage: React.FC = () => {
     data: cashFlowData, 
     isLoading: cashFlowLoading, 
     error: cashFlowError 
-  } = useCashFlowProjections(userId || '');
-  
-  const refreshCashFlowMutation = useRefreshCashFlowProjections(userId || '');
+  } = useCashFlowProjections();
+
+  const refreshCashFlowMutation = useRefreshCashFlowProjections();
 
   const { formatCurrency, formatPercentage } = useFormatters();
   const { theme } = useTheme();
@@ -262,34 +264,24 @@ const FinancialPlanningPage: React.FC = () => {
   const scenarios = cashFlowProjections?.scenarios;
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-      <div className="space-y-8">
-        {/* Page Header */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <DollarSign className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Financial Planning</h1>
-                <p className="text-muted-foreground text-lg">
-                  Manage your spending and view long-term projections
-                </p>
-              </div>
-            </div>
-            {(activeTab === 'projections' || activeTab === 'planning') && cashFlowData && (
-              <Button 
-                variant="outline" 
-                onClick={handleRefreshCashFlow}
-                disabled={refreshCashFlowMutation.isPending}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshCashFlowMutation.isPending ? 'animate-spin' : ''}`} />
-                Refresh Projections
-              </Button>
-            )}
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader
+        icon={DollarSign}
+        title="Financial Planning"
+        description="Manage your spending and view long-term projections"
+        action={
+          (activeTab === 'projections' || activeTab === 'planning') && cashFlowData ? (
+            <Button 
+              variant="outline" 
+              onClick={handleRefreshCashFlow}
+              disabled={refreshCashFlowMutation.isPending}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshCashFlowMutation.isPending ? 'animate-spin' : ''}`} />
+              Refresh Projections
+            </Button>
+          ) : undefined
+        }
+      />
 
         {/* Top Overview Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -403,25 +395,60 @@ const FinancialPlanningPage: React.FC = () => {
             {/* History Chart */}
             <SpendingHistory userId={userId || ''} />
 
-            {/* Main Content with Sidebar */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content Area (2/3 width) */}
-              <div className="lg:col-span-2 space-y-6">
-                <Tabs value={spendingSubTab} onValueChange={setSpendingSubTab} className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="scenario" className="flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      Scenario
-                    </TabsTrigger>
-                    <TabsTrigger value="input" className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4" />
-                      Input
-                    </TabsTrigger>
-                    <TabsTrigger value="categories" className="flex items-center gap-2">
-                      <PieChart className="h-4 w-4" />
-                      Categories
-                    </TabsTrigger>
-                  </TabsList>
+            {/* Emergency Fund and Recommendations - Integrated into main flow */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {spendingData && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Emergency Fund
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EmergencyFundAnalysis 
+                      data={spendingData}
+                      loading={spendingLoading}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {recommendations && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5" />
+                      Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SpendingRecommendations 
+                      recommendations={recommendations}
+                      loading={recommendationsLoading}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Main Content Area - Full Width */}
+            <div className="space-y-6">
+              <Tabs value={spendingSubTab} onValueChange={setSpendingSubTab} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="scenario" className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Scenario
+                  </TabsTrigger>
+                  <TabsTrigger value="input" className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Input
+                  </TabsTrigger>
+                  <TabsTrigger value="categories" className="flex items-center gap-2">
+                    <PieChart className="h-4 w-4" />
+                    Categories
+                  </TabsTrigger>
+                </TabsList>
 
                   {/* Scenario Tab */}
                   <TabsContent value="scenario" className="space-y-6">
@@ -524,44 +551,6 @@ const FinancialPlanningPage: React.FC = () => {
                   </TabsContent>
                 </Tabs>
               </div>
-
-              {/* Right Sidebar (1/3 width) */}
-              <div className="space-y-6">
-                {spendingData && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <Shield className="h-5 w-5" />
-                        Emergency Fund
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <EmergencyFundAnalysis 
-                        data={spendingData}
-                        loading={spendingLoading}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-
-                {recommendations && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <Lightbulb className="h-5 w-5" />
-                        Recommendations
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <SpendingRecommendations 
-                        recommendations={recommendations}
-                        loading={recommendationsLoading}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
           </TabsContent>
 
           {/* Tab 2: Projections (Cash Flow) */}
@@ -1121,8 +1110,7 @@ const FinancialPlanningPage: React.FC = () => {
             )}
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </PageContainer>
   );
 };
 

@@ -5,6 +5,7 @@ import { DashboardPreview } from "@/components/blocks/dashboard-preview";
 import { CTASection } from "@/components/blocks/cta";
 import { Footer } from "@/components/blocks/footer";
 import { FloatingShapes } from "@/components/blocks/ui";
+import { SamplePlansSection } from "@/components/blocks/sample-plans/SamplePlansSection";
 
 const Index = () => {
   return (
@@ -17,6 +18,9 @@ const Index = () => {
       
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Sample Plans Section - Prominent placement right after Hero */}
+      <SamplePlansSection />
 
       {/* Features Section */}
       <FeaturesSection />

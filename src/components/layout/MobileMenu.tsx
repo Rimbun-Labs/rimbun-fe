@@ -19,7 +19,9 @@ import {
   TrendingUp,
   LineChart,
   Target,
-  Home
+  Home,
+  Building2,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -150,6 +152,41 @@ const MobileMenu: React.FC = () => {
             </Link>
           </div>
 
+          {/* Explorer Section */}
+          <div className="space-y-2">
+            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+              Explorer
+            </h3>
+            <Link
+              to="/banking-products"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/banking-products') 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <Building2 className="h-4 w-4" />
+              Banking
+            </Link>
+            <Link
+              to={hasCompletedAssessment ? `/investment-explorer/${session.id}` : '/assessment'}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive(`/investment-explorer/${session?.id}`) 
+                  ? "bg-accent text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive",
+                !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
+              )}
+              onClick={closeMobileMenu}
+              title={!hasCompletedAssessment ? "Complete your assessment to access the Investment Explorer" : ""}
+            >
+              <Compass className="h-4 w-4" />
+              Investment
+            </Link>
+          </div>
+
           {/* Learning Section */}
           <div className="space-y-2">
             <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
@@ -180,21 +217,6 @@ const MobileMenu: React.FC = () => {
             >
               <BookOpen className="h-4 w-4" />
               Learning Paths
-            </Link>
-            <Link
-              to={hasCompletedAssessment ? `/investment-explorer/${session.id}` : '/assessment'}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive(`/investment-explorer/${session?.id}`) 
-                  ? "bg-accent text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive",
-                !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
-              )}
-              onClick={closeMobileMenu}
-              title={!hasCompletedAssessment ? "Complete your assessment to access the Investment Explorer" : ""}
-            >
-              <Compass className="h-4 w-4" />
-              Investment Explorer
             </Link>
           </div>
 

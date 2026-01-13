@@ -14,7 +14,8 @@ import {
   Target,
   ChevronDown,
   ChevronUp,
-  MoreHorizontal
+  MoreHorizontal,
+  Building2
 } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
 import { useBankPermission } from '@/hooks/useBankPermission';
@@ -47,6 +48,7 @@ const AppSidebar: React.FC = () => {
   
   // State for collapsible sections
   const [isPlanningOpen, setIsPlanningOpen] = useState(false);
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
   const [isLearningOpen, setIsLearningOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   
@@ -57,10 +59,14 @@ const AppSidebar: React.FC = () => {
                              location.pathname.includes('/financial-planning');
     setIsPlanningOpen(isOnPlanningPage);
     
-    // Auto-expand Learning section if on learning pages
-    const isOnLearningPage = location.pathname.includes('/learning') || 
-                            location.pathname.includes('/learning-path') ||
+    // Auto-expand Explorer section if on banking products or investment explorer pages
+    const isOnExplorerPage = location.pathname.includes('/banking-products') ||
                             location.pathname.includes('/investment-explorer');
+    setIsExplorerOpen(isOnExplorerPage);
+    
+    // Auto-expand Learning section if on learning pages (but NOT investment-explorer)
+    const isOnLearningPage = location.pathname.includes('/learning') || 
+                            location.pathname.includes('/learning-path');
     setIsLearningOpen(isOnLearningPage);
   }, [location.pathname]);
 
@@ -166,6 +172,45 @@ const AppSidebar: React.FC = () => {
           </Collapsible>
         </div>
 
+        {/* Explorer Section - Collapsible */}
+        <div className="space-y-1">
+          <div className="px-3 py-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Explorer
+            </h3>
+          </div>
+          <Collapsible open={isExplorerOpen} onOpenChange={setIsExplorerOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
+              <div className="flex items-center gap-3">
+                <Compass className="h-4 w-4" />
+                <span>Explorer</span>
+              </div>
+              {isExplorerOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1 mt-1">
+              <NavLink
+                to="/banking-products"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
+                    isActive 
+                      ? "bg-accent text-accent-foreground border-primary" 
+                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                  )
+                }
+              >
+                <Building2 className="h-4 w-4" />
+                Banking
+              </NavLink>
+              {renderInvestmentExplorerLink()}
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+
         {/* Learning Section - Collapsible */}
         <div className="space-y-1">
           <div className="px-3 py-2">
@@ -214,7 +259,6 @@ const AppSidebar: React.FC = () => {
                 <BookOpen className="h-4 w-4" />
                 Learning Paths
               </NavLink>
-              {renderInvestmentExplorerLink()}
             </CollapsibleContent>
           </Collapsible>
         </div>

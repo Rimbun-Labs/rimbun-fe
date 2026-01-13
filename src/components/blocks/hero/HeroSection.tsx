@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Loader2, Sparkles, ArrowRight, TrendingUp, Brain, Target, CheckCircle } from "lucide-react";
+import { Loader2, Sparkles, ArrowRight, TrendingUp, Brain, Target, CheckCircle, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -13,7 +13,7 @@ const stages = [
   {
     id: 1,
     title: "Learn Through Scenarios",
-    description: "Complete our interactive assessment with real-world investment scenarios.",
+    description: "Complete our interactive assessment with real-world financial scenarios covering investments, banking, and financial planning.",
     icon: Brain,
     color: "blue" as const
   },
@@ -26,8 +26,8 @@ const stages = [
   },
   {
     id: 3,
-    title: "Build Investment Confidence",
-    description: "Track your progress and apply knowledge to real financial decisions.",
+    title: "Build Financial Confidence",
+    description: "Track your progress and apply knowledge to real financial decisions about investments, banking, and planning.",
     icon: Target,
     color: "purple" as const
   }
@@ -64,7 +64,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 backdrop-blur-sm"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>Interactive Investment Education</span>
+                <span>Interactive Financial Education</span>
               </motion.div>
 
               {/* Main Heading */}
@@ -75,7 +75,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.3, duration: 0.8 }}
                   className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl/none text-foreground"
                 >
-                  Build Investment Confidence Through Learning
+                  Build Financial Confidence Through Learning
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 30 }}
@@ -83,7 +83,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.4, duration: 0.8 }}
                   className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed"
                 >
-                  Take our interactive assessment to understand your investment style, then learn through scenarios tailored to your goals and knowledge level.
+                  Take our interactive assessment to understand your financial profile, then get personalized recommendations for investments, banking products, and financial planning tailored to your goals.
                 </motion.p>
               </div>
             </motion.div>
@@ -94,6 +94,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
               className="space-y-6"
+              id="how-it-works"
             >
               <h3 className="text-lg font-semibold text-foreground">How it works:</h3>
               <div className="space-y-4">
@@ -155,7 +156,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="flex flex-col gap-4 min-[400px]:flex-row"
             >
-              {/* Primary CTA - Get Started */}
+              {/* Primary CTA - Take Your Assessment */}
               <Button 
                 asChild 
                 size="lg"
@@ -163,7 +164,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               >
                 <Link to="/signup">
                   <span className="relative z-10 flex items-center">
-                    Get Started
+                    Take Your Assessment
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
@@ -178,12 +179,13 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               >
                 <Link to="/login">
                   <span className="flex items-center">
-                    Sign In
+                    Already have an account? Sign In
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </Button>
             </motion.div>
+
           </div>
         </div>
       </div>

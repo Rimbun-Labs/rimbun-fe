@@ -17,7 +17,7 @@ const benefits = [
   {
     icon: Shield,
     title: "Interactive Scenarios",
-    description: "Learn investment concepts through real-world examples"
+    description: "Learn financial concepts through real-world examples"
   },
   {
     icon: Users,
@@ -42,10 +42,10 @@ export const CTASection = ({ className }: CTASectionProps) => {
             {/* Header */}
             <div className="space-y-6">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl text-foreground">
-                Ready to Build Your Investment Confidence?
+                Ready to Build Your Financial Confidence?
               </h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl leading-relaxed">
-                Join thousands of learners who are developing the knowledge and skills to make informed investment decisions through personalized education.
+                Develop the knowledge and skills to make informed financial decisions about investments, banking products, and financial planning through personalized education tailored to your goals.
               </p>
             </div>
 
@@ -91,7 +91,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
               >
                 <Link to="/signup">
                   <span className="flex items-center">
-                    Start Your Learning Journey
+                    Begin Your Assessment
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
@@ -105,7 +105,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
               >
                 <Link to="/login">
                   <span className="flex items-center">
-                    Sign In to Continue
+                    Sign In to Your Dashboard
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
@@ -120,9 +120,6 @@ export const CTASection = ({ className }: CTASectionProps) => {
               transition={{ duration: 0.6, delay: 0.6 }}
               viewport={{ once: true }}
             >
-              <p className="text-sm text-muted-foreground mb-6">
-                Trusted by investors worldwide
-              </p>
               <div className="flex flex-wrap justify-center items-center gap-8 text-muted-foreground">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -130,7 +127,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-sm">Free assessment</span>
+                  <span className="text-sm">Free 15-minute assessment</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />

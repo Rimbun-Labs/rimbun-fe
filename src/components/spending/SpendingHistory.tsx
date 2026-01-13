@@ -20,8 +20,8 @@ const SpendingHistory: React.FC<SpendingHistoryProps> = ({ userId, limit, scenar
   const [viewMode, setViewMode] = useState<'history' | 'trends'>('history');
   const [selectedPeriod, setSelectedPeriod] = useState<'3m' | '6m' | '12m'>('6m');
   
-  const { data, isLoading, error } = useSpendingHistory(userId, { limit });
-  const { data: trendsData, isLoading: trendsLoading, error: trendsError } = useSpendingTrends(userId, selectedPeriod);
+  const { data, isLoading, error } = useSpendingHistory({ limit });
+  const { data: trendsData, isLoading: trendsLoading, error: trendsError } = useSpendingTrends(selectedPeriod);
   
   const { formatCurrency } = useFormatters();
 

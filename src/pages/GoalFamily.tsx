@@ -30,10 +30,10 @@ const GoalFamilyPage = () => {
     data: familySummaries,
     isLoading: isSummaryLoading,
     isError: isSummaryError,
-  } = useGoalFamilySummaries(userId);
+  } = useGoalFamilySummaries();
 
-  const { data: goalsData } = useGoalsOverview(userId, true);
-  const createGoal = useCreateGoal(userId);
+  const { data: goalsData } = useGoalsOverview(true);
+  const createGoal = useCreateGoal();
 
   const matchingFamily = useMemo(() => {
     return familySummaries?.families?.find((family) => family.slug === familySlug);
@@ -43,7 +43,7 @@ const GoalFamilyPage = () => {
   const {
     data: familyBoard,
     isLoading: isBoardLoading,
-  } = useGoalFamilyBoard(userId, familyId);
+  } = useGoalFamilyBoard(familyId);
 
   const isLoading = isSummaryLoading || (Boolean(familyId) && isBoardLoading);
 
