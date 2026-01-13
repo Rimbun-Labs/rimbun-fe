@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { UserAnswer, Question } from '@/lib/api/types/assessment';
 import { useAssessmentProgress } from '@/hooks/useAssessmentProgress';
@@ -24,6 +24,7 @@ import { storageUtils } from '@/lib/storage/storageUtils';
 
 const Assessment: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isComplete, setIsComplete] = useState(false);
   const [showStartPage, setShowStartPage] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
@@ -273,9 +274,13 @@ const Assessment: React.FC = () => {
     if (results && sessionId && hasNewlyCompletedAssessment) {
       // Results are available, assessment is complete - navigate to dashboard
       console.log('✅ Assessment: Results loaded, navigating to dashboard');
+      
+      // Invalidate banking recommendations so they refetch with new assessment data
+      queryClient.invalidateQueries({ queryKey: ['banking', 'recommendations'] });
+      
       navigate(`/dashboard/${sessionId}`);
     }
-  }, [results, sessionId, hasNewlyCompletedAssessment, navigate]);
+  }, [results, sessionId, hasNewlyCompletedAssessment, navigate, queryClient]);
 
   // Handle errors in useEffect
   useEffect(() => {

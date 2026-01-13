@@ -8,6 +8,7 @@ import {
 } from '@/lib/utils/bankingTransformers';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSession } from '@/contexts/SessionContext';
 import type {
   BankingProduct,
   ProductComparison,
@@ -17,6 +18,7 @@ import type {
 /**
  * Get banking product recommendations
  * Backend extracts user ID from Authorization token
+ * Only enabled when user has completed assessment
  */
 export function useBankingRecommendations(filters?: {
   goalId?: string;
@@ -25,6 +27,7 @@ export function useBankingRecommendations(filters?: {
   includeIneligible?: boolean;
 }) {
   const { user } = useAuth();
+  const { session } = useSession();
 
   return useQuery({
     queryKey: ['banking', 'recommendations', user?.uid, filters],
@@ -35,7 +38,7 @@ export function useBankingRecommendations(filters?: {
       const response = await bankingApi.getRecommendations(filters);
       return transformRecommendationsResponse(response);
     },
-    enabled: !!user,
+    enabled: !!user && !!session?.isCompleted, // Only fetch when assessment is completed
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
