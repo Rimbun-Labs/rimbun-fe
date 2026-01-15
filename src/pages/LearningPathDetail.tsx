@@ -48,7 +48,6 @@ const LearningPathDetail: React.FC = () => {
   const [showMetrics, setShowMetrics] = useState(false);
   const [bookmarkedSections, setBookmarkedSections] = useState<number[]>([]);
   const [lastCompletedSection, setLastCompletedSection] = useState<number | null>(null);
-  const [showCelebration, setShowCelebration] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
@@ -94,14 +93,6 @@ const LearningPathDetail: React.FC = () => {
     }
   }, []);
 
-  // Handle completion celebration
-  useEffect(() => {
-    if (lastCompletedSection !== null) {
-      setShowCelebration(true);
-      const timer = setTimeout(() => setShowCelebration(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [lastCompletedSection]);
 
   // Early return if asset class is invalid
   if (!assetClass || !learningPathsContent[assetClass]) {
@@ -952,23 +943,6 @@ const LearningPathDetail: React.FC = () => {
           </ScrollArea>
         </SheetContent>
       </Sheet>
-
-      {/* Celebration Animation */}
-      <AnimatePresence>
-        {showCelebration && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: -20 }}
-            transition={{ duration: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
-          >
-            <div className="text-6xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent drop-shadow-lg">
-              🎉
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Quiz Dialog */}
       <Dialog open={showQuiz} onOpenChange={setShowQuiz}>

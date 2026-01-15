@@ -100,6 +100,214 @@ export function formatProductFeatures(attributes?: BankingProductRecommendation[
     if (typeof value === 'number') return `${value}%`;
     return String(value);
   };
+
+  // NEW: Extract from nested fees object (catalog items have nested structure)
+  if (attributes.fees && typeof attributes.fees === 'object' && !Array.isArray(attributes.fees)) {
+    const fees = attributes.fees as any;
+    // Annual fee from nested fees
+    if (fees.annual_fee !== undefined && fees.annual_fee !== null) {
+      const fee = formatCurrency(fees.annual_fee);
+      features.annualFee = fee === 'No fee' ? 'No annual fee' : fee;
+    }
+    // Card replacement fee
+    if (fees.card_replacement_fee !== undefined && fees.card_replacement_fee !== null) {
+      features.cardReplacementFee = formatCurrency(fees.card_replacement_fee);
+    }
+    // Card replacement fee for faulty cards
+    if (fees.card_replacement_fee_faulty !== undefined && fees.card_replacement_fee_faulty !== null) {
+      features.cardReplacementFeeFaulty = formatCurrency(fees.card_replacement_fee_faulty);
+    }
+    // Card replacement fee for lost cards
+    if (fees.card_replacement_fee_lost !== undefined && fees.card_replacement_fee_lost !== null) {
+      features.cardReplacementFee = formatCurrency(fees.card_replacement_fee_lost);
+    }
+    // PIN replacement fee
+    if (fees.pin_replacement_fee !== undefined && fees.pin_replacement_fee !== null) {
+      features.pinReplacementFee = formatCurrency(fees.pin_replacement_fee);
+    }
+    // Foreign transaction fee
+    if (fees.foreign_transaction_fee !== undefined && fees.foreign_transaction_fee !== null) {
+      if (fees.foreign_transaction_fee_type === 'percentage') {
+        features.foreignTransactionFee = formatPercentage(fees.foreign_transaction_fee);
+      } else {
+        features.foreignTransactionFee = formatCurrency(fees.foreign_transaction_fee);
+      }
+    }
+    // ATM withdrawal fees
+    if (fees.atm_withdrawal_own_bank !== undefined && fees.atm_withdrawal_own_bank !== null) {
+      features.atmWithdrawalOwnBank = formatCurrency(fees.atm_withdrawal_own_bank);
+    }
+    if (fees.atm_withdrawal_other_local !== undefined && fees.atm_withdrawal_other_local !== null) {
+      features.atmWithdrawalOtherLocal = formatCurrency(fees.atm_withdrawal_other_local);
+    }
+    if (fees.atm_withdrawal_international !== undefined && fees.atm_withdrawal_international !== null) {
+      features.atmWithdrawalInternational = formatCurrency(fees.atm_withdrawal_international);
+    }
+    // Dispute handling fee
+    if (fees.dispute_handling_fee !== undefined && fees.dispute_handling_fee !== null) {
+      features.disputeHandlingFee = formatCurrency(fees.dispute_handling_fee);
+    }
+    // Bill payment fee
+    if (fees.bill_payment_fee !== undefined && fees.bill_payment_fee !== null) {
+      features.billPaymentFee = formatCurrency(fees.bill_payment_fee);
+    }
+    // P2P transfer fee
+    if (fees.p2p_transfer_fee_vcard !== undefined && fees.p2p_transfer_fee_vcard !== null) {
+      features.p2pTransferFeeVcard = formatCurrency(fees.p2p_transfer_fee_vcard);
+    }
+    // ATM cardless withdrawal fee
+    if (fees.atm_cardless_withdrawal_fee !== undefined && fees.atm_cardless_withdrawal_fee !== null) {
+      features.atmCardlessWithdrawalFee = formatCurrency(fees.atm_cardless_withdrawal_fee);
+    }
+    // Sales draft retrieval fee
+    if (fees.sales_draft_retrieval_fee !== undefined && fees.sales_draft_retrieval_fee !== null) {
+      features.salesDraftRetrievalFee = formatCurrency(fees.sales_draft_retrieval_fee);
+    }
+    // Non-physical transfer fee
+    if (fees.non_physical_transfer_fee !== undefined && fees.non_physical_transfer_fee !== null) {
+      features.nonPhysicalTransferFee = formatCurrency(fees.non_physical_transfer_fee);
+    }
+  }
+
+  // NEW: Extract from nested limits object
+  if (attributes.limits && typeof attributes.limits === 'object' && !Array.isArray(attributes.limits)) {
+    const limits = attributes.limits as any;
+    // Daily ATM withdrawal limit
+    if (limits.daily_atm_withdrawal_limit !== undefined && limits.daily_atm_withdrawal_limit !== null) {
+      features.dailyAtmLimit = formatCurrency(limits.daily_atm_withdrawal_limit);
+    }
+    // Daily purchase limit
+    if (limits.daily_purchase_limit !== undefined && limits.daily_purchase_limit !== null) {
+      features.dailyPurchaseLimit = formatCurrency(limits.daily_purchase_limit);
+    }
+    // Daily purchase limit default
+    if (limits.daily_purchase_limit_default !== undefined && limits.daily_purchase_limit_default !== null && !features.dailyPurchaseLimit) {
+      features.dailyPurchaseLimit = formatCurrency(limits.daily_purchase_limit_default);
+    }
+    // Contactless transaction limit
+    if (limits.contactless_transaction_limit !== undefined && limits.contactless_transaction_limit !== null) {
+      features.contactlessLimit = formatCurrency(limits.contactless_transaction_limit);
+    }
+    // Daily cardless withdrawal
+    if (limits.daily_atm_cardless_withdrawal !== undefined && limits.daily_atm_cardless_withdrawal !== null) {
+      features.dailyCardlessWithdrawal = formatCurrency(limits.daily_atm_cardless_withdrawal);
+    }
+    // Daily bill payment limit
+    if (limits.daily_bill_payment_limit !== undefined && limits.daily_bill_payment_limit !== null) {
+      features.dailyBillPaymentLimit = formatCurrency(limits.daily_bill_payment_limit);
+    }
+    // Daily topup limit
+    if (limits.daily_topup_limit !== undefined && limits.daily_topup_limit !== null) {
+      features.dailyTopupLimit = formatCurrency(limits.daily_topup_limit);
+    }
+    // Daily P2P limit
+    if (limits.daily_p2p_transfer_limit !== undefined && limits.daily_p2p_transfer_limit !== null) {
+      features.dailyP2pLimit = formatCurrency(limits.daily_p2p_transfer_limit);
+    }
+    // Hari Raya P2P limit
+    if (limits.hari_raya_p2p_limit !== undefined && limits.hari_raya_p2p_limit !== null) {
+      features.hariRayaP2pLimit = formatCurrency(limits.hari_raya_p2p_limit);
+    }
+    // Minimum transaction
+    if (limits.minimum_transaction !== undefined && limits.minimum_transaction !== null) {
+      features.minimumTransaction = formatCurrency(limits.minimum_transaction);
+    }
+  }
+
+  // NEW: Extract from nested features object
+  if (attributes.features && typeof attributes.features === 'object' && !Array.isArray(attributes.features)) {
+    const nestedFeatures = attributes.features as any;
+    // Chip enabled
+    if (nestedFeatures.chip_enabled !== undefined) {
+      features.chipEnabled = nestedFeatures.chip_enabled;
+    }
+    // Online shopping
+    if (nestedFeatures.online_shopping !== undefined) {
+      features.onlineShopping = nestedFeatures.online_shopping;
+    }
+    // Rewards program
+    if (nestedFeatures.rewards_program !== undefined) {
+      features.rewardsProgram = nestedFeatures.rewards_program;
+    }
+    // Rewards rate
+    if (nestedFeatures.rewards_rate && !features.rewards) {
+      features.rewards = capitalizeElite(nestedFeatures.rewards_rate);
+    }
+    // Rewards note
+    if (nestedFeatures.rewards_note && !features.rewards) {
+      features.rewards = capitalizeElite(nestedFeatures.rewards_note);
+    }
+    // Mobile wallet compatible
+    if (nestedFeatures.mobile_wallet_compatible && Array.isArray(nestedFeatures.mobile_wallet_compatible)) {
+      features.mobileWalletCompatible = nestedFeatures.mobile_wallet_compatible;
+    }
+    // Premium benefits
+    if (nestedFeatures.premium_benefits && Array.isArray(nestedFeatures.premium_benefits)) {
+      features.premiumBenefits = nestedFeatures.premium_benefits;
+    }
+    // Travel insurance / Takaful
+    if (nestedFeatures.insurance_coverage?.travel_takaful) {
+      features.travelInsurance = `BND ${nestedFeatures.insurance_coverage.travel_takaful.toLocaleString()}`;
+    }
+    // Lounge access
+    if (nestedFeatures.lounge_access) {
+      const lounge = nestedFeatures.lounge_access;
+      if (typeof lounge === 'object' && lounge.network) {
+        const fee = lounge.fee_per_visit ? formatCurrency(lounge.fee_per_visit) : '';
+        features.loungeAccess = `${lounge.network}${fee ? ` (${fee} per visit)` : ''}`;
+      } else if (typeof lounge === 'string') {
+        features.loungeAccess = lounge;
+      }
+    }
+    // Contactless payment
+    if (nestedFeatures.contactless_payment !== undefined) {
+      features.contactlessPayment = nestedFeatures.contactless_payment;
+    }
+    // Global acceptance
+    if (nestedFeatures.global_acceptance !== undefined) {
+      features.globalAcceptance = nestedFeatures.global_acceptance;
+    }
+    // ATM access networks
+    if (nestedFeatures.atm_access_networks && Array.isArray(nestedFeatures.atm_access_networks)) {
+      features.atmAccessNetworks = nestedFeatures.atm_access_networks;
+    }
+    // Digital banking
+    if (nestedFeatures.digital_banking && Array.isArray(nestedFeatures.digital_banking)) {
+      features.digitalBanking = nestedFeatures.digital_banking;
+    }
+    // P2P transfers
+    if (nestedFeatures.p2p_transfers && Array.isArray(nestedFeatures.p2p_transfers)) {
+      features.p2pTransfers = nestedFeatures.p2p_transfers;
+    }
+    // Topup services
+    if (nestedFeatures.topup_services && Array.isArray(nestedFeatures.topup_services)) {
+      features.topupServices = nestedFeatures.topup_services;
+    }
+    // Special offers
+    if (nestedFeatures.special_offers && Array.isArray(nestedFeatures.special_offers)) {
+      features.specialOffers = nestedFeatures.special_offers;
+    }
+    // Family cards
+    if (nestedFeatures.family_cards !== undefined) {
+      features.familyCards = nestedFeatures.family_cards;
+    }
+    // Card format (for virtual cards)
+    if (nestedFeatures.card_format) {
+      features.cardFormat = nestedFeatures.card_format;
+    }
+    // Bill payment
+    if (nestedFeatures.bill_payment !== undefined) {
+      features.billPayment = nestedFeatures.bill_payment;
+    }
+    // ATM cardless withdrawal
+    if (nestedFeatures.atm_cardless_withdrawal !== undefined) {
+      features.atmCardlessWithdrawal = nestedFeatures.atm_cardless_withdrawal;
+    }
+    // Shariah concept
+    if (nestedFeatures.shariah_concept) {
+      features.shariahConcept = nestedFeatures.shariah_concept;
+    }
+  }
   
   // Interest Rates - check numeric first, then string variants
   if (attributes.interestRate !== undefined && attributes.interestRate !== null) {
@@ -115,10 +323,10 @@ export function formatProductFeatures(attributes?: BankingProductRecommendation[
     features.apy = String(attributes.apyStr);
   }
   
-  // Annual Fee - check string variant first (has complex text), then numeric
-  if (attributes.annualFeeStr) {
+  // Annual Fee - check string variant first (has complex text), then numeric, then nested fees
+  if (attributes.annualFeeStr && !features.annualFee) {
     features.annualFee = capitalizeElite(attributes.annualFeeStr);
-  } else if (attributes.annualFee !== undefined && attributes.annualFee !== null) {
+  } else if (attributes.annualFee !== undefined && attributes.annualFee !== null && !features.annualFee) {
     const fee = formatCurrency(attributes.annualFee);
     features.annualFee = fee === 'No fee' ? 'No annual fee' : fee;
   }
@@ -266,34 +474,34 @@ export function formatProductFeatures(attributes?: BankingProductRecommendation[
     features.cardInfo = capitalizeElite(attributes.cardInfo);
   }
   
-  // Fees - handle numeric values
-  if (attributes.cardReplacementFee !== undefined && attributes.cardReplacementFee !== null) {
+  // Fees - handle numeric values (only if not already set from nested fees)
+  if (attributes.cardReplacementFee !== undefined && attributes.cardReplacementFee !== null && !features.cardReplacementFee) {
     features.cardReplacementFee = formatCurrency(attributes.cardReplacementFee);
-  } else if (attributes.cardReplacementFee) {
+  } else if (attributes.cardReplacementFee && !features.cardReplacementFee) {
     features.cardReplacementFee = typeof attributes.cardReplacementFee === 'string' ? attributes.cardReplacementFee : String(attributes.cardReplacementFee);
   }
   
-  if (attributes.cardReplacementFeeFaulty !== undefined && attributes.cardReplacementFeeFaulty !== null) {
+  if (attributes.cardReplacementFeeFaulty !== undefined && attributes.cardReplacementFeeFaulty !== null && !features.cardReplacementFeeFaulty) {
     features.cardReplacementFeeFaulty = formatCurrency(attributes.cardReplacementFeeFaulty);
-  } else if (attributes.cardReplacementFeeFaulty) {
+  } else if (attributes.cardReplacementFeeFaulty && !features.cardReplacementFeeFaulty) {
     features.cardReplacementFeeFaulty = typeof attributes.cardReplacementFeeFaulty === 'string' ? attributes.cardReplacementFeeFaulty : String(attributes.cardReplacementFeeFaulty);
   }
   
-  if (attributes.pinReplacementFee !== undefined && attributes.pinReplacementFee !== null) {
+  if (attributes.pinReplacementFee !== undefined && attributes.pinReplacementFee !== null && !features.pinReplacementFee) {
     features.pinReplacementFee = formatCurrency(attributes.pinReplacementFee);
-  } else if (attributes.pinReplacementFee) {
+  } else if (attributes.pinReplacementFee && !features.pinReplacementFee) {
     features.pinReplacementFee = typeof attributes.pinReplacementFee === 'string' ? attributes.pinReplacementFee : String(attributes.pinReplacementFee);
   }
   
-  if (attributes.atmFees !== undefined && attributes.atmFees !== null) {
+  if (attributes.atmFees !== undefined && attributes.atmFees !== null && !features.atmFees) {
     features.atmFees = formatCurrency(attributes.atmFees);
-  } else if (attributes.atmFees) {
+  } else if (attributes.atmFees && !features.atmFees) {
     features.atmFees = typeof attributes.atmFees === 'string' ? attributes.atmFees : String(attributes.atmFees);
   }
   
-  if (attributes.foreignTransactionFee !== undefined && attributes.foreignTransactionFee !== null) {
+  if (attributes.foreignTransactionFee !== undefined && attributes.foreignTransactionFee !== null && !features.foreignTransactionFee) {
     features.foreignTransactionFee = formatPercentage(attributes.foreignTransactionFee);
-  } else if (attributes.foreignTransactionFee) {
+  } else if (attributes.foreignTransactionFee && !features.foreignTransactionFee) {
     features.foreignTransactionFee = typeof attributes.foreignTransactionFee === 'string' ? attributes.foreignTransactionFee : String(attributes.foreignTransactionFee);
   }
 
@@ -323,81 +531,178 @@ export function formatProductFeatures(attributes?: BankingProductRecommendation[
     features.closingFee = typeof attributes.closingFee === 'string' ? attributes.closingFee : String(attributes.closingFee);
   }
   
-  // Limits - handle numeric values
-  if (attributes.dailyAtmLimit !== undefined && attributes.dailyAtmLimit !== null) {
+  // Limits - handle numeric values (only if not already set from nested limits)
+  if (attributes.dailyAtmLimit !== undefined && attributes.dailyAtmLimit !== null && !features.dailyAtmLimit) {
     features.dailyAtmLimit = formatCurrency(attributes.dailyAtmLimit);
-  } else if (attributes.dailyAtmLimit) {
+  } else if (attributes.dailyAtmLimit && !features.dailyAtmLimit) {
     features.dailyAtmLimit = typeof attributes.dailyAtmLimit === 'string' ? attributes.dailyAtmLimit : String(attributes.dailyAtmLimit);
   }
   
-  if (attributes.dailyPurchaseLimit !== undefined && attributes.dailyPurchaseLimit !== null) {
+  if (attributes.dailyPurchaseLimit !== undefined && attributes.dailyPurchaseLimit !== null && !features.dailyPurchaseLimit) {
     features.dailyPurchaseLimit = formatCurrency(attributes.dailyPurchaseLimit);
-  } else if (attributes.dailyPurchaseLimit) {
+  } else if (attributes.dailyPurchaseLimit && !features.dailyPurchaseLimit) {
     features.dailyPurchaseLimit = typeof attributes.dailyPurchaseLimit === 'string' ? attributes.dailyPurchaseLimit : String(attributes.dailyPurchaseLimit);
   }
   
-  if (attributes.contactlessLimit !== undefined && attributes.contactlessLimit !== null) {
+  if (attributes.contactlessLimit !== undefined && attributes.contactlessLimit !== null && !features.contactlessLimit) {
     features.contactlessLimit = formatCurrency(attributes.contactlessLimit);
-  } else if (attributes.contactlessLimit) {
+  } else if (attributes.contactlessTransactionLimit !== undefined && attributes.contactlessTransactionLimit !== null && !features.contactlessLimit) {
+    features.contactlessLimit = formatCurrency(attributes.contactlessTransactionLimit);
+  } else if (attributes.contactlessLimit && !features.contactlessLimit) {
     features.contactlessLimit = typeof attributes.contactlessLimit === 'string' ? attributes.contactlessLimit : String(attributes.contactlessLimit);
   }
   
-  if (attributes.dailyCardlessWithdrawal !== undefined && attributes.dailyCardlessWithdrawal !== null) {
+  if (attributes.dailyCardlessWithdrawal !== undefined && attributes.dailyCardlessWithdrawal !== null && !features.dailyCardlessWithdrawal) {
     features.dailyCardlessWithdrawal = formatCurrency(attributes.dailyCardlessWithdrawal);
-  } else if (attributes.dailyCardlessWithdrawal) {
+  } else if (attributes.dailyCardlessWithdrawal && !features.dailyCardlessWithdrawal) {
     features.dailyCardlessWithdrawal = typeof attributes.dailyCardlessWithdrawal === 'string' ? attributes.dailyCardlessWithdrawal : String(attributes.dailyCardlessWithdrawal);
   }
   
-  if (attributes.dailyBillPaymentLimit !== undefined && attributes.dailyBillPaymentLimit !== null) {
+  if (attributes.dailyBillPaymentLimit !== undefined && attributes.dailyBillPaymentLimit !== null && !features.dailyBillPaymentLimit) {
     features.dailyBillPaymentLimit = formatCurrency(attributes.dailyBillPaymentLimit);
-  } else if (attributes.dailyBillPaymentLimit) {
+  } else if (attributes.dailyBillPaymentLimit && !features.dailyBillPaymentLimit) {
     features.dailyBillPaymentLimit = typeof attributes.dailyBillPaymentLimit === 'string' ? attributes.dailyBillPaymentLimit : String(attributes.dailyBillPaymentLimit);
   }
   
-  if (attributes.dailyTopupLimit !== undefined && attributes.dailyTopupLimit !== null) {
+  if (attributes.dailyTopupLimit !== undefined && attributes.dailyTopupLimit !== null && !features.dailyTopupLimit) {
     features.dailyTopupLimit = formatCurrency(attributes.dailyTopupLimit);
-  } else if (attributes.dailyTopupLimit) {
+  } else if (attributes.dailyTopupLimit && !features.dailyTopupLimit) {
     features.dailyTopupLimit = typeof attributes.dailyTopupLimit === 'string' ? attributes.dailyTopupLimit : String(attributes.dailyTopupLimit);
   }
   
-  if (attributes.dailyP2pLimit !== undefined && attributes.dailyP2pLimit !== null) {
+  if (attributes.dailyP2pLimit !== undefined && attributes.dailyP2pLimit !== null && !features.dailyP2pLimit) {
     features.dailyP2pLimit = formatCurrency(attributes.dailyP2pLimit);
-  } else if (attributes.dailyP2pLimit) {
+  } else if (attributes.dailyP2pLimit && !features.dailyP2pLimit) {
     features.dailyP2pLimit = typeof attributes.dailyP2pLimit === 'string' ? attributes.dailyP2pLimit : String(attributes.dailyP2pLimit);
   }
   
-  // String-only fields
-  if (attributes.hariRayaP2pLimit) features.hariRayaP2pLimit = typeof attributes.hariRayaP2pLimit === 'string' ? attributes.hariRayaP2pLimit : String(attributes.hariRayaP2pLimit);
-  if (attributes.hariRayaP2pNote) features.hariRayaP2pNote = typeof attributes.hariRayaP2pNote === 'string' ? attributes.hariRayaP2pNote : String(attributes.hariRayaP2pNote);
-  if (attributes.minimumTransaction) features.minimumTransaction = typeof attributes.minimumTransaction === 'string' ? attributes.minimumTransaction : String(attributes.minimumTransaction);
-  if (attributes.accountRequirement) features.accountRequirement = typeof attributes.accountRequirement === 'string' ? attributes.accountRequirement : String(attributes.accountRequirement);
-  if (attributes.prestigeMembership) {
-    features.prestigeMembership = capitalizeElite(attributes.prestigeMembership);
+  // String-only fields (only if not already set from nested objects)
+  if (attributes.hariRayaP2pLimit && !features.hariRayaP2pLimit) {
+    features.hariRayaP2pLimit = typeof attributes.hariRayaP2pLimit === 'string' ? attributes.hariRayaP2pLimit : String(attributes.hariRayaP2pLimit);
   }
-  if (attributes.perdanaMembership) {
-    features.perdanaMembership = capitalizeElite(attributes.perdanaMembership);
+  if (attributes.hariRayaP2pNote && !features.hariRayaP2pNote) {
+    features.hariRayaP2pNote = typeof attributes.hariRayaP2pNote === 'string' ? attributes.hariRayaP2pNote : String(attributes.hariRayaP2pNote);
   }
-  if (attributes.mobileWallets) features.mobileWallets = typeof attributes.mobileWallets === 'string' ? attributes.mobileWallets : String(attributes.mobileWallets);
-  if (attributes.premiumBenefits) {
+  if (attributes.minimumTransaction && !features.minimumTransaction) {
+    features.minimumTransaction = typeof attributes.minimumTransaction === 'string' ? attributes.minimumTransaction : String(attributes.minimumTransaction);
+  }
+  if (attributes.accountRequirement && !features.accountRequirement) {
+    features.accountRequirement = typeof attributes.accountRequirement === 'string' ? attributes.accountRequirement : String(attributes.accountRequirement);
+  }
+  if (attributes.prestigeMembership && !features.prestigeMembership) {
+    if (typeof attributes.prestigeMembership === 'object') {
+      const pm = attributes.prestigeMembership as any;
+      if (pm.aum_requirement) {
+        features.prestigeMembership = `BND ${pm.aum_requirement.toLocaleString()} AUM`;
+      } else {
+        features.prestigeMembership = 'Prestige Membership';
+      }
+    } else {
+      features.prestigeMembership = capitalizeElite(attributes.prestigeMembership);
+    }
+  }
+  if (attributes.perdanaMembership && !features.perdanaMembership) {
+    if (typeof attributes.perdanaMembership === 'object') {
+      const pm = attributes.perdanaMembership as any;
+      if (pm.income_requirement) {
+        features.perdanaMembership = `BND ${pm.income_requirement.toLocaleString()}/month income`;
+      } else if (pm.aum_alternative) {
+        features.perdanaMembership = `BND ${pm.aum_alternative.toLocaleString()} AUM`;
+      } else {
+        features.perdanaMembership = 'PERDANA Membership';
+      }
+    } else {
+      features.perdanaMembership = capitalizeElite(attributes.perdanaMembership);
+    }
+  }
+  if (attributes.mobileWallets && !features.mobileWallets) {
+    features.mobileWallets = typeof attributes.mobileWallets === 'string' ? attributes.mobileWallets : String(attributes.mobileWallets);
+  }
+  if (attributes.premiumBenefits && !features.premiumBenefits) {
     features.premiumBenefits = Array.isArray(attributes.premiumBenefits)
       ? attributes.premiumBenefits
       : [attributes.premiumBenefits];
   }
-  if (attributes.travelInsurance) features.travelInsurance = typeof attributes.travelInsurance === 'string' ? attributes.travelInsurance : String(attributes.travelInsurance);
-  if (attributes.loungeAccess) features.loungeAccess = typeof attributes.loungeAccess === 'string' ? attributes.loungeAccess : String(attributes.loungeAccess);
+  if (attributes.travelInsurance && !features.travelInsurance) {
+    features.travelInsurance = typeof attributes.travelInsurance === 'string' ? attributes.travelInsurance : String(attributes.travelInsurance);
+  }
+  if (attributes.loungeAccess && !features.loungeAccess) {
+    if (typeof attributes.loungeAccess === 'object') {
+      const lounge = attributes.loungeAccess as any;
+      if (lounge.network) {
+        const fee = lounge.fee_per_visit ? formatCurrency(lounge.fee_per_visit) : '';
+        features.loungeAccess = `${lounge.network}${fee ? ` (${fee} per visit)` : ''}`;
+      }
+    } else {
+      features.loungeAccess = typeof attributes.loungeAccess === 'string' ? attributes.loungeAccess : String(attributes.loungeAccess);
+    }
+  }
   
-  // Digital Features
-  if (attributes.onlineBanking !== undefined) {
-    features.onlineBanking = attributes.onlineBanking;
+  // Digital Features (only if not already set from nested features)
+  if (attributes.onlineBanking !== undefined && !features.onlineBanking) {
+    features.onlineBanking = attributes.onlineBanking ? 'Yes' : 'No';
   }
-  if (attributes.mobileApp !== undefined) {
-    features.mobileApp = attributes.mobileApp;
+  if (attributes.mobileApp !== undefined && !features.mobileApp) {
+    features.mobileApp = attributes.mobileApp ? 'Yes' : 'No';
   }
-  if (attributes.atmAccess !== undefined) {
-    features.atmAccess = attributes.atmAccess;
+  if (attributes.atmAccess !== undefined && !features.atmAccess) {
+    features.atmAccess = attributes.atmAccess ? 'Yes' : 'No';
   }
-  if (attributes.mobileWalletCompatible && Array.isArray(attributes.mobileWalletCompatible)) {
+  if (attributes.mobileWalletCompatible && Array.isArray(attributes.mobileWalletCompatible) && !features.mobileWalletCompatible) {
     features.mobileWalletCompatible = attributes.mobileWalletCompatible;
+  }
+
+  // Additional flat fields that might exist (only if not already set)
+  if (attributes.cardNetwork && !features.cardNetwork) {
+    features.cardNetwork = typeof attributes.cardNetwork === 'string' ? attributes.cardNetwork : String(attributes.cardNetwork);
+  }
+  if (attributes.cardInfo && !features.cardInfo) {
+    features.cardInfo = capitalizeElite(attributes.cardInfo);
+  }
+  if (attributes.contactlessPayment !== undefined && !features.contactlessPayment) {
+    features.contactlessPayment = attributes.contactlessPayment;
+  }
+  if (attributes.globalAcceptance !== undefined && !features.globalAcceptance) {
+    features.globalAcceptance = attributes.globalAcceptance;
+  }
+  if (attributes.atmAccessNetworks && Array.isArray(attributes.atmAccessNetworks) && !features.atmAccessNetworks) {
+    features.atmAccessNetworks = attributes.atmAccessNetworks;
+  }
+  if (attributes.digitalBanking && Array.isArray(attributes.digitalBanking) && !features.digitalBanking) {
+    features.digitalBanking = attributes.digitalBanking;
+  }
+  if (attributes.p2pTransfers && Array.isArray(attributes.p2pTransfers) && !features.p2pTransfers) {
+    features.p2pTransfers = attributes.p2pTransfers;
+  }
+  if (attributes.topupServices && Array.isArray(attributes.topupServices) && !features.topupServices) {
+    features.topupServices = attributes.topupServices;
+  }
+  if (attributes.chipEnabled !== undefined && !features.chipEnabled) {
+    features.chipEnabled = attributes.chipEnabled;
+  }
+  if (attributes.onlineShopping !== undefined && !features.onlineShopping) {
+    features.onlineShopping = attributes.onlineShopping;
+  }
+  if (attributes.rewardsProgram !== undefined && !features.rewardsProgram) {
+    features.rewardsProgram = attributes.rewardsProgram;
+  }
+  if (attributes.rewardsRate && !features.rewards) {
+    features.rewards = capitalizeElite(attributes.rewardsRate);
+  }
+  if (attributes.rewardsNote && !features.rewards) {
+    features.rewards = capitalizeElite(attributes.rewardsNote);
+  }
+  if (attributes.shariahConcept && !features.shariahConcept) {
+    features.shariahConcept = typeof attributes.shariahConcept === 'string' ? attributes.shariahConcept : String(attributes.shariahConcept);
+  }
+  if (attributes.cardFormat && !features.cardFormat) {
+    features.cardFormat = typeof attributes.cardFormat === 'string' ? attributes.cardFormat : String(attributes.cardFormat);
+  }
+  if (attributes.billPayment !== undefined && !features.billPayment) {
+    features.billPayment = attributes.billPayment;
+  }
+  if (attributes.atmCardlessWithdrawal !== undefined && !features.atmCardlessWithdrawal) {
+    features.atmCardlessWithdrawal = attributes.atmCardlessWithdrawal;
   }
   
   return features;
@@ -593,12 +898,14 @@ export interface ProductComparison {
   products: BankingProduct[];
   comparison: ProductComparisonResponse['comparison'];
   highlights?: ProductComparisonResponse['highlights'];
-  summary?: string;
+  summary?: ProductComparisonResponse['summary'];
 }
 
 export function transformComparisonResponse(
   apiResponse: ProductComparisonResponse
 ): ProductComparison {
+  // Transform products but pass through comparison, highlights, and summary as-is
+  // The backend provides these in the exact format we need
   return {
     products: apiResponse.products.map(transformRecommendation),
     comparison: apiResponse.comparison,
@@ -634,12 +941,31 @@ export function transformProfileResponse(
 
     return products.map(product => {
       try {
+        // Backend returns product details nested under 'product' object
+        // Read from nested product object first, fallback to top-level for backward compatibility
+        const productName = product.product?.productName || product.productName;
+        const bankName = product.product?.bankName || product.bankName;
+        const productType = product.product?.productType || product.productType;
+        
+        // ADD DEBUG LOGGING HERE
+        console.log('[Transform] Transforming product from profile:', {
+          productId: product.productId,
+          productNameFromNested: product.product?.productName,
+          productNameFromTop: product.productName,
+          productNameFinal: productName,
+          productTypeFromNested: product.product?.productType,
+          productTypeFromTop: product.productType,
+          productTypeFinal: productType,
+          productTypeMapped: mapProductType(productType || 'savings'),
+          allProductFields: product,
+        });
+        
         return {
           id: product.id || product.productId, // Fallback to productId if id is missing
           productId: product.productId,
-          productName: product.productName,
-          bankName: product.bankName,
-          productType: mapProductType(product.productType),
+          productName: productName || 'Product Name Not Available',
+          bankName: bankName || 'Bank Name Not Available',
+          productType: mapProductType(productType || 'savings'),
           // Balance fields - include all that exist in response
           currentBalance: product.currentBalance,
           outstandingBalance: product.outstandingBalance,

@@ -14,7 +14,7 @@ import { useProductCatalog } from '@/hooks/useBankingProducts';
 import { useAddProduct, useUpdateProduct } from '@/hooks/useBankingProducts';
 import { Search, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { mapProductType } from '@/lib/utils/bankingTransformers';
+// mapProductType removed - not needed since catalog products are already transformed
 import type { UserProduct, BankingProductType } from '@/lib/api/types/banking';
 import { format } from 'date-fns';
 
@@ -80,8 +80,30 @@ export const AddProductDialog = ({
       setOpenedDate(editProduct.openedDate ? new Date(editProduct.openedDate) : undefined);
     } else if (selectedProduct) {
       // Add mode: detect product type from selected product
-      const productType = mapProductType(selectedProduct.type);
-      setSelectedProductType(productType);
+      // selectedProduct.type is already in frontend format (already mapped by transformCatalogItem)
+      // No need to call mapProductType again - it would cause incorrect defaulting to 'savings'
+      
+      // ADD VALIDATION: Ensure selectedProduct matches selectedProductId
+      if (selectedProduct.productId !== selectedProductId) {
+        console.error('[AddProduct] Mismatch detected:', {
+          selectedProductId,
+          selectedProductProductId: selectedProduct.productId,
+          selectedProductName: selectedProduct.name,
+          selectedProductType: selectedProduct.type,
+        });
+        // Reset to prevent wrong product type
+        setSelectedProductType(null);
+        return;
+      }
+      
+      console.log('[AddProduct] Product selected:', {
+        productId: selectedProduct.productId,
+        name: selectedProduct.name,
+        type: selectedProduct.type,
+        bank: selectedProduct.bank,
+      });
+      
+      setSelectedProductType(selectedProduct.type);
       // Reset form fields when product changes
       setCurrentBalance('');
       setOutstandingBalance('');
@@ -91,8 +113,19 @@ export const AddProductDialog = ({
       setOpenedDate(undefined);
       setErrors({});
       setTouched({});
+    } else if (selectedProductId && !selectedProduct) {
+      // Product ID selected but product not found - this shouldn't happen
+      console.warn('[AddProduct] Product ID selected but product not found:', {
+        selectedProductId,
+        availableProducts: filteredProducts.map(p => ({
+          id: p.id,
+          productId: p.productId,
+          name: p.name,
+        })),
+      });
+      setSelectedProductType(null);
     }
-  }, [selectedProduct, editProduct]);
+  }, [selectedProduct, editProduct, selectedProductId, filteredProducts]);
 
   // Validate field on blur
   const validateField = (fieldName: string, value: string | number | undefined): string | undefined => {
@@ -241,8 +274,30 @@ export const AddProductDialog = ({
     }
 
     // Build request body with only relevant fields
+    const productIdToSend = editProduct?.productId || selectedProductId;
+    
+    // ADD DEBUG LOGGING
+    console.log('[AddProduct] Debug Info:', {
+      selectedProductId,
+      selectedProductType,
+      selectedProduct: selectedProduct ? {
+        id: selectedProduct.id,
+        productId: selectedProduct.productId,
+        name: selectedProduct.name,
+        type: selectedProduct.type,
+        bank: selectedProduct.bank,
+      } : null,
+      productIdToSend,
+      allFilteredProducts: filteredProducts.map(p => ({
+        id: p.id,
+        productId: p.productId,
+        name: p.name,
+        type: p.type,
+      })),
+    });
+
     const productData: any = {
-      productId: editProduct?.productId || selectedProductId,
+      productId: productIdToSend,
     };
 
     // Add fields based on product type
@@ -267,10 +322,12 @@ export const AddProductDialog = ({
 
     // Debit card has no balance fields
 
-    // Add optional opened date
-    if (openedDate) {
-      productData.openedDate = openedDate.toISOString().split('T')[0];
-    }
+    // Dates are optional - removed to avoid backend validation issues
+    // if (openedDate) {
+    //   productData.openedDate = openedDate.toISOString().split('T')[0];
+    // }
+
+    console.log('[AddProduct] Final request body:', productData);
 
     if (editProduct) {
       updateProductMutation.mutate(productData, {
@@ -316,7 +373,7 @@ export const AddProductDialog = ({
   const showCreditLimit = selectedProductType === 'credit_card';
   const showLoanAmount = selectedProductType === 'loan';
   const showMonthlyPayment = selectedProductType === 'loan';
-  const showOpenedDate = true; // Optional for all types
+  const showOpenedDate = false; // Disabled - backend has validation issues with dates
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>

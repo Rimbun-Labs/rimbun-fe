@@ -75,6 +75,34 @@ export const BrowseAllTab = ({
     return grouped;
   }, [products]);
 
+  // Extract available product types and banks from actual data
+  const availableTypes = useMemo(() => {
+    const types = new Set(products.map(p => p.type));
+    return Array.from(types);
+  }, [products]);
+
+  const availableBanks = useMemo(() => {
+    const banks = new Set(products.map(p => p.bank).filter(Boolean));
+    return Array.from(banks).sort();
+  }, [products]);
+
+  // Map product types to readable names for search presets
+  const productTypeLabels: Record<string, string> = {
+    savings: 'Savings Account',
+    credit_card: 'Credit Card',
+    checking: 'Checking Account',
+    cd: 'Fixed Deposit',
+    loan: 'Personal Loan',
+    debit_card: 'Debit Card',
+    virtual_prepaid_card: 'Virtual Prepaid Card',
+  };
+
+  const presetProducts = useMemo(() => {
+    return availableTypes
+      .map(type => productTypeLabels[type] || type)
+      .slice(0, 6);
+  }, [availableTypes]);
+
   const isInCompare = (productId: string) => compareProducts.some((p) => p.id === productId);
 
   const isLoading = isLoadingCatalog || isLoadingRecommendations;

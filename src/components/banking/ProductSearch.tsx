@@ -9,31 +9,17 @@ interface ProductSearchProps {
   onPresetSelect: (preset: string) => void;
   searchMode?: 'product' | 'institution';
   onModeChange?: (mode: 'product' | 'institution') => void;
+  availableProducts?: string[]; // Available product types from actual data
+  availableInstitutions?: string[]; // Available bank names from actual data
 }
-
-const PRESET_PRODUCTS = [
-  'Savings Account',
-  'Credit Card',
-  'Fixed Deposit',
-  'Personal Loan',
-  'Investment Account',
-  'Mortgage'
-];
-
-const PRESET_INSTITUTIONS = [
-  'Maybank',
-  'CIMB',
-  'Public Bank',
-  'RHB',
-  'Hong Leong',
-  'AmBank'
-];
 
 export const ProductSearch = ({ 
   onSearch, 
   onPresetSelect,
   searchMode = 'product',
-  onModeChange 
+  onModeChange,
+  availableProducts = [],
+  availableInstitutions = []
 }: ProductSearchProps) => {
   const [query, setQuery] = useState('');
 
@@ -46,6 +32,10 @@ export const ProductSearch = ({
     setQuery(preset);
     onPresetSelect(preset);
   };
+
+  // Use available data, limit to 6 most common for display
+  const presetProducts = availableProducts.slice(0, 6);
+  const presetInstitutions = availableInstitutions.slice(0, 6);
 
   return (
     <Card className="mb-6">
@@ -103,24 +93,27 @@ export const ProductSearch = ({
           )}
 
           {/* Preset Buttons */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              Popular {searchMode === 'product' ? 'Products' : 'Institutions'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(searchMode === 'product' ? PRESET_PRODUCTS : PRESET_INSTITUTIONS).map((preset) => (
-                <Button
-                  key={preset}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePresetClick(preset)}
-                  className="rounded-full"
-                >
-                  {preset}
-                </Button>
-              ))}
+          {((searchMode === 'product' && presetProducts.length > 0) || 
+            (searchMode === 'institution' && presetInstitutions.length > 0)) && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Popular {searchMode === 'product' ? 'Products' : 'Institutions'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(searchMode === 'product' ? presetProducts : presetInstitutions).map((preset) => (
+                  <Button
+                    key={preset}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePresetClick(preset)}
+                    className="rounded-full"
+                  >
+                    {preset}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

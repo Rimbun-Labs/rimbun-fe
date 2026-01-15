@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Wallet, ChevronDown, ChevronUp, ChevronRight, Plus } from 'lucide-react';
-import { useBankingProfile } from '@/hooks/useBankingProducts';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Wallet, ChevronDown, ChevronUp, ChevronRight, Plus, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Info } from 'lucide-react';
+import { useBankingProfile, useBankingFinancialSummary } from '@/hooks/useBankingProducts';
 import { MyProductCard } from '@/components/banking/MyProductCard';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
 import { useFormatters } from '@/hooks/useFormatters';
 import type { UserProduct } from '@/lib/api/types/banking';
 
@@ -35,11 +36,13 @@ export const BankingProductsSection: React.FC<BankingProductsSectionProps> = ({
 
   // Fetch user's actual banking products
   const { data: userProducts, isLoading, error } = useBankingProfile();
+  
+  // Fetch financial summary
+  const { data: summary, isLoading: summaryLoading } = useBankingFinancialSummary();
 
   const products = userProducts || [];
   const displayedProducts = isExpanded ? products : products.slice(0, 3);
   const totalProducts = products.length;
-  const totalBalance = products.reduce((sum, product) => sum + (product.currentBalance || 0), 0);
 
   const handleViewAll = () => {
     navigate('/banking-products');
@@ -145,51 +148,145 @@ export const BankingProductsSection: React.FC<BankingProductsSectionProps> = ({
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Overview - Always Visible */}
-            <div className="space-y-3">
-              {/* Cross-section connection to Investment */}
-              {investmentGoals?.targetAmount && (
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">💡 Connection:</span> Your banking products provide liquidity and support for your investment goal of{' '}
-                    <span className="font-semibold">{formatCurrency(investmentGoals.targetAmount)}</span>
-                    {savingsRate !== undefined && savingsRate > 0 && (
-                      <> with your current {savingsRate.toFixed(0)}% savings rate</>
+          <div className="space-y-6">
+            {/* Financial Summary - Integrated at top */}
+            {summary && !summaryLoading && (
+              <div className="space-y-4">
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Net Worth */}
+                  <div className="space-y-2 p-4 rounded-lg bg-muted/30 border border-border">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground">Net Worth</span>
+                    </div>
+                    <div className={`text-2xl font-bold ${summary.netWorth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {formatCurrency(summary.netWorth)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {summary.netWorth >= 0 ? 'Assets exceed liabilities' : 'Liabilities exceed assets'}
+                    </div>
+                  </div>
+
+                  {/* Total Assets */}
+                  <div className="space-y-2 p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-muted-foreground">What You Own</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {formatCurrency(summary.totalAssets)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Savings + Fixed Deposits
+                    </div>
+                  </div>
+
+                  {/* Total Liabilities */}
+                  <div className="space-y-2 p-4 rounded-lg bg-red-500/5 border border-red-500/20">
+                    <div className="flex items-center gap-2">
+                      <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      <span className="text-sm font-medium text-muted-foreground">What You Owe</span>
+                    </div>
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {formatCurrency(summary.totalLiabilities)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Credit Cards + Loans
+                    </div>
+                  </div>
+                </div>
+
+                {/* Debt Ratios - If Available */}
+                {(summary.debtToIncomeRatio !== undefined || summary.creditUtilizationRatio !== undefined) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {summary.debtToIncomeRatio !== undefined && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-medium text-muted-foreground">Debt-to-Income Ratio</div>
+                          <div className="text-sm text-foreground">
+                            {summary.debtToIncomeRatio > 40 ? (
+                              <span className="text-red-600 dark:text-red-400 font-semibold">High</span>
+                            ) : summary.debtToIncomeRatio > 30 ? (
+                              <span className="text-amber-600 dark:text-amber-400 font-semibold">Moderate</span>
+                            ) : (
+                              <span className="text-green-600 dark:text-green-400 font-semibold">Healthy</span>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={summary.debtToIncomeRatio > 40 ? 'destructive' : 'secondary'}>
+                          {summary.debtToIncomeRatio.toFixed(1)}%
+                        </Badge>
+                      </div>
                     )}
-                  </p>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Total Products</div>
-                  <div className="text-2xl font-bold">{totalProducts}</div>
-                  <div className="text-xs text-muted-foreground">banking products</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Total Balance</div>
-                  <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
-                  <div className="text-xs text-muted-foreground">across all accounts</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Actions</div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddProduct}
-                    className="flex items-center gap-2 w-full mt-1"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Product
-                  </Button>
-                </div>
+
+                    {summary.creditUtilizationRatio !== undefined && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border">
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-medium text-muted-foreground">Credit Utilization</div>
+                          <div className="text-sm text-foreground">
+                            {summary.creditUtilizationRatio > 30 ? (
+                              <span className="text-red-600 dark:text-red-400 font-semibold">High</span>
+                            ) : summary.creditUtilizationRatio > 20 ? (
+                              <span className="text-amber-600 dark:text-amber-400 font-semibold">Moderate</span>
+                            ) : (
+                              <span className="text-green-600 dark:text-green-400 font-semibold">Healthy</span>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={summary.creditUtilizationRatio > 30 ? 'destructive' : 'secondary'}>
+                          {summary.creditUtilizationRatio.toFixed(1)}%
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* High Debt Warnings */}
+                {((summary.debtToIncomeRatio && summary.debtToIncomeRatio > 40) || 
+                  (summary.creditUtilizationRatio && summary.creditUtilizationRatio > 30)) && (
+                  <Alert variant="destructive" className="py-3">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      {summary.debtToIncomeRatio && summary.debtToIncomeRatio > 40 && (
+                        <div>Your debt-to-income ratio is high ({summary.debtToIncomeRatio.toFixed(1)}%). Consider reducing debt or increasing income.</div>
+                      )}
+                      {summary.creditUtilizationRatio && summary.creditUtilizationRatio > 30 && (
+                        <div className={summary.debtToIncomeRatio && summary.debtToIncomeRatio > 40 ? 'mt-1' : ''}>
+                          Your credit utilization is high ({summary.creditUtilizationRatio.toFixed(1)}%). Try to keep it below 30% for better credit health.
+                        </div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
-            </div>
+            )}
+
+            {/* Divider */}
+            {summary && !summaryLoading && <div className="border-t border-border" />}
+
+            {/* Connection to Investment Goals */}
+            {investmentGoals?.targetAmount && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">💡 Connection:</span> Your banking products provide liquidity and support for your investment goal of{' '}
+                  <span className="font-semibold">{formatCurrency(investmentGoals.targetAmount)}</span>
+                  {savingsRate !== undefined && savingsRate > 0 && (
+                    <> with your current {savingsRate.toFixed(0)}% savings rate</>
+                  )}
+                </p>
+              </div>
+            )}
 
             {/* Products Grid */}
             {displayedProducts.length > 0 && (
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="font-semibold">Your Products</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">Your Products</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {totalProducts} {totalProducts === 1 ? 'product' : 'products'}
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {displayedProducts.map((product) => (
                     <MyProductCard

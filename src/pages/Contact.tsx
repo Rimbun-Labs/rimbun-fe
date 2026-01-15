@@ -51,9 +51,8 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
-        <div className="text-center mb-12">
+    <div className="container mx-auto px-4 py-16 max-w-4xl">
+      <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Have a question or feedback? We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.
@@ -183,7 +182,6 @@ const Contact: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 };

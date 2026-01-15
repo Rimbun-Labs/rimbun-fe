@@ -13,6 +13,7 @@ import type {
   BankingProduct,
   ProductComparison,
   UserProduct,
+  BankingFinancialSummary,
 } from '@/lib/api/types/banking';
 
 /**
@@ -216,6 +217,7 @@ export function useUpdateProduct(productId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: ['banking', 'summary'] });
       toast.success('Product updated');
     },
     onError: (error: Error) => {
@@ -241,10 +243,31 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: ['banking', 'summary'] });
       toast.success('Product removed from your profile');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to remove product');
     },
+  });
+}
+
+/**
+ * Get financial summary (assets, liabilities, net worth, debt ratios)
+ * Backend extracts user ID from Authorization token
+ */
+export function useBankingFinancialSummary() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['banking', 'summary', user?.uid],
+    queryFn: async () => {
+      if (!user) {
+        throw new Error('User must be authenticated');
+      }
+      return await bankingApi.getFinancialSummary();
+    },
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000, // 2 minutes (summary changes when products change)
   });
 }

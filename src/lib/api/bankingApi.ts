@@ -6,6 +6,7 @@ import type {
   ProductCatalogResponse,
   BankingProductRecommendation,
   ProductCatalogItem,
+  BankingFinancialSummary,
 } from './types/banking';
 
 export const bankingApi = {
@@ -200,6 +201,22 @@ export const bankingApi = {
     const response = await apiClient.get<{ data: BankingProductRecommendation }>(
       `/banking/products/${productId}`
     );
+    return response.data.data;
+  },
+
+  /**
+   * Get financial summary (assets, liabilities, net worth, debt ratios)
+   * Backend extracts user ID from Authorization token
+   */
+  async getFinancialSummary(): Promise<BankingFinancialSummary> {
+    const response = await apiClient.get<{ data: BankingFinancialSummary }>(
+      '/banking/profile/summary'
+    );
+    
+    if (!response.data?.data) {
+      throw new Error('Invalid financial summary response structure');
+    }
+    
     return response.data.data;
   },
 };

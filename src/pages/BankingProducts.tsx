@@ -103,6 +103,7 @@ const BankingProducts = () => {
             <CompareTab 
               firebaseId={firebaseId}
               products={compareProducts}
+              onAddToCompare={handleAddToCompare}
               onRemove={handleRemoveFromCompare}
             />
           </TabsContent>

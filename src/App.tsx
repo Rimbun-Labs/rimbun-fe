@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SessionProvider } from "./contexts/SessionContext";
 // Removed environment-aware storage - using API-first approach
 import { ThemeProvider } from "./hooks/useTheme";
-import { AppLayout, ContentLayout } from "./components/layout";
+import { AppLayout, ContentLayout, PublicLayout } from "./components/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -125,11 +125,15 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
       <Route path="/home" element={<Index />} />
-      <Route path="/about" element={<AboutUs />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<TermsOfService />} />
-      <Route path="/cookies" element={<CookiePolicy />} />
+      
+      {/* Public routes with header */}
+      <Route element={<PublicLayout />}>
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
+      </Route>
       <Route 
         path="/explore" 
         element={

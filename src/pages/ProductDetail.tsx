@@ -31,6 +31,72 @@ import { EligibilityBadge } from '@/components/banking/EligibilityBadge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+// Component to render description with clickable links
+const DescriptionWithLinks: React.FC<{ 
+  description: string; 
+  productName: string;
+  bankName: string;
+}> = ({ description, productName, bankName }) => {
+  // URL regex pattern - matches http/https URLs
+  const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+  
+  // Split description by URLs
+  const parts = description.split(urlRegex);
+  
+  // Generate bank product URL (not tariff)
+  const getProductUrl = (originalUrl: string): string => {
+    try {
+      const url = new URL(originalUrl);
+      // If it's a tariff/schedule link, try to convert to product page
+      if (url.pathname.includes('tariff') || url.pathname.includes('schedule')) {
+        // Try to find product page path - remove tariff/schedule from path
+        const productPath = url.pathname
+          .replace(/\/tariff.*$/i, '')
+          .replace(/\/schedule.*$/i, '')
+          .replace(/\/rates.*$/i, '');
+        return `${url.origin}${productPath || '/products'}`;
+      }
+      return originalUrl;
+    } catch {
+      return originalUrl;
+    }
+  };
+  
+  // Get clean link text
+  const getLinkText = (url: string): string => {
+    if (url.includes('tariff') || url.includes('schedule') || url.includes('rates')) {
+      return `View ${productName} on ${bankName}`;
+    }
+    return `Learn More`;
+  };
+  
+  return (
+    <p className="text-muted-foreground leading-relaxed">
+      {parts.map((part, index) => {
+        // Check if this part is a URL
+        if (urlRegex.test(part)) {
+          const productUrl = getProductUrl(part);
+          const linkText = getLinkText(part);
+          
+          return (
+            <a
+              key={index}
+              href={productUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-1 font-medium"
+            >
+              {linkText}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </p>
+  );
+};
+
 const typeIcons: Record<string, React.ElementType> = {
   savings: PiggyBank,
   credit_card: CreditCard,
@@ -232,7 +298,11 @@ const ProductDetail: React.FC = () => {
               <CardTitle>About This Product</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+              <DescriptionWithLinks 
+                description={product.description}
+                productName={product.name}
+                bankName={product.bank}
+              />
             </CardContent>
           </Card>
         )}

@@ -15,7 +15,18 @@ interface ProductFiltersProps {
   onSortChange?: (sort: SortOption) => void;
   onQuickFilterChange?: (filter: 'eligibleOnly' | 'highMatch' | null) => void;
   availableGoals?: string[];
+  availableTypes?: string[]; // Available product types from actual data
 }
+
+const TYPE_LABELS: Record<string, string> = {
+  savings: 'Savings',
+  credit_card: 'Credit Card',
+  checking: 'Checking',
+  cd: 'Fixed Deposit',
+  loan: 'Loan',
+  debit_card: 'Debit Card',
+  virtual_prepaid_card: 'Virtual Prepaid Card',
+};
 
 export const ProductFilters: React.FC<ProductFiltersProps> = ({
   selectedType,
@@ -27,7 +38,14 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
   onSortChange,
   onQuickFilterChange,
   availableGoals = [],
+  availableTypes = [],
 }) => {
+  // If availableTypes is provided, only show those types
+  // Otherwise, show all types (for backward compatibility)
+  const typesToShow = availableTypes.length > 0 
+    ? availableTypes 
+    : ['savings', 'credit_card', 'checking', 'cd', 'loan', 'debit_card', 'virtual_prepaid_card'];
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Select value={selectedType} onValueChange={onTypeChange}>
@@ -36,13 +54,11 @@ export const ProductFilters: React.FC<ProductFiltersProps> = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="savings">Savings</SelectItem>
-          <SelectItem value="credit_card">Credit Card</SelectItem>
-          <SelectItem value="checking">Checking</SelectItem>
-          <SelectItem value="cd">Fixed Deposit</SelectItem>
-          <SelectItem value="loan">Loan</SelectItem>
-          <SelectItem value="debit_card">Debit Card</SelectItem>
-          <SelectItem value="virtual_prepaid_card">Virtual Prepaid Card</SelectItem>
+          {typesToShow.map((type) => (
+            <SelectItem key={type} value={type}>
+              {TYPE_LABELS[type] || type}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
