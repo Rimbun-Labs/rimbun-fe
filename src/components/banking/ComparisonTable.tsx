@@ -63,8 +63,6 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
     scores: true,
     description: false,
     explanation: false,
-    scoreBreakdown: false,
-    alignedGoals: false,
   });
 
   const sortedProducts = [...comparisonData.products].sort((a, b) => 
@@ -517,120 +515,6 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                           ))}
                         </tr>
                       )}
-                    </>
-                  )}
-
-                  {/* Aligned Goals Section */}
-                  {sortedProducts.some(p => p.alignedGoals && p.alignedGoals.length > 0) && (
-                    <>
-                      <tr className="bg-primary/5 border-t-2 border-border">
-                        <td colSpan={sortedProducts.length + 1} className="p-3 font-bold text-sm uppercase tracking-wide text-foreground border-r border-border">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Target className="h-4 w-4" />
-                              <span>Aligned Goals</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleSection('alignedGoals')}
-                              className="h-auto p-1 text-xs"
-                            >
-                              {expandedSections.alignedGoals ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Show Less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Show Goals
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      {expandedSections.alignedGoals && (
-                        <tr className="border-b-2 border-border">
-                          <td className="p-4 font-medium text-sm border-r border-border bg-muted/10 align-top">
-                            Goals This Product Supports
-                          </td>
-                          {sortedProducts.map((product) => (
-                            <td key={product.id} className="p-4 border-r border-border last:border-r-0 align-top">
-                              {product.alignedGoals && product.alignedGoals.length > 0 ? (
-                                <div className="flex flex-wrap gap-1.5 justify-center">
-                                  {product.alignedGoals.map((goal, idx) => (
-                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                      {goal}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </td>
-                          ))}
-                        </tr>
-                      )}
-                    </>
-                  )}
-
-                  {/* Score Breakdown Section */}
-                  {sortedProducts.some(p => p.scoreBreakdown && p.scoreBreakdown.length > 0) && (
-                    <>
-                      <tr className="bg-primary/5 border-t-2 border-border">
-                        <td colSpan={sortedProducts.length + 1} className="p-3 font-bold text-sm uppercase tracking-wide text-foreground border-r border-border">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4" />
-                              <span>Match Score Breakdown</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleSection('scoreBreakdown')}
-                              className="h-auto p-1 text-xs"
-                            >
-                              {expandedSections.scoreBreakdown ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Show Less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  Show Breakdown
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                      {expandedSections.scoreBreakdown && sortedProducts[0]?.scoreBreakdown?.map((breakdown, idx) => (
-                        <tr key={idx} className="border-b border-border">
-                          <td className="p-4 font-medium text-sm border-r border-border bg-muted/10">
-                            {breakdown.category}
-                          </td>
-                          {sortedProducts.map((product) => {
-                            const productBreakdown = product.scoreBreakdown?.find(b => b.category === breakdown.category);
-                            return (
-                              <td key={product.id} className="p-4 text-center border-r border-border last:border-r-0">
-                                {productBreakdown ? (
-                                  <div className="space-y-1">
-                                    <div className="font-semibold">{productBreakdown.score}%</div>
-                                    {'explanation' in productBreakdown && productBreakdown.explanation && (
-                                      <p className="text-xs text-muted-foreground">{String(productBreakdown.explanation)}</p>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-muted-foreground">—</span>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
                     </>
                   )}
 
