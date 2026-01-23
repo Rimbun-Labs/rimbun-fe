@@ -25,7 +25,7 @@ const JourneyTracker: React.FC<JourneyTrackerProps> = ({ variant = 'compact', cl
   // Determine current stage based on route - just show which page user is on
   const getCurrentStage = (): number => {
     // Planning stage: financial planning or goals pages
-    if (location.pathname.includes('/financial-planning') || location.pathname.includes('/goals')) {
+    if (location.pathname.includes('/spending') || location.pathname.includes('/planning') || location.pathname.includes('/goals')) {
       return 2; // Planning
     }
     // Learning stage: learning pages
@@ -55,7 +55,7 @@ const JourneyTracker: React.FC<JourneyTrackerProps> = ({ variant = 'compact', cl
       step: 2,
       title: 'Planning',
       icon: Target,
-      route: '/financial-planning',
+      route: '/spending',
     },
   ];
 

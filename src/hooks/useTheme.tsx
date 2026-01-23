@@ -24,7 +24,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'light',
-  storageKey = 'investlearn-theme',
+  storageKey = 'rimbun-theme',
   ...props
 }: ThemeProviderProps) {
   // Optimized localStorage hook for theme

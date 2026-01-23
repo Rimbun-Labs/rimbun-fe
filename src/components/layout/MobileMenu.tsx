@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Logo } from '@/components/ui/Logo';
 
 const MobileMenu: React.FC = () => {
   const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
@@ -59,10 +60,7 @@ const MobileMenu: React.FC = () => {
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
         <SheetHeader className="mb-6">
           <SheetTitle className="flex items-center gap-2">
-            <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">IL</span>
-            </div>
-            <span>Investlearn</span>
+            <Logo size="md" showText />
           </SheetTitle>
         </SheetHeader>
 

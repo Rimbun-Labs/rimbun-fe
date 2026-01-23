@@ -14,6 +14,7 @@ import {
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/Logo";
 
 const navigation = [
   { name: "About", href: "/about" },
@@ -80,15 +81,12 @@ export const LandingHeader = () => {
               transition={{ delay: 0.1 }}
             >
               <Link to="/home" className="flex items-center space-x-3 group">
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl w-10 h-10 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                    <span className="text-primary-foreground font-bold text-lg">IL</span>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative group-hover:scale-105 transition-all duration-300">
+                  <Logo size="lg" variant="header" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-bold text-xl text-foreground">
-                    Investlearn
+                    Rimbun
                   </span>
                   <span className="text-xs text-muted-foreground -mt-1">Interactive Financial Education</span>
                 </div>

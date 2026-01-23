@@ -56,7 +56,7 @@ Error Details:
 Please provide any additional context about what you were doing when this error occurred.
     `);
     
-    window.open(`mailto:support@investlearn.com?subject=${subject}&body=${body}`, '_blank');
+    window.open(`mailto:team@rimbun.co?subject=${subject}&body=${body}`, '_blank');
   };
 
   return (

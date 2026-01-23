@@ -44,6 +44,8 @@ const InvestmentExplorer = lazy(() => import("./pages/InvestmentExplorer"));
 const SpendingAnalysis = lazy(() => import("./pages/SpendingAnalysis"));
 const CashFlowProjections = lazy(() => import("./pages/CashFlowProjections"));
 const FinancialPlanning = lazy(() => import("./pages/FinancialPlanning"));
+const Spending = lazy(() => import("./pages/Spending"));
+const Planning = lazy(() => import("./pages/Planning"));
 const BankAnalyticsDashboard = lazy(() => import("./pages/BankAnalyticsDashboard"));
 const GoalsPage = lazy(() => import("./pages/Goals"));
 const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
@@ -347,13 +349,25 @@ const AppRoutes = () => {
           } 
         />
         <Route 
-          path="/financial-planning" 
+          path="/spending" 
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
-              <FinancialPlanning />
+              <Spending />
             </Suspense>
           } 
         />
+        <Route 
+          path="/planning" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Planning />
+            </Suspense>
+          } 
+        />
+        {/* Legacy routes - redirect to new pages */}
+        <Route path="/financial-planning" element={<Navigate to="/spending" replace />} />
+        <Route path="/spending-analysis" element={<Navigate to="/spending" replace />} />
+        <Route path="/cash-flow-projections" element={<Navigate to="/planning?tab=projections" replace />} />
         <Route 
           path="/banking-products" 
           element={
@@ -370,9 +384,6 @@ const AppRoutes = () => {
             </Suspense>
           } 
         />
-        {/* Legacy routes - redirect to new consolidated page */}
-        <Route path="/spending-analysis" element={<Navigate to="/financial-planning?tab=current" replace />} />
-        <Route path="/cash-flow-projections" element={<Navigate to="/financial-planning?tab=projections" replace />} />
         <Route 
           path="/goals" 
           element={

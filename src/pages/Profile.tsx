@@ -257,7 +257,7 @@ const ProfileContent = () => {
       const a = document.createElement('a');
       a.href = url;
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('.')[0];
-      a.download = `my-investlearn-data-${timestamp}.json`;
+      a.download = `my-rimbun-data-${timestamp}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -10,7 +10,7 @@ const TermsOfService: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
           <p>
-              By accessing and using InvestLearn ("the Service," "we," "us," or "our"), you accept and agree to be bound by these Terms of Service ("Terms"). 
+              By accessing and using Rimbun ("the Service," "we," "us," or "our"), you accept and agree to be bound by these Terms of Service ("Terms"). 
               If you do not agree to these Terms, please do not use our Service.
           </p>
           </section>
@@ -18,7 +18,7 @@ const TermsOfService: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">2. Description of Service</h2>
           <p>
-              InvestLearn is an educational platform that provides:
+              Rimbun is an educational platform that provides:
           </p>
           <ul className="list-disc pl-6 mb-4">
               <li>Investment education and learning materials</li>
@@ -30,7 +30,7 @@ const TermsOfService: React.FC = () => {
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-4">
               <p className="font-semibold text-yellow-800">Important Disclaimer:</p>
               <p className="text-yellow-700">
-                InvestLearn is an EDUCATIONAL platform only. We do NOT provide investment, 
+                Rimbun is an EDUCATIONAL platform only. We do NOT provide investment, 
                 financial, or legal advice. Our content is for educational purposes only and should 
                 not be construed as personalized investment recommendations.
               </p>
@@ -83,7 +83,7 @@ const TermsOfService: React.FC = () => {
               <p className="font-semibold text-red-800 mb-2">CRITICAL INVESTMENT DISCLAIMER</p>
               <p className="text-red-700">
                 <strong>NOT INVESTMENT ADVICE:</strong> The content, assessments, and recommendations provided 
-                by InvestLearn are for EDUCATIONAL PURPOSES ONLY and should NOT be considered as 
+                by Rimbun are for EDUCATIONAL PURPOSES ONLY and should NOT be considered as 
                 investment, financial, legal, or tax advice.
               </p>
               <p className="text-red-700 mt-2">
@@ -98,7 +98,7 @@ const TermsOfService: React.FC = () => {
               </p>
               <p className="text-red-700 mt-2">
                 <strong>Your Responsibility:</strong> You are solely responsible for your investment decisions. 
-                InvestLearn, its operators, and content creators are not liable for any losses or damages 
+                Rimbun, its operators, and content creators are not liable for any losses or damages 
                 resulting from your use of this educational platform.
               </p>
           </div>
@@ -106,7 +106,7 @@ const TermsOfService: React.FC = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">6. Intellectual Property</h2>
-          <p>The Service and its original content, features, and functionality are owned by InvestLearn 
+          <p>The Service and its original content, features, and functionality are owned by Rimbun 
               and protected by international copyright, trademark, and other intellectual property laws.</p>
           <p>You may not:</p>
           <ul className="list-disc pl-6 mb-4">
@@ -135,7 +135,7 @@ const TermsOfService: React.FC = () => {
           <div className="bg-gray-50 border-l-4 border-gray-400 p-4 my-4">
               <p className="font-semibold text-gray-800 mb-2">TO THE MAXIMUM EXTENT PERMITTED BY LAW:</p>
               <p className="text-gray-700">
-                InvestLearn and its operators, employees, and partners shall NOT be liable for any indirect, 
+                Rimbun and its operators, employees, and partners shall NOT be liable for any indirect, 
                 incidental, special, consequential, or punitive damages, including but not limited to:</p>
               <ul className="list-disc pl-6 text-gray-700 mt-2">
                 <li>Loss of profits or investments</li>
@@ -164,7 +164,7 @@ const TermsOfService: React.FC = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">10. Indemnification</h2>
-          <p>You agree to indemnify and hold harmless InvestLearn, its operators, employees, and partners 
+          <p>You agree to indemnify and hold harmless Rimbun, its operators, employees, and partners 
               from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:</p>
           <ul className="list-disc pl-6 mb-4">
               <li>Your use or misuse of the Service</li>
@@ -217,8 +217,8 @@ const TermsOfService: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-4">15. Contact Information</h2>
           <p>If you have questions about these Terms, please contact us:</p>
           <ul className="list-none mb-4">
-              <li><strong>Email:</strong> investlearn@gmail.com</li>
-              <li><strong>Support:</strong> investlearn@gmail.com</li>
+              <li><strong>Email:</strong> team@rimbun.co</li>
+              <li><strong>Support:</strong> team@rimbun.co</li>
           </ul>
           </section>
 
@@ -232,13 +232,13 @@ const TermsOfService: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">17. Entire Agreement</h2>
           <p>These Terms, together with our Privacy Policy, constitute the entire agreement between you and 
-              InvestLearn regarding the use of the Service and supersede all prior agreements and understandings.</p>
+              Rimbun regarding the use of the Service and supersede all prior agreements and understandings.</p>
           </section>
 
           <div className="mt-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
           <p className="text-sm text-blue-800">
               <strong>Final Reminder:</strong> This platform is for educational purposes only. Always consult 
-              with qualified financial professionals before making investment decisions. InvestLearn does 
+              with qualified financial professionals before making investment decisions. Rimbun does 
               not provide investment, financial, legal, or tax advice.
           </p>
           </div>

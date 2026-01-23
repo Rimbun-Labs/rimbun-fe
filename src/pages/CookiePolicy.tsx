@@ -15,7 +15,7 @@ const CookiePolicy: React.FC = () => {
             the website owners.
           </p>
           <p>
-            This Cookie Policy explains how InvestLearn ("we," "our," or "us") uses cookies and 
+            This Cookie Policy explains how Rimbun ("we," "our," or "us") uses cookies and 
             similar technologies when you use our Service.
           </p>
         </section>
@@ -116,7 +116,7 @@ const CookiePolicy: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-4">7. Contact Us</h2>
           <p>If you have questions about our use of cookies, please contact us:</p>
           <ul className="list-none mb-4">
-            <li><strong>Email:</strong> investlearnco@gmail.com</li>
+            <li><strong>Email:</strong> team@rimbun.co</li>
           </ul>
         </section>
 

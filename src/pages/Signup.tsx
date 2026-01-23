@@ -11,6 +11,7 @@ import { userService } from '@/lib/api/userService';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { AlertCircle } from 'lucide-react';
 import { authService } from '@/lib/auth/authService';
+import { Logo } from '@/components/ui/Logo';
 
 const Signup = () => {
   const { signUp, signInWithGoogle } = useAuth();
@@ -96,10 +97,7 @@ const Signup = () => {
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-primary" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <div className="bg-background rounded-full w-8 h-8 flex items-center justify-center mr-2">
-            <span className="text-primary font-bold">IL</span>
-          </div>
-          Investlearn
+          <Logo size="md" showText textClassName="text-white" />
         </div>
         <div className="relative z-20 mt-auto">
           <p className="text-lg">

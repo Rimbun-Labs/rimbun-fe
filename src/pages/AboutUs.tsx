@@ -10,7 +10,7 @@ const AboutUs: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
           <p className="text-lg text-muted-foreground mb-4">
-            At InvestLearn, we believe that financial literacy is the foundation of financial freedom. 
+            At Rimbun, we believe that financial literacy is the foundation of financial freedom. 
             Our mission is to empower individuals with the knowledge, confidence, and tools they need 
             to make informed investment decisions.
           </p>
@@ -24,7 +24,7 @@ const AboutUs: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">What We Do</h2>
           <p className="mb-4">
-            InvestLearn is an AI-powered investment education platform that provides:
+            Rimbun is an AI-powered investment education platform that provides:
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li><strong>Personalized Assessments:</strong> Understand your risk tolerance, knowledge level, and investment preferences through our interactive assessment</li>
@@ -53,7 +53,7 @@ const AboutUs: React.FC = () => {
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 my-4">
             <p className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Educational Purpose Only</p>
             <p className="text-yellow-700 dark:text-yellow-300">
-              InvestLearn is an educational platform. We do not provide investment, financial, or legal advice. 
+              Rimbun is an educational platform. We do not provide investment, financial, or legal advice. 
               All content, assessments, and recommendations are for educational purposes only and should not 
               be construed as personalized investment advice. Always consult with a qualified financial advisor 
               before making investment decisions.

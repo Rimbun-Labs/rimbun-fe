@@ -59,7 +59,7 @@ const Explore: React.FC = () => {
               </h1>
             </div>
             <p className="text-lg text-muted-foreground">
-              See how Investlearn creates personalized financial plans for different life situations. 
+              See how Rimbun creates personalized financial plans for different life situations. 
               Each profile includes banking products, investment strategies, and educational content tailored to their goals.
             </p>
             <div className="pt-4">

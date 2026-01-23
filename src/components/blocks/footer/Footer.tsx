@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Logo } from "@/components/ui/Logo";
 import {
   Dialog,
   DialogContent,
@@ -35,7 +36,7 @@ const footerLinks = {
   ]
 };
 
-const CONTACT_EMAIL = "investlearnco@gmail.com";
+const CONTACT_EMAIL = "team@rimbun.co";
 
 export const Footer = ({ className }: FooterProps) => {
   const [emailSubject, setEmailSubject] = useState("");
@@ -43,7 +44,7 @@ export const Footer = ({ className }: FooterProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSendEmail = () => {
-    const subject = encodeURIComponent(emailSubject || "Contact from Investlearn");
+    const subject = encodeURIComponent(emailSubject || "Contact from Rimbun");
     const body = encodeURIComponent(emailBody || "");
     const mailtoLink = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
     window.location.href = mailtoLink;
@@ -65,15 +66,12 @@ export const Footer = ({ className }: FooterProps) => {
             viewport={{ once: true }}
           >
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className="bg-gradient-to-br from-primary to-primary/80 rounded-xl w-10 h-10 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <span className="text-primary-foreground font-bold text-lg">IL</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative group-hover:scale-105 transition-all duration-300">
+                <Logo size="lg" variant="footer" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                  Investlearn
+                  Rimbun
                 </span>
                 <span className="text-xs text-muted-foreground -mt-1">AI-Powered Financial Education</span>
               </div>
@@ -203,7 +201,7 @@ export const Footer = ({ className }: FooterProps) => {
           viewport={{ once: true }}
         >
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>© 2024 Investlearn. All rights reserved.</span>
+            <span>© 2024 Rimbun. All rights reserved.</span>
             <div className="flex items-center space-x-2">
               <Shield className="h-3 w-3" />
               <span>Privacy focused</span>

@@ -10,10 +10,10 @@ const PrivacyPolicy: React.FC = () => {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
           <p>
-              Welcome to InvestLearn ("we," "our," or "us"). We are committed to protecting your privacy and ensuring you have a positive experience when using our educational platform.
+              Welcome to Rimbun ("we," "our," or "us"). We are committed to protecting your privacy and ensuring you have a positive experience when using our educational platform.
           </p>
           <p>
-              This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our investment education platform InvestLearn (the "Service").
+              This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our investment education platform Rimbun (the "Service").
           </p>
           </section>
 
@@ -102,7 +102,7 @@ const PrivacyPolicy: React.FC = () => {
               <li><strong>Opt-Out:</strong> Unsubscribe from marketing communications</li>
               <li><strong>Restrict Processing:</strong> Limit how we use your data</li>
           </ul>
-          <p>To exercise these rights, contact us at: investlearn@gmail.com</p>
+          <p>To exercise these rights, contact us at: team@rimbun.co</p>
           </section>
 
         <section className="mb-8">
@@ -146,14 +146,14 @@ const PrivacyPolicy: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-4">12. Contact Us</h2>
           <p>If you have questions about this Privacy Policy, please contact us:</p>
           <ul className="list-none mb-4">
-              <li><strong>Email:</strong> investlearn@gmail.com</li>
-              <li><strong>Support:</strong> investlearn@gmail.com</li>
+              <li><strong>Email:</strong> team@rimbun.co</li>
+              <li><strong>Support:</strong> team@rimbun.co</li>
           </ul>
           </section>
 
           <div className="mt-8 p-4 bg-muted rounded-lg">
           <p className="text-sm">
-              <strong>Important Disclaimer:</strong> This Privacy Policy applies to InvestLearn educational platform only. 
+              <strong>Important Disclaimer:</strong> This Privacy Policy applies to Rimbun educational platform only. 
               We do not provide investment, financial, or legal advice. All content is for educational purposes.
           </p>
           </div>

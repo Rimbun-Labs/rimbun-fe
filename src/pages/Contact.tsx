@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Mail, Send, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CONTACT_EMAIL = "investlearnco@gmail.com";
+const CONTACT_EMAIL = "team@rimbun.co";
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ const Contact: React.FC = () => {
     setIsSubmitting(true);
     
     // Create mailto link with form data
-    const subject = encodeURIComponent(formData.subject || 'Contact from Investlearn');
+    const subject = encodeURIComponent(formData.subject || 'Contact from Rimbun');
     const body = encodeURIComponent(
       `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     );

@@ -54,9 +54,10 @@ const AppSidebar: React.FC = () => {
   
   // Auto-expand sections based on current route
   useEffect(() => {
-    // Auto-expand Planning section if on goals or financial planning pages
+    // Auto-expand Financial Analysis section if on goals, spending, or planning pages
     const isOnPlanningPage = location.pathname.includes('/goals') || 
-                             location.pathname.includes('/financial-planning');
+                             location.pathname.includes('/spending') ||
+                             location.pathname.includes('/planning');
     setIsPlanningOpen(isOnPlanningPage);
     
     // Auto-expand Explorer section if on banking products or investment explorer pages
@@ -120,18 +121,18 @@ const AppSidebar: React.FC = () => {
           </NavLink>
         </div>
 
-        {/* Planning Section - Collapsible */}
+        {/* Financial Analysis Section - Collapsible */}
         <div className="space-y-1">
           <div className="px-3 py-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Planning
+              Financial Analysis
             </h3>
           </div>
           <Collapsible open={isPlanningOpen} onOpenChange={setIsPlanningOpen}>
             <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
               <div className="flex items-center gap-3">
-                <Target className="h-4 w-4" />
-                <span>Planning</span>
+                <BarChart3 className="h-4 w-4" />
+                <span>Financial Analysis</span>
               </div>
               {isPlanningOpen ? (
                 <ChevronUp className="h-4 w-4" />
@@ -155,7 +156,7 @@ const AppSidebar: React.FC = () => {
                 Goals
               </NavLink>
               <NavLink
-                to="/financial-planning"
+                to="/spending"
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
@@ -166,7 +167,21 @@ const AppSidebar: React.FC = () => {
                 }
               >
                 <DollarSign className="h-4 w-4" />
-                Financial Planning
+                Spending
+              </NavLink>
+              <NavLink
+                to="/planning"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
+                    isActive 
+                      ? "bg-accent text-accent-foreground border-primary" 
+                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                  )
+                }
+              >
+                <BarChart3 className="h-4 w-4" />
+                Planning
               </NavLink>
             </CollapsibleContent>
           </Collapsible>
@@ -269,7 +284,7 @@ const AppSidebar: React.FC = () => {
             <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
               <div className="flex items-center gap-3">
                 <MoreHorizontal className="h-4 w-4" />
-                <span>Other</span>
+                <span>Account</span>
               </div>
               {isMoreOpen ? (
                 <ChevronUp className="h-4 w-4" />

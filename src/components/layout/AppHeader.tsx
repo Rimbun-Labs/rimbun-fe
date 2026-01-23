@@ -20,6 +20,7 @@ import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
+import { Logo } from '@/components/ui/Logo';
 import MobileMenu from './MobileMenu';
 
 interface AppHeaderProps {
@@ -87,10 +88,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
               </div>
             )}
             <Link to="/home" className="flex items-center space-x-2">
-              <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">IL</span>
-              </div>
-              <span className="font-semibold hidden md:inline-block">Investlearn</span>
+              <Logo size="md" showText className="hidden md:flex" />
+              <Logo size="md" className="md:hidden" />
             </Link>
           </div>
           

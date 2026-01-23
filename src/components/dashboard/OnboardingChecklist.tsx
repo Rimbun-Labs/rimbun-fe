@@ -59,7 +59,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       label: 'Track Your Spending',
       description: 'Add spending data to see cash flow projections',
       completed: hasSpendingData,
-      route: '/financial-planning?tab=current',
+      route: '/spending',
     },
     {
       id: 'goals',

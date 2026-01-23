@@ -8,6 +8,8 @@ import {
   ResponsiveContainer, 
   BarChart, 
   Bar, 
+  LineChart,
+  Line,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -65,7 +67,7 @@ const FinancialPlanningPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'current' | 'projections' | 'planning'>(initialTab as 'current' | 'projections' | 'planning');
   
   // Spending Analysis state
-  const [spendingSubTab, setSpendingSubTab] = useState('scenario');
+  const [spendingSubTab, setSpendingSubTab] = useState('input');
   const [scenario, setScenario] = useState<SpendingScenario | null>(null);
   
   // Cash Flow state
@@ -206,6 +208,35 @@ const FinancialPlanningPage: React.FC = () => {
     });
   }, [selectedScenarioData, breakdownPeriod]);
 
+  const timelineChartData = useMemo(() => {
+    if (!selectedScenarioData?.monthlyProjections) return [];
+    
+    const monthsToShow = timelinePeriod === '1Y' ? 12 : timelinePeriod === '3Y' ? 36 : 60;
+    const filtered = selectedScenarioData.monthlyProjections.slice(0, monthsToShow);
+    
+    // For 5Y, show every 6 months; for 3Y, show every 3 months; for 1Y, show every month
+    const interval = timelinePeriod === '1Y' ? 1 : timelinePeriod === '3Y' ? 3 : 6;
+    
+    return filtered
+      .filter((_, index) => index % interval === 0)
+      .map((proj) => {
+        const date = new Date(proj.year, proj.month - 1);
+        const monthName = date.toLocaleString('en-US', { month: 'short' });
+        const year = date.getFullYear();
+        
+        return {
+          month: proj.month,
+          year: proj.year,
+          label: `${monthName} ${year}`,
+          netWorth: proj.totalNetWorth,
+          goalProgress: proj.goalProgress,
+          savings: proj.savings,
+          monthlyReturn: proj.monthlyReturn,
+          fullDate: `${year}-${String(proj.month).padStart(2, '0')}`,
+        };
+      });
+  }, [selectedScenarioData, timelinePeriod]);
+
   const formatMonthlyReturn = (value: number) => {
     return formatCurrency(value);
   };
@@ -338,56 +369,32 @@ const FinancialPlanningPage: React.FC = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'current' | 'projections' | 'planning')} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger value="current" className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Current State
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>View your current spending, savings, and emergency fund status</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger 
-                    value="projections" 
-                    disabled={!cashFlowData || !!cashFlowData.message}
-                    className="flex items-center gap-2"
-                  >
-                    <TrendingUp className="h-4 w-4" />
-                    Projections
-                    {(!cashFlowData || cashFlowData.message) && (
-                      <span className="text-xs ml-1">(Complete Assessment)</span>
-                    )}
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>See long-term cash flow projections and goal progress scenarios</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <TabsTrigger 
-                    value="planning" 
-                    className="flex items-center gap-2"
-                  >
-                    <Target className="h-4 w-4" />
-                    Planning
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Explore how spending changes impact your goals and emergency fund timeline</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50">
+            <TabsTrigger 
+              value="current" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <DollarSign className="h-4 w-4" />
+              Current State
+            </TabsTrigger>
+            <TabsTrigger 
+              value="projections" 
+              disabled={!cashFlowData || !!cashFlowData.message}
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Projections
+              {(!cashFlowData || cashFlowData.message) && (
+                <span className="text-xs ml-1">(Complete Assessment)</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="planning" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <Target className="h-4 w-4" />
+              Planning
+            </TabsTrigger>
           </TabsList>
 
           {/* Tab 1: Current State (Spending Analysis) */}
@@ -395,151 +402,52 @@ const FinancialPlanningPage: React.FC = () => {
             {/* History Chart */}
             <SpendingHistory userId={userId || ''} />
 
-            {/* Emergency Fund and Recommendations - Integrated into main flow */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {spendingData && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Emergency Fund
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <EmergencyFundAnalysis 
-                      data={spendingData}
-                      loading={spendingLoading}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-
-              {recommendations && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5" />
-                      Recommendations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SpendingRecommendations 
-                      recommendations={recommendations}
-                      loading={recommendationsLoading}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Main Content Area - Full Width */}
+            {/* Input and Categories - Moved up for primary action */}
             <div className="space-y-6">
               <Tabs value={spendingSubTab} onValueChange={setSpendingSubTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="scenario" className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    Scenario
-                  </TabsTrigger>
-                  <TabsTrigger value="input" className="flex items-center gap-2">
+                <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50">
+                  <TabsTrigger 
+                    value="input" 
+                    className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                  >
                     <AlertCircle className="h-4 w-4" />
                     Input
                   </TabsTrigger>
-                  <TabsTrigger value="categories" className="flex items-center gap-2">
+                  <TabsTrigger 
+                    value="categories" 
+                    className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                  >
                     <PieChart className="h-4 w-4" />
                     Categories
                   </TabsTrigger>
                 </TabsList>
 
-                  {/* Scenario Tab */}
-                  <TabsContent value="scenario" className="space-y-6">
-                    {spendingData ? (
-                      <>
-                        <SpendingScenarioSimulator
-                          monthlyIncome={spendingData.monthlyIncome}
-                          monthlySpending={spendingData.monthlySpending}
-                          onScenarioChange={setScenario}
-                        />
-                        {scenario && currentState && scenarioState && (
-                          <>
-                            <SpendingImpactCards
-                              current={currentState}
-                              scenario={scenarioState}
-                              dataQuality={dataQuality}
-                            />
-                            
-                            {currentState.emergencyFundTarget > 0 && (
-                              <EmergencyFundTimelineChart
-                                currentAmount={currentState.emergencyFundCurrent}
-                                targetAmount={currentState.emergencyFundTarget}
-                                currentMonthlyContribution={
-                                  Math.max(
-                                    (spendingData.monthlyIncome - spendingData.monthlySpending) * 0.1,
-                                    currentState.emergencyFundTarget > currentState.emergencyFundCurrent
-                                      ? (currentState.emergencyFundTarget - currentState.emergencyFundCurrent) / 60
-                                      : 0
-                                  )
-                                }
-                                scenarioMonthlyContribution={scenarioState.emergencyFundMonthly}
-                                monthlySpending={scenario.adjustedSpending}
-                                dataQuality={dataQuality}
-                              />
-                            )}
-
-                            {goalsData && goalsData.goals.length > 0 && (
-                              <GoalImpactDisplay
-                                goals={goalsData.goals}
-                                currentInvestmentAllocation={currentState.investmentMonthly}
-                                scenarioInvestmentAllocation={scenarioState.investmentMonthly}
-                                dataQuality={dataQuality}
-                              />
-                            )}
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>No Spending Data</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground mb-4">
-                            Enter your spending data first to use the scenario simulator.
-                          </p>
-                          <Button onClick={() => setSpendingSubTab('input')}>
-                            Go to Input Tab
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </TabsContent>
-
-                  {/* Input Tab */}
-                  <TabsContent value="input" className="space-y-6">
+                {/* Input Tab */}
+                <TabsContent value="input" className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                      <DollarSign className="h-5 w-5" />
+                      Enter Your Spending Data
+                    </h3>
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                          <DollarSign className="h-5 w-5" />
-                          Enter Your Spending Data
-                        </CardTitle>
-                      </CardHeader>
                       <CardContent>
                         <SpendingInput 
                           userId={userId || ''}
                           currentData={spendingData}
                           onSuccess={() => {
-                            setSpendingSubTab('scenario');
+                            // Data saved successfully, stay on input tab
                           }}
                         />
                       </CardContent>
                     </Card>
-                  </TabsContent>
+                  </div>
+                </TabsContent>
 
-                  {/* Categories Tab */}
-                  <TabsContent value="categories" className="space-y-6">
+                {/* Categories Tab */}
+                <TabsContent value="categories" className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Spending Categories</h3>
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="text-xl">Spending Categories</CardTitle>
-                      </CardHeader>
                       <CardContent>
                         <SpendingCategories 
                           userId={userId || ''}
@@ -548,9 +456,50 @@ const FinancialPlanningPage: React.FC = () => {
                         />
                       </CardContent>
                     </Card>
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Emergency Fund - Full width */}
+            {spendingData && (
+              <div>
+                <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                  <Shield className="h-5 w-5" />
+                  Emergency Fund
+                </h3>
+                <Card>
+                  <CardContent>
+                    <EmergencyFundAnalysis 
+                      data={spendingData}
+                      loading={spendingLoading}
+                    />
+                  </CardContent>
+                </Card>
               </div>
+            )}
+
+            {/* Recommendations - Full width with context */}
+            {recommendations && (
+              <div>
+                <h3 className="text-xl font-semibold flex items-center gap-2 mb-2">
+                  <Lightbulb className="h-5 w-5" />
+                  Recommendations
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Personalized suggestions based on your spending patterns and financial goals. 
+                  These recommendations help optimize your savings rate, emergency fund progress, and goal achievement timeline.
+                </p>
+                <Card>
+                  <CardContent>
+                    <SpendingRecommendations 
+                      recommendations={recommendations}
+                      loading={recommendationsLoading}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* Tab 2: Projections (Cash Flow) */}
@@ -573,15 +522,14 @@ const FinancialPlanningPage: React.FC = () => {
                 {/* Left Column - Main Analysis (2/3 width) */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Scenario Comparison */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5" />
-                        Scenario Comparison
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                      <BarChart3 className="h-5 w-5" />
+                      Scenario Comparison
+                    </h3>
+                    <Card>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {(['conservative', 'realistic', 'optimistic'] as const).map((scenario) => {
                           const data = scenarios?.[scenario];
                           if (!data) return null;
@@ -602,22 +550,32 @@ const FinancialPlanningPage: React.FC = () => {
                             </div>
                           );
                         })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                             
                   {/* Detailed Analysis Tabs */}
                   <Tabs defaultValue="timeline" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="timeline" className="flex items-center gap-2">
+                    <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50">
+                      <TabsTrigger 
+                        value="timeline" 
+                        className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                      >
                         <Calendar className="h-4 w-4" />
                         Timeline
                       </TabsTrigger>
-                      <TabsTrigger value="breakdown" className="flex items-center gap-2">
+                      <TabsTrigger 
+                        value="breakdown" 
+                        className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                      >
                         <BarChart3 className="h-4 w-4" />
                         Breakdown
                       </TabsTrigger>
-                      <TabsTrigger value="goals" className="flex items-center gap-2">
+                      <TabsTrigger 
+                        value="goals" 
+                        className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+                      >
                         <PieChart className="h-4 w-4" />
                         Goals
                       </TabsTrigger>
@@ -646,66 +604,100 @@ const FinancialPlanningPage: React.FC = () => {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-4">
-                            {selectedScenarioData?.monthlyProjections
-                              ? selectedScenarioData.monthlyProjections
-                                  .slice(0, timelinePeriod === '1Y' ? 12 : timelinePeriod === '3Y' ? 36 : 60)
-                                  .filter((_, index) => {
-                                    const interval = timelinePeriod === '1Y' ? 1 : timelinePeriod === '3Y' ? 3 : 6;
-                                    return index % interval === 0;
-                                  })
-                                  .map((projection, index) => (
-                                    <div key={`${projection.month}-${projection.year}-${index}`} className="flex items-center justify-between p-4 border rounded-lg">
-                                      <div className="flex items-center gap-4">
-                                        <div className="text-center">
-                                          <p className="text-sm font-medium">{projection.month}/{projection.year}</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                          <p className="text-sm text-muted-foreground">
-                                            Net Worth: <span className="font-bold">{formatCurrency(projection.totalNetWorth)}</span>
-                                          </p>
-                                          <p className="text-sm text-muted-foreground">
-                                            Goal Progress: <span className="font-bold">{projection.goalProgress.toFixed(1)}%</span>
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="text-right space-y-1">
-                                        <div className="flex items-center justify-end gap-1.5">
-                                          <p className="text-sm text-muted-foreground">
-                                            Investment Return: <span className="font-bold">{formatMonthlyReturn(projection.monthlyReturn)}</span>
-                                          </p>
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                              aria-label="About monthly investment return"
-                            >
-                              <Info className="h-3.5 w-3.5" />
-                            </button>
-                                              </TooltipTrigger>
-                                              <TooltipContent className="max-w-xs">
-                                                <p className="font-semibold mb-1">Monthly Investment Return</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                  The dollar amount of returns from your investment portfolio for this month. This varies by scenario (conservative, realistic, optimistic) based on different market return assumptions.
+                          {timelineChartData.length > 0 ? (
+                            <div className="h-[500px] w-full">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart 
+                                  data={timelineChartData}
+                                  margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                                  <XAxis 
+                                    dataKey="label"
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                    tick={{ fontSize: 12, fill: isDarkMode ? '#9ca3af' : '#6b7280' }}
+                                    interval="preserveStartEnd"
+                                  />
+                                  <YAxis 
+                                    yAxisId="left"
+                                    tickFormatter={(value) => formatCurrency(value)}
+                                    tick={{ fontSize: 12, fill: isDarkMode ? '#9ca3af' : '#6b7280' }}
+                                  />
+                                  <YAxis 
+                                    yAxisId="right"
+                                    orientation="right"
+                                    tickFormatter={(value) => `${value.toFixed(1)}%`}
+                                    tick={{ fontSize: 12, fill: isDarkMode ? '#9ca3af' : '#6b7280' }}
+                                  />
+                                  <RechartsTooltip
+                                    content={({ active, payload }) => {
+                                      if (active && payload && payload.length) {
+                                        const data = payload[0].payload;
+                                        return (
+                                          <div className="bg-popover p-3 rounded-lg shadow-lg border border-border">
+                                            <p className="font-medium text-popover-foreground mb-2">
+                                              {data.label}
+                                            </p>
+                                            <div className="space-y-1 text-sm">
+                                              <p className="text-blue-600 dark:text-blue-400 font-semibold">
+                                                Net Worth: <span className="font-bold">{formatCurrency(data.netWorth)}</span>
+                                              </p>
+                                              <p className="text-purple-600 dark:text-purple-400">
+                                                Goal Progress: <span className="font-bold">{data.goalProgress.toFixed(1)}%</span>
+                                              </p>
+                                              <div className="pt-1 border-t space-y-1">
+                                                <p className="text-green-600 dark:text-green-400">
+                                                  Savings: <span className="font-bold">{formatCurrency(data.savings)}</span>
                                                 </p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Savings: <span className="font-bold">{formatCurrency(projection.savings)}</span>
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ))
-                              : (
-                                <div className="py-8 text-center text-muted-foreground">
-                                  No projection data available
-                                </div>
-                              )}
-                          </div>
+                                                <p className="text-muted-foreground">
+                                                  Investment Return: <span className="font-bold">{formatMonthlyReturn(data.monthlyReturn)}</span>
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    }}
+                                  />
+                                  <Legend 
+                                    wrapperStyle={{ paddingTop: '20px' }}
+                                    formatter={(value) => {
+                                      if (value === 'netWorth') return 'Net Worth';
+                                      if (value === 'goalProgress') return 'Goal Progress (%)';
+                                      return value;
+                                    }}
+                                  />
+                                  <Line
+                                    yAxisId="left"
+                                    type="monotone"
+                                    dataKey="netWorth"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    dot={{ r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                    name="netWorth"
+                                  />
+                                  <Line
+                                    yAxisId="right"
+                                    type="monotone"
+                                    dataKey="goalProgress"
+                                    stroke="#a855f7"
+                                    strokeWidth={2}
+                                    dot={{ r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                    name="goalProgress"
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          ) : (
+                            <div className="py-8 text-center text-muted-foreground">
+                              No projection data available
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     </TabsContent>
@@ -1000,113 +992,57 @@ const FinancialPlanningPage: React.FC = () => {
 
           {/* Tab 3: Planning (Combined) */}
           <TabsContent value="planning" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Spending Scenario Planning */}
-              {spendingData && (
+            {/* Spending Scenario Planning */}
+            {spendingData && (
+              <div>
+                <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                  <Target className="h-5 w-5" />
+                  Spending Scenario Planning
+                </h3>
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Spending Scenario Planning
-                    </CardTitle>
-                  </CardHeader>
                   <CardContent className="space-y-4">
-                    <SpendingScenarioSimulator
-                      monthlyIncome={spendingData.monthlyIncome}
-                      monthlySpending={spendingData.monthlySpending}
-                      onScenarioChange={setScenario}
+                  <SpendingScenarioSimulator
+                    monthlyIncome={spendingData.monthlyIncome}
+                    monthlySpending={spendingData.monthlySpending}
+                    onScenarioChange={setScenario}
+                  />
+                  {scenario && currentState && scenarioState && (
+                    <SpendingImpactCards
+                      current={currentState}
+                      scenario={scenarioState}
+                      dataQuality={dataQuality}
                     />
-                    {scenario && currentState && scenarioState && (
-                      <SpendingImpactCards
-                        current={currentState}
-                        scenario={scenarioState}
-                        dataQuality={dataQuality}
-                      />
-                    )}
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => setActiveTab('current')}
-                    >
-                      View Full Spending Analysis
-                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setActiveTab('current')}
+                  >
+                    View Full Spending Analysis
+                  </Button>
                   </CardContent>
                 </Card>
-              )}
-
-              {/* Cash Flow Projections Summary */}
-              {cashFlowData && !cashFlowData.message && scenarios && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Long-term Projections
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-3">
-                      {(['conservative', 'realistic', 'optimistic'] as const).map((scenario) => {
-                        const data = scenarios[scenario];
-                        const isSelected = selectedScenario === scenario;
-                        
-                        return (
-                          <div
-                            key={scenario}
-                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                              isSelected ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
-                            }`}
-                            onClick={() => setSelectedScenario(scenario)}
-                          >
-                            <h5 className="text-xs text-muted-foreground mb-1 capitalize">{scenario}</h5>
-                            <p className="text-sm font-bold">{formatCurrency(data.finalValue)}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {selectedScenarioData && assessment && (
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Goal Progress</span>
-                          <span className="font-medium">
-                            {selectedScenarioData.goalAchieved ? '100%' : `${((selectedScenarioData.finalValue / assessment.targetAmount) * 100).toFixed(1)}%`}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Time to Goal</span>
-                          <span className="font-medium">{selectedScenarioData.monthsToGoal} months</span>
-                        </div>
-                      </div>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => setActiveTab('projections')}
-                    >
-                      View Detailed Projections
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Combined Goal Impact */}
             {goalsData && goalsData.goals.length > 0 && scenario && currentState && scenarioState && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Goal Impact Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <GoalImpactDisplay
-                    goals={goalsData.goals}
-                    currentInvestmentAllocation={currentState.investmentMonthly}
-                    scenarioInvestmentAllocation={scenarioState.investmentMonthly}
-                    dataQuality={dataQuality}
-                  />
-                </CardContent>
-              </Card>
+              <div>
+                <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                  <Target className="h-5 w-5" />
+                  Goal Impact Analysis
+                </h3>
+                <Card>
+                  <CardContent>
+                    <GoalImpactDisplay
+                      goals={goalsData.goals}
+                      currentInvestmentAllocation={currentState.investmentMonthly}
+                      scenarioInvestmentAllocation={scenarioState.investmentMonthly}
+                      dataQuality={dataQuality}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </TabsContent>
         </Tabs>

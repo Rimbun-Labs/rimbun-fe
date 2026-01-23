@@ -548,7 +548,7 @@ const Dashboard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/financial-planning')}
+                    onClick={() => navigate('/spending')}
                     className="flex items-center gap-2"
                   >
                     View Details
@@ -600,7 +600,7 @@ const Dashboard = () => {
                           title="No Spending Data Yet"
                           description="Add your spending information to see insights, recommendations, and track your financial status"
                           actionText="Set Up Spending Analysis"
-                          onAction={() => navigate('/financial-planning?tab=current')}
+                          onAction={() => navigate('/spending')}
                           variant="compact"
                         />
                         {/* Preview/Teaser Content */}
@@ -720,7 +720,7 @@ const Dashboard = () => {
       <Dialog open={showWelcome} onOpenChange={(open) => dispatch({ type: 'SET_WELCOME', show: open })}>
         <DialogContent className="sm:max-w-2xl p-8">
           <DialogHeader className="space-y-4">
-            <DialogTitle className="text-2xl">Welcome to InvestLearn!</DialogTitle>
+            <DialogTitle className="text-2xl">Welcome to Rimbun!</DialogTitle>
             <DialogDescription className="text-lg">
               Let's get started with your personalized investment journey.
             </DialogDescription>
