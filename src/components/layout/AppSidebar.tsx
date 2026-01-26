@@ -89,7 +89,7 @@ const AppSidebar: React.FC = () => {
           cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
             isActive 
-              ? "bg-accent text-accent-foreground border-primary" 
+              ? "bg-accent !text-accent-foreground border-primary" 
               : "text-muted-foreground sidebar-nav-inactive border-border",
             !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
           )
@@ -112,7 +112,7 @@ const AppSidebar: React.FC = () => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
+                isActive ? "bg-accent !text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
               )
             }
           >
@@ -328,7 +328,7 @@ const AppSidebar: React.FC = () => {
                     cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
                       isActive 
-                        ? "bg-accent text-accent-foreground border-primary" 
+                        ? "bg-accent !text-accent-foreground border-primary" 
                         : "text-muted-foreground sidebar-nav-inactive border-border"
                     )
                   }

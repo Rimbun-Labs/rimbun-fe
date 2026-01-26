@@ -312,7 +312,7 @@ const getFamilyColor = (familyId: string, index: number): string => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Goal Progress Timeline</CardTitle>
           <CardDescription>Visualize your financial goals over time</CardDescription>
@@ -326,7 +326,7 @@ const getFamilyColor = (familyId: string, index: number): string => {
 
   if (!goals.length) {
     return (
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Goal Progress Timeline</CardTitle>
           <CardDescription>Visualize your financial goals over time</CardDescription>
@@ -341,7 +341,7 @@ const getFamilyColor = (familyId: string, index: number): string => {
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>

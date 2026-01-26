@@ -31,6 +31,25 @@ export function mapProductType(apiType: string): BankingProductType {
 }
 
 /**
+ * Map frontend product type to backend API product type
+ * Used when sending productType filter to the backend API
+ */
+export function mapProductTypeToBackend(frontendType: BankingProductType): string {
+  const reverseMap: Record<BankingProductType, string> = {
+    'savings': 'savings_account',
+    'cd': 'fixed_deposit',
+    'credit_card': 'credit_card',
+    'loan': 'loan',
+    'checking': 'checking_account',
+    'money_market': 'money_market',
+    'debit_card': 'debit_card',
+    'virtual_prepaid_card': 'virtual_prepaid_card',
+  };
+  
+  return reverseMap[frontendType] || 'savings_account';
+}
+
+/**
  * Map eligibility boolean + gaps to status string
  */
 export function mapEligibilityStatus(

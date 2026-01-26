@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
-import { ProductFilters, SortOption, ProductTypeFilter } from './ProductFilters';
+import { SortOption } from './ProductFilters';
 import { ProductCategorySection } from './ProductCategorySection';
 import { ProductSearch } from './ProductSearch';
 import { BankingProduct } from '@/lib/api/types/banking';
 import { useBankingRecommendations } from '@/hooks/useBankingProducts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sparkles } from 'lucide-react';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -44,24 +45,21 @@ export const RecommendationsTab = ({
   onAddToCompare 
 }: RecommendationsTabProps) => {
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<ProductTypeFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('matchScore');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchMode, setSearchMode] = useState<'product' | 'institution'>('product');
 
+  // Always get all products - no type filtering
   const { data, isLoading, error } = useBankingRecommendations({
-    productType: selectedType !== 'all' ? selectedType : undefined,
+    disableTypeFiltering: true, // Always disable backend type filtering to get all products
   });
 
   const filteredProducts = useMemo(() => {
     if (!data?.products) return [];
     let products = [...data.products];
     
-    if (selectedType !== 'all') {
-      products = products.filter(p => p.type === selectedType);
-    }
-    
-    // Add search filtering
+    // Backend handles type filtering now, so we don't need to filter by type here
+    // Only apply search filtering (backend doesn't support search for recommendations)
     if (searchQuery) {
       const queryLower = searchQuery.toLowerCase();
       products = products.filter(p => 
@@ -72,7 +70,7 @@ export const RecommendationsTab = ({
     }
     
     return sortProducts(products, sortBy);
-  }, [data, selectedType, sortBy, searchQuery]);
+  }, [data, sortBy, searchQuery]);
 
   const productsByType = useMemo(() => {
     if (!filteredProducts.length) return {};
@@ -133,12 +131,13 @@ export const RecommendationsTab = ({
     );
   }
 
+  // If no data, show empty state (since query is enabled, assessment is done)
   if (!data || data.products.length === 0) {
     return (
       <EnhancedEmptyState
         icon={Target}
-        title="No Recommendations Yet"
-        description="Complete your financial assessment to see personalized banking product recommendations."
+        title="No recommendations available"
+        description="No products match your profile. Try adjusting your search or check back later."
         variant="default"
       />
     );
@@ -167,16 +166,20 @@ export const RecommendationsTab = ({
         availableInstitutions={availableBanks}
       />
 
-      <ProductFilters
-        selectedType={selectedType}
-        selectedGoal="all"
-        sortBy={sortBy}
-        onTypeChange={setSelectedType}
-        onGoalChange={() => {}}
-        onSortChange={setSortBy}
-        availableGoals={[]}
-        availableTypes={availableTypes}
-      />
+      {/* Sort dropdown only - type filter removed since products are already grouped by type */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="matchScore">Match Score</SelectItem>
+            <SelectItem value="eligibility">Eligibility</SelectItem>
+            <SelectItem value="productType">Product Type</SelectItem>
+            <SelectItem value="name">Name</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {Object.keys(productsByType).length > 0 ? (
         <div className="space-y-4">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { EducationalAnalysisResponse } from '@/lib/api/assetAnalyzerApi';
+import { useSession } from '@/contexts/SessionContext';
 import { 
   formatMarketCap,
   formatPercentage,
@@ -33,6 +35,8 @@ export const EducationalMode: React.FC<EducationalModeProps> = ({
   data,
   isLoading
 }) => {
+  const navigate = useNavigate();
+  const { session } = useSession();
 
   if (isLoading) {
     return (
@@ -251,18 +255,30 @@ export const EducationalMode: React.FC<EducationalModeProps> = ({
         transition={{ delay: 0.8 }}
         className="flex flex-wrap gap-3"
       >
-        <Button variant="default" className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4" />
-          Learn More About Investing
+        <Button variant="default" asChild className="flex items-center gap-2">
+          <Link to="/learning">
+            <BookOpen className="h-4 w-4" />
+            Learn More About Investing
+          </Link>
         </Button>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Target className="h-4 w-4" />
-          Review My Profile
+        <Button variant="outline" asChild className="flex items-center gap-2">
+          <Link to="/profile">
+            <Target className="h-4 w-4" />
+            Review My Profile
+          </Link>
         </Button>
-        <Button variant="outline" className="flex items-center gap-2">
-          <ChevronRight className="h-4 w-4" />
-          Explore Similar Assets
-        </Button>
+        {session?.id && (
+          <Button 
+            variant="outline" 
+            asChild
+            className="flex items-center gap-2"
+          >
+            <Link to={`/investment-explorer/${session.id}`}>
+              <ChevronRight className="h-4 w-4" />
+              Explore Similar Assets
+            </Link>
+          </Button>
+        )}
       </motion.div>
     </div>
   );

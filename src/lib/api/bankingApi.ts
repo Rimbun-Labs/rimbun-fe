@@ -19,12 +19,16 @@ export const bankingApi = {
     productType?: string;
     limit?: number;
     includeIneligible?: boolean;
+    includeFiltered?: boolean;
+    disableTypeFiltering?: boolean;
   }): Promise<BankingProductRecommendationsResponse> {
     const params: Record<string, string> = {};
     if (filters?.goalId) params.goalId = filters.goalId;
     if (filters?.productType) params.productType = filters.productType;
     if (filters?.limit) params.limit = filters.limit.toString();
     if (filters?.includeIneligible) params.includeIneligible = 'true';
+    if (filters?.includeFiltered) params.includeFiltered = 'true';
+    if (filters?.disableTypeFiltering) params.disableTypeFiltering = 'true';
     
     // Add cache-busting parameter
     params._t = Date.now().toString();

@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   DollarSign, 
   PieChart,
-  Shield,
   Lightbulb,
   AlertCircle
 } from "lucide-react";
@@ -21,7 +20,6 @@ import TrendsInsightsCard from '@/components/spending/TrendsInsightsCard';
 import SpendingHistory from '@/components/spending/SpendingHistory';
 import SpendingInput from '@/components/spending/SpendingInput';
 import SpendingCategories from '@/components/spending/SpendingCategories';
-import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
 import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
 
 const SpendingPage: React.FC = () => {
@@ -158,21 +156,7 @@ const SpendingPage: React.FC = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Emergency Fund - Full width */}
-        {spendingData && (
-          <div>
-            <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
-              <Shield className="h-5 w-5" />
-              Emergency Fund
-            </h3>
-            <EmergencyFundAnalysis 
-              data={spendingData}
-              loading={spendingLoading}
-            />
-          </div>
-        )}
-
-        {/* Recommendations - Full width with context */}
+        {/* Recommendations - Includes Savings Rate and Emergency Fund */}
         {recommendations && (
           <div>
             <h3 className="text-xl font-semibold flex items-center gap-2 mb-2">
@@ -183,14 +167,11 @@ const SpendingPage: React.FC = () => {
               Personalized suggestions based on your spending patterns and financial goals. 
               These recommendations help optimize your savings rate, emergency fund progress, and goal achievement timeline.
             </p>
-            <Card>
-              <CardContent>
-                <SpendingRecommendations 
-                  recommendations={recommendations}
-                  loading={recommendationsLoading}
-                />
-              </CardContent>
-            </Card>
+            <SpendingRecommendations 
+              recommendations={recommendations}
+              spendingData={spendingData}
+              loading={recommendationsLoading}
+            />
           </div>
         )}
       </div>

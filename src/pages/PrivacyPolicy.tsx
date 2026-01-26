@@ -2,7 +2,7 @@ import React from 'react';
 
 const PrivacyPolicy: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
       <div className="prose prose-lg max-w-none">
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">Last Updated: {new Date().toLocaleDateString()}</p>
@@ -147,7 +147,6 @@ const PrivacyPolicy: React.FC = () => {
           <p>If you have questions about this Privacy Policy, please contact us:</p>
           <ul className="list-none mb-4">
               <li><strong>Email:</strong> team@rimbun.co</li>
-              <li><strong>Support:</strong> team@rimbun.co</li>
           </ul>
           </section>
 

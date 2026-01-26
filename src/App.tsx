@@ -135,23 +135,23 @@ const AppRoutes = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/cookies" element={<CookiePolicy />} />
+        <Route 
+          path="/explore" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Explore />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/explore/:slug" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <PersonaDetail />
+            </Suspense>
+          } 
+        />
       </Route>
-      <Route 
-        path="/explore" 
-        element={
-          <Suspense fallback={<LoadingState variant="expanded" />}>
-            <Explore />
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/explore/:slug" 
-        element={
-          <Suspense fallback={<LoadingState variant="expanded" />}>
-            <PersonaDetail />
-          </Suspense>
-        } 
-      />
 
       {/* Protected routes with ContentLayout (contained, centered) */}
       <Route

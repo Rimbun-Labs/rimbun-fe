@@ -2,8 +2,7 @@ import React from 'react';
 
 const AboutUs: React.FC = () => {
   return (
-    <div className="w-full flex justify-center">
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
       <div className="prose prose-lg max-w-none">
         <h1 className="text-4xl font-bold mb-8">About Us</h1>
         
@@ -70,7 +69,6 @@ const AboutUs: React.FC = () => {
           </p>
         </section>
       </div>
-    </div>
     </div>
   );
 };

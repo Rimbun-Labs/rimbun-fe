@@ -32,7 +32,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
 
   return (
     <div className={cn(SPACING.page.container, className)}>
-      <div className={cn(spacingClass, className)}>
+      <div className={cn('w-full', spacingClass, className)}>
         {children}
       </div>
     </div>

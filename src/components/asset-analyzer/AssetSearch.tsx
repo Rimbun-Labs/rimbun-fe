@@ -279,31 +279,49 @@ export const AssetSearch: React.FC<AssetSearchProps> = ({
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
                 >
-                  {searchResults.map((result, index) => (
-                    <div
-                      key={index}
-                      className="p-4 hover:bg-muted/50 cursor-pointer border-b border-border last:border-b-0"
-                      onClick={() => handleAssetClick(result.symbol)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <TrendingUp className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <div className="font-medium text-foreground">{result.symbol}</div>
-                            <div className="text-sm text-muted-foreground">{result.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {result.type} • {result.region}
+                  {searchResults.map((result, index) => {
+                    const isSelected = selectedForComparison.includes(result.symbol);
+                    return (
+                      <div
+                        key={index}
+                        className="p-4 hover:bg-muted/50 cursor-pointer border-b border-border last:border-b-0 relative group"
+                        onClick={() => handleAssetClick(result.symbol)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <TrendingUp className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-foreground">{result.symbol}</div>
+                              <div className="text-sm text-muted-foreground">{result.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {result.type} • {result.region}
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {result.currency}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              type="button"
+                              className="p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleComparisonToggle(result.symbol);
+                              }}
+                            >
+                              <GitCompare className={`h-3 w-3 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                            </Button>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          {result.currency}
-                        </Badge>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -322,18 +340,35 @@ export const AssetSearch: React.FC<AssetSearchProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {recentSearches.map((symbol, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleAssetClick(symbol)}
-                  className="flex items-center gap-2"
-                >
-                  <Star className="h-3 w-3" />
-                  {symbol}
-                </Button>
-              ))}
+              {recentSearches.map((symbol, index) => {
+                const isSelected = selectedForComparison.includes(symbol);
+                return (
+                  <div key={index} className="relative group">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAssetClick(symbol)}
+                      className="flex items-center gap-2 pr-8"
+                    >
+                      <Star className="h-3 w-3" />
+                      {symbol}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      className="absolute right-0 top-0 p-1 h-full w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleComparisonToggle(symbol);
+                      }}
+                    >
+                      <GitCompare className={`h-3 w-3 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -383,8 +418,10 @@ export const AssetSearch: React.FC<AssetSearchProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
+                    type="button"
                     className="absolute top-2 right-2 p-1 h-6 w-6"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       handleComparisonToggle(suggestion.symbol);
                     }}
@@ -413,13 +450,21 @@ export const AssetSearch: React.FC<AssetSearchProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedForComparison([])}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedForComparison([]);
+                  }}
                 >
                   Clear
                 </Button>
                 <Button
                   size="sm"
-                  onClick={handleCompareClick}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCompareClick();
+                  }}
                   disabled={selectedForComparison.length < 2}
                 >
                   Compare Assets

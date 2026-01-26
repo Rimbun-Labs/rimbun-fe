@@ -101,8 +101,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
               className={cn(
                 "hidden md:flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 location.pathname === "/home"
-                  ? "text-foreground bg-accent"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  ? "text-accent-foreground bg-accent"
+                  : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
               )}
             >
               Home

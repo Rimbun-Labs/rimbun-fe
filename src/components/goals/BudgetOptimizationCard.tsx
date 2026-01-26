@@ -42,7 +42,7 @@ export const BudgetOptimizationCard: React.FC<BudgetOptimizationCardProps> = ({
   const { totalRequested, availableBudget, isOverBudget, overBudgetAmount, warnings, suggestions, isStaleAssessment } = budgetValidation;
 
   return (
-    <Card className="border-amber-200 dark:border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20">
+    <Card className="border-amber-200 dark:border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20 w-full">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>

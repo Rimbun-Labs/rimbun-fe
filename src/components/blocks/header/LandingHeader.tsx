@@ -148,7 +148,7 @@ export const LandingHeader = () => {
                   transition={{ delay: 0.7 }}
                   className="flex items-center gap-3"
                 >
-                  <Button asChild variant="outline" size="sm" className="border-border hover:bg-muted">
+                  <Button asChild variant="outline" size="sm" className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent">
                     <Link to="/login">Sign In</Link>
                   </Button>
                   <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">

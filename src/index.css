@@ -253,6 +253,16 @@
     @apply text-gray-300 hover:text-gray-100;
   }
 
+  /* Ensure accent backgrounds always use dark text - direct CSS rule for reliability */
+  .bg-accent {
+    color: hsl(var(--accent-foreground)) !important;
+  }
+  
+  /* Also ensure it works in dark mode */
+  .dark .bg-accent {
+    color: hsl(var(--accent-foreground)) !important;
+  }
+
   .dark .form-label-secondary {
     @apply text-gray-300;
   }

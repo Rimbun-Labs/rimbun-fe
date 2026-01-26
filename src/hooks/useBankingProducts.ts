@@ -26,6 +26,8 @@ export function useBankingRecommendations(filters?: {
   productType?: string;
   limit?: number;
   includeIneligible?: boolean;
+  includeFiltered?: boolean;
+  disableTypeFiltering?: boolean;
 }) {
   const { user } = useAuth();
   const { session } = useSession();
@@ -41,6 +43,7 @@ export function useBankingRecommendations(filters?: {
     },
     enabled: !!user && !!session?.isCompleted, // Only fetch when assessment is completed
     staleTime: 5 * 60 * 1000, // 5 minutes
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching new filter
   });
 }
 

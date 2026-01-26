@@ -58,9 +58,9 @@ export const GoalSummaryCards = ({ summary, isLoading }: GoalSummaryCardsProps) 
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 w-full">
       {cards.map(({ label, value, icon: Icon, accent, progress }) => (
-        <Card key={label} className="border-muted">
+        <Card key={label} className="border-muted w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {label}

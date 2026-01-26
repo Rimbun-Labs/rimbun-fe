@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Send, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { contactApi } from '@/lib/api/contactApi';
 
 const CONTACT_EMAIL = "team@rimbun.co";
 
@@ -22,7 +23,7 @@ const Contact: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.message) {
@@ -32,26 +33,27 @@ const Contact: React.FC = () => {
 
     setIsSubmitting(true);
     
-    // Create mailto link with form data
-    const subject = encodeURIComponent(formData.subject || 'Contact from Rimbun');
-    const body = encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-    );
-    const mailtoLink = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
-    
-    // Reset form after a short delay
-    setTimeout(() => {
+    try {
+      await contactApi.sendContactMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || 'Contact from Rimbun',
+        message: formData.message
+      });
+      
+      // Reset form on success
       setFormData({ name: '', email: '', subject: '', message: '' });
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+    } catch (error: any) {
+      console.error('Failed to send message:', error);
+      toast.error(error.message || 'Failed to send message. Please try again later.');
+    } finally {
       setIsSubmitting(false);
-      toast.success('Opening your email client...');
-    }, 500);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
       <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -100,7 +102,7 @@ const Contact: React.FC = () => {
           <CardHeader>
             <CardTitle>Send us a Message</CardTitle>
             <CardDescription>
-              Fill out the form below and we'll open your email client to send us a message
+              Fill out the form below and we'll receive your message directly
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -159,12 +161,12 @@ const Contact: React.FC = () => {
                 {isSubmitting ? (
                   <>
                     <Send className="h-4 w-4 mr-2 animate-pulse" />
-                    Opening Email Client...
+                    Sending...
                   </>
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Open Email Client
+                    Send
                   </>
                 )}
               </Button>
@@ -174,9 +176,8 @@ const Contact: React.FC = () => {
               <p className="text-sm text-muted-foreground flex items-start gap-2">
                 <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  Clicking "Open Email Client" will open your default email application with the message 
-                  pre-filled. If you don't have an email client configured, you can copy our email address 
-                  above and send us a message directly.
+                  Your message will be sent directly to us. We typically respond within 24-48 hours. 
+                  For urgent matters, please include "URGENT" in your subject line.
                 </span>
               </p>
             </div>

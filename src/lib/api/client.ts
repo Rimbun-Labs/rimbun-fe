@@ -12,8 +12,8 @@ export const apiClient = axios.create({
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
   async (config) => {
-    // Skip auth for public endpoints (personas)
-    const isPublicEndpoint = config.url?.includes('/personas');
+    // Skip auth for public endpoints (personas, contact)
+    const isPublicEndpoint = config.url?.includes('/personas') || config.url?.includes('/contact');
     
     if (isPublicEndpoint) {
       // Remove any existing auth header for public endpoints

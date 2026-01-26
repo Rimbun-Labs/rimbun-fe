@@ -302,6 +302,7 @@ export const AssetAnalyzerTab: React.FC<AssetAnalyzerTabProps> = ({ className })
             <ComparisonView
               data={comparisonData}
               isLoading={isLoading}
+              onBackToSearch={handleBackToSearch}
             />
           ) : (
             <EmptyState

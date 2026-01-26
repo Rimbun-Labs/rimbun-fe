@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Shield, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { SpendingAnalysisDto } from '@/lib/api/spendingApi';
 import { useFormatters } from '@/hooks/useFormatters';
 
@@ -16,6 +17,7 @@ const EmergencyFundAnalysis: React.FC<EmergencyFundAnalysisProps> = ({
   loading 
 }) => {
   const { formatCurrency, formatPercentage } = useFormatters();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (loading) {
     return (
@@ -89,25 +91,50 @@ const EmergencyFundAnalysis: React.FC<EmergencyFundAnalysisProps> = ({
   const StatusIcon = statusInfo.icon;
 
   return (
-    <div className="space-y-6">
-      {/* Status Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Emergency Fund Analysis
+            Emergency Fund
           </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Status Badge */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-center">
-              <Badge className={`${statusInfo.color} text-lg px-4 py-2`}>
-                <StatusIcon className="h-4 w-4 mr-2" />
-                {statusInfo.message}
-              </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="h-8 w-8 p-0"
+          >
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Compact Summary - Always Visible */}
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <StatusIcon className={`h-5 w-5 ${statusInfo.color.includes('green') ? 'text-green-600' : statusInfo.color.includes('yellow') ? 'text-yellow-600' : statusInfo.color.includes('blue') ? 'text-blue-600' : 'text-gray-600'}`} />
+            <div>
+              <p className="text-sm font-medium">{statusInfo.message}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatCurrency(currentEmergencyFund)} / {recommendedEmergencyFund > 0 ? formatCurrency(recommendedEmergencyFund) : 'Target not set'}
+              </p>
             </div>
-            
+          </div>
+          {recommendedEmergencyFund > 0 && (
+            <div className="text-right">
+              <p className="text-sm font-bold">{isNaN(progressPercentage) ? '0' : progressPercentage.toFixed(0)}%</p>
+              <p className="text-xs text-muted-foreground">Progress</p>
+            </div>
+          )}
+        </div>
+
+        {/* Expanded Details - Only when expanded */}
+        {isExpanded && (
+          <div className="space-y-6 pt-4 border-t">
             {/* Coverage Information */}
             <div className="text-center space-y-1">
               <p className="text-sm text-muted-foreground">
@@ -122,7 +149,6 @@ const EmergencyFundAnalysis: React.FC<EmergencyFundAnalysisProps> = ({
                 </p>
               )}
             </div>
-          </div>
 
           {/* Progress Bar */}
           {recommendedEmergencyFund > 0 && (
@@ -150,58 +176,9 @@ const EmergencyFundAnalysis: React.FC<EmergencyFundAnalysisProps> = ({
             </p>
           </div>
 
-          {/* Recommendations */}
+          {/* Emergency Fund Calculator */}
           <div className="space-y-4">
-            <h4 className="font-medium">Recommendations</h4>
-            {emergencyFundStatus?.status === 'insufficient' && (
-              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                <h5 className="font-medium text-yellow-800 dark:text-yellow-400 mb-2">Build Your Emergency Fund</h5>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-2">
-                  You currently have {monthsOfExpenses.toFixed(1)} months of expenses covered. 
-                  Aim for at least 3-6 months for adequate coverage.
-                </p>
-                <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-                  <li>• Target: {formatCurrency(recommendedEmergencyFund)} ({targetMonths > 0 ? `${targetMonths.toFixed(1)} months` : '6 months recommended'})</li>
-                  <li>• Set up automatic transfers to a high-yield savings account</li>
-                  <li>• Consider reducing discretionary spending temporarily</li>
-                </ul>
-              </div>
-            )}
-
-            {emergencyFundStatus?.status === 'adequate' && (
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <h5 className="font-medium text-green-800 dark:text-green-400 mb-2">Great Job!</h5>
-                <p className="text-sm text-green-700 dark:text-green-300">
-                  You have {monthsOfExpenses.toFixed(1)} months of expenses covered, which is adequate. 
-                  {recommendedEmergencyFund > currentEmergencyFund && (
-                    <span> Continue building toward your {targetMonths > 0 ? `${targetMonths.toFixed(1)}-month` : ''} target of {formatCurrency(recommendedEmergencyFund)}.</span>
-                  )}
-                  {recommendedEmergencyFund <= currentEmergencyFund && (
-                    <span> Consider investing excess funds or increasing your retirement contributions.</span>
-                  )}
-                </p>
-              </div>
-            )}
-
-            {emergencyFundStatus?.status === 'excessive' && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <h5 className="font-medium text-blue-800 dark:text-blue-400 mb-2">Consider Optimizing</h5>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  You have {monthsOfExpenses.toFixed(1)} months of expenses covered, which exceeds the recommended 6 months. 
-                  Consider investing excess funds for better long-term returns.
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Emergency Fund Calculator */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Emergency Fund Calculator</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+            <h4 className="font-medium text-sm">Emergency Fund Calculator</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="flex items-center gap-3">
@@ -234,9 +211,11 @@ const EmergencyFundAnalysis: React.FC<EmergencyFundAnalysisProps> = ({
               <p className="text-lg font-bold">{formatCurrency(monthlySpending * 12)}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

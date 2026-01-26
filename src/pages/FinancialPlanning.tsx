@@ -48,7 +48,6 @@ import TrendsInsightsCard from '@/components/spending/TrendsInsightsCard';
 import SpendingHistory from '@/components/spending/SpendingHistory';
 import SpendingInput from '@/components/spending/SpendingInput';
 import SpendingCategories from '@/components/spending/SpendingCategories';
-import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
 import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
 import SpendingScenarioSimulator, { SpendingScenario } from '@/components/spending/SpendingScenarioSimulator';
 import SpendingImpactCards from '@/components/spending/SpendingImpactCards';
@@ -461,25 +460,7 @@ const FinancialPlanningPage: React.FC = () => {
               </Tabs>
             </div>
 
-            {/* Emergency Fund - Full width */}
-            {spendingData && (
-              <div>
-                <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
-                  <Shield className="h-5 w-5" />
-                  Emergency Fund
-                </h3>
-                <Card>
-                  <CardContent>
-                    <EmergencyFundAnalysis 
-                      data={spendingData}
-                      loading={spendingLoading}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Recommendations - Full width with context */}
+            {/* Recommendations - Includes Savings Rate and Emergency Fund */}
             {recommendations && (
               <div>
                 <h3 className="text-xl font-semibold flex items-center gap-2 mb-2">
@@ -490,14 +471,11 @@ const FinancialPlanningPage: React.FC = () => {
                   Personalized suggestions based on your spending patterns and financial goals. 
                   These recommendations help optimize your savings rate, emergency fund progress, and goal achievement timeline.
                 </p>
-                <Card>
-                  <CardContent>
-                    <SpendingRecommendations 
-                      recommendations={recommendations}
-                      loading={recommendationsLoading}
-                    />
-                  </CardContent>
-                </Card>
+                <SpendingRecommendations 
+                  recommendations={recommendations}
+                  spendingData={spendingData}
+                  loading={recommendationsLoading}
+                />
               </div>
             )}
           </TabsContent>

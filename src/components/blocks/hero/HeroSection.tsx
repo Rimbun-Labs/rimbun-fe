@@ -124,7 +124,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                     <div className="flex-1">
                       <h4 className={cn(
                         "font-medium transition-colors duration-500",
-                        currentStage === index ? "text-primary" : "text-foreground"
+                        currentStage === index ? "text-[#49AEB8]" : "text-foreground"
                       )}>
                         {stage.title}
                       </h4>
@@ -175,7 +175,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 asChild 
                 variant="outline" 
                 size="lg"
-                className="group border-border hover:bg-muted hover:text-foreground"
+                className="group border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent"
               >
                 <Link to="/login">
                   <span className="flex items-center">

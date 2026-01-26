@@ -123,7 +123,7 @@ export const AllocationStrategySimulator = ({
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CardHeader>
           <CollapsibleTrigger asChild>

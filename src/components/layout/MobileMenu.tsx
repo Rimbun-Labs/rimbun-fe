@@ -75,7 +75,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/home') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -88,7 +88,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/dashboard${session?.id ? `/${session.id}` : ''}`) 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -101,7 +101,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/goals') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -114,7 +114,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/assessment') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -127,7 +127,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/spending-analysis') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -140,7 +140,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/cash-flow-projections') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -160,7 +160,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/banking-products') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -173,7 +173,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/investment-explorer/${session?.id}`) 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive",
                 !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
               )}
@@ -195,7 +195,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/learning') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -208,7 +208,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive(`/learning-path/${session?.id}`) 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}
@@ -228,7 +228,7 @@ const MobileMenu: React.FC = () => {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
                 isActive('/profile') 
-                  ? "bg-accent text-accent-foreground" 
+                  ? "bg-accent !text-accent-foreground" 
                   : "text-muted-foreground sidebar-nav-inactive"
               )}
               onClick={closeMobileMenu}

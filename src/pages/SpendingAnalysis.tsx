@@ -15,7 +15,6 @@ import TrendsInsightsCard from '@/components/spending/TrendsInsightsCard';
 import SpendingHistory from '@/components/spending/SpendingHistory';
 import SpendingInput from '@/components/spending/SpendingInput';
 import SpendingCategories from '@/components/spending/SpendingCategories';
-import EmergencyFundAnalysis from '@/components/spending/EmergencyFundAnalysis';
 import SpendingRecommendations from '@/components/spending/SpendingRecommendations';
 
 // Phase 3 components
@@ -296,40 +295,13 @@ const SpendingAnalysisPage: React.FC = () => {
 
           {/* Right Sidebar (1/3 width) - Always Visible */}
           <div className="space-y-6">
-            {/* Emergency Fund Analysis - Always Visible */}
-            {spendingData && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Emergency Fund
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <EmergencyFundAnalysis 
-                    data={spendingData}
-                    loading={spendingLoading}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Recommendations - Always Visible */}
+            {/* Recommendations - Includes Savings Rate and Emergency Fund */}
             {recommendations && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5" />
-                    Recommendations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SpendingRecommendations 
-                    recommendations={recommendations}
-                    loading={recommendationsLoading}
-                  />
-                </CardContent>
-              </Card>
+              <SpendingRecommendations 
+                recommendations={recommendations}
+                spendingData={spendingData}
+                loading={recommendationsLoading}
+              />
             )}
           </div>
         </div>

@@ -21,7 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, PlusCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, PlusCircle, RefreshCw, Target } from 'lucide-react';
+import { PageHeader, PageContainer } from '@/components/layout';
 import { GoalType, GoalWithInsightsDto } from '@/lib/api/types/goals';
 import {
   AlertDialog,
@@ -95,14 +96,13 @@ const GoalsPage = () => {
   }, [data?.goals, searchTerm, typeFilter]);
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Goals</h1>
-          <p className="text-muted-foreground">
-            Track every financial objective, monitor progress, and adjust plans.
-          </p>
-        </div>
+    <PageContainer>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+        <PageHeader
+          icon={Target}
+          title="Goals"
+          description="Track every financial objective, monitor progress, and adjust plans."
+        />
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -115,41 +115,44 @@ const GoalsPage = () => {
         </div>
       </div>
 
-      <GoalSummaryCards summary={data?.summary} isLoading={isLoading} />
+      {/* Main Content */}
+      <div className="space-y-6 mt-6">
+        <GoalSummaryCards summary={data?.summary} isLoading={isLoading} />
 
-      {/* Budget Optimization Warning */}
-      {!isLoading && data?.budgetValidation && data.budgetValidation.isOverBudget && (
-        <BudgetOptimizationCard budgetValidation={data.budgetValidation} />
-      )}
+        {/* Budget Optimization Warning */}
+        {!isLoading && data?.budgetValidation && data.budgetValidation.isOverBudget && (
+          <BudgetOptimizationCard budgetValidation={data.budgetValidation} />
+        )}
 
-      {/* Goal Progress Timeline Chart */}
-      <GoalProgressTimeline
-        goals={data?.goals}
-        isLoading={isLoading}
-        familySummaries={familySummaries?.families}
-      />
+        {/* Goal Progress Timeline Chart */}
+        <GoalProgressTimeline
+          goals={data?.goals}
+          isLoading={isLoading}
+          familySummaries={familySummaries?.families}
+        />
 
-      {/* Allocation Strategy Simulator */}
-      <AllocationStrategySimulator
-        goals={data?.goals ?? []}
-        budgetValidation={data?.budgetValidation}
-        familySummaries={familySummaries?.families}
-        isLoading={isLoading}
-      />
+        {/* Allocation Strategy Simulator */}
+        <AllocationStrategySimulator
+          goals={data?.goals ?? []}
+          budgetValidation={data?.budgetValidation}
+          familySummaries={familySummaries?.families}
+          isLoading={isLoading}
+        />
 
-      <GoalFamiliesOverview
-        summaries={familySummaries}
-        isLoading={isFamilySummaryLoading}
-        onSelectFamily={(family) => navigate(`/goals/family/${family.slug}`)}
-      />
+        <GoalFamiliesOverview
+          summaries={familySummaries}
+          isLoading={isFamilySummaryLoading}
+          onSelectFamily={(family) => navigate(`/goals/family/${family.slug}`)}
+        />
 
-      {isError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Unable to load goals</AlertTitle>
-          <AlertDescription>Check your connection and try again.</AlertDescription>
-        </Alert>
-      )}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Unable to load goals</AlertTitle>
+            <AlertDescription>Check your connection and try again.</AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       <GoalFormDialog
         open={isFormOpen}
@@ -195,7 +198,7 @@ const GoalsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 };
 

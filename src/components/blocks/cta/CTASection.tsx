@@ -101,7 +101,7 @@ export const CTASection = ({ className }: CTASectionProps) => {
                 asChild 
                 variant="outline" 
                 size="lg"
-                className="border-border hover:bg-muted hover:text-foreground"
+                className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent"
               >
                 <Link to="/login">
                   <span className="flex items-center">

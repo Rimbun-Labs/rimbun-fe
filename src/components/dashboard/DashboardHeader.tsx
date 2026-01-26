@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from 'react-router-dom';
-import { BarChart, BookOpen, Lightbulb, MoreHorizontal, TrendingUp } from 'lucide-react';
+import { BarChart, Lightbulb, MoreHorizontal, TrendingUp } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
 import {
   DropdownMenu,
@@ -49,12 +49,6 @@ const DashboardHeader = () => {
                 <Link to="/assessment?mode=retake" className="flex items-center">
                   <BarChart className="h-4 w-4 mr-2" />
                   Retake Assessment
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/learning" className="flex items-center">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Learning Library
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

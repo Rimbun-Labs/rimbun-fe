@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { ProfileProvider, useProfile } from '@/contexts/ProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -32,9 +33,10 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { SubscriptionTier } from '@/lib/api/types/subscription';
 import { updateSubscription } from '@/lib/api/subscriptionApi';
 import { authService } from '@/lib/auth/authService';
+import { getUserSessions } from '@/lib/api/assessmentApi';
 
 const ProfileContent = () => {
-  const { profile, isLoading, error, updateProfileData } = useProfile();
+  const { profile, isLoading, error, updateProfileData, refreshProfile } = useProfile();
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -42,8 +44,48 @@ const ProfileContent = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Assessment count now comes from profile.summary (no need for separate API call)
-  const assessmentCount = profile?.summary?.totalAssessments || 0;
+  // Get assessment count directly from sessions API (most reliable)
+  const databaseUserId = userService.getDatabaseUserId();
+  const { data: userSessions, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['user-sessions', databaseUserId],
+    queryFn: async () => {
+      if (!databaseUserId) return [];
+      return await getUserSessions(databaseUserId);
+    },
+    enabled: !!databaseUserId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Calculate assessment count from completed sessions
+  const assessmentCount = useMemo(() => {
+    // First, try to get count from sessions API (most reliable)
+    if (userSessions && userSessions.length > 0) {
+      const completedSessions = userSessions.filter((session: any) => session.isCompleted === true);
+      if (completedSessions.length > 0) {
+        return completedSessions.length;
+      }
+    }
+    
+    // Fallback to profile data if sessions not loaded yet
+    if (!sessionsLoading && profile) {
+      // Try assessmentHistory length
+      if (profile.assessmentHistory && profile.assessmentHistory.length > 0) {
+        return profile.assessmentHistory.length;
+      }
+      
+      // Fallback to summary totalAssessments
+      if (profile.summary?.totalAssessments && profile.summary.totalAssessments > 0) {
+        return profile.summary.totalAssessments;
+      }
+      
+      // If user has a latestAssessment, show at least 1
+      if (profile.latestAssessment?.sessionId) {
+        return 1;
+      }
+    }
+    
+    return 0;
+  }, [userSessions, sessionsLoading, profile]);
   
   // Form data state
   const [formData, setFormData] = useState({
@@ -107,6 +149,8 @@ const ProfileContent = () => {
     setIsUpdating(true);
     try {
       await updateProfileData(formData);
+      // Refresh profile from backend to get latest data
+      await refreshProfile();
       toast.success('Profile updated successfully!');
     } catch (error) {
       toast.error('Failed to update profile');
@@ -470,7 +514,7 @@ const ProfileContent = () => {
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Assessments Completed</Label>
                             <p className="text-sm text-muted-foreground">
-                              {isLoading ? (
+                              {(isLoading || sessionsLoading) ? (
                                 <Loader2 className="h-3 w-3 animate-spin inline" />
                               ) : (
                                 `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''}`
@@ -485,7 +529,7 @@ const ProfileContent = () => {
                           <div className="space-y-1">
                             <Label className="text-foreground font-medium">Assessment Progress</Label>
                             <p className="text-sm text-muted-foreground">
-                              {isLoading ? (
+                              {(isLoading || sessionsLoading) ? (
                                 <Loader2 className="h-3 w-3 animate-spin inline" />
                               ) : (
                                 `${assessmentCount} assessment${assessmentCount !== 1 ? 's' : ''} completed`

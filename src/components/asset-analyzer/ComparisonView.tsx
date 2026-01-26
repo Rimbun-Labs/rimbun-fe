@@ -26,11 +26,13 @@ import {
 interface ComparisonViewProps {
   data?: ComparisonResponse['data'];
   isLoading: boolean;
+  onBackToSearch?: () => void;
 }
 
 export const ComparisonView: React.FC<ComparisonViewProps> = ({
   data,
-  isLoading
+  isLoading,
+  onBackToSearch
 }) => {
 
   if (isLoading) {
@@ -67,6 +69,9 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
     );
   }
 
+  // Extract symbols from data.assets
+  const symbols = data.assets.map(asset => asset.symbol);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -86,10 +91,16 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             </p>
           </div>
         </div>
-        <Button variant="outline" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to Search
-        </Button>
+        {onBackToSearch && (
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={onBackToSearch}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Search
+          </Button>
+        )}
       </div>
           <div className="space-y-6">
             {/* Asset Cards */}

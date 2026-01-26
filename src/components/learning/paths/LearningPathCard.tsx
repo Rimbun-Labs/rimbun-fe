@@ -6,7 +6,6 @@ import {
   ChevronRight, 
   BookOpen, 
   Clock, 
-  Bookmark,
   CheckCircle2,
   Sparkles
 } from 'lucide-react';
@@ -24,7 +23,6 @@ interface LearningPathCardProps {
 const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content, allocation }) => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
   const [completedSections, setCompletedSections] = React.useState<number[]>([]);
 
   useEffect(() => {
@@ -42,11 +40,6 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
 
   const handleClick = () => {
     navigate(`/learning-path/${sessionId}/${assetClass.toLowerCase()}`);
-  };
-
-  const handleBookmark = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsBookmarked(!isBookmarked);
   };
 
   if (!content) {
@@ -101,21 +94,6 @@ const LearningPathCard: React.FC<LearningPathCardProps> = ({ assetClass, content
         className="absolute left-0 top-0 bottom-0 w-1 bg-primary"
         style={{ height: `${allocation}%` }}
       />
-
-      {/* Quick actions */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8"
-          onClick={handleBookmark}
-        >
-          <Bookmark className={cn(
-            "h-4 w-4",
-            isBookmarked ? "fill-emerald-500 text-emerald-500" : "text-muted-foreground"
-          )} />
-        </Button>
-      </div>
 
       <CardContent className="p-6">
         <div className="flex flex-col h-full">

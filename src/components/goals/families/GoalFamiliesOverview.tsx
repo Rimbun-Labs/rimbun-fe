@@ -38,7 +38,7 @@ export const GoalFamiliesOverview = ({
 
   if (!families.length) {
     return (
-      <Card className="border-dashed border-muted">
+      <Card className="border-dashed border-muted w-full">
         <CardContent className="py-12 text-center text-muted-foreground">
           No goal families available yet.
         </CardContent>
@@ -57,8 +57,8 @@ export const GoalFamiliesOverview = ({
   );
 
   return (
-    <div className="space-y-4">
-      <Card className="border-muted">
+    <div className="space-y-4 w-full">
+      <Card className="border-muted w-full">
         <CardHeader>
           <CardTitle className="text-lg">Goal Families Overview</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ export const GoalFamiliesOverview = ({
           ))}
         </div>
       ) : (
-        <Card className="border-dashed border-muted">
+        <Card className="border-dashed border-muted w-full">
           <CardContent className="py-8 text-center">
             <p className="text-base font-medium">No active goal families yet</p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -107,7 +107,7 @@ export const GoalFamiliesOverview = ({
       )}
 
       {inactiveFamilies.length > 0 && (
-        <Card className="border-muted">
+        <Card className="border-muted w-full">
           <CardHeader>
             <CardTitle className="text-lg">Other pillars to explore</CardTitle>
             <p className="text-sm text-muted-foreground">
