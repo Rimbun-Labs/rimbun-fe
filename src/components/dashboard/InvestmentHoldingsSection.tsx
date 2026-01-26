@@ -117,9 +117,7 @@ export const InvestmentHoldingsSection: React.FC<InvestmentHoldingsSectionProps>
             <EnhancedEmptyState
               icon={TrendingUp}
               title="No Investment Holdings Yet"
-              description="Add your existing investment holdings to track them and get better insights into your portfolio performance"
-              actionText="Add Your First Holding"
-              onAction={handleAddHolding}
+              description="The ability to add investment holdings is currently unavailable. This feature will be available soon."
               variant="compact"
             />
             {/* Preview/Teaser Content */}
@@ -158,17 +156,6 @@ export const InvestmentHoldingsSection: React.FC<InvestmentHoldingsSectionProps>
                     {totalGainLossPercent >= 0 ? '+' : ''}{totalGainLossPercent.toFixed(2)}%
                   </div>
                 </div>
-              </div>
-              <div className="flex justify-center pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddHolding}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Holding
-                </Button>
               </div>
             </div>
 
