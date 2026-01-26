@@ -21,7 +21,7 @@ import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import BankingProductsSection from '@/components/dashboard/BankingProductsSection';
-import InvestmentHoldingsSection from '@/components/dashboard/InvestmentHoldingsSection';
+// import InvestmentHoldingsSection from '@/components/dashboard/InvestmentHoldingsSection'; // Temporarily disabled
 import LearningPathSection from '@/components/dashboard/LearningPathSection';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -698,10 +698,10 @@ const Dashboard = () => {
               savingsRate={spendingData?.savingsRate}
             />
 
-            {/* Investment Holdings Section */}
-            <InvestmentHoldingsSection
+            {/* Investment Holdings Section - Temporarily disabled */}
+            {/* <InvestmentHoldingsSection
               sessionId={effectiveSessionId}
-            />
+            /> */}
 
             {/* Investment Portfolio Section - Moved to Investment Explorer */}
             {/* Detailed portfolio analysis, charts, and recommendations are now in the Investment Explorer page */}
