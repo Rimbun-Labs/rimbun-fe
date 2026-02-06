@@ -4,6 +4,7 @@ import { LandingHeader } from "@/components/blocks/header/LandingHeader";
 import { Footer } from "@/components/blocks/footer";
 import { FloatingShapes } from "@/components/blocks/ui";
 import { DashboardPreview } from "@/components/blocks/dashboard-preview";
+import { BankAnalyticsPreview } from "@/components/blocks/analytics-preview";
 import { motion } from "framer-motion";
 import {
   Building2,
@@ -142,8 +143,51 @@ export default function ForBanks() {
         </div>
       </section>
 
-      {/* Platform / Product */}
-      <section id="platform" className="py-16 md:py-24">
+      {/* Analytics for your team */}
+      <section className="py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h2 className="text-3xl font-bold text-foreground mb-3">
+              Analytics for your team
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Bank partners get access to a dedicated analytics dashboard: engagement metrics, risk profile distribution, financial health and investment preferences, and customer segmentation.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-5xl mx-auto mb-10"
+          >
+            <BankAnalyticsPreview />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <a href="mailto:team@rimbun.co">
+                Request a demo
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/login">Partner sign in</Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Platform / Product — what your customers see */}
+      <section id="platform" className="py-16 md:py-24 bg-muted/30">
         <div className="container px-4 md:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
