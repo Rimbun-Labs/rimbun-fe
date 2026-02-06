@@ -13,6 +13,8 @@ interface FooterProps {
 
 const footerLinks = {
   company: [
+    { name: "For Banks", href: "/for-banks" },
+    { name: "For Individuals", href: "/for-individuals" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" }
   ],
@@ -37,7 +39,7 @@ export const Footer = ({ className }: FooterProps) => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/for-banks" className="flex items-center space-x-3 group">
               <div className="relative group-hover:scale-105 transition-all duration-300">
                 <Logo size="lg" variant="footer" />
               </div>
@@ -50,7 +52,7 @@ export const Footer = ({ className }: FooterProps) => {
             </Link>
             
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Empowering investors with personalized education and AI-driven insights to build confidence and achieve financial goals.
+              Financial education platform for banks and their customers. Personalized learning, goal tracking, and product matching at scale.
             </p>
           </motion.div>
 

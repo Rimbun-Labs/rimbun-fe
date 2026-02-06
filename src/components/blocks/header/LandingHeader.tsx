@@ -17,9 +17,10 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 
 const navigation = [
+  { name: "For Banks", href: "/for-banks" },
+  { name: "For Individuals", href: "/for-individuals" },
   { name: "About", href: "/about" },
-  { name: "How It Works", href: "#how-it-works" },
-  { name: "Features", href: "#features" },
+  { name: "Contact", href: "/contact" },
 ];
 
 
@@ -37,28 +38,6 @@ export const LandingHeader = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const scrollToSection = (href: string) => {
-    // Handle route links
-    if (href.startsWith('/')) {
-      window.location.href = href;
-      return;
-    }
-    
-    // Handle anchor links with offset for fixed header
-    const element = document.querySelector(href);
-    if (element) {
-      const headerHeight = 64; // Height of fixed header
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-    }
-    setIsMobileMenuOpen(false);
-  };
 
   return (
     <>
@@ -80,7 +59,7 @@ export const LandingHeader = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Link to="/home" className="flex items-center space-x-3 group">
+              <Link to="/for-banks" className="flex items-center space-x-3 group">
                 <div className="relative group-hover:scale-105 transition-all duration-300">
                   <Logo size="lg" variant="header" />
                 </div>
@@ -96,16 +75,19 @@ export const LandingHeader = () => {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               {navigation.map((item, index) => (
-                <motion.button
-                  key={item.name}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.1 }}
-                  onClick={() => scrollToSection(item.href)}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-                >
-                  {item.name}
-                </motion.button>
+                <motion.div key={item.name}>
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors duration-200",
+                      (item.href === "/for-banks" ? location.pathname === "/for-banks" || location.pathname === "/" || location.pathname === "/home" : location.pathname === item.href)
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                </motion.div>
               ))}
             </nav>
 
@@ -151,12 +133,21 @@ export const LandingHeader = () => {
                   <Button asChild variant="outline" size="sm" className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent">
                     <Link to="/login">Sign In</Link>
                   </Button>
-                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    <Link to="/signup">
-                      Take Your Assessment
-                      <ArrowRight className="ml-2 h-3 w-3" />
-                    </Link>
-                  </Button>
+                  {location.pathname === "/for-individuals" ? (
+                    <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                      <Link to="/signup">
+                        Take Your Assessment
+                        <ArrowRight className="ml-2 h-3 w-3" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                      <a href="mailto:team@rimbun.co">
+                        Request a demo
+                        <ArrowRight className="ml-2 h-3 w-3" />
+                      </a>
+                    </Button>
+                  )}
                 </motion.div>
               )}
 
@@ -195,9 +186,11 @@ export const LandingHeader = () => {
                   variant="ghost"
                   size="lg"
                   className="w-full justify-start text-left h-12"
-                  onClick={() => scrollToSection(item.href)}
+                  asChild
                 >
-                  {item.name}
+                  <Link to={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                    {item.name}
+                  </Link>
                 </Button>
               ))}
             </div>

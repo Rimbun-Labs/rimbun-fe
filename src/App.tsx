@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SessionProvider } from "./contexts/SessionContext";
 // Removed environment-aware storage - using API-first approach
 import { ThemeProvider } from "./hooks/useTheme";
-import { AppLayout, ContentLayout, PublicLayout } from "./components/layout";
+import { AppLayout, ContentLayout, PublicLayout, LandingLayout } from "./components/layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -17,7 +17,8 @@ import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 // Lightweight pages - keep in main bundle (frequently used, small size)
-import Index from "./pages/Index";
+import ForBanks from "./pages/ForBanks";
+import ForIndividuals from "./pages/ForIndividuals";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -112,8 +113,8 @@ const RootRedirect = () => {
     }
   }
 
-  // If user is not authenticated, show marketing page
-  return <Index />;
+  // If user is not authenticated, show B2B homepage (For Banks)
+  return <ForBanks />;
 };
 
 const AppRoutes = () => {
@@ -126,12 +127,18 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/home" element={<Index />} />
-      
-      {/* Public routes with header */}
-      <Route element={<PublicLayout />}>
+      <Route path="/for-banks" element={<ForBanks />} />
+      <Route path="/home" element={<ForBanks />} />
+      <Route path="/for-individuals" element={<ForIndividuals />} />
+
+      {/* Public routes with same landing header as For Banks / For Individuals */}
+      <Route element={<LandingLayout />}>
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
+      </Route>
+
+      {/* Public routes with app header (legal, explore) */}
+      <Route element={<PublicLayout />}>
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/cookies" element={<CookiePolicy />} />
