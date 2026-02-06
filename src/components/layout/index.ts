@@ -1,6 +1,5 @@
 export { default as AppLayout } from './AppLayout';
 export { default as ContentLayout } from './ContentLayout';
-export { default as FullWidthContentLayout } from './FullWidthContentLayout';
 export { default as BaseLayout } from './BaseLayout';
 export { default as PublicLayout } from './PublicLayout';
 export { default as LandingLayout } from './LandingLayout';
