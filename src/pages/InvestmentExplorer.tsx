@@ -10,12 +10,10 @@ import {
   MessageSquare,
   PieChart,
   TrendingUp,
-  Info,
   BarChart3
 } from 'lucide-react';
 import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplorerChat';
 import { PortfolioSimulator } from '@/components/investment/PortfolioSimulator';
-import { PortfolioQuickReference } from '@/components/investment/PortfolioQuickReference';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { RouteErrorBoundary } from '@/components/error/RouteErrorBoundary';
 import { PageHeader, PageContainer } from '@/components/layout';
@@ -28,8 +26,9 @@ import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state';
+import { getRiskProfileLabel } from '@/lib/constants/displayNames';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 // Lazy load Asset Analyzer to reduce initial bundle size
 const AssetAnalyzerTab = lazy(() => 
@@ -45,7 +44,7 @@ const InvestmentExplorer: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'chat' | 'simulator' | 'analyzer'>('profile');
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch assessment results and recommendations (always fetch for Quick Reference, needed for Simulator)
+  // Fetch assessment results and recommendations (needed for Profile tab and Simulator)
   const { data: assessmentResults, isLoading: assessmentLoading } = useQuery({
     queryKey: ['assessment-results', sessionId],
     queryFn: () => getAssessmentResults(sessionId!),
@@ -121,17 +120,7 @@ const InvestmentExplorer: React.FC = () => {
     return null;
   }
 
-  // Helper function to get risk profile label
-  const getRiskProfileLabel = (score?: number): string => {
-    if (!score) return 'N/A';
-    if (score >= 80) return 'Aggressive';
-    if (score >= 60) return 'Growth-Oriented';
-    if (score >= 40) return 'Balanced';
-    if (score >= 20) return 'Conservative';
-    return 'Very Conservative';
-  };
-
-  // Helper function to get knowledge level label
+  // Helper for knowledge level display (profile tab only)
   const getKnowledgeLevelLabel = (score?: number): string => {
     if (!score) return 'N/A';
     if (score >= 80) return 'Expert';
@@ -157,18 +146,6 @@ const InvestmentExplorer: React.FC = () => {
           </div>
         </div>
       )}
-
-        {/* Quick Reference Card */}
-        {(assessmentResults || recommendations || assessmentLoading || recommendationsLoading) && (
-          <PortfolioQuickReference
-            riskProfile={assessmentResults?.scoreData?.riskProfile}
-            knowledgeLevel={assessmentResults?.scoreData?.knowledgeLevel}
-            allocations={recommendations?.adjustedAllocations}
-            diversificationScore={recommendations?.diversificationAnalysis?.diversificationScore}
-            isLoading={assessmentLoading || recommendationsLoading}
-            sessionId={sessionId}
-          />
-        )}
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className={SPACING.page.subsection}>
@@ -211,14 +188,14 @@ const InvestmentExplorer: React.FC = () => {
           <TabsContent value="profile" className="mt-6 space-y-6">
             {assessmentLoading || recommendationsLoading ? (
               <LoadingState 
-                title="Loading Your Investment Profile"
-                subtitle="Analyzing your assessment results and preparing personalized recommendations"
+                title="Loading your profile"
+                subtitle="Loading your profile and recommendations."
               />
             ) : !assessmentResults?.scoreData && !recommendations?.adjustedAllocations ? (
               <EnhancedEmptyState
                 icon={TrendingUp}
-                title="No Assessment Data Available"
-                description="Complete your investment assessment to see your personalized risk profile, portfolio recommendations, and diversification analysis."
+                title="No profile yet"
+                description="Complete your assessment to see your risk profile and portfolio recommendations."
                 actionText="Complete Assessment"
                 onAction={() => navigate('/assessment')}
               />
@@ -245,14 +222,14 @@ const InvestmentExplorer: React.FC = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-muted-foreground">Risk Profile Score</span>
-                            <span className="text-2xl font-bold">{assessmentResults.scoreData.riskProfile}%</span>
+                            <span className="text-2xl font-bold">{formatScorePercent(assessmentResults.scoreData.riskProfile)}</span>
                           </div>
                           <Progress value={assessmentResults.scoreData.riskProfile} className="h-2" />
                         </div>
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-muted-foreground">Knowledge Level</span>
-                            <span className="text-2xl font-bold">{assessmentResults.scoreData.knowledgeLevel}%</span>
+                            <span className="text-2xl font-bold">{formatScorePercent(assessmentResults.scoreData.knowledgeLevel)}</span>
                           </div>
                           <Progress value={assessmentResults.scoreData.knowledgeLevel} className="h-2" />
                           <p className="text-xs text-muted-foreground">
@@ -282,30 +259,10 @@ const InvestmentExplorer: React.FC = () => {
                 {recommendations?.adjustedAllocations ? (
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-xl">Recommended Portfolio Allocation</CardTitle>
-                          <CardDescription>
-                            Optimal asset distribution based on your risk profile and goals
-                          </CardDescription>
-                        </div>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                className="p-1 rounded-full text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                aria-label="About portfolio allocation"
-                              >
-                                <Info className="h-4 w-4" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <p>This allocation is personalized based on your assessment results and investment goals.</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
+                      <CardTitle className="text-xl">Recommended Portfolio Allocation</CardTitle>
+                      <CardDescription>
+                        Optimal asset mix based on your risk profile and goals.
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="min-h-[400px]">
@@ -319,8 +276,8 @@ const InvestmentExplorer: React.FC = () => {
                 ) : (
                   <EnhancedEmptyState
                     icon={PieChart}
-                    title="No Portfolio Recommendations Yet"
-                    description="Complete your assessment to receive personalized portfolio allocation recommendations based on your risk profile and investment goals."
+                    title="No portfolio recommendations yet"
+                    description="Complete your assessment to see your risk profile and portfolio recommendations."
                     actionText="Complete Assessment"
                     onAction={() => navigate('/assessment')}
                     variant="compact"
@@ -361,8 +318,6 @@ const InvestmentExplorer: React.FC = () => {
           {/* Portfolio Simulator Tab */}
           <TabsContent value="simulator" className="mt-6">
             <PortfolioSimulator
-              currentAllocations={recommendations?.adjustedAllocations}
-              recommendedAllocations={recommendations?.adjustedAllocations}
               riskProfile={assessmentResults?.scoreData?.riskProfile}
               targetAmount={assessmentResults?.scoreData?.directInputs?.targetAmount}
               investmentHorizon={assessmentResults?.scoreData?.directInputs?.investmentHorizon}
@@ -377,6 +332,7 @@ const InvestmentExplorer: React.FC = () => {
               <AssetAnalyzerTab />
             </Suspense>
           </TabsContent>
+
         </Tabs>
     </PageContainer>
   );

@@ -34,6 +34,10 @@ export interface GoalMetadata {
   notes?: string;
   templateId?: string | null;
   checklistItems?: Array<{ id: string; label: string; completed: boolean }>;
+  /** Selected fund IDs for real-fund simulation (backend also reads this when goalFundSelections not in request) */
+  selectedFundIds?: string[];
+  /** Optional weights per fund; length should match selectedFundIds; backend normalizes if omitted */
+  selectedFundWeights?: number[];
 }
 
 export interface GoalAutomationSettings {
@@ -237,11 +241,20 @@ export interface GoalProgressHistoryDto {
 }
 
 // Strategy Simulation Types
+/** Per-goal fund selection for real-fund simulation (use backend fund IDs from funds API) */
+export interface GoalFundSelection {
+  fundIds: string[];
+  /** Optional; if omitted backend uses equal weight. Length should match fundIds. */
+  weights?: number[];
+}
+
 export interface SimulateStrategyRequest {
   strategy: 'priority' | 'timeline' | 'proportional' | 'required_savings';
   monthlyBudget: number;
   goalIds?: string[];
   includeInactive?: boolean;
+  /** Optional: real-fund simulation per goal. Key = goal ID (UUID), value = fund IDs and optional weights. Omit for asset-class assumptions. */
+  goalFundSelections?: Record<string, GoalFundSelection>;
 }
 
 export interface GoalAllocationResult {

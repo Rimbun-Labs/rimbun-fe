@@ -19,7 +19,7 @@ const currency = new Intl.NumberFormat('en-US', {
 export const GoalSummaryCards = ({ summary, isLoading }: GoalSummaryCardsProps) => {
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 w-full">
         {Array.from({ length: 4 }).map((_, idx) => (
           <Skeleton key={idx} className="h-36 rounded-xl" />
         ))}

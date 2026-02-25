@@ -43,7 +43,7 @@ export const MyProductCard: React.FC<MyProductCardProps> = ({
   const Icon = typeIcons[product.productType] || PiggyBank;
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg">
+    <Card className="w-full transition-all duration-300 hover:shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">

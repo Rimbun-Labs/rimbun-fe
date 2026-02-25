@@ -114,4 +114,14 @@ export const getCategoryDisplayName = (category: MetricCategory): string => {
     default:
       return category;
   }
+};
+
+/** Shared risk profile label (used in Investment Explorer, Dashboard, etc.) */
+export const getRiskProfileLabel = (score?: number): string => {
+  if (score == null) return 'N/A';
+  if (score >= 80) return 'Aggressive';
+  if (score >= 60) return 'Growth-Oriented';
+  if (score >= 40) return 'Balanced';
+  if (score >= 20) return 'Conservative';
+  return 'Very Conservative';
 }; 

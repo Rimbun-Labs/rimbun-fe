@@ -124,7 +124,7 @@ export const BrowseAllTab = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Grid3x3 className="h-5 w-5 text-primary" />
@@ -138,7 +138,7 @@ export const BrowseAllTab = ({
       </div>
 
       {Object.keys(productsByType).length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full min-w-0">
           {Object.entries(productsByType).map(([type, products]) => (
             <ProductCategorySection
               key={type}

@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,7 @@ import {
   AlertCircle,
   Info,
   Target,
-  PieChart,
+  PieChart as PieChartIcon,
   Edit,
   Trash2,
   X,
@@ -23,7 +22,9 @@ import {
   Minimize2,
   Zap,
   CloudRain,
-  Sun
+  Sun,
+  Building2,
+  PlusCircle
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useFormatters } from '@/hooks/useFormatters';
@@ -31,18 +32,27 @@ import { LoadingState } from '@/components/dashboard/ui/LoadingState';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useFundCatalog } from '@/hooks/useFunds';
+import type { FundListItem } from '@/lib/api/types/funds';
 
-interface AssetAllocations {
-  equities: number;
-  bonds: number;
-  realEstate: number;
-  cash: number;
+/** Single fund in the simulator portfolio (replaces asset-class allocation) */
+export interface FundAllocationItem {
+  fundId: string;
+  name: string;
+  weight: number;
+}
+
+/** Parse fund performance string/number to decimal (0.08 = 8%) */
+function parseFundReturn(value: string | number | null | undefined): number {
+  if (value == null || value === '') return 0;
+  const n = typeof value === 'string' ? parseFloat(value) : value;
+  if (Number.isNaN(n)) return 0;
+  return n > 1 ? n / 100 : n;
 }
 
 interface PortfolioSimulatorProps {
-  currentAllocations?: AssetAllocations;
-  recommendedAllocations?: AssetAllocations;
   riskProfile?: number;
   targetAmount?: number;
   investmentHorizon?: number;
@@ -53,7 +63,7 @@ interface PortfolioSimulatorProps {
 interface Scenario {
   id: string;
   name: string;
-  allocations: AssetAllocations;
+  fundAllocations: FundAllocationItem[];
   projectedReturn: number;
   projectedRisk: number;
   timeToGoal?: number;
@@ -74,8 +84,6 @@ interface MarketScenario {
 }
 
 export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
-  currentAllocations,
-  recommendedAllocations,
   riskProfile = 50,
   targetAmount,
   investmentHorizon,
@@ -159,15 +167,15 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
     };
   }, [viewportSize, isChartExpanded]);
   
-  // Initialize with recommended allocations or defaults
-  const defaultAllocations: AssetAllocations = recommendedAllocations || {
-    equities: 60,
-    bonds: 25,
-    realEstate: 10,
-    cash: 5,
-  };
+  const { data: fundCatalogData } = useFundCatalog({ limit: 100, offset: 0 });
+  const funds: FundListItem[] = fundCatalogData?.funds ?? [];
+  const fundMap = useMemo(() => {
+    const m = new Map<string, FundListItem>();
+    funds.forEach((f) => m.set(f.fundId, f));
+    return m;
+  }, [funds]);
 
-  const [allocations, setAllocations] = useState<AssetAllocations>(defaultAllocations);
+  const [fundAllocations, setFundAllocations] = useState<FundAllocationItem[]>([]);
   const [savedScenarios, setSavedScenarios] = useState<Scenario[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -175,11 +183,34 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
   const [scenarioName, setScenarioName] = useState('');
   const [selectedMarketScenarios, setSelectedMarketScenarios] = useState<string[]>([]);
   const [showScenarioComparison, setShowScenarioComparison] = useState(false);
+  const [addFundsOpen, setAddFundsOpen] = useState(false);
+  const [addFundsPending, setAddFundsPending] = useState<FundAllocationItem[]>([]);
 
-  // Calculate total allocation
-  const totalAllocation = useMemo(() => {
-    return allocations.equities + allocations.bonds + allocations.realEstate + allocations.cash;
-  }, [allocations]);
+  useEffect(() => {
+    if (addFundsOpen) {
+      setAddFundsPending([...fundAllocations]);
+    }
+  }, [addFundsOpen]); // eslint-disable-line react-hooks/exhaustive-deps -- init when dialog opens
+
+  const totalAllocation = useMemo(
+    () => fundAllocations.reduce((sum, f) => sum + f.weight, 0),
+    [fundAllocations]
+  );
+
+  const blendedReturnAndRisk = useMemo(() => {
+    if (fundAllocations.length === 0) return { return: 0, risk: 0 };
+    let weightedReturn = 0;
+    let weightedRisk = 0;
+    fundAllocations.forEach((item) => {
+      const fund = fundMap.get(item.fundId);
+      const ret = parseFundReturn(fund?.performance3y ?? fund?.performance1y);
+      const vol = parseFundReturn(fund?.volatility3y) || 0.1;
+      const w = item.weight / 100;
+      weightedReturn += w * ret;
+      weightedRisk += w * vol;
+    });
+    return { return: weightedReturn, risk: weightedRisk };
+  }, [fundAllocations, fundMap]);
 
   // Market scenario definitions (hardcoded based on historical patterns)
   const marketScenarios: MarketScenario[] = useMemo(() => [
@@ -263,105 +294,54 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
     }
   ], []);
 
-  // Calculate projected metrics based on allocation and selected scenarios
+  const baselineWeightedReturn = blendedReturnAndRisk.return;
+  const weightedRisk = blendedReturnAndRisk.risk;
+
   const projectedMetrics = useMemo(() => {
-    // Baseline returns
-    const baselineEquityReturn = 0.08;
-    const baselineBondReturn = 0.04;
-    const baselineRealEstateReturn = 0.06;
-    const baselineCashReturn = 0.02;
-
-    const equityRisk = 0.18;
-    const bondRisk = 0.06;
-    const realEstateRisk = 0.12;
-    const cashRisk = 0.01;
-
-    // Calculate baseline weighted return
-    const baselineWeightedReturn = 
-      (allocations.equities / 100) * baselineEquityReturn +
-      (allocations.bonds / 100) * baselineBondReturn +
-      (allocations.realEstate / 100) * baselineRealEstateReturn +
-      (allocations.cash / 100) * baselineCashReturn;
-
-    const weightedRisk = 
-      (allocations.equities / 100) * equityRisk +
-      (allocations.bonds / 100) * bondRisk +
-      (allocations.realEstate / 100) * realEstateRisk +
-      (allocations.cash / 100) * cashRisk;
-
-    // Calculate time to goal if we have target amount and monthly contribution
     let timeToGoal: number | undefined;
-    if (targetAmount && monthlyContribution) {
+    if (targetAmount && monthlyContribution && fundAllocations.length > 0) {
       const monthlyReturn = baselineWeightedReturn / 12;
-      const currentValue = 0; // Could be passed as prop
       let months = 0;
-      let value = currentValue;
-      
-      while (value < targetAmount && months < 600) { // Max 50 years
+      let value = 0;
+      while (value < targetAmount && months < 600) {
         value = value * (1 + monthlyReturn) + monthlyContribution;
         months++;
       }
       timeToGoal = months;
     }
-
     return {
-      projectedReturn: baselineWeightedReturn * 100, // Convert to percentage
-      projectedRisk: weightedRisk * 100, // Convert to percentage
-      riskAdjustedReturn: (baselineWeightedReturn / weightedRisk) * 100,
+      projectedReturn: baselineWeightedReturn * 100,
+      projectedRisk: weightedRisk * 100,
+      riskAdjustedReturn: weightedRisk > 0 ? (baselineWeightedReturn / weightedRisk) * 100 : 0,
       timeToGoal,
     };
-  }, [allocations, targetAmount, monthlyContribution]);
+  }, [baselineWeightedReturn, weightedRisk, fundAllocations.length, targetAmount, monthlyContribution]);
 
-  // Generate projection data for chart with scenarios
+  const scenarioMultipliers: Record<string, number> = useMemo(() => ({
+    baseline: 1,
+    bull: 1.5,
+    bear: 0.5,
+    recession: 0.7,
+    'high-inflation': 1.2,
+    recovery: 1.3,
+  }), []);
+
   const projectionData = useMemo(() => {
     const years = investmentHorizon || 20;
     const monthlyContributionAmount = monthlyContribution || 1000;
     const data: Array<{ year: number; baseline: number; [key: string]: number | string }> = [];
-
-    // Calculate baseline returns based on allocation
-    const baselineEquityReturn = 0.08;
-    const baselineBondReturn = 0.04;
-    const baselineRealEstateReturn = 0.06;
-    const baselineCashReturn = 0.02;
-    
-    const baselineWeightedReturn = 
-      (allocations.equities / 100) * baselineEquityReturn +
-      (allocations.bonds / 100) * baselineBondReturn +
-      (allocations.realEstate / 100) * baselineRealEstateReturn +
-      (allocations.cash / 100) * baselineCashReturn;
-    
     const baselineMonthlyReturn = baselineWeightedReturn / 12;
     let baselineValue = 0;
-
-    // Calculate scenario projections
     const scenarioProjections: Record<string, number[]> = {};
-    
-    selectedMarketScenarios.forEach(scenarioId => {
-      const scenario = marketScenarios.find(s => s.id === scenarioId);
-      if (!scenario) return;
-      
+
+    selectedMarketScenarios.forEach((scenarioId) => {
+      const mult = scenarioMultipliers[scenarioId] ?? 1;
+      const scenarioMonthlyReturn = (baselineWeightedReturn * mult) / 12;
       scenarioProjections[scenarioId] = [];
       let scenarioValue = 0;
-      
-      // Calculate returns for this scenario
-      const scenarioEquityReturn = scenario.equityReturn;
-      const scenarioBondReturn = scenario.bondReturn;
-      const scenarioRealEstateReturn = scenario.realEstateReturn;
-      const scenarioCashReturn = scenario.cashReturn;
-      
-      const scenarioWeightedReturn = 
-        (allocations.equities / 100) * scenarioEquityReturn +
-        (allocations.bonds / 100) * scenarioBondReturn +
-        (allocations.realEstate / 100) * scenarioRealEstateReturn +
-        (allocations.cash / 100) * scenarioCashReturn;
-      
-      const scenarioMonthlyReturn = scenarioWeightedReturn / 12;
-      
       for (let i = 0; i <= years * 12; i += 12) {
-        if (i === 0) {
-          scenarioProjections[scenarioId].push(0);
-        } else {
-          // Calculate value for this year
+        if (i === 0) scenarioProjections[scenarioId].push(0);
+        else {
           for (let m = 0; m < 12; m++) {
             scenarioValue = scenarioValue * (1 + scenarioMonthlyReturn) + monthlyContributionAmount;
           }
@@ -370,98 +350,31 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
       }
     });
 
-    // Generate data points
     for (let i = 0; i <= years * 12; i += 12) {
       const year = i / 12;
       const dataPoint: { year: number; baseline: number; [key: string]: number | string } = {
         year,
         baseline: baselineValue,
       };
-
-      // Add scenario values
-      selectedMarketScenarios.forEach(scenarioId => {
+      selectedMarketScenarios.forEach((scenarioId) => {
         const scenarioIndex = Math.floor(i / 12);
-        if (scenarioProjections[scenarioId] && scenarioProjections[scenarioId][scenarioIndex] !== undefined) {
+        if (scenarioProjections[scenarioId]?.[scenarioIndex] !== undefined) {
           dataPoint[scenarioId] = scenarioProjections[scenarioId][scenarioIndex];
         }
       });
-
       data.push(dataPoint);
-
-      // Calculate baseline value for next year
       if (i < years * 12) {
         for (let m = 0; m < 12; m++) {
           baselineValue = baselineValue * (1 + baselineMonthlyReturn) + monthlyContributionAmount;
         }
       }
     }
-
     return data;
-  }, [allocations, monthlyContribution, investmentHorizon, selectedMarketScenarios, marketScenarios]);
+  }, [baselineWeightedReturn, monthlyContribution, investmentHorizon, selectedMarketScenarios, scenarioMultipliers]);
 
-  // Handle slider change
-  const handleAllocationChange = useCallback((assetClass: keyof AssetAllocations, value: number[]) => {
-    setAllocations(prev => {
-      const newValue = value[0];
-      const oldValue = prev[assetClass];
-      const difference = newValue - oldValue;
-      
-      // Calculate total of other allocations
-      const otherTotal = Object.entries(prev)
-        .filter(([key]) => key !== assetClass)
-        .reduce((sum, [, val]) => sum + val, 0);
-      
-      // If other allocations are 0, we can't adjust them
-      if (otherTotal === 0) {
-        return { ...prev, [assetClass]: Math.min(newValue, 100) };
-      }
-      
-      // Adjust other allocations proportionally to maintain 100% total
-      const newAllocations = { ...prev, [assetClass]: newValue };
-      const newOtherTotal = 100 - newValue;
-      
-      if (newOtherTotal < 0) {
-        // If new value exceeds 100%, cap it at 100% and set others to 0
-        return {
-          equities: assetClass === 'equities' ? 100 : 0,
-          bonds: assetClass === 'bonds' ? 100 : 0,
-          realEstate: assetClass === 'realEstate' ? 100 : 0,
-          cash: assetClass === 'cash' ? 100 : 0,
-        };
-      }
-      
-      // Adjust proportionally
-      Object.keys(newAllocations).forEach(key => {
-        if (key !== assetClass) {
-          const oldOtherValue = prev[key as keyof AssetAllocations];
-          newAllocations[key as keyof AssetAllocations] = 
-            Math.round((oldOtherValue / otherTotal) * newOtherTotal);
-        }
-      });
-      
-      // Ensure total is exactly 100% (handle rounding errors)
-      const finalTotal = Object.values(newAllocations).reduce((sum, val) => sum + val, 0);
-      if (finalTotal !== 100) {
-        const adjustment = 100 - finalTotal;
-        // Find the largest non-adjusted allocation and add/subtract the difference
-        const largestKey = Object.entries(newAllocations)
-          .filter(([key]) => key !== assetClass)
-          .sort(([, a], [, b]) => b - a)[0]?.[0] as keyof AssetAllocations;
-        if (largestKey) {
-          newAllocations[largestKey] = Math.max(0, newAllocations[largestKey] + adjustment);
-        }
-      }
-      
-      return newAllocations;
-    });
-  }, []);
-
-  // Reset to recommended
   const handleReset = useCallback(() => {
-    if (recommendedAllocations) {
-      setAllocations(recommendedAllocations);
-    }
-  }, [recommendedAllocations]);
+    setFundAllocations([]);
+  }, []);
 
   // Open save dialog
   const handleOpenSaveDialog = useCallback(() => {
@@ -470,45 +383,39 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
     setShowSaveDialog(true);
   }, [savedScenarios.length]);
 
-  // Save scenario
   const handleSaveScenario = useCallback(() => {
     if (!scenarioName.trim()) return;
-    
     const scenario: Scenario = {
       id: editingScenario?.id || Date.now().toString(),
       name: scenarioName.trim(),
-      allocations: { ...allocations },
+      fundAllocations: fundAllocations.map((f) => ({ ...f })),
       projectedReturn: projectedMetrics.projectedReturn,
       projectedRisk: projectedMetrics.projectedRisk,
       timeToGoal: projectedMetrics.timeToGoal,
     };
-    
     if (editingScenario) {
-      setSavedScenarios(prev => prev.map(s => s.id === editingScenario.id ? scenario : s));
+      setSavedScenarios((prev) => prev.map((s) => (s.id === editingScenario.id ? scenario : s)));
     } else {
-      setSavedScenarios(prev => [...prev, scenario]);
+      setSavedScenarios((prev) => [...prev, scenario]);
     }
-    
     setShowSaveDialog(false);
     setScenarioName('');
     setEditingScenario(null);
-  }, [scenarioName, allocations, projectedMetrics, editingScenario]);
+  }, [scenarioName, fundAllocations, projectedMetrics, editingScenario]);
 
-  // Delete scenario
   const handleDeleteScenario = useCallback((id: string) => {
-    setSavedScenarios(prev => prev.filter(s => s.id !== id));
+    setSavedScenarios((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
-  // Edit scenario
   const handleEditScenario = useCallback((scenario: Scenario) => {
     setEditingScenario(scenario);
     setScenarioName(scenario.name);
+    setFundAllocations(scenario.fundAllocations.map((f) => ({ ...f })));
     setShowSaveDialog(true);
   }, []);
 
-  // Load scenario
   const handleLoadScenario = useCallback((scenario: Scenario) => {
-    setAllocations(scenario.allocations);
+    setFundAllocations(scenario.fundAllocations.map((f) => ({ ...f })));
   }, []);
 
   // Get risk level label
@@ -541,11 +448,11 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl flex items-center gap-2">
-                <PieChart className="h-5 w-5" />
+                <PieChartIcon className="h-5 w-5" />
                 Portfolio Simulator
               </CardTitle>
               <CardDescription className="mt-2">
-                Experiment with different asset allocations and see how they affect your portfolio's risk and return
+                Add actual funds and see how your portfolio could grow using real performance
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -553,10 +460,10 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleReset}
-                disabled={!recommendedAllocations}
+                disabled={fundAllocations.length === 0}
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Reset
+                Clear funds
               </Button>
               <Button
                 variant="outline"
@@ -571,246 +478,166 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
         </CardHeader>
       </Card>
 
-      {/* Allocation Sliders */}
+      {/* Fund allocation (replaces asset-class sliders) */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Adjust Asset Allocation</CardTitle>
+          <CardTitle className="text-lg">Fund allocation</CardTitle>
           <CardDescription>
-            Drag the sliders to adjust your portfolio allocation. Total must equal 100%.
+            Add actual funds to simulate portfolio growth using real performance (e.g. 3Y). Weights should total 100%.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Equities */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Equities</span>
-                <TooltipProvider>
-                  <UITooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Stocks and equity investments. Higher allocation = higher potential returns and risk.</p>
-                    </TooltipContent>
-                  </UITooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={allocations.equities}
-                    onChange={(e) => {
-                      const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                      handleAllocationChange('equities', [value]);
-                    }}
-                    className="w-20 h-9 text-center text-lg font-bold"
-                  />
-                  <span className="text-sm text-muted-foreground">%</span>
+        <CardContent className="space-y-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAddFundsOpen(true)}
+            className="gap-2"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {fundAllocations.length === 0 ? 'Add funds' : 'Edit funds'}
+          </Button>
+          {fundAllocations.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              No funds selected. Add funds above to see projections based on real fund performance.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {fundAllocations.map((item) => (
+                <div
+                  key={item.fundId}
+                  className="flex items-center gap-3 rounded-lg border p-3"
+                >
+                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 text-sm font-medium truncate">{item.name}</span>
+                  <span className="text-sm text-muted-foreground">{item.weight}%</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    onClick={() =>
+                      setFundAllocations((prev) => prev.filter((f) => f.fundId !== item.fundId))
+                    }
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                {recommendedAllocations && (
-                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                    Recommended: {recommendedAllocations.equities}%
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <Slider
-              value={[allocations.equities]}
-              onValueChange={(value) => handleAllocationChange('equities', value)}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
-            {recommendedAllocations && (
-              <div className="sm:hidden">
-                <Badge variant="outline" className="text-xs">
-                  Recommended: {recommendedAllocations.equities}%
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Bonds */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Bonds</span>
-                <TooltipProvider>
-                  <UITooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Fixed-income investments. Lower risk, stable returns.</p>
-                    </TooltipContent>
-                  </UITooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={allocations.bonds}
-                    onChange={(e) => {
-                      const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                      handleAllocationChange('bonds', [value]);
-                    }}
-                    className="w-20 h-9 text-center text-lg font-bold"
-                  />
-                  <span className="text-sm text-muted-foreground">%</span>
+              ))}
+              {totalAllocation !== 100 && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                  <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0" />
+                  <span className="text-sm text-yellow-800 dark:text-yellow-200">
+                    Total is {totalAllocation}%. Edit funds and set weights to total 100%.
+                  </span>
                 </div>
-                {recommendedAllocations && (
-                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                    Recommended: {recommendedAllocations.bonds}%
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <Slider
-              value={[allocations.bonds]}
-              onValueChange={(value) => handleAllocationChange('bonds', value)}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
-            {recommendedAllocations && (
-              <div className="sm:hidden">
-                <Badge variant="outline" className="text-xs">
-                  Recommended: {recommendedAllocations.bonds}%
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Real Estate */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Real Estate</span>
-                <TooltipProvider>
-                  <UITooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Real estate investments. Moderate risk, inflation hedge.</p>
-                    </TooltipContent>
-                  </UITooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={allocations.realEstate}
-                    onChange={(e) => {
-                      const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                      handleAllocationChange('realEstate', [value]);
-                    }}
-                    className="w-20 h-9 text-center text-lg font-bold"
-                  />
-                  <span className="text-sm text-muted-foreground">%</span>
-                </div>
-                {recommendedAllocations && (
-                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                    Recommended: {recommendedAllocations.realEstate}%
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <Slider
-              value={[allocations.realEstate]}
-              onValueChange={(value) => handleAllocationChange('realEstate', value)}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
-            {recommendedAllocations && (
-              <div className="sm:hidden">
-                <Badge variant="outline" className="text-xs">
-                  Recommended: {recommendedAllocations.realEstate}%
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Cash */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Cash</span>
-                <TooltipProvider>
-                  <UITooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Cash and cash equivalents. Lowest risk, lowest return.</p>
-                    </TooltipContent>
-                  </UITooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={allocations.cash}
-                    onChange={(e) => {
-                      const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                      handleAllocationChange('cash', [value]);
-                    }}
-                    className="w-20 h-9 text-center text-lg font-bold"
-                  />
-                  <span className="text-sm text-muted-foreground">%</span>
-                </div>
-                {recommendedAllocations && (
-                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                    Recommended: {recommendedAllocations.cash}%
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <Slider
-              value={[allocations.cash]}
-              onValueChange={(value) => handleAllocationChange('cash', value)}
-              min={0}
-              max={100}
-              step={1}
-              className="w-full"
-            />
-            {recommendedAllocations && (
-              <div className="sm:hidden">
-                <Badge variant="outline" className="text-xs">
-                  Recommended: {recommendedAllocations.cash}%
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Total Allocation Warning */}
-          {totalAllocation !== 100 && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-              <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-              <span className="text-sm text-yellow-800 dark:text-yellow-200">
-                Total allocation is {totalAllocation}%. Please adjust to equal 100%.
-              </span>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Add / Edit funds dialog */}
+      <Dialog
+        open={addFundsOpen}
+        onOpenChange={(open) => {
+          setAddFundsOpen(open);
+          if (!open) setAddFundsPending([]);
+        }}
+      >
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col gap-4 overflow-hidden">
+          <DialogHeader className="shrink-0">
+            <DialogTitle>Add funds to portfolio</DialogTitle>
+            <DialogDescription>
+              Select funds and set allocation weights (%). Leave at 0 for equal weight. Total will be normalized to 100%.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[50vh] min-h-[200px] shrink-0 rounded-md border p-3">
+            <div className="space-y-2 pr-2">
+              {funds.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4">Loading funds…</p>
+              ) : (
+                funds.map((fund) => {
+                  const current = addFundsPending.find((f) => f.fundId === fund.fundId);
+                  const isSelected = !!current;
+                  return (
+                    <div
+                      key={fund.fundId}
+                      className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50"
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setAddFundsPending((prev) => [
+                              ...prev.filter((f) => f.fundId !== fund.fundId),
+                              { fundId: fund.fundId, name: fund.name, weight: 0 },
+                            ]);
+                          } else {
+                            setAddFundsPending((prev) => prev.filter((f) => f.fundId !== fund.fundId));
+                          }
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{fund.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {fund.fundHouse} · {fund.assetClass}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div className="flex items-center gap-1 w-24 shrink-0">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={current?.weight ?? ''}
+                            onChange={(e) => {
+                              const v = e.target.value === '' ? 0 : Math.max(0, Math.min(100, Number(e.target.value)));
+                              setAddFundsPending((prev) =>
+                                prev.map((f) =>
+                                  f.fundId === fund.fundId ? { ...f, weight: v } : f
+                                )
+                              );
+                            }}
+                            className="h-8 text-xs"
+                          />
+                          <span className="text-xs text-muted-foreground">%</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter className="shrink-0">
+            <Button variant="outline" onClick={() => setAddFundsOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                let list = [...addFundsPending];
+                const sum = list.reduce((s, f) => s + f.weight, 0);
+                if (sum > 0) {
+                  list = list.map((f) => ({ ...f, weight: Math.round((f.weight / sum) * 100) }));
+                  const diff = 100 - list.reduce((s, f) => s + f.weight, 0);
+                  if (diff !== 0 && list.length > 0) {
+                    list[0] = { ...list[0], weight: list[0].weight + diff };
+                  }
+                } else {
+                  const n = list.length;
+                  const equal = n > 0 ? Math.floor(100 / n) : 0;
+                  list = list.map((f, i) => ({ ...f, weight: i === 0 ? 100 - equal * (n - 1) : equal }));
+                }
+                setFundAllocations(list);
+                setAddFundsOpen(false);
+                setAddFundsPending([]);
+              }}
+              disabled={addFundsPending.length === 0}
+            >
+              Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Projected Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -825,7 +652,7 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
           <CardContent>
             <div className="space-y-2">
               <div className="text-3xl font-bold text-green-600">
-                {formatPercentage(projectedMetrics.projectedReturn / 100)}
+                {formatPercentage(projectedMetrics.projectedReturn)}
               </div>
               <p className="text-sm text-muted-foreground">Annual expected return</p>
             </div>
@@ -843,7 +670,7 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
           <CardContent>
             <div className="space-y-2">
               <div className={`text-3xl font-bold ${riskLevel.color}`}>
-                {formatPercentage(projectedMetrics.projectedRisk / 100)}
+                {formatPercentage(projectedMetrics.projectedRisk)}
               </div>
               <p className="text-sm text-muted-foreground">{riskLevel.label}</p>
             </div>
@@ -941,7 +768,7 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
                   Projected Growth
                 </CardTitle>
                 <CardDescription>
-                  Projected portfolio value over time based on your allocation
+                  Projected portfolio value over time using your selected funds’ performance (3Y/1Y) and weights
                   {selectedMarketScenarios.length > 0 && ` (with ${selectedMarketScenarios.length} scenario${selectedMarketScenarios.length > 1 ? 's' : ''})`}
                 </CardDescription>
               </div>
@@ -1145,18 +972,8 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
                     const twentyYearValue = scenarioData[20] || 0;
                     const finalValue = scenarioData[scenarioData.length - 1] || 0;
                     
-                    // Calculate time to goal for scenario
-                    const scenarioEquityReturn = scenario.equityReturn;
-                    const scenarioBondReturn = scenario.bondReturn;
-                    const scenarioRealEstateReturn = scenario.realEstateReturn;
-                    const scenarioCashReturn = scenario.cashReturn;
-                    
-                    const scenarioWeightedReturn = 
-                      (allocations.equities / 100) * scenarioEquityReturn +
-                      (allocations.bonds / 100) * scenarioBondReturn +
-                      (allocations.realEstate / 100) * scenarioRealEstateReturn +
-                      (allocations.cash / 100) * scenarioCashReturn;
-                    
+                    const mult = scenarioMultipliers[scenarioId] ?? 1;
+                    const scenarioWeightedReturn = baselineWeightedReturn * mult;
                     const scenarioMonthlyReturn = scenarioWeightedReturn / 12;
                     let scenarioTimeToGoal: number | undefined;
                     if (targetAmount && monthlyContribution) {
@@ -1224,19 +1041,6 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
         </Card>
       )}
 
-      {/* Allocation Visualization */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Allocation Visualization</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PortfolioAllocation 
-            allocations={allocations}
-            loading={false}
-          />
-        </CardContent>
-      </Card>
-
       {/* Saved Scenarios */}
       {savedScenarios.length > 0 && (
         <Card>
@@ -1256,10 +1060,10 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
                       <h4 className="font-medium text-foreground mb-1">{scenario.name}</h4>
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <Badge variant="outline" className="text-xs">
-                          {formatPercentage(scenario.projectedReturn / 100)} return
+                          {formatPercentage(scenario.projectedReturn)} return
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          {formatPercentage(scenario.projectedRisk / 100)} risk
+                          {formatPercentage(scenario.projectedRisk)} risk
                         </Badge>
                         {scenario.timeToGoal && (
                           <Badge variant="outline" className="text-xs">
@@ -1267,11 +1071,16 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
                           </Badge>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
-                        <div>Equities: <span className="font-semibold text-foreground">{scenario.allocations.equities}%</span></div>
-                        <div>Bonds: <span className="font-semibold text-foreground">{scenario.allocations.bonds}%</span></div>
-                        <div>Real Estate: <span className="font-semibold text-foreground">{scenario.allocations.realEstate}%</span></div>
-                        <div>Cash: <span className="font-semibold text-foreground">{scenario.allocations.cash}%</span></div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        {scenario.fundAllocations.map((f) => (
+                          <span key={f.fundId}>
+                            {f.name.length > 25 ? f.name.slice(0, 25) + '…' : f.name}:{' '}
+                            <span className="font-semibold text-foreground">{f.weight}%</span>
+                          </span>
+                        ))}
+                        {scenario.fundAllocations.length === 0 && (
+                          <span className="text-muted-foreground">No funds</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
@@ -1335,21 +1144,26 @@ export const PortfolioSimulator: React.FC<PortfolioSimulatorProps> = ({
               />
             </div>
             <div className="p-3 bg-muted/50 rounded-lg space-y-2 text-sm">
-              <div className="font-medium">Current Allocation:</div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>Equities: {allocations.equities}%</div>
-                <div>Bonds: {allocations.bonds}%</div>
-                <div>Real Estate: {allocations.realEstate}%</div>
-                <div>Cash: {allocations.cash}%</div>
+              <div className="font-medium">Current allocation:</div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                {fundAllocations.length === 0 ? (
+                  <span className="text-muted-foreground">No funds selected</span>
+                ) : (
+                  fundAllocations.map((f) => (
+                    <span key={f.fundId}>
+                      {f.name.length > 20 ? f.name.slice(0, 20) + '…' : f.name}: {f.weight}%
+                    </span>
+                  ))
+                )}
               </div>
               <div className="pt-2 border-t">
                 <div className="flex justify-between">
                   <span>Projected Return:</span>
-                  <span className="font-semibold">{formatPercentage(projectedMetrics.projectedReturn / 100)}</span>
+                  <span className="font-semibold">{formatPercentage(projectedMetrics.projectedReturn)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Projected Risk:</span>
-                  <span className="font-semibold">{formatPercentage(projectedMetrics.projectedRisk / 100)}</span>
+                  <span className="font-semibold">{formatPercentage(projectedMetrics.projectedRisk)}</span>
                 </div>
               </div>
             </div>

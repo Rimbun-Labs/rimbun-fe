@@ -10,6 +10,7 @@ import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import ScoreCard from '../ScoreCard';
 import { MetricDetails, getMetricInsights } from './MetricDetails';
 import { AssessmentResult } from '@/lib/api/types/assessment';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 interface OverviewTabProps {
   result: AssessmentResult['scoreData'];
@@ -131,7 +132,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ result }) => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Based on your knowledge level ({result.knowledgeLevel.toFixed(1)}), we recommend completing our investment basics modules
+                      Based on your knowledge level ({formatScorePercent(result.knowledgeLevel)}), we recommend completing our investment basics modules
                     </p>
                   </div>
                 </div>

@@ -38,7 +38,7 @@ export const ProductSearch = ({
   const presetInstitutions = availableInstitutions.slice(0, 6);
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 w-full">
       <CardContent className="p-6">
         <div className="space-y-4">
           {/* Welcome Query */}

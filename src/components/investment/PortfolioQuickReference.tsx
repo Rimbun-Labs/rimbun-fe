@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Shield, BookOpen } from 'lucide-react';
 import { LoadingState } from '@/components/dashboard/ui/LoadingState';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 interface PortfolioQuickReferenceProps {
   riskProfile?: number;
@@ -71,7 +72,7 @@ export const PortfolioQuickReference: React.FC<PortfolioQuickReferenceProps> = (
               <Shield className="h-3 w-3" />
               Risk Profile
             </div>
-            <div className="text-lg font-bold">{riskProfile ?? 0}%</div>
+            <div className="text-lg font-bold">{formatScorePercent(riskProfile)}</div>
             <div className="text-xs text-muted-foreground">
               {riskProfile !== undefined ? getRiskLabel(riskProfile) : 'N/A'}
             </div>
@@ -81,7 +82,7 @@ export const PortfolioQuickReference: React.FC<PortfolioQuickReferenceProps> = (
               <BookOpen className="h-3 w-3" />
               Knowledge Level
             </div>
-            <div className="text-lg font-bold">{knowledgeLevel ?? 0}%</div>
+            <div className="text-lg font-bold">{formatScorePercent(knowledgeLevel)}</div>
             <div className="text-xs text-muted-foreground">Investment Knowledge</div>
           </div>
         </div>

@@ -8,11 +8,14 @@ import { ThemeProvider } from '@/hooks/useTheme';
 import { useSession } from '@/contexts/SessionContext';
 
 interface BaseLayoutProps {
-  useContainer?: boolean; // Controls whether to use container mx-auto (ContentLayout) or w-full (AppLayout)
+  useContainer?: boolean; // Controls whether to use container padding (ContentLayout) or w-full (AppLayout)
+  /** When useContainer is true, cap content at max-w-7xl. Set to false for full-width content (e.g. Banking). Default true. */
+  containMaxWidth?: boolean;
 }
 
-const BaseLayout: React.FC<BaseLayoutProps> = ({ 
-  useContainer = false
+const BaseLayout: React.FC<BaseLayoutProps> = ({
+  useContainer = false,
+  containMaxWidth = true,
 }) => {
   const { session } = useSession();
   const location = useLocation();
@@ -21,6 +24,14 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
 
   // Show full layout only if assessment is completed or on non-home pages
   const showFullLayout = hasCompletedAssessment || !isHomePage;
+
+  const useMaxWidth = useContainer && containMaxWidth;
+  const innerClassName = useContainer
+    ? useMaxWidth
+      ? "min-w-0 w-full max-w-7xl mx-auto pb-16"
+      : "min-w-0 w-full pb-16"
+    : "min-w-0 w-full";
+  const innerStyle = !useContainer || !useMaxWidth ? { maxWidth: 'none' as const } : {};
 
   return (
     <ThemeProvider>
@@ -36,13 +47,10 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
                   <AppSidebar />
                 </div>
               )}
-              <main 
-                className={`flex-1 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
+              <main
+                className={`flex-1 min-w-0 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
               >
-                <div 
-                  className={useContainer ? "max-w-7xl mx-auto pb-16" : "w-full"}
-                  style={!useContainer ? {maxWidth: 'none'} : {}}
-                >
+                <div className={innerClassName} style={innerStyle}>
                   <Outlet />
                 </div>
               </main>

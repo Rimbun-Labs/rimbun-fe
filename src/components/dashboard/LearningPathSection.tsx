@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 interface LearningPathSectionProps {
   sessionId?: string;
@@ -85,7 +86,7 @@ export const LearningPathSection: React.FC<LearningPathSectionProps> = ({
     : 0;
 
   const knowledgeContext = knowledgeLevel !== undefined
-    ? `Personalized for your ${knowledgeLevel}% knowledge level`
+    ? `Personalized for your ${formatScorePercent(knowledgeLevel)} knowledge level`
     : 'Personalized for your knowledge level';
 
   const handleViewFullPath = () => {

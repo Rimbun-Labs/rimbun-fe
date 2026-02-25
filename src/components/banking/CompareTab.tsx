@@ -292,7 +292,7 @@ export const CompareTab: React.FC<CompareTabProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-accent/10">
@@ -318,7 +318,9 @@ export const CompareTab: React.FC<CompareTabProps> = ({
         )}
       </div>
 
-      <ComparisonTable comparisonData={comparisonData} onRemove={onRemove} />
+      <div className="min-w-0 w-full overflow-x-auto">
+        <ComparisonTable comparisonData={comparisonData} onRemove={onRemove} />
+      </div>
       
       {/* Add Product Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

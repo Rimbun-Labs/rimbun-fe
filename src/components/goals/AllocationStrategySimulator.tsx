@@ -62,6 +62,23 @@ export const AllocationStrategySimulator = ({
     }
   }, [defaultBudget, monthlyBudget]);
 
+  // Build goalFundSelections from goal metadata when user has selected funds per goal (real-fund simulation)
+  const goalFundSelections = useMemo(() => {
+    const selections: Record<string, { fundIds: string[]; weights?: number[] }> = {};
+    for (const goal of goals) {
+      const ids = goal.metadata?.selectedFundIds;
+      if (ids?.length) {
+        selections[goal.id] = {
+          fundIds: ids,
+          ...(goal.metadata.selectedFundWeights?.length === ids.length && {
+            weights: goal.metadata.selectedFundWeights,
+          }),
+        };
+      }
+    }
+    return Object.keys(selections).length ? selections : undefined;
+  }, [goals]);
+
   // Debounced simulation API call
   useEffect(() => {
     // Clear existing timer
@@ -76,11 +93,13 @@ export const AllocationStrategySimulator = ({
 
     // Debounce API call by 500ms
     debounceTimerRef.current = setTimeout(() => {
-      simulateStrategy.mutate({
+      const request: Parameters<typeof simulateStrategy.mutate>[0] = {
         strategy: selectedStrategy as 'priority' | 'timeline' | 'proportional' | 'required_savings',
         monthlyBudget,
         includeInactive: false,
-      });
+      };
+      if (goalFundSelections) request.goalFundSelections = goalFundSelections;
+      simulateStrategy.mutate(request);
     }, 500);
 
     return () => {
@@ -88,7 +107,7 @@ export const AllocationStrategySimulator = ({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [selectedStrategy, monthlyBudget, goals.length, userId]);
+  }, [selectedStrategy, monthlyBudget, goals.length, userId, goalFundSelections]);
 
   // Create simulated goals from API response
   const simulatedGoals = useMemo(() => {
@@ -160,7 +179,7 @@ export const AllocationStrategySimulator = ({
               totalRequested={totalRequested}
               strategies={budgetValidation?.suggestions}
             />
-            
+
             {/* Show error if simulation fails */}
             {simulateStrategy.isError && selectedStrategy !== 'current' && (
               <div className="rounded-lg border border-red-200 dark:border-red-500/40 bg-red-50/50 dark:bg-red-950/20 p-3">

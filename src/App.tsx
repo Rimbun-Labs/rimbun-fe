@@ -176,6 +176,14 @@ const AppRoutes = () => {
             </Suspense>
           } 
         />
+        <Route 
+          path="/assessment-results/:sessionId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <AssessmentResultsPage />
+            </Suspense>
+          } 
+        />
       </Route>
 
       {/* Protected routes with AppLayout (full width) */}

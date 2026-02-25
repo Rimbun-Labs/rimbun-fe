@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 const FinancialProfileCard = () => {
   const { profile, isLoading, error } = useProfile();
@@ -123,7 +124,7 @@ const FinancialProfileCard = () => {
               <div className="flex justify-between items-center">
                 <h3 className="font-medium text-sm">Risk Profile</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold">{financialProfile.riskProfile}%</span>
+                  <span className="text-sm font-bold">{formatScorePercent(financialProfile.riskProfile)}</span>
                   <span className="text-xs text-muted-foreground">
                     ({getRiskLevelLabel(financialProfile.riskProfile)})
                   </span>
@@ -137,7 +138,7 @@ const FinancialProfileCard = () => {
               <div className="flex justify-between items-center">
                 <h3 className="font-medium text-sm">Knowledge Level</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold">{financialProfile.knowledgeLevel}%</span>
+                  <span className="text-sm font-bold">{formatScorePercent(financialProfile.knowledgeLevel)}</span>
                   <span className="text-xs text-muted-foreground">
                     ({getKnowledgeLevelLabel(financialProfile.knowledgeLevel)})
                   </span>

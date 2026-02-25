@@ -144,7 +144,7 @@ export const RecommendationsTab = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full min-w-0">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-gradient-accent">
           <Sparkles className="h-5 w-5 text-accent-foreground" />
@@ -168,7 +168,7 @@ export const RecommendationsTab = ({
 
       {/* Sort dropdown only - type filter removed since products are already grouped by type */}
       <div className="flex flex-wrap items-center gap-3">
-        <Select value={sortBy} onValueChange={setSortBy}>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -182,7 +182,7 @@ export const RecommendationsTab = ({
       </div>
 
       {Object.keys(productsByType).length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full min-w-0">
           {Object.entries(productsByType).map(([type, products]) => (
             <ProductCategorySection
               key={type}

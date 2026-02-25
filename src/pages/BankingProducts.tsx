@@ -10,6 +10,7 @@ import { MyProductsTab } from '@/components/banking/MyProductsTab';
 import { BrowseAllTab } from '@/components/banking/BrowseAllTab';
 import { PageHeader, PageContainer } from '@/components/layout';
 import { SPACING } from '@/lib/constants/spacing';
+import { cn } from '@/lib/utils';
 
 const BankingProducts = () => {
   const { user } = useAuth();
@@ -39,9 +40,10 @@ const BankingProducts = () => {
         description="Discover personalized banking products tailored to your financial goals"
       />
 
-      {/* Main Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className={SPACING.page.subsection}>
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid h-auto p-1 bg-muted/50">
+      {/* Main Content - wrapper forced full width so layout doesn't shrink to content */}
+      <div className="space-y-6 mt-6 w-full min-w-0 block" style={{ width: '100%' }}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={cn(SPACING.page.subsection, 'w-full min-w-0')}>
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-muted/50">
             <TabsTrigger 
               value="recommendations" 
               className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
@@ -83,7 +85,7 @@ const BankingProducts = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="recommendations" className="mt-6">
+          <TabsContent value="recommendations" className="mt-6 w-full min-w-0 data-[state=inactive]:hidden" forceMount>
             <RecommendationsTab 
               firebaseId={firebaseId}
               compareProducts={compareProducts}
@@ -91,7 +93,7 @@ const BankingProducts = () => {
             />
           </TabsContent>
 
-          <TabsContent value="browse-all" className="mt-6">
+          <TabsContent value="browse-all" className="mt-6 w-full min-w-0 data-[state=inactive]:hidden" forceMount>
             <BrowseAllTab 
               firebaseId={firebaseId}
               compareProducts={compareProducts}
@@ -99,7 +101,7 @@ const BankingProducts = () => {
             />
           </TabsContent>
 
-          <TabsContent value="compare" className="mt-6">
+          <TabsContent value="compare" className="mt-6 w-full min-w-0 data-[state=inactive]:hidden" forceMount>
             <CompareTab 
               firebaseId={firebaseId}
               products={compareProducts}
@@ -108,10 +110,11 @@ const BankingProducts = () => {
             />
           </TabsContent>
 
-          <TabsContent value="my-products" className="mt-6">
+          <TabsContent value="my-products" className="mt-6 w-full min-w-0 data-[state=inactive]:hidden" forceMount>
             <MyProductsTab firebaseId={firebaseId} />
           </TabsContent>
         </Tabs>
+      </div>
     </PageContainer>
   );
 };

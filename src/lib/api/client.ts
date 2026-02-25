@@ -12,9 +12,15 @@ export const apiClient = axios.create({
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
   async (config) => {
-    // Skip auth for public endpoints (personas, contact)
-    const isPublicEndpoint = config.url?.includes('/personas') || config.url?.includes('/contact');
-    
+    // Skip auth for public endpoints (personas, contact). For investment/funds, only skip auth when NOT requesting profile fit.
+    const isFundsWithFit =
+      config.url?.includes('/investment/funds') &&
+      (config.params?.includeFit === true || config.params?.includeFit === 'true' || config.params?.includeFit === '1');
+    const isPublicEndpoint =
+      config.url?.includes('/personas') ||
+      config.url?.includes('/contact') ||
+      (config.url?.includes('/investment/funds') && !isFundsWithFit);
+
     if (isPublicEndpoint) {
       // Remove any existing auth header for public endpoints
       delete config.headers.Authorization;

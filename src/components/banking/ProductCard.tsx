@@ -191,7 +191,7 @@ export const ProductCard = ({
 
   return (
     <Card 
-      className={`group transition-all duration-300 hover:shadow-lg ${
+      className={`w-full group transition-all duration-300 hover:shadow-lg ${
         isSelected ? 'ring-2 ring-accent shadow-md' : ''
       } ${
         isTopRecommendation ? 'ring-2 ring-primary/30 bg-primary/5 border-primary/20' : ''

@@ -31,8 +31,8 @@ export const PageContainer: React.FC<PageContainerProps> = ({
     : SPACING.page.section;
 
   return (
-    <div className={cn(SPACING.page.container, className)}>
-      <div className={cn('w-full', spacingClass, className)}>
+    <div className={cn(SPACING.page.container, 'min-w-0', className)}>
+      <div className={cn('w-full min-w-0', spacingClass)}>
         {children}
       </div>
     </div>

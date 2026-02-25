@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AssessmentResult } from '@/lib/api/assessmentApi';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 import RiskProfileChart from '../dashboard/RiskProfileChart';
 
 interface AssessmentCompleteProps {
@@ -35,15 +36,15 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span>Risk Tolerance:</span>
-                <span className="font-semibold">{result.scoreData.riskProfile}/10</span>
+                <span className="font-semibold">{formatScorePercent(result.scoreData.riskProfile)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Knowledge Level:</span>
-                <span className="font-semibold">{result.scoreData.knowledgeLevel}/10</span>
+                <span className="font-semibold">{formatScorePercent(result.scoreData.knowledgeLevel)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Decision Style:</span>
-                <span className="font-semibold">{result.scoreData.decisionStyleScore}/10</span>
+                <span className="font-semibold">{formatScorePercent(result.scoreData.decisionStyleScore)}</span>
               </div>
             </div>
           </CardContent>

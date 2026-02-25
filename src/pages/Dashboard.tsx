@@ -23,6 +23,7 @@ import DiversificationAnalysis from '@/components/recommendations/Diversificatio
 import BankingProductsSection from '@/components/dashboard/BankingProductsSection';
 // import InvestmentHoldingsSection from '@/components/dashboard/InvestmentHoldingsSection'; // Temporarily disabled
 import LearningPathSection from '@/components/dashboard/LearningPathSection';
+import EducationalInsights from '@/components/dashboard/EducationalInsights';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, ChevronRight, Info, AlertCircle, BarChart3, Lightbulb, TrendingUp, Shield, PieChart, DollarSign } from "lucide-react";
@@ -137,15 +138,6 @@ const getScoreLabel = (score: number) => {
   if (score >= 60) return 'Good';
   return 'Needs Improvement';
 };
-
-const getRiskProfileLabel = (riskProfile: number) => {
-  if (riskProfile >= 80) return 'Very Aggressive';
-  if (riskProfile >= 60) return 'Aggressive';
-  if (riskProfile >= 40) return 'Moderate';
-  if (riskProfile >= 20) return 'Conservative';
-  return 'Very Conservative';
-};
-
 
 const Dashboard = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -265,7 +257,7 @@ const Dashboard = () => {
 
   // Get banking profile for checklist
   const { data: bankingProfile } = useBankingProfile();
-  const hasBankingProducts = !!(bankingProfile && bankingProfile.products && bankingProfile.products.length > 0);
+  const hasBankingProducts = !!(bankingProfile && bankingProfile.length > 0);
 
   const { formatCurrency, formatPercentage } = useFormatters();
 
@@ -537,6 +529,12 @@ const Dashboard = () => {
           
           {/* Main Content */}
           <div className="space-y-6">
+            {/* Assessment / Investment Profile (radar + insights) */}
+            <EducationalInsights
+              profile={assessmentResults?.scoreData}
+              profileLoading={assessmentLoading}
+            />
+
             {/* Financial Status Section - Combined Spending & Cash Flow */}
             <Card>
               <CardHeader>

@@ -47,7 +47,8 @@ export const formatMarketCap = (marketCap: number): string => {
 };
 
 export const formatPercentage = (value: number): string => {
-  return `${(value * 100).toFixed(1)}%`;
+  const pct = value * 100;
+  return `${Number.isInteger(pct) ? pct : parseFloat(pct.toFixed(1))}%`;
 };
 
 export const formatCurrency = (value: number): string => {
@@ -59,8 +60,10 @@ export const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
+/** Format number; avoid trailing zeros (use backend precision, max decimals). */
 export const formatNumber = (value: number, decimals: number = 2): string => {
-  return value.toFixed(decimals);
+  const fixed = value.toFixed(decimals);
+  return String(parseFloat(fixed));
 };
 
 // Error handling

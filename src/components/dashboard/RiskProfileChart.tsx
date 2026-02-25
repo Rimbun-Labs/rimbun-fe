@@ -30,18 +30,22 @@ interface RiskProfileChartProps {
     decisionStyleConfidence: number;
     personalityConfidence: number;
   };
+  /** When true, axis ticks show the score value (e.g. "Risk Profile 72") */
+  showScoreOnAxis?: boolean;
 }
 
-const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, confidenceMetrics }) => {
+const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, confidenceMetrics, showScoreOnAxis = false }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
+
+  // Use theme primary (same as rest of app: teal from CSS var --primary)
+  const primaryColor = 'hsl(var(--primary))';
 
   // Memoize the colors object to prevent recreation on every render
   const colors = useMemo(() => ({
     primary: {
-      stroke: '#4f46e5',
-      fill: '#4f46e5',
-      gradient: 'linear-gradient(180deg, #4f46e5 0%, #6366f1 100%)',
+      stroke: primaryColor,
+      fill: primaryColor,
     },
     confidence: {
       high: {
@@ -98,14 +102,15 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full h-full"
+      className="w-full"
+      style={{ minHeight: 320 }}
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={320}>
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <defs>
-            <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4f46e5" />
-              <stop offset="100%" stopColor="#6366f1" />
+            <linearGradient id="scoreGradient-radar" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={primaryColor} />
+              <stop offset="100%" stopColor={primaryColor} />
             </linearGradient>
           </defs>
           
@@ -118,11 +123,44 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
           
           <PolarAngleAxis 
             dataKey="attribute" 
-            tick={{ 
-              fill: isDarkMode ? '#9ca3af' : '#64748b',
-              fontSize: 12,
-              fontWeight: 500
-            }}
+            tick={
+              showScoreOnAxis
+                ? (props: { payload?: { attribute?: string; value?: number | string }; x?: number; y?: number; textAnchor?: string }) => {
+                    const { payload, x = 0, y = 0, textAnchor = 'middle' } = props;
+                    const label = (typeof payload?.value === 'string' ? payload.value : payload?.attribute) ?? '';
+                    const numericValue = typeof payload?.value === 'number'
+                      ? payload.value
+                      : chartData.find((d) => d.attribute === label)?.value ?? 0;
+                    const displayValue = Math.round(numericValue);
+                    const fill = isDarkMode ? '#9ca3af' : '#64748b';
+                    return (
+                      <g transform={`translate(${x}, ${y})`}>
+                        <text
+                          textAnchor={textAnchor}
+                          fill={fill}
+                          fontSize={11}
+                          fontWeight={500}
+                        >
+                          {label}
+                        </text>
+                        <text
+                          textAnchor={textAnchor}
+                          fill={isDarkMode ? '#e2e8f0' : '#1e293b'}
+                          fontSize={13}
+                          fontWeight={700}
+                          dy={14}
+                        >
+                          {displayValue}
+                        </text>
+                      </g>
+                    );
+                  }
+                : {
+                    fill: isDarkMode ? '#9ca3af' : '#64748b',
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }
+            }
             axisLine={{ stroke: isDarkMode ? '#374151' : '#e2e8f0' }}
           />
           
@@ -130,7 +168,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
             name="Your Profile"
             dataKey="value"
             stroke={colors.primary.stroke}
-            fill="url(#scoreGradient)"
+            fill={`url(#scoreGradient-radar)`}
             fillOpacity={0.7}
             animationDuration={1000}
             animationEasing="ease-in-out"
@@ -154,8 +192,9 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
           <Tooltip 
             content={({ active, payload, label }) => {
               if (active && payload && payload.length) {
-                const score = Number(payload[0].value);
-                const confidence = payload[1]?.value ? Number(payload[1].value) : null;
+                const score = Math.round(Number(payload[0].value));
+                const confidenceRaw = payload[1]?.value ? Number(payload[1].value) : null;
+                const confidence = confidenceRaw != null ? Math.round(confidenceRaw) : null;
                 
                 return (
                   <div className="bg-popover p-4 rounded-lg shadow-lg border border-border">
@@ -165,7 +204,7 @@ const RiskProfileChart: React.FC<RiskProfileChartProps> = React.memo(({ data, co
                         <span className="text-sm text-muted-foreground">Score:</span>
                         <span className="font-medium text-popover-foreground">{score}/100</span>
                       </div>
-                      {confidence && (
+                      {confidence != null && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">Confidence:</span>
                           <Badge variant="outline" className={getConfidenceBadgeColor(confidence)}>

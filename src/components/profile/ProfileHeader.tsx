@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Camera, Save, X, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { formatScorePercent } from '@/lib/utils/scoreFormatters';
 
 const ProfileHeader = () => {
   const { profile, isLoading, isEditing, unsavedChanges, setIsEditing, discardChanges, updateProfilePicture, error } = useProfile();
@@ -105,7 +106,7 @@ const ProfileHeader = () => {
             )}
             {profile.financialProfile.riskProfile > 0 && (
               <Badge variant="secondary" className="max-w-fit mx-auto md:mx-0">
-                {profile.financialProfile.riskProfile}% Risk
+                {formatScorePercent(profile.financialProfile.riskProfile)} Risk
               </Badge>
             )}
           </div>
