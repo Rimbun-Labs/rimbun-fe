@@ -26,7 +26,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [session, setSession] = useState<ResponseGroup | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storageReady, setStorageReady] = useState(false);
-  const { userRegistrationComplete, loading: authLoading } = useAuth();
+  const { user, userRegistrationComplete, loading: authLoading } = useAuth();
   
   // Shared in-flight promise to prevent duplicate API calls
   const assessmentCheckPromiseRef = useRef<Promise<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean }> | null>(null);
@@ -51,6 +51,15 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       storageUtils.removeItem('assessmentSessionId');
     }
   }, [sessionId, storageReady]);
+
+  // Clear session when user signs out or is not logged in (avoids showing previous user's assessment)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      setSessionId(null);
+      setSession(null);
+      storageUtils.removeItem('assessmentSessionId');
+    }
+  }, [user, authLoading]);
 
   const fetchResumeData = async (responseGroupId: string) => {
     try {

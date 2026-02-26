@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { authService } from '@/lib/auth/authService';
 import { userService } from '@/lib/api/userService';
+import { storageUtils } from '@/lib/storage/storageUtils';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
@@ -101,10 +102,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await authService.signOut();
     if (error) throw error;
     
-    // Clear the database user ID when signing out
+    // Clear user-specific data so the next user doesn't see previous session
     userService.clearDatabaseUserId();
-    setUserRegistrationComplete(false); // Reset registration state
-    
+    storageUtils.removeItem('assessmentSessionId');
+    setUserRegistrationComplete(false);
+
     navigate('/'); // Go to landing page instead of login
   };
 
