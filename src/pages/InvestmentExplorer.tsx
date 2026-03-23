@@ -10,7 +10,8 @@ import {
   MessageSquare,
   PieChart,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Wallet
 } from 'lucide-react';
 import { InvestmentExplorerChat } from '@/components/investment/InvestmentExplorerChat';
 import { PortfolioSimulator } from '@/components/investment/PortfolioSimulator';
@@ -22,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getAssessmentResults } from '@/lib/api/assessmentApi';
 import { getRecommendations } from '@/lib/api/recommendationApi';
 import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
+import { MyPositionsTab } from '@/components/investment/MyPositionsTab';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +43,7 @@ const InvestmentExplorer: React.FC = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { session, isLoading, error: sessionError } = useSession();
-  const [activeTab, setActiveTab] = useState<'profile' | 'chat' | 'simulator' | 'analyzer'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'chat' | 'simulator' | 'analyzer' | 'positions'>('profile');
   const [error, setError] = useState<string | null>(null);
 
   // Fetch assessment results and recommendations (needed for Profile tab and Simulator)
@@ -149,7 +151,7 @@ const InvestmentExplorer: React.FC = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className={SPACING.page.subsection}>
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid h-auto p-1 bg-muted/50">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid h-auto p-1 bg-muted/50">
             <TabsTrigger 
               value="profile" 
               className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
@@ -181,6 +183,14 @@ const InvestmentExplorer: React.FC = () => {
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Asset Analyzer</span>
               <span className="sm:hidden">Analyzer</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="positions" 
+              className="gap-2 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">My Positions</span>
+              <span className="sm:hidden">Mine</span>
             </TabsTrigger>
           </TabsList>
 
@@ -331,6 +341,11 @@ const InvestmentExplorer: React.FC = () => {
             <Suspense fallback={<LoadingState variant="compact" title="Loading Asset Analyzer" subtitle="Preparing analysis tools..." />}>
               <AssetAnalyzerTab />
             </Suspense>
+          </TabsContent>
+
+          {/* My Positions Tab */}
+          <TabsContent value="positions" className="mt-6">
+            <MyPositionsTab />
           </TabsContent>
 
         </Tabs>
