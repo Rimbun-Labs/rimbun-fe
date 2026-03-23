@@ -144,7 +144,7 @@ export const BrowseAllTab = ({
               key={type}
               type={type as BankingProduct['type']}
               products={products}
-              onProductSelect={(p) => navigate(`/banking-products/${p.id}`)}
+              onProductSelect={(p) => navigate(`/banking-products/${p.id}`, { state: { recommendation: p } })}
               onAddToCompare={onAddToCompare}
               isInCompare={isInCompare}
               firebaseId={firebaseId}

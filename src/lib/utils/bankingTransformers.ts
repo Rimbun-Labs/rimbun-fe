@@ -769,7 +769,8 @@ export function transformRecommendation(
   const productName = (apiProduct.productName?.trim() || apiProduct.product?.productName?.trim() || '').trim();
   const bankName = (apiProduct.bankName?.trim() || apiProduct.product?.bankName?.trim() || '').trim();
   const productType = apiProduct.productType || apiProduct.product?.productType || 'savings';
-  const description = (apiProduct.product?.description || '').trim();
+  // Support both shapes: nested (recommendations) and flat (catalog/single-product)
+  const description = (apiProduct.product?.description ?? apiProduct.description ?? '').trim();
   
   // Log for debugging if fields are missing
   if (!productName || !bankName) {
@@ -802,9 +803,10 @@ export function transformRecommendation(
       apiProduct.eligibilityGaps
     ),
     alignedGoals,
-    features: formatProductFeatures(apiProduct.product?.attributes),
+    features: formatProductFeatures(apiProduct.product?.attributes ?? apiProduct.attributes),
     scoreBreakdown,
     explanation: apiProduct.explanation,
+    insight: apiProduct.insight,
   };
 }
 
@@ -884,13 +886,14 @@ export function transformRecommendationsResponse(
             name: rec.productName || rec.product?.productName || 'Product Name Not Available',
             bank: rec.bankName || rec.product?.bankName || 'Bank Name Not Available',
             type: mapProductType(rec.productType || rec.product?.productType || 'savings'),
-            description: rec.product?.description || '',
+            description: (rec.product?.description ?? rec.description ?? '').trim(),
             matchScore: rec.overallScore || 0,
             eligibilityStatus: mapEligibilityStatus(rec.isEligible ?? false, rec.eligibilityGaps),
             alignedGoals: (rec.alignedGoals || []).map(g => g.goalName),
-            features: formatProductFeatures(rec.product?.attributes),
+            features: formatProductFeatures(rec.product?.attributes ?? rec.attributes),
             scoreBreakdown: [],
             explanation: rec.explanation,
+            insight: rec.insight,
           };
         }
       }),

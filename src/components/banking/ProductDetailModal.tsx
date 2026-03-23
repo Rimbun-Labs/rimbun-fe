@@ -26,7 +26,8 @@ import {
   Star,
   ChevronDown,
   ChevronUp,
-  Scale
+  Scale,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBankingRecommendations } from '@/hooks/useBankingProducts';
@@ -332,6 +333,26 @@ export const ProductDetailModal = ({
                       </li>
                     ))}
                   </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* People like you */}
+            {product.insight && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    People like you
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-foreground leading-relaxed">
+                    {product.insight.percentage}% of people like you {product.insight.copy}
+                  </p>
+                  {product.insight.segmentDescription && (
+                    <p className="text-sm text-muted-foreground">{product.insight.segmentDescription}</p>
+                  )}
                 </CardContent>
               </Card>
             )}

@@ -214,6 +214,13 @@ export interface ScoreBreakdown {
   color: string;
 }
 
+/** "People like you" segment insight (optional on recommendations) */
+export interface PeopleLikeYouInsight {
+  percentage: number;
+  copy: string;
+  segmentDescription?: string;
+}
+
 export interface ProductExplanation {
   mainExplanation?: string;
   keyStrengths?: string[];
@@ -244,6 +251,8 @@ export interface BankingProduct {
   features: ProductAttributes;
   scoreBreakdown?: ScoreBreakdown[];
   explanation?: ProductExplanation;
+  /** "People like you" insight when segment/product meets threshold */
+  insight?: PeopleLikeYouInsight;
 }
 
 // API Response Types
@@ -262,7 +271,8 @@ export interface BankingProductRecommendation {
     goalName: string;
     matchScore: number;
   }>;
-  product: {
+  /** Nested shape (recommendations API). Omitted when response is flat (catalog/single-product). */
+  product?: {
     id?: string;
     productCode?: string;
     productName?: string;
@@ -273,6 +283,10 @@ export interface BankingProductRecommendation {
     attributes: ProductAttributes;
     description?: string;
   };
+  /** Flat shape (catalog/single-product API): description at root when no nested product */
+  description?: string;
+  /** Flat shape (catalog/single-product API): attributes at root when no nested product */
+  attributes?: ProductAttributes;
   // Optional fields - may be missing
   chartData?: Array<{
     category: string;
@@ -295,6 +309,8 @@ export interface BankingProductRecommendation {
   };
   crossGoalProduct?: boolean;
   explanation?: ProductExplanation;
+  /** "People like you" insight when segment/product meets threshold */
+  insight?: PeopleLikeYouInsight;
 }
 
 export interface EligibilityGap {

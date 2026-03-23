@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScoreIndicator } from './ScoreIndicator';
 import { EligibilityBadge } from './EligibilityBadge';
 import { BankingProduct } from '@/lib/api/types/banking';
-import { CreditCard, Landmark, PiggyBank, Wallet, TrendingUp, DollarSign, Plus, Star, Target, ChevronDown, ChevronUp, Sparkles, CheckCircle2, Info, Clock, DollarSign as DollarSignIcon, TrendingDown, Check, Gift, Shield, Plane } from 'lucide-react';
+import { CreditCard, Landmark, PiggyBank, Wallet, TrendingUp, DollarSign, Plus, Star, Target, ChevronDown, ChevronUp, Sparkles, CheckCircle2, Info, Clock, DollarSign as DollarSignIcon, TrendingDown, Check, Gift, Shield, Plane, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAddProduct } from '@/hooks/useBankingProducts';
 import { useBankingProfile } from '@/hooks/useBankingProducts';
@@ -605,6 +605,22 @@ export const ProductCard = ({
           )}
         </div>
 
+        {/* People like you insight */}
+        {product.insight && (
+          <div className="mt-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+            <div className="flex items-start gap-2">
+              <Users className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-foreground">
+                  {product.insight.percentage}% of people like you {product.insight.copy}
+                </p>
+                {product.insight.segmentDescription && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{product.insight.segmentDescription}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Expandable Section - Show Why This Works */}
         <Button
@@ -723,6 +739,20 @@ export const ProductCard = ({
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* People like you (expanded) */}
+            {product.insight && (
+              <div className="space-y-2 pt-2 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <h5 className="text-xs font-semibold text-foreground">People like you</h5>
+                </div>
+                <p className="text-xs text-foreground">{product.insight.percentage}% {product.insight.copy}</p>
+                {product.insight.segmentDescription && (
+                  <p className="text-xs text-muted-foreground">{product.insight.segmentDescription}</p>
+                )}
               </div>
             )}
           </div>

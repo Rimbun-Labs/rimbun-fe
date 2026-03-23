@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, TrendingUp, Award, CheckCircle2, XCircle, DollarSign, Sparkles, Info, ChevronDown, ChevronUp, Target, FileText, BarChart3, Gift, Shield, AlertCircle } from 'lucide-react';
+import { X, TrendingUp, Award, CheckCircle2, XCircle, DollarSign, Sparkles, Info, ChevronDown, ChevronUp, Target, FileText, BarChart3, Gift, Shield, AlertCircle, Users } from 'lucide-react';
 import { ProductComparison } from '@/lib/utils/bankingTransformers';
 import type { ComparisonRow } from '@/lib/api/types/banking';
 import { ScoreIndicator } from './ScoreIndicator';
@@ -619,7 +619,7 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                             </tr>
                           )}
                           {sortedProducts.some(p => p.explanation?.cashFlowImpact) && (
-                            <tr className="border-b-2 border-border">
+                            <tr className="border-b border-border">
                               <td className="p-4 font-medium text-sm border-r border-border bg-muted/10 align-top">
                                 Cash Flow Impact
                               </td>
@@ -629,6 +629,32 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
                                     <p className="text-muted-foreground leading-relaxed">
                                       {product.explanation.cashFlowImpact}
                                     </p>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              ))}
+                            </tr>
+                          )}
+                          {sortedProducts.some(p => p.insight) && (
+                            <tr className="border-b-2 border-border">
+                              <td className="p-4 font-medium text-sm border-r border-border bg-muted/10 align-top">
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-primary" />
+                                  People like you
+                                </div>
+                              </td>
+                              {sortedProducts.map(product => (
+                                <td key={product.id} className="p-4 text-sm border-r border-border last:border-r-0 align-top">
+                                  {product.insight ? (
+                                    <div>
+                                      <p className="text-muted-foreground">
+                                        {product.insight.percentage}% {product.insight.copy}
+                                      </p>
+                                      {product.insight.segmentDescription && (
+                                        <p className="text-xs text-muted-foreground mt-1">{product.insight.segmentDescription}</p>
+                                      )}
+                                    </div>
                                   ) : (
                                     <span className="text-muted-foreground">—</span>
                                   )}

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,8 @@ import {
   Target,
   Info,
   CheckCircle2,
+  Users,
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBankingRecommendations, useAddProduct, useBankingProfile } from '@/hooks/useBankingProducts';
@@ -171,18 +173,26 @@ const categorizeFeatures = (features: BankingProduct['features'], productType: s
 const ProductDetail: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const firebaseId = user?.uid;
 
-  // Try to get from recommendations first
+  // Prefer recommendation passed from list (keeps list and detail score/eligibility in sync)
+  const productFromState = useMemo(() => {
+    const rec = location.state?.recommendation as BankingProduct | undefined;
+    if (!rec || !productId) return null;
+    if (rec.id === productId || rec.productId === productId) return rec;
+    return null;
+  }, [location.state, productId]);
+
+  // Try to get from recommendations cache (same product, different tab/query)
   const { data: recommendationsData, isLoading: recommendationsLoading } = useBankingRecommendations();
-  
   const productFromRecommendations = useMemo(() => {
     if (!recommendationsData?.products || !productId) return null;
     return recommendationsData.products.find(p => p.id === productId || p.productId === productId);
   }, [recommendationsData, productId]);
 
-  // If not in recommendations, try catalog
+  // If not in recommendations, try catalog (product-by-id API)
   const { data: catalogProduct, isLoading: catalogLoading } = useQuery({
     queryKey: ['banking', 'product', productId],
     queryFn: async () => {
@@ -194,11 +204,11 @@ const ProductDetail: React.FC = () => {
         return null;
       }
     },
-    enabled: !productFromRecommendations && !!productId,
+    enabled: !productFromState && !productFromRecommendations && !!productId,
   });
 
-  const product = productFromRecommendations || catalogProduct;
-  const isLoading = recommendationsLoading || catalogLoading;
+  const product = productFromState || productFromRecommendations || catalogProduct;
+  const isLoading = !product && (recommendationsLoading || catalogLoading);
 
   const { data: userProducts } = useBankingProfile();
   const isAlreadyAdded = userProducts?.some(p => p.productId === product?.productId || p.productId === product?.id);
@@ -407,6 +417,26 @@ const ProductDetail: React.FC = () => {
                     ))}
                   </ul>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* People like you */}
+        {product.insight && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                People like you
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-muted-foreground leading-relaxed">
+                {product.insight.percentage}% of people like you {product.insight.copy}
+              </p>
+              {product.insight.segmentDescription && (
+                <p className="text-sm text-muted-foreground">{product.insight.segmentDescription}</p>
               )}
             </CardContent>
           </Card>
