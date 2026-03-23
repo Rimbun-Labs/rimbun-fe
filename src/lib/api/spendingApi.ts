@@ -1,4 +1,8 @@
 import { apiClient } from './client';
+import type {
+  ApplyBankStatementResponse,
+  BankStatementResponseDto,
+} from './types/documents';
 
 // DTOs for spending API
 export interface SpendingOverviewDto {
@@ -12,6 +16,7 @@ export interface SpendingCategoryDto {
   categoryName: string;
   monthlyAmount: number;
   isCustom: boolean;
+  bucket?: 'essential' | 'discretionary' | 'debt' | null;
 }
 
 export interface EmergencyFundStatusDto {
@@ -20,6 +25,7 @@ export interface EmergencyFundStatusDto {
   monthsOfExpenses: number;
   status: 'adequate' | 'insufficient' | 'excessive';
   recommendedTarget: number;
+  recommendedEmergencyFund?: number; // Backend sends this; use for display/forms
 }
 
 export interface SpendingAnalysisDto {
@@ -27,7 +33,17 @@ export interface SpendingAnalysisDto {
   monthlySpending: number;
   savingsRate: number;
   emergencyFundStatus: EmergencyFundStatusDto;
-  spendingCategories: SpendingCategoryDto[];
+  spendingCategories?: SpendingCategoryDto[]; // optional in single-view profile response
+
+  // Optional (e.g. from GET /spending/overview or single-view profile)
+  remainingAmount?: number;
+  spendingToIncomeRatio?: number;
+
+  // Phase 2 (optional) – derived from statement/categories when available
+  burnRate?: number | null; // expenses / income (e.g. 0.85 = 85%)
+  essentialMonthly?: number | null;
+  discretionaryMonthly?: number | null;
+  debtMonthly?: number | null;
 }
 
 export interface SpendingRecommendationDto {
@@ -227,6 +243,20 @@ export const spendingApi = {
       `/spending/trends?period=${period}`
     );
     return response.data.data;
+  },
+
+  /**
+   * Apply parsed bank statement to spending (monthly spending, emergency fund).
+   * Send the same bankStatement object returned from documents/parse.
+   */
+  applyBankStatement: async (
+    bankStatement: BankStatementResponseDto
+  ): Promise<ApplyBankStatementResponse> => {
+    const response = await apiClient.post<ApplyBankStatementResponse>(
+      '/spending/from-statement',
+      { bankStatement }
+    );
+    return response.data;
   }
 };
 

@@ -77,8 +77,8 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
     resolver: zodResolver(spendingFormSchema),
     defaultValues: {
       monthlySpending: currentData?.monthlySpending || 0,
-      emergencyFundCurrent: currentData?.emergencyFundCurrent || 0,
-      emergencyFundTarget: currentData?.recommendedEmergencyFund || undefined
+      emergencyFundCurrent: currentData?.emergencyFundStatus?.currentAmount ?? currentData?.emergencyFundCurrent ?? 0,
+      emergencyFundTarget: currentData?.emergencyFundStatus?.recommendedEmergencyFund ?? currentData?.emergencyFundStatus?.recommendedTarget ?? undefined
     }
   });
 
@@ -90,8 +90,8 @@ const SpendingInput: React.FC<SpendingInputProps> = ({
       form.setValue('emergencyFundTarget', existingPeriod.emergencyFundTarget);
     } else if (isCurrentPeriod && currentData) {
       form.setValue('monthlySpending', currentData.monthlySpending || 0);
-      form.setValue('emergencyFundCurrent', currentData.emergencyFundCurrent || 0);
-      form.setValue('emergencyFundTarget', currentData.recommendedEmergencyFund);
+      form.setValue('emergencyFundCurrent', currentData.emergencyFundStatus?.currentAmount ?? currentData.emergencyFundCurrent ?? 0);
+      form.setValue('emergencyFundTarget', currentData.emergencyFundStatus?.recommendedEmergencyFund ?? currentData.emergencyFundStatus?.recommendedTarget);
     } else {
       form.setValue('monthlySpending', 0);
       form.setValue('emergencyFundCurrent', 0);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ProfileProvider, useProfile } from '@/contexts/ProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +24,8 @@ import {
   Calendar,
   CheckCircle,
   BookOpen,
-  Download
+  Download,
+  FileUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { userService } from '@/lib/api/userService';
@@ -34,15 +36,29 @@ import { SubscriptionTier } from '@/lib/api/types/subscription';
 import { updateSubscription } from '@/lib/api/subscriptionApi';
 import { authService } from '@/lib/auth/authService';
 import { getUserSessions } from '@/lib/api/assessmentApi';
+import { ProfileDocumentsSection } from '@/components/profile/ProfileDocumentsSection';
+import ProfileNeedsList from '@/components/dashboard/ProfileNeedsList';
+import { useEconomicProfile, useUpsertEconomicProfile } from '@/hooks/useEconomicProfile';
+import type { EmploymentType } from '@/lib/api/types/economicProfile';
 
 const ProfileContent = () => {
+  const [searchParams] = useSearchParams();
   const { profile, isLoading, error, updateProfileData, refreshProfile } = useProfile();
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
+
+  // Deep link: /profile?section=documents opens Documents tab
+  useEffect(() => {
+    if (searchParams.get('section') === 'documents') {
+      setActiveTab('documents');
+    }
+  }, [searchParams]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const { data: economicProfile, isLoading: econLoading } = useEconomicProfile();
+  const upsertEconomicProfile = useUpsertEconomicProfile();
 
   // Get assessment count directly from sessions API (most reliable)
   const databaseUserId = userService.getDatabaseUserId();
@@ -409,17 +425,18 @@ const ProfileContent = () => {
             </p>
           </div>
 
+          {/* Things to do - profile needs / gaps */}
+          <ProfileNeedsList />
+
           {/* Main Content */}
           <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid grid-cols-1 mb-6 w-full">
+              <TabsList className="grid grid-cols-2 mb-6 w-full max-w-md">
                 <TabsTrigger value="account">Account</TabsTrigger>
-                {/* Preferences tab disabled for testbed launch - keeping profile simple */}
-                {/* <TabsTrigger value="preferences">Preferences</TabsTrigger> */}
-                {/* Notifications tab disabled for testbed launch - no backend connection */}
-                {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
-                {/* Subscription tab disabled for testbed launch */}
-                {/* <TabsTrigger value="subscription">Subscription</TabsTrigger> */}
+                <TabsTrigger value="documents" className="gap-2">
+                  <FileUp className="h-4 w-4" />
+                  Documents
+                </TabsTrigger>
               </TabsList>
 
               {/* Account Tab */}
@@ -491,6 +508,111 @@ const ProfileContent = () => {
                           'Update Profile'
                         )}
                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Economic profile - employment and dependents */}
+                <Card className="w-full">
+                  <CardHeader className="flex flex-row items-center space-y-0 gap-4 pb-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-foreground">Economic profile</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        Your work situation and who depends on your income
+                      </CardDescription>
+                    </div>
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Shield className="h-5 w-5 text-primary" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <Label className="text-foreground font-medium">Employment type</Label>
+                      <Select
+                        disabled={econLoading || upsertEconomicProfile.isPending}
+                        value={(economicProfile?.employmentType as EmploymentType | null) ?? 'other'}
+                        onValueChange={(value) => {
+                          const employmentType = value as EmploymentType;
+                          upsertEconomicProfile.mutate({
+                            employmentType,
+                            employmentDetail: economicProfile?.employmentDetail ?? null,
+                            dependents: economicProfile?.dependents ?? 0,
+                            plannedRetirementAge: economicProfile?.plannedRetirementAge ?? null,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-11">
+                          <SelectValue placeholder="Select your employment type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="government">Government / public sector</SelectItem>
+                          <SelectItem value="private_salaried">Private salaried employee</SelectItem>
+                          <SelectItem value="self_employed">Self-employed / freelancer</SelectItem>
+                          <SelectItem value="business_owner">Business owner</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="unemployed">Not currently working</SelectItem>
+                          <SelectItem value="retired">Retired</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="dependents" className="text-foreground font-medium">
+                        Number of people you support
+                      </Label>
+                      <Input
+                        id="dependents"
+                        type="number"
+                        min={0}
+                        max={20}
+                        value={
+                          economicProfile?.dependents != null
+                            ? String(economicProfile.dependents)
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const parsed = raw === '' ? null : Number(raw);
+                          upsertEconomicProfile.mutate({
+                            employmentType: economicProfile?.employmentType ?? 'other',
+                            employmentDetail: economicProfile?.employmentDetail ?? null,
+                            dependents: parsed,
+                            plannedRetirementAge: economicProfile?.plannedRetirementAge ?? null,
+                          });
+                        }}
+                        placeholder="e.g. 0, 2, 3"
+                        className="border-border focus:border-primary h-11 w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="retirement-age" className="text-foreground font-medium">
+                        Planned retirement age (optional)
+                      </Label>
+                      <Input
+                        id="retirement-age"
+                        type="number"
+                        min={40}
+                        max={80}
+                        value={
+                          economicProfile?.plannedRetirementAge != null
+                            ? String(economicProfile.plannedRetirementAge)
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const parsed = raw === '' ? null : Number(raw);
+                          upsertEconomicProfile.mutate({
+                            employmentType: economicProfile?.employmentType ?? 'other',
+                            employmentDetail: economicProfile?.employmentDetail ?? null,
+                            dependents: economicProfile?.dependents ?? 0,
+                            plannedRetirementAge: parsed,
+                          });
+                        }}
+                        placeholder="e.g. 60 or 65"
+                        className="border-border focus:border-primary h-11 w-full"
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -731,6 +853,11 @@ const ProfileContent = () => {
                     </div>
                   </CardContent>
                 </Card> */}
+              </TabsContent>
+
+              {/* Documents Tab - Upload bank statement or product brochure */}
+              <TabsContent value="documents" className="space-y-6 w-full">
+                <ProfileDocumentsSection />
               </TabsContent>
 
               {/* Preferences Tab - Disabled for testbed launch - keeping profile simple */}

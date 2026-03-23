@@ -46,7 +46,11 @@ const SpendingOverviewCard: React.FC<SpendingOverviewCardProps> = ({ data, loadi
     monthlyIncome,
     monthlySpending,
     savingsRate,
-    emergencyFundStatus
+    emergencyFundStatus,
+    burnRate,
+    essentialMonthly,
+    discretionaryMonthly,
+    debtMonthly,
   } = data;
 
   const recommendedEmergencyFund = emergencyFundStatus?.recommendedTarget || 0;
@@ -152,6 +156,31 @@ const SpendingOverviewCard: React.FC<SpendingOverviewCardProps> = ({ data, loadi
             )}
           </p>
         </div>
+
+        {/* Burn Rate and Category Breakdown (Phase 2, optional) */}
+        {typeof burnRate === 'number' && (
+          <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Burn rate</span>
+              </div>
+              {/* burnRate is a ratio (0.85) – convert to percent for formatter */}
+              <span className="text-sm font-semibold">
+                {formatPercentage((burnRate ?? 0) * 100)}
+              </span>
+            </div>
+            {(essentialMonthly != null ||
+              discretionaryMonthly != null ||
+              debtMonthly != null) && (
+              <p className="text-xs text-muted-foreground">
+                Essential: {essentialMonthly != null ? formatCurrency(essentialMonthly) : '—'} •{' '}
+                Discretionary: {discretionaryMonthly != null ? formatCurrency(discretionaryMonthly) : '—'} •{' '}
+                Debt: {debtMonthly != null ? formatCurrency(debtMonthly) : '—'}
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

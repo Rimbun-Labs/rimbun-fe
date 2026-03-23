@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@/components/ui/button';
 import { 
   DollarSign, 
   PieChart,
   Lightbulb,
-  AlertCircle
+  AlertCircle,
+  FileUp
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/lib/api/userService';
@@ -129,6 +132,15 @@ const SpendingPage: React.FC = () => {
                 <DollarSign className="h-5 w-5" />
                 Enter Your Spending Data
               </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Enter manually below, or import from a bank statement PDF.
+              </p>
+              <Button variant="outline" size="sm" className="mb-4" asChild>
+                <Link to="/profile?section=documents" className="gap-2">
+                  <FileUp className="h-4 w-4" />
+                  Import from bank statement
+                </Link>
+              </Button>
               <SpendingInput 
                 userId={userId || ''}
                 currentData={spendingData}

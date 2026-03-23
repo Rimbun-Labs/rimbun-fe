@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PieChart as PieChartIcon, Plus, Edit, Trash2, List, BarChart3 } from "lucide-react";
 import { SpendingCategoryDto } from '@/lib/api/spendingApi';
 import { useAddSpendingCategory, useUpdateSpendingCategory, useDeleteSpendingCategory } from '@/hooks/useSpendingData';
@@ -14,10 +21,13 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recha
 import { useFormatters } from '@/hooks/useFormatters';
 import { useTheme } from '@/hooks/useTheme';
 
+const BucketEnum = z.enum(['essential', 'discretionary', 'debt']);
+
 // Form validation schema
 const categoryFormSchema = z.object({
   categoryName: z.string().min(1, 'Category name is required').max(50, 'Category name too long'),
-  monthlyAmount: z.number().min(0, 'Amount must be positive').max(1000000, 'Amount seems too high')
+  monthlyAmount: z.number().min(0, 'Amount must be positive').max(1000000, 'Amount seems too high'),
+  bucket: BucketEnum.optional(),
 });
 
 type CategoryFormData = z.infer<typeof categoryFormSchema>;
@@ -48,7 +58,8 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       categoryName: '',
-      monthlyAmount: 0
+      monthlyAmount: 0,
+      bucket: undefined,
     }
   });
 
@@ -64,7 +75,8 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
           category: {
             categoryName: data.categoryName,
             monthlyAmount: data.monthlyAmount,
-            isCustom: true
+            isCustom: true,
+            bucket: data.bucket ?? null,
           }
         });
         setEditingCategory(null);
@@ -73,7 +85,8 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
         await addCategoryMutation.mutateAsync({
           categoryName: data.categoryName,
           monthlyAmount: data.monthlyAmount,
-          isCustom: true
+          isCustom: true,
+          bucket: data.bucket ?? null,
         });
       }
       reset();
@@ -87,6 +100,7 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
     setEditingCategory(category);
     setValue('categoryName', category.categoryName);
     setValue('monthlyAmount', category.monthlyAmount);
+    setValue('bucket', (category.bucket ?? undefined) as any);
     setIsAddDialogOpen(true);
   };
 
@@ -218,6 +232,22 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
                   {errors.monthlyAmount && (
                     <p className="text-sm text-red-500">{errors.monthlyAmount.message}</p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bucket">Bucket (optional)</Label>
+                  <Select
+                    value={form.watch('bucket') || ''}
+                    onValueChange={(val) => form.setValue('bucket', val as any)}
+                  >
+                    <SelectTrigger id="bucket">
+                      <SelectValue placeholder="Use default bucket" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="essential">Essential</SelectItem>
+                      <SelectItem value="discretionary">Discretionary</SelectItem>
+                      <SelectItem value="debt">Debt</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={handleCloseDialog}>
@@ -372,6 +402,13 @@ const SpendingCategories: React.FC<SpendingCategoriesProps> = ({
                       {category.isCustom && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                           Custom
+                        </span>
+                      )}
+                      {category.bucket && (
+                        <span className="text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded">
+                          {category.bucket === 'essential' && 'Essential'}
+                          {category.bucket === 'discretionary' && 'Discretionary'}
+                          {category.bucket === 'debt' && 'Debt'}
                         </span>
                       )}
                     </div>
