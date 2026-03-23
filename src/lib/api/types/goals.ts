@@ -38,6 +38,8 @@ export interface GoalMetadata {
   selectedFundIds?: string[];
   /** Optional weights per fund; length should match selectedFundIds; backend normalizes if omitted */
   selectedFundWeights?: number[];
+  /** Resilience nudge answer: who depends on this goal (used by insurance/resilience flow) */
+  dependencyScope?: 'self' | 'others';
 }
 
 export interface GoalAutomationSettings {
@@ -285,5 +287,42 @@ export interface GoalFamilyMappingResponse {
   familyToGoalTypes: Record<GoalFamilySlug, string[]>;
   validGoalTypes: string[];
   validFamilies: GoalFamilySlug[];
+}
+
+// Resilience (Insurance Hedge) API types – GET /goals/:goalId/resilience
+export interface ResilienceProductDto {
+  productId: string;
+  insurerName: string;
+  productName: string;
+  productCategory: string;
+  productSubcategory: string;
+  productPageUrl?: string;
+  nudgeCopy?: string;
+  estimatedMonthlyPremiumProxy?: number;
+}
+
+export type ResilienceHedgeType =
+  | 'goal_completion_guarantee'
+  | 'income_floor'
+  | 'capital_preservation'
+  | 'none';
+
+export interface ResilienceResponseDto {
+  goalId: string;
+  hedgeType: string;
+  recommendedSumAssured: number;
+  actionCopy: string;
+  products: ResilienceProductDto[];
+  showNudge: boolean;
+  nudgeQuestionCopy: string;
+  dependencyScope?: 'self' | 'others';
+}
+
+export interface ResilienceApiResponse {
+  data: ResilienceResponseDto | null;
+}
+
+export interface GoalUpdateNudgePayload {
+  metadata: { dependencyScope: 'self' | 'others' };
 }
 

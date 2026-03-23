@@ -83,6 +83,10 @@ export interface AssessmentResult {
     finalScore: number;          // Final weighted score (0-100)
     profile: string;             // One of: "Advanced Balanced Investor", "Balanced Investor", "Opportunistic Investor", "Conservative Investor"
     overallConfidence: number;   // Overall confidence level (0-1)
+
+    // Finance persona (from backend finance-persona-mapper; for insurance/banking suitability)
+    financePersona?: string;     // e.g. "Safety-first" | "Balanced builder" | "Growth-focused" | "Income & preservation"
+    financePersonaTagline?: string;
   };
   createdAt: string;
   updatedAt: string;

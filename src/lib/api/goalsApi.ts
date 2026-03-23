@@ -3,6 +3,7 @@ import {
   CreateGoalRequest,
   GoalProgressHistoryDto,
   GoalWithInsightsDto,
+  ResilienceResponseDto,
   UpdateGoalRequest,
   UserGoalsResponse,
   SimulateStrategyRequest,
@@ -84,6 +85,13 @@ export const goalsApi = {
     const response = await apiClient.post<ApiResponse<SimulateStrategyResponse>>(
       `/goals/simulate-strategy`,
       request
+    );
+    return response.data.data;
+  },
+
+  getResilience: async (goalId: string): Promise<ResilienceResponseDto | null> => {
+    const response = await apiClient.get<ApiResponse<ResilienceResponseDto | null>>(
+      `/goals/${goalId}/resilience`
     );
     return response.data.data;
   },

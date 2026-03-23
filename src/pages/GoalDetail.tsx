@@ -5,6 +5,7 @@ import {
   useDeleteGoal,
   useGoal,
   useGoalProgressHistory,
+  useResilience,
   useUpdateGoal,
 } from '@/hooks/useGoals';
 import {
@@ -32,10 +33,20 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
   ArrowLeft,
   BadgeCheck,
   Calendar,
   Clock4,
+  Info,
   NotebookPen,
   Pencil,
   Shield,
@@ -44,12 +55,22 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { GoalWithInsightsDto } from '@/lib/api/types/goals';
 import { getGoalFamilyConfigBySlug } from '@/lib/constants/goalFamilies';
+import {
+  getInsuranceCurrencyFormat,
+  getMonthlyPaymentLabel,
+  HEDGE_TYPE_EXPLANATIONS,
+  INSURANCE_TERMS,
+} from '@/lib/constants/insuranceEducation';
+import { formatGoalType, getInsuranceProductDisplayName } from '@/lib/utils/insuranceDisplay';
+import { LabelWithBridgeTooltip } from '@/components/insurance/LabelWithBridgeTooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   maximumFractionDigits: 0,
 });
+const insuranceCurrency = getInsuranceCurrencyFormat();
 
 const GoalDetailPage = () => {
   const { goalId } = useParams<{ goalId: string }>();
@@ -59,9 +80,12 @@ const GoalDetailPage = () => {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isNudgeOpen, setIsNudgeOpen] = useState(false);
+  const [nudgeChoice, setNudgeChoice] = useState<'self' | 'others' | null>(null);
   const [historyRange, setHistoryRange] = useState<'6m' | '12m' | '24m' | 'all'>('12m');
 
   const { data: goal, isLoading, isError, refetch } = useGoal(goalId);
+  const { data: resilience, refetch: refetchResilience } = useResilience(goalId);
   const progressQueryOptions = useMemo(() => {
     if (historyRange === 'all') return undefined;
     return { limit: parseInt(historyRange, 10) };
@@ -124,6 +148,16 @@ const GoalDetailPage = () => {
     await updateGoal.mutateAsync(payload);
     setIsEditOpen(false);
     refetch();
+  };
+
+  const handleNudgeAnswer = async (dependencyScope: 'self' | 'others') => {
+    if (!goalId || !goal) return;
+    await updateGoal.mutateAsync({
+      metadata: { ...goal.metadata, dependencyScope },
+    });
+    setIsNudgeOpen(false);
+    setNudgeChoice(null);
+    refetchResilience();
   };
 
   if (isLoading) {
@@ -212,7 +246,7 @@ const GoalDetailPage = () => {
           </div>
           <h1 className="mt-2 text-3xl font-semibold">{goal.goalName}</h1>
           <p className="text-muted-foreground">
-            {goal.goalType.replace('_', ' ')} · Priority {goal.priority ?? 3}
+            {formatGoalType(goal.goalType)} · Priority {goal.priority ?? 3}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -310,6 +344,206 @@ const GoalDetailPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {resilience && resilience.hedgeType !== 'none' && (
+        <Card className="border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              Protection & resilience
+            </CardTitle>
+            <CardDescription>{resilience.actionCopy}</CardDescription>
+            {(() => {
+              const explain = HEDGE_TYPE_EXPLANATIONS[resilience.hedgeType] ?? HEDGE_TYPE_EXPLANATIONS.none;
+              return (
+                <p className="text-sm text-muted-foreground pt-1">
+                  What this means: {explain.body}
+                </p>
+              );
+            })()}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {resilience.showNudge && resilience.dependencyScope == null && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/30 p-4">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  {resilience.nudgeQuestionCopy}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsNudgeOpen(true)}
+                  className="border-amber-300 dark:border-amber-700"
+                >
+                  Answer to see tailored products
+                </Button>
+              </div>
+            )}
+            {resilience.recommendedSumAssured > 0 && (
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">
+                  <LabelWithBridgeTooltip label="Recommended cover" bridgeKey="recommendedCover" />: {insuranceCurrency.format(resilience.recommendedSumAssured)}
+                </p>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                        aria-label="Explanation: Recommended cover"
+                      >
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>{INSURANCE_TERMS.recommendedCover}</p>
+                      <p className="mt-1 font-medium">{INSURANCE_TERMS.recommendedCoverContext}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            )}
+            {resilience.products.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">Suggested products</p>
+                <ul className="space-y-3">
+                  {resilience.products.map((product) => (
+                    <li
+                      key={product.productId}
+                      className="rounded-lg border bg-muted/30 p-3 text-sm"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          {product.productId ? (
+                            <Link
+                              to={`/insurance/products/${encodeURIComponent(product.productId)}`}
+                              className="block hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded -m-1 p-1"
+                            >
+                              <p className="font-medium text-foreground">
+                                {getInsuranceProductDisplayName(product)}
+                              </p>
+                              {product.nudgeCopy && (
+                                <p className="mt-1 text-muted-foreground">{product.nudgeCopy}</p>
+                              )}
+                              {product.estimatedMonthlyPremiumProxy != null && (() => {
+                                const { term, indicativeLabel } = getMonthlyPaymentLabel(product.isTakaful === true);
+                                return (
+                                  <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                                    From {insuranceCurrency.format(product.estimatedMonthlyPremiumProxy)}/mo
+                                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5 w-full">
+                                      Indicative {term.toLowerCase()} · {indicativeLabel}
+                                    </span>
+                                  </p>
+                                );
+                              })()}
+                            </Link>
+                          ) : (
+                            <>
+                              <p className="font-medium text-foreground">
+                                {getInsuranceProductDisplayName(product)}
+                              </p>
+                              {product.nudgeCopy && (
+                                <p className="mt-1 text-muted-foreground">{product.nudgeCopy}</p>
+                              )}
+                              {product.estimatedMonthlyPremiumProxy != null && (() => {
+                                const { term, indicativeLabel } = getMonthlyPaymentLabel(product.isTakaful === true);
+                                return (
+                                  <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                                    From {insuranceCurrency.format(product.estimatedMonthlyPremiumProxy)}/mo
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            type="button"
+                                            className="text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded inline-flex"
+                                            aria-label="Explanation: Indicative premium"
+                                          >
+                                            <Info className="h-3 w-3" />
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs">
+                                          <p>{INSURANCE_TERMS.indicativePremium}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <span className="block text-[10px] text-muted-foreground/80 mt-0.5 w-full">
+                                      Indicative {term.toLowerCase()} · {indicativeLabel}
+                                    </span>
+                                  </p>
+                                );
+                              })()}
+                            </>
+                          )}
+                        </div>
+                        {product.productId ? (
+                          <Button variant="outline" size="sm" asChild>
+                            <Link to={`/insurance/products/${encodeURIComponent(product.productId)}`}>
+                              View details
+                            </Link>
+                          </Button>
+                        ) : product.productPageUrl ? (
+                          <Button variant="outline" size="sm" asChild>
+                            <a
+                              href={product.productPageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View product
+                            </a>
+                          </Button>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={isNudgeOpen} onOpenChange={setIsNudgeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>One quick question</DialogTitle>
+            <DialogDescription>
+              {resilience?.nudgeQuestionCopy}
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (nudgeChoice) handleNudgeAnswer(nudgeChoice);
+            }}
+            className="space-y-4"
+          >
+            <RadioGroup
+              value={nudgeChoice ?? ''}
+              onValueChange={(v) => setNudgeChoice(v === 'self' || v === 'others' ? v : null)}
+              className="grid gap-3"
+            >
+              <label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                <RadioGroupItem value="self" id="nudge-self" />
+                <span className="text-sm font-medium">Just for me</span>
+              </label>
+              <label className="flex items-center gap-3 rounded-lg border p-4 cursor-pointer hover:bg-accent/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                <RadioGroupItem value="others" id="nudge-others" />
+                <span className="text-sm font-medium">Others rely on it</span>
+              </label>
+            </RadioGroup>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsNudgeOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={updateGoal.isPending || !nudgeChoice}
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <GoalProgressChart
         history={progressHistory}
