@@ -15,7 +15,8 @@ import {
   ChevronDown,
   ChevronUp,
   MoreHorizontal,
-  Building2
+  Building2,
+  Shield
 } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
 import { useBankPermission } from '@/hooks/useBankPermission';
@@ -60,9 +61,10 @@ const AppSidebar: React.FC = () => {
                              location.pathname.includes('/planning');
     setIsPlanningOpen(isOnPlanningPage);
     
-    // Auto-expand Explorer section if on banking products or investment explorer pages
+    // Auto-expand Explorer section if on banking, investment, or insurance explorer pages
     const isOnExplorerPage = location.pathname.includes('/banking-products') ||
-                            location.pathname.includes('/investment-explorer');
+                            location.pathname.includes('/investment-explorer') ||
+                            location.pathname.includes('/insurance');
     setIsExplorerOpen(isOnExplorerPage);
     
     // Auto-expand Learning section if on learning pages (but NOT investment-explorer)
@@ -222,6 +224,20 @@ const AppSidebar: React.FC = () => {
                 Banking
               </NavLink>
               {renderInvestmentExplorerLink()}
+              <NavLink
+                to="/insurance"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
+                    isActive 
+                      ? "bg-accent text-accent-foreground border-primary" 
+                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                  )
+                }
+              >
+                <Shield className="h-4 w-4" />
+                Insurance
+              </NavLink>
             </CollapsibleContent>
           </Collapsible>
         </div>

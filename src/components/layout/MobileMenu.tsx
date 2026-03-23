@@ -21,7 +21,8 @@ import {
   Target,
   Home,
   Building2,
-  Search
+  Search,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -182,6 +183,19 @@ const MobileMenu: React.FC = () => {
             >
               <Compass className="h-4 w-4" />
               Investment
+            </Link>
+            <Link
+              to="/insurance"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                isActive('/insurance') 
+                  ? "bg-accent !text-accent-foreground" 
+                  : "text-muted-foreground sidebar-nav-inactive"
+              )}
+              onClick={closeMobileMenu}
+            >
+              <Shield className="h-4 w-4" />
+              Insurance
             </Link>
           </div>
 

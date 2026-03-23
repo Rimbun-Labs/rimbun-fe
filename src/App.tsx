@@ -52,6 +52,8 @@ const GoalsPage = lazy(() => import("./pages/Goals"));
 const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
 const GoalFamilyPage = lazy(() => import("./pages/GoalFamily"));
 const BankingProducts = lazy(() => import("./pages/BankingProducts"));
+const InsuranceExplorer = lazy(() => import("./pages/InsuranceExplorer"));
+const InsuranceProductDetail = lazy(() => import("./pages/InsuranceProductDetail"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Explore = lazy(() => import("./pages/Explore"));
 const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
@@ -428,6 +430,22 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <InvestmentExplorer />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/insurance" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <InsuranceExplorer />
+            </Suspense>
+          } 
+        />
+        <Route 
+          path="/insurance/products/:productId" 
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <InsuranceProductDetail />
             </Suspense>
           } 
         />
