@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bankingApi } from '@/lib/api/bankingApi';
+import { singleViewProfileQueryKey } from '@/hooks/useSingleViewProfile';
+import { profileNeedsQueryKey } from '@/hooks/useProfileNeeds';
 import {
   transformRecommendationsResponse,
   transformComparisonResponse,
@@ -182,6 +184,8 @@ export function useAddProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Product added to your profile');
     },
     onError: (error: Error) => {
@@ -221,6 +225,8 @@ export function useUpdateProduct(productId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
       queryClient.invalidateQueries({ queryKey: ['banking', 'summary'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Product updated');
     },
     onError: (error: Error) => {
@@ -247,6 +253,8 @@ export function useDeleteProduct() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
       queryClient.invalidateQueries({ queryKey: ['banking', 'summary'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Product removed from your profile');
     },
     onError: (error: Error) => {

@@ -16,7 +16,9 @@ import { config } from '@/lib/api/config';
 
 // Component imports
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import OnboardingChecklist from '@/components/dashboard/OnboardingChecklist';
+import ProfileNeedsList from '@/components/dashboard/ProfileNeedsList';
+import PurposeScorecard from '@/components/dashboard/PurposeScorecard';
+import { useProfileNeeds } from '@/hooks/useProfileNeeds';
 import PortfolioAllocation from '@/components/dashboard/PortfolioAllocation';
 import RiskProfileChart from '@/components/dashboard/RiskProfileChart';
 import DiversificationAnalysis from '@/components/recommendations/DiversificationAnalysis';
@@ -50,12 +52,10 @@ import {
   CashExplanation
 } from '@/components/dashboard/explanations/assetAllocation';
 import InvestmentScenarios from '@/components/dashboard/InvestmentScenarios';
-import { useSpendingData } from '@/hooks/useSpendingData';
 import { useCashFlowProjections, useRefreshCashFlowProjections } from '@/hooks/useCashFlowData';
 import { useFormatters } from '@/hooks/useFormatters';
-import { useGoalsOverview } from '@/hooks/useGoals';
 import { getLearningProgress } from '@/lib/api/profileApi';
-import { useBankingProfile } from '@/hooks/useBankingProducts';
+import { useSingleViewProfile } from '@/hooks/useSingleViewProfile';
 
 // Types
 interface LowercaseAssetAllocations {
@@ -158,23 +158,10 @@ const Dashboard = () => {
     return !hasSeen;
   });
 
-  // Onboarding checklist state
-  const [showChecklist, setShowChecklist] = useState(() => {
-    const dismissed = localStorage.getItem('onboardingChecklistDismissed');
-    return !dismissed && effectiveSessionId && session?.isCompleted;
-  });
+  // "Things to do" card visibility: show by default; dismiss only hides for this visit (no localStorage)
+  const [showChecklist, setShowChecklist] = useState(true);
 
-  // Update checklist visibility when assessment is completed
-  useEffect(() => {
-    if (effectiveSessionId && session?.isCompleted) {
-      const dismissed = localStorage.getItem('onboardingChecklistDismissed');
-      if (!dismissed) {
-        setShowChecklist(true);
-      }
-      // Mark dashboard as visited
-      localStorage.setItem('hasVisitedDashboard', 'true');
-    }
-  }, [effectiveSessionId, session?.isCompleted]);
+  const { data: profileNeedsData } = useProfileNeeds();
   
   // Get assessment results for the current session
   const { data: assessmentResults, isLoading: assessmentLoading, error: assessmentError } = useQuery({
@@ -222,12 +209,22 @@ const Dashboard = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
-  // Get spending data
-  const { 
-    data: spendingData, 
-    isLoading: spendingLoading, 
-    error: spendingError 
-  } = useSpendingData();
+  // Single-view profile: spending, goals, banking (one request)
+  const {
+    data: profileData,
+    isLoading: profileLoading,
+    error: profileError,
+  } = useSingleViewProfile();
+
+  const spendingData = profileData?.spending ?? undefined;
+  const spendingLoading = profileLoading;
+  const spendingError = profileError ?? undefined;
+
+  const goalsData = profileData?.goals ?? undefined;
+  const goalsLoading = profileLoading;
+
+  const hasBankingProducts =
+    (profileData?.banking?.existingProducts?.length ?? 0) > 0;
 
   // Get cash flow data
   const { 
@@ -237,12 +234,6 @@ const Dashboard = () => {
   } = useCashFlowProjections();
 
   const refreshCashFlowMutation = useRefreshCashFlowProjections();
-
-  // Get goals data for checklist
-  const { 
-    data: goalsData, 
-    isLoading: goalsLoading 
-  } = useGoalsOverview(false);
 
   // Get learning progress for checklist
   const { 
@@ -254,10 +245,6 @@ const Dashboard = () => {
     enabled: !!userService.getDatabaseUserId(),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  // Get banking profile for checklist
-  const { data: bankingProfile } = useBankingProfile();
-  const hasBankingProducts = !!(bankingProfile && bankingProfile.length > 0);
 
   const { formatCurrency, formatPercentage } = useFormatters();
 
@@ -465,21 +452,26 @@ const Dashboard = () => {
         <>
           {/* Header Section */}
           <DashboardHeader />
+
+          {/* Purpose Scorecard - when backend returns purposeStatus (Purpose-Centric Fiduciary Engine) */}
+          {profileNeedsData?.purposeStatus && profileNeedsData.purposeStatus.length > 0 && (
+            <PurposeScorecard purposeStatus={profileNeedsData.purposeStatus} />
+          )}
           
-          {/* Onboarding Checklist - Show after assessment completion */}
-          {showChecklist && effectiveSessionId && session?.isCompleted && (
-            <OnboardingChecklist
-              assessmentComplete={!!(effectiveSessionId && session?.isCompleted)}
-              hasSpendingData={!!spendingData}
-              hasGoals={!!(goalsData?.goals && goalsData.goals.length > 0)}
-              hasLearningProgress={!!(learningProgress && learningProgress.completedModules > 0)}
-              hasBankingProducts={hasBankingProducts}
-              sessionId={effectiveSessionId}
-              onDismiss={() => {
-                localStorage.setItem('onboardingChecklistDismissed', 'true');
-                setShowChecklist(false);
-              }}
+          {/* Profile needs / things to do - from GET /profile/needs */}
+          {showChecklist ? (
+            <ProfileNeedsList
+              onDismiss={() => setShowChecklist(false)}
             />
+          ) : (
+            <Button
+              variant="outline"
+              className="mb-6 w-full sm:w-auto justify-start gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
+              onClick={() => setShowChecklist(true)}
+            >
+              <ChevronDown className="h-4 w-4" />
+              Show things to do
+            </Button>
           )}
           
           {/* Progressive Hint - Show once for first-time users */}

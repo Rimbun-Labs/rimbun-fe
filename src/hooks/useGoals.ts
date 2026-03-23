@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { goalsApi } from '@/lib/api/goalsApi';
+import { singleViewProfileQueryKey } from '@/hooks/useSingleViewProfile';
+import { profileNeedsQueryKey } from '@/hooks/useProfileNeeds';
 import { goalFamiliesApi } from '@/lib/api/goalFamiliesApi';
 import {
   CreateGoalRequest,
@@ -9,6 +11,7 @@ import {
   GoalWithInsightsDto,
   GoalFamilySummariesResponse,
   GoalFamilyBoardDto,
+  ResilienceResponseDto,
   UpdateGoalRequest,
   UserGoalsResponse,
   SimulateStrategyRequest,
@@ -51,8 +54,9 @@ export const useGoalsOverview = (includeInactive = false) => {
         )
       )
         .then(() => {
-          // Invalidate queries to refresh the data
           queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
+          queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+          queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
         })
         .catch((error) => {
           console.error('Failed to update assessment goal priorities:', error);
@@ -71,6 +75,15 @@ export const useGoal = (goalId?: string) => {
   return useQuery<GoalWithInsightsDto>({
     queryKey: ['goals', 'detail', goalId],
     queryFn: () => goalsApi.getGoal(goalId!),
+    enabled: Boolean(goalId),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useResilience = (goalId?: string) => {
+  return useQuery<ResilienceResponseDto | null>({
+    queryKey: ['goals', 'resilience', goalId],
+    queryFn: () => goalsApi.getResilience(goalId!),
     enabled: Boolean(goalId),
     staleTime: 1000 * 60 * 5,
   });
@@ -102,6 +115,8 @@ export const useCreateGoal = () => {
     onSuccess: (goal) => {
       toast.success('Goal created successfully');
       queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       queryClient.setQueryData<GoalWithInsightsDto>(
         ['goals', 'detail', goal.id],
         goal
@@ -122,6 +137,9 @@ export const useUpdateGoal = (goalId?: string) => {
       toast.success('Goal updated successfully');
       queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
       queryClient.invalidateQueries({ queryKey: ['goals', 'progress', goalId] });
+      queryClient.invalidateQueries({ queryKey: ['goals', 'resilience', goalId] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       queryClient.setQueryData<GoalWithInsightsDto>(
         ['goals', 'detail', goal.id],
         goal
@@ -142,6 +160,8 @@ export const useDeleteGoal = () => {
       toast.success('Goal deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['goals', 'overview'] });
       queryClient.invalidateQueries({ queryKey: ['goals', 'progress', goalId] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       queryClient.removeQueries({ queryKey: ['goals', 'detail', goalId] });
     },
     onError: (error: Error) => {

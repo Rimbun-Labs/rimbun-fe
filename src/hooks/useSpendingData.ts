@@ -6,6 +6,9 @@ import {
   SaveSpendingPeriodDto,
   SpendingPeriodDto
 } from '@/lib/api/spendingApi';
+import type { BankStatementResponseDto } from '@/lib/api/types/documents';
+import { singleViewProfileQueryKey } from '@/hooks/useSingleViewProfile';
+import { profileNeedsQueryKey } from '@/hooks/useProfileNeeds';
 import { toast } from 'sonner';
 
 /**
@@ -34,6 +37,8 @@ export const useSaveSpendingOverview = () => {
       // Invalidate and refetch spending data
       queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
       queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Spending data saved successfully');
     },
     onError: (error: Error) => {
@@ -68,6 +73,8 @@ export const useAddSpendingCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['spending-categories'] });
       queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
       queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Category added successfully');
     },
     onError: (error: Error) => {
@@ -90,6 +97,8 @@ export const useUpdateSpendingCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['spending-categories'] });
       queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
       queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Category updated successfully');
     },
     onError: (error: Error) => {
@@ -111,6 +120,8 @@ export const useDeleteSpendingCategory = () => {
       queryClient.invalidateQueries({ queryKey: ['spending-categories'] });
       queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
       queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Category deleted successfully');
     },
     onError: (error: Error) => {
@@ -146,6 +157,8 @@ export const useSaveSpendingPeriod = () => {
       queryClient.invalidateQueries({ queryKey: ['spending-trends'] });
       queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
       queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
       toast.success('Spending period saved successfully');
     },
     onError: (error: Error) => {
@@ -185,5 +198,29 @@ export const useSpendingTrends = (
     queryFn: () => spendingApi.getSpendingTrends(period),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3
+  });
+};
+
+/**
+ * Hook to apply parsed bank statement to spending (from Profile documents flow).
+ * Invalidates spending overview and recommendations on success.
+ */
+export const useApplyBankStatement = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bankStatement: BankStatementResponseDto) =>
+      spendingApi.applyBankStatement(bankStatement),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['spending-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['spending-recommendations'] });
+      queryClient.invalidateQueries({ queryKey: ['spending-history'] });
+      queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
+      queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
+      toast.success('Spending updated from bank statement');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to apply bank statement');
+    },
   });
 };

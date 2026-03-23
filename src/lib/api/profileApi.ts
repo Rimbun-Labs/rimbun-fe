@@ -1,5 +1,8 @@
 import { apiClient } from './client';
 import { config } from './config';
+import type { UserProfileDto, SingleViewProfileResponse } from './types/singleViewProfile';
+import type { NeedsAndGapsDto } from './types/needsAndGaps';
+import type { EconomicProfileDto } from './types/economicProfile';
 
 export interface UserProfile {
   id: string;
@@ -255,6 +258,48 @@ export const getLearningProgress = async (userId: string): Promise<{
       achievements: []
     };
   }
+};
+
+/**
+ * Single-view profile: GET /api/v1/profile
+ * Returns identity, assessment, spending, goals, banking, statementAccount in one call.
+ * Auth: Bearer token (same as other endpoints). Each section can be null.
+ */
+export const getSingleViewProfile = async (): Promise<UserProfileDto> => {
+  const response = await apiClient.get<SingleViewProfileResponse>('/profile');
+  return response.data.data;
+};
+
+/**
+ * Profile needs and gaps: GET /api/v1/profile/needs
+ * Returns prioritized list of gaps (assessment, goals, emergency fund, etc.) for dashboard "things to do".
+ */
+export const getProfileNeeds = async (): Promise<NeedsAndGapsDto> => {
+  const response = await apiClient.get<{ data: NeedsAndGapsDto }>('/profile/needs');
+  return response.data.data;
+};
+
+/**
+ * Economic profile: GET /api/v1/profile/economic
+ * Returns user's employment context and dependents for purpose engine.
+ */
+export const getEconomicProfile = async (): Promise<EconomicProfileDto | null> => {
+  const response = await apiClient.get<{ data: EconomicProfileDto | null }>('/profile/economic');
+  return response.data.data;
+};
+
+/**
+ * Upsert economic profile: PUT /api/v1/profile/economic
+ * Backend normalizes employmentType, dependents, plannedRetirementAge.
+ */
+export const upsertEconomicProfile = async (
+  payload: EconomicProfileDto
+): Promise<EconomicProfileDto> => {
+  const response = await apiClient.put<{ data: EconomicProfileDto }>(
+    '/profile/economic',
+    payload
+  );
+  return response.data.data;
 };
 
 export const updateProfilePicture = async (file: File): Promise<string> => {
