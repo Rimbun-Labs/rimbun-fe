@@ -74,6 +74,32 @@ export interface FinancialHealthMetrics {
   
   // Overall Score (0-100)
   overallHealthScore: number;
+
+  // Phase 2 – optional; present when at least one user has behavioral spending data
+  spendingBehavior?: SpendingBehaviorMetrics;
+  // Phase 3 – optional; present when at least one user has statement account data
+  statementAccountSummary?: StatementAccountSummary;
+}
+
+/** Phase 2: aggregates over users with burn rate / bucket data (e.g. from statements). */
+export interface SpendingBehaviorMetrics {
+  usersWithBehavioralData: number;
+  averageBurnRate: number;
+  medianBurnRate: number;
+  burnRateDistribution: {
+    low: number;    // burn rate < 0.6
+    medium: number; // 0.6 ≤ burn rate < 0.9
+    high: number;  // burn rate ≥ 0.9
+  };
+  averageEssentialMonthly: number;
+  averageDiscretionaryMonthly: number;
+  averageDebtMonthly: number;
+}
+
+/** Phase 3: users who have uploaded a statement with account/fee info. */
+export interface StatementAccountSummary {
+  usersWithStatementData: number;
+  averageMonthlyFee: number | null; // null if no one has a fee
 }
 
 export interface IncomeMetrics {

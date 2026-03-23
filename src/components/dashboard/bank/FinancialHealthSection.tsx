@@ -117,6 +117,65 @@ export const FinancialHealthSection: React.FC<FinancialHealthSectionProps> = ({ 
             Median: {formatCurrency(data.medianMonthlySpending)}
           </div>
         </div>
+
+        {/* Spending behavior (Phase 2) – from statements/categorization */}
+        {data.spendingBehavior && (
+          <div className="space-y-2 pt-4 border-t">
+            <div className="text-sm font-medium">Spending behavior (from statements)</div>
+            <div className="text-xs text-muted-foreground">
+              Users with behavioral data: {formatNumber(data.spendingBehavior.usersWithBehavioralData)}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Avg burn rate</span>
+              <span className="text-sm font-semibold">
+                {(data.spendingBehavior.averageBurnRate * 100).toFixed(0)}%
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Median burn rate</span>
+              <span className="text-sm font-medium">
+                {(data.spendingBehavior.medianBurnRate * 100).toFixed(0)}%
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="text-center">
+                <div className="font-semibold">{formatNumber(data.spendingBehavior.burnRateDistribution.low)}</div>
+                <div className="text-muted-foreground">Low (&lt;60%)</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">{formatNumber(data.spendingBehavior.burnRateDistribution.medium)}</div>
+                <div className="text-muted-foreground">Medium (60–90%)</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold">{formatNumber(data.spendingBehavior.burnRateDistribution.high)}</div>
+                <div className="text-muted-foreground">High (≥90%)</div>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground pt-1">
+              Avg essential: {formatCurrency(data.spendingBehavior.averageEssentialMonthly)} ·{' '}
+              discretionary: {formatCurrency(data.spendingBehavior.averageDiscretionaryMonthly)} ·{' '}
+              debt: {formatCurrency(data.spendingBehavior.averageDebtMonthly)}
+            </div>
+          </div>
+        )}
+
+        {/* Statement-derived accounts (Phase 3) */}
+        {data.statementAccountSummary && (
+          <div className="space-y-2 pt-4 border-t">
+            <div className="text-sm font-medium">Statement-derived accounts</div>
+            <div className="text-xs text-muted-foreground">
+              Users with statement data: {formatNumber(data.statementAccountSummary.usersWithStatementData)}
+            </div>
+            {data.statementAccountSummary.averageMonthlyFee != null && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Average monthly fee (from statements)</span>
+                <span className="text-sm font-semibold">
+                  {formatCurrency(data.statementAccountSummary.averageMonthlyFee)}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
