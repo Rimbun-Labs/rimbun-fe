@@ -17,8 +17,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 
 const navigation = [
-  { name: "For Banks", href: "/for-banks" },
-  { name: "For Individuals", href: "/for-individuals" },
+  { name: "For Financial Institutions", href: "/for-banks" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
@@ -67,7 +66,7 @@ export const LandingHeader = () => {
                   <span className="font-bold text-xl text-foreground">
                     Rimbun
                   </span>
-                  <span className="text-xs text-muted-foreground -mt-1">Interactive Financial Education</span>
+                  <span className="text-xs text-muted-foreground -mt-1">Financial Intelligence Signals Platform</span>
                 </div>
               </Link>
             </motion.div>

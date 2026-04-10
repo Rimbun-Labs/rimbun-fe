@@ -11,15 +11,15 @@ import {
 } from "lucide-react";
 
 /**
- * Static preview of the Bank Analytics Dashboard for the For Banks landing page.
+ * Static preview of the institution analytics dashboard for the Financial Institutions landing page.
  * No real data or API calls—mock layout only.
  */
 export const BankAnalyticsPreview: React.FC = () => {
   const overviewCards = [
-    { title: "Total Customers", value: "12,450", desc: "Registered users", icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
-    { title: "Health Score", value: "72%", desc: "Average financial health", icon: TrendingUp, color: "text-green-600 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
-    { title: "Active Users (30d)", value: "8,200", desc: "Active in last 30 days", icon: Activity, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
-    { title: "Assessment Completion", value: "68%", desc: "Completed assessments", icon: CheckCircle2, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },
+    { title: "Customers in scope", value: "12,450", desc: "With active signal coverage", icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
+    { title: "Mean confidence", value: "72%", desc: "Across top intent signals", icon: TrendingUp, color: "text-green-600 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
+    { title: "Signal volume (30d)", value: "8,200", desc: "Generated in the last 30 days", icon: Activity, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
+    { title: "Review throughput", value: "68%", desc: "Human-reviewed this month", icon: CheckCircle2, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },
   ];
 
   return (
@@ -31,7 +31,7 @@ export const BankAnalyticsPreview: React.FC = () => {
             <BarChart3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-foreground">Bank Analytics Dashboard</h3>
+            <h3 className="font-semibold text-lg text-foreground">Institution Analytics Dashboard</h3>
             <p className="text-sm text-muted-foreground">Preview — partner view</p>
           </div>
         </div>
@@ -68,17 +68,17 @@ export const BankAnalyticsPreview: React.FC = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
-                Risk Profile Distribution
+                Confidence distribution
               </CardTitle>
               <CardDescription className="text-xs">
-                Breakdown of customer risk profiles
+                Share of signals by confidence band (sample)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                { label: "Conservative", pct: 35, color: "bg-blue-500" },
-                { label: "Moderate", pct: 45, color: "bg-primary" },
-                { label: "Aggressive", pct: 20, color: "bg-orange-500" },
+                { label: "High", pct: 35, color: "bg-blue-500" },
+                { label: "Medium", pct: 45, color: "bg-primary" },
+                { label: "Low", pct: 20, color: "bg-orange-500" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground w-24">{item.label}</span>
@@ -90,14 +90,14 @@ export const BankAnalyticsPreview: React.FC = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Engagement & Segmentation</CardTitle>
+              <CardTitle className="text-base">Cohort &amp; intent movement</CardTitle>
               <CardDescription className="text-xs">
-                Financial health, activity, and customer segments
+                Example segment tags from signal drift (sample)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {["Engagement metrics", "Financial health", "Investment preferences", "Customer segments"].map((t) => (
+                {["Travel momentum", "Spend rhythm shift", "Merchant mix change", "Intent segments"].map((t) => (
                   <span
                     key={t}
                     className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"

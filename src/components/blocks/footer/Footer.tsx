@@ -13,8 +13,7 @@ interface FooterProps {
 
 const footerLinks = {
   company: [
-    { name: "For Banks", href: "/for-banks" },
-    { name: "For Individuals", href: "/for-individuals" },
+    { name: "For Financial Institutions", href: "/for-banks" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" }
   ],
@@ -47,12 +46,12 @@ export const Footer = ({ className }: FooterProps) => {
                 <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                   Rimbun
                 </span>
-                <span className="text-xs text-muted-foreground -mt-1">AI-Powered Financial Education</span>
+                <span className="text-xs text-muted-foreground -mt-1">Financial Intelligence &amp; Intent Signals</span>
               </div>
             </Link>
             
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Financial education platform for banks and their customers. Personalized learning, goal tracking, and product matching at scale.
+              Turn customer financial activity into confidence-scored intent signals and partner-ready outputs—with optional learning tools where they help.
             </p>
           </motion.div>
 
@@ -130,7 +129,7 @@ export const Footer = ({ className }: FooterProps) => {
           viewport={{ once: true }}
         >
           <p className="text-sm text-muted-foreground">
-            Made with <Heart className="inline h-3 w-3 text-red-500" /> to help you build financial confidence
+            Made with <Heart className="inline h-3 w-3 text-red-500" /> for clearer, human-reviewed financial intelligence
           </p>
         </motion.div>
       </div>

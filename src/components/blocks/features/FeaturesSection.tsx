@@ -1,4 +1,4 @@
-import { BarChart, LayoutDashboard, BookOpen, Target, Brain, TrendingUp, Shield, CreditCard } from "lucide-react";
+import { LayoutDashboard, BookOpen, Target, Brain, TrendingUp, Shield, CreditCard } from "lucide-react";
 import { FeatureCard } from "./FeatureCard";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -9,82 +9,82 @@ interface FeaturesSectionProps {
 
 const features = [
   {
-    title: "Interactive Scenario-Based Assessment",
-    description: "Answer real-world financial scenarios, not just questions. Discover your risk tolerance, knowledge gaps, and financial style through practical situations covering investments, banking, and financial planning.",
+    title: "Signal-Aware Ingestion",
+    description: "Ingest transaction and behavioral events across accounts to create a unified stream for downstream intelligence.",
     icon: Brain,
     color: "blue" as const,
     benefits: [
-      "Understand your risk comfort zone through real scenarios",
-      "Identify exactly where your financial knowledge stands",
-      "Align recommendations with your financial goals",
-      "Get insights into your financial personality"
+      "Connect multi-source account activity",
+      "Capture event context and timestamps",
+      "Establish a consistent upstream signal feed",
+      "Prepare data for compliant processing"
     ],
-    details: "Our assessment uses interactive scenarios to understand how you'd react in real financial situations, creating a comprehensive profile of your risk tolerance, knowledge level, and preferences for investments, banking, and financial planning."
+    details: "The platform ingests event-level financial activity from approved sources and prepares it for normalization and signal detection."
   },
   {
-    title: "Your Financial Command Center",
-    description: "See your risk profile, portfolio recommendations, learning progress, and financial goals all in one place. Get actionable insights tailored to your assessment results.",
+    title: "Normalization + Signal Detection",
+    description: "Normalize fragmented event data, detect intent signals, and attach confidence metadata for each signal.",
     icon: LayoutDashboard,
     color: "purple" as const,
     benefits: [
-      "View your personalized portfolio allocation",
-      "Track your learning and assessment progress",
-      "Monitor progress toward your financial goals",
-      "See your financial confidence score"
+      "Standardize categories across data sources",
+      "Detect spend rhythm and travel momentum",
+      "Track merchant and behavior shifts",
+      "Attach confidence and recency markers"
     ],
-    details: "Your dashboard provides real-time insights into your learning progress, portfolio recommendations, banking product matches, and personalized action items to improve your financial knowledge."
+    details: "Detection pipelines transform raw events into explainable signals with confidence scoring and traceable histories."
   },
   {
-    title: "Learning That Adapts to You",
-    description: "Skip what you know, focus on what you don't. Your learning path automatically adjusts based on your assessment results and progress, covering equities, bonds, real estate, and cash management.",
+    title: "Partner-Ready Outputs",
+    description: "Publish intelligence through APIs and snapshots so product and servicing teams can act in context.",
     icon: BookOpen,
     color: "green" as const,
     benefits: [
-      "Content adapts to your knowledge level",
-      "Track progress through interactive modules",
-      "Test understanding with scenario-based quizzes",
-      "Get personalized explanations and insights"
+      "Serve API payloads for integrations",
+      "Share dashboard-ready summary snapshots",
+      "Expose confidence metadata for review",
+      "Support action workflows across channels"
     ],
-    details: "Our learning system adapts to your progress, focusing on areas where you need improvement and skipping content you already know. Learn about asset classes, investment metrics, banking products, and financial planning strategies at your own pace."
+    details: "Outputs are designed for partner apps and operations teams that need signal context and confidence metadata in one place."
   },
   {
-    title: "Financial Goal Planning",
-    description: "Set retirement, house, education, or wealth goals. Get personalized financial strategies with realistic timelines, monthly contribution calculations, and risk-adjusted projections.",
+    title: "Intelligence Command Center",
+    description: "Monitor signal quality, cohort movement, and operational outcomes through a shared intelligence dashboard.",
     icon: Target,
     color: "orange" as const,
     benefits: [
-      "Set and organize multiple financial goals",
-      "Get personalized financial strategies",
-      "Track progress with realistic timelines",
-      "Calculate required monthly contributions"
+      "Track distribution and signal drift",
+      "Review confidence-scored opportunities",
+      "Segment cohorts by detected intent",
+      "Monitor historical signal behavior"
     ],
-    details: "Define your financial goals and receive tailored strategies combining investments, banking products, and savings plans with realistic timelines and risk-adjusted returns. See how different contribution amounts and timelines affect your ability to reach your goals."
+    details: "The dashboard helps teams operationalize intelligence by combining trend visibility with traceable signal histories."
   },
   {
-    title: "Investment Explorer & AI Chat",
-    description: "Ask questions about investments, analyze assets, and simulate portfolio scenarios. Get personalized answers based on your risk profile and investment goals.",
+    title: "Action Workflows with Human Review",
+    description: "Use signals to prioritize next-best actions while keeping final decisions in regulated human workflows.",
     icon: TrendingUp,
     color: "red" as const,
     benefits: [
-      "Chat with AI about investment questions",
-      "Analyze stocks, ETFs, and bonds",
-      "Simulate portfolio growth scenarios",
-      "Get personalized recommendations"
+      "Trigger timely customer journeys",
+      "Route actions by confidence thresholds",
+      "Support review before execution",
+      "Document rationale from signal traces"
     ],
-    details: "Use the Investment Explorer to ask questions, analyze specific assets, and run what-if scenarios. All answers are personalized based on your risk profile and investment preferences from your assessment."
+    details: "Signals indicate likely customer needs and are designed to inform, not replace, judgment in advisory and servicing workflows."
   },
   {
-    title: "Banking Product Matching",
-    description: "Get personalized banking product recommendations based on your financial goals. Compare savings accounts, credit cards, loans, and more to find the best fit for your situation.",
+    title: "Privacy by Architecture",
+    description: "Build intelligence with privacy-first controls, including hashed identifiers and minimal dependency on direct PII.",
     icon: CreditCard,
     color: "indigo" as const,
     benefits: [
-      "Personalized product recommendations",
-      "Compare multiple banking products",
-      "See match scores and eligibility",
-      "Find products aligned with your goals"
+      "Use hashed IDs for linkage",
+      "Avoid direct PII dependency by default",
+      "Apply access boundaries by role",
+      "Preserve transparent processing context"
     ],
-    details: "Based on your assessment and financial goals, get matched with banking products that fit your needs. Compare features, costs, and benefits to make informed decisions."
+    details: "Privacy controls are embedded in system design so intelligence workflows remain partner-ready and compliance-aware."
   }
 ];
 
@@ -128,9 +128,9 @@ export const FeaturesSection = ({ className }: FeaturesSectionProps) => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">Your Complete Financial Toolkit</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">From Data Events to Financial Intelligence</h2>
           <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-            From interactive scenario-based assessment to personalized learning paths, banking product matching, and financial planning tools—everything you need to build financial confidence.
+            Ingest, normalize, and activate confidence-scored intent signals across partner workflows while retaining space for human review.
           </p>
         </motion.div>
 
@@ -171,7 +171,7 @@ export const FeaturesSection = ({ className }: FeaturesSectionProps) => {
             <Shield className="h-12 w-12 mx-auto mb-6 text-primary" />
             <h3 className="text-2xl font-bold mb-4 text-foreground">Your Data, Your Control</h3>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              We only collect what's needed to personalize your learning experience. No selling data. No third-party sharing. Just your education, your way.
+              We collect only what is required for signal generation and partner outputs. No direct PII dependency by default, no data selling, and transparent confidence context.
             </p>
             <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-3">
@@ -180,11 +180,11 @@ export const FeaturesSection = ({ className }: FeaturesSectionProps) => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Privacy-first approach</span>
+                <span>Hashed IDs and privacy-first architecture</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>No commitments required</span>
+                <span>Signals indicate; human review remains essential</span>
               </div>
             </div>
           </div>

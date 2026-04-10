@@ -22,36 +22,36 @@ import { cn } from "@/lib/utils";
 const bankBenefits = [
   {
     icon: Users,
-    title: "Increase engagement",
+    title: "Capture intent signals earlier",
     description:
-      "Personalized learning paths and scenario-based assessment keep your customers engaged and coming back.",
+      "Surface transaction and behavior patterns that indicate changing customer intent before requests are submitted.",
   },
   {
     icon: Target,
-    title: "Improve financial literacy at scale",
+    title: "Move from raw data to explainable signals",
     description:
-      "Help customers understand investments, banking products, and planning—with content that adapts to their level.",
+      "Normalize fragmented financial events into confidence-scored insights your teams can review and act on.",
   },
   {
     icon: CreditCard,
-    title: "Match customers to your products",
+    title: "Activate partner-ready outputs",
     description:
-      "Goal-based recommendations and product matching surface the right offers at the right time.",
+      "Deliver APIs and snapshots that help partners trigger timely journeys and contextual product experiences.",
   },
   {
     icon: Building2,
-    title: "Built for financial institutions",
+    title: "Built for regulated environments",
     description:
-      "Designed for banks and their customers. Deploy as white-label or co-branded to strengthen your brand.",
+      "Designed for Financial Institutions and their customers with privacy-first data handling and transparent confidence metadata.",
   },
 ];
 
 const platformFeatures = [
-  { icon: LayoutDashboard, label: "AI-driven assessment & personalized learning paths" },
-  { icon: Target, label: "Financial goal tracking and projections" },
-  { icon: CreditCard, label: "Banking product matching and comparison" },
-  { icon: BookOpen, label: "Investment education and explorer" },
-  { icon: LineChart, label: "Dashboard and progress tracking" },
+  { icon: LayoutDashboard, label: "Ingest -> Normalize -> Signal -> Action workflow" },
+  { icon: Target, label: "Signals: spend rhythm, travel momentum, merchant shifts" },
+  { icon: CreditCard, label: "Partner outputs: APIs, snapshots, confidence metadata" },
+  { icon: BookOpen, label: "Secondary learning layer for user enablement" },
+  { icon: LineChart, label: "Operational dashboard with traceable signal history" },
 ];
 
 export default function ForBanks() {
@@ -71,7 +71,7 @@ export default function ForBanks() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20"
             >
               <Building2 className="h-4 w-4" />
-              <span>For banks & financial institutions</span>
+              <span>For Financial Institutions</span>
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -79,7 +79,7 @@ export default function ForBanks() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-foreground"
             >
-              Power your customers&apos; financial education
+              Turn transaction activity into actionable financial intelligence
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -87,7 +87,7 @@ export default function ForBanks() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Deliver personalized, scenario-based financial education and goal-based insights at scale. Help your customers build confidence and make better decisions—while deepening engagement with your brand and products.
+              Convert customer financial behavior into explainable intent signals for teams, apps, and partner workflows. Signals indicate likely needs with confidence scores to support timely human-reviewed decisions.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -102,8 +102,29 @@ export default function ForBanks() {
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-border">
-                <Link to="/contact">Contact us</Link>
+                <Link to="/for-banks#platform">View outputs</Link>
               </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-10 pt-10 border-t border-border/40 max-w-2xl mx-auto"
+            >
+              <ul className="flex flex-col sm:flex-row flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2 justify-center sm:justify-start">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  <span>Signals inform decisions—not advice</span>
+                </li>
+                <li className="flex items-center gap-2 justify-center sm:justify-start">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  <span>Confidence metadata on outputs</span>
+                </li>
+                <li className="flex items-center gap-2 justify-center sm:justify-start">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                  <span>Privacy-first by design</span>
+                </li>
+              </ul>
             </motion.div>
           </div>
         </div>
@@ -118,7 +139,7 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="text-3xl font-bold text-center mb-12 text-foreground"
           >
-            Why banks choose Rimbun
+            Why Financial Institutions use Rimbun
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {bankBenefits.map((item, i) => (
@@ -153,10 +174,10 @@ export default function ForBanks() {
             className="text-center mb-10"
           >
             <h2 className="text-3xl font-bold text-foreground mb-3">
-              Analytics for your team
+              Signals your teams can trust
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Bank partners get access to a dedicated analytics dashboard: engagement metrics, risk profile distribution, financial health and investment preferences, and customer segmentation.
+              Partner teams get a dedicated analytics view for signal quality, cohort movement, and confidence distribution across customer segments.
             </p>
           </motion.div>
           <motion.div
@@ -180,7 +201,7 @@ export default function ForBanks() {
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link to="/login">Partner sign in</Link>
+              <Link to="/for-banks#platform">View outputs</Link>
             </Button>
           </motion.div>
         </div>
@@ -195,9 +216,12 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-foreground mb-4">See the platform</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Outputs for partners and apps</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Your customers get a personalized dashboard, learning paths, goal tracking, and product recommendations—all powered by our assessment and AI-driven engine.
+              Deliver intelligence as API-ready outputs and dashboard snapshots with confidence metadata so product, risk, and servicing teams share one view.
+            </p>
+            <p className="text-sm text-muted-foreground/90 max-w-2xl mx-auto mt-4">
+              Example end-user experience—signals and partner outputs power experiences like this. Synthetic preview only.
             </p>
           </motion.div>
           <motion.div
@@ -214,7 +238,7 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="mt-12 max-w-2xl mx-auto"
           >
-            <h3 className="font-semibold text-foreground mb-4 text-center">Platform capabilities</h3>
+            <h3 className="font-semibold text-foreground mb-4 text-center">Signal and output capabilities</h3>
             <ul className="space-y-3">
               {platformFeatures.map((f) => (
                 <li
@@ -240,10 +264,10 @@ export default function ForBanks() {
             className="max-w-2xl mx-auto text-center space-y-6"
           >
             <h2 className="text-3xl font-bold text-foreground">
-              Ready to bring financial education to your customers?
+              Ready to operationalize financial intelligence?
             </h2>
             <p className="text-muted-foreground">
-              Get in touch for a demo or to discuss how Rimbun can work for your institution.
+              Discuss integration options and see how confidence-scored intent signals can support partner and product workflows.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -253,7 +277,7 @@ export default function ForBanks() {
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link to="/contact">Contact us</Link>
+                <Link to="/for-banks#platform">View outputs</Link>
               </Button>
             </div>
           </motion.div>

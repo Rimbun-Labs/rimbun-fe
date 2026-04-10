@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Loader2, Sparkles, ArrowRight, TrendingUp, Brain, Target, CheckCircle, Eye } from "lucide-react";
+import { Sparkles, ArrowRight, TrendingUp, Brain, Target, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -12,22 +12,22 @@ interface HeroSectionProps {
 const stages = [
   {
     id: 1,
-    title: "Learn Through Scenarios",
-    description: "Complete our interactive assessment with real-world financial scenarios covering investments, banking, and financial planning.",
+    title: "Ingest",
+    description: "Connect customer activity streams and ingest transaction-level events from trusted sources.",
     icon: Brain,
     color: "blue" as const
   },
   {
     id: 2,
-    title: "Get Personalized Learning",
-    description: "Receive a customized curriculum that adapts to your knowledge and goals.",
+    title: "Normalize + Signal",
+    description: "Standardize events and detect confidence-scored patterns such as spend rhythm and merchant shifts.",
     icon: TrendingUp,
     color: "green" as const
   },
   {
     id: 3,
-    title: "Build Financial Confidence",
-    description: "Track your progress and apply knowledge to real financial decisions about investments, banking, and planning.",
+    title: "Action",
+    description: "Deliver partner-ready outputs and recommendations for human-reviewed decisions in apps and operations.",
     icon: Target,
     color: "purple" as const
   }
@@ -64,7 +64,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 backdrop-blur-sm"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>Interactive Financial Education</span>
+                <span>Financial Intelligence + Intent Signals</span>
               </motion.div>
 
               {/* Main Heading */}
@@ -75,7 +75,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.3, duration: 0.8 }}
                   className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl/none text-foreground"
                 >
-                  Build Financial Confidence Through Learning
+                  Convert financial activity into trusted intent signals
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 30 }}
@@ -83,7 +83,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.4, duration: 0.8 }}
                   className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed"
                 >
-                  Take our interactive assessment to understand your financial profile, then get personalized recommendations for investments, banking products, and financial planning tailored to your goals.
+                  Move from fragmented events to explainable, confidence-scored insights that indicate customer needs and support responsible human review.
                 </motion.p>
               </div>
             </motion.div>
@@ -156,30 +156,30 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               transition={{ delay: 0.6, duration: 0.8 }}
               className="flex flex-col gap-4 min-[400px]:flex-row"
             >
-              {/* Primary CTA - Take Your Assessment */}
+              {/* Primary CTA - Demo / integration conversation */}
               <Button 
                 asChild 
                 size="lg"
                 className="relative group overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <Link to="/signup">
+                <Link to="/contact">
                   <span className="relative z-10 flex items-center">
-                    Take Your Assessment
+                    Request a Demo
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </Button>
               
-              {/* Secondary CTA - Sign In */}
+              {/* Secondary CTA - explore intelligence views */}
               <Button 
                 asChild 
                 variant="outline" 
                 size="lg"
                 className="group border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent"
               >
-                <Link to="/login">
+                <Link to="/explore">
                   <span className="flex items-center">
-                    Already have an account? Sign In
+                    Explore Insights
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
