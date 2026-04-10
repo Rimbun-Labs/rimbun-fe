@@ -11,35 +11,68 @@ import {
 } from "lucide-react";
 
 /**
- * Static preview of the institution analytics dashboard for the Financial Institutions landing page.
- * No real data or API calls—mock layout only.
+ * Illustrative UI aligned with BankCustomerInsights (GET /bank/customers/insights).
+ * Static mock only—no API calls. Numbers are synthetic.
  */
 export const BankAnalyticsPreview: React.FC = () => {
   const overviewCards = [
-    { title: "Customers in scope", value: "12,450", desc: "With active signal coverage", icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
-    { title: "Mean confidence", value: "72%", desc: "Across top intent signals", icon: TrendingUp, color: "text-green-600 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30" },
-    { title: "Signal volume (30d)", value: "8,200", desc: "Generated in the last 30 days", icon: Activity, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
-    { title: "Review throughput", value: "68%", desc: "Human-reviewed this month", icon: CheckCircle2, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },
+    {
+      title: "Total customers",
+      value: "12,450",
+      desc: "In aggregation scope",
+      icon: Users,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+    },
+    {
+      title: "Overall health score",
+      value: "72",
+      desc: "Mean score (0–100)",
+      icon: TrendingUp,
+      color: "text-green-600 dark:text-green-400",
+      bg: "bg-green-100 dark:bg-green-900/30",
+    },
+    {
+      title: "Active users (30d)",
+      value: "8,200",
+      desc: "Engagement window",
+      icon: Activity,
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-100 dark:bg-purple-900/30",
+    },
+    {
+      title: "Assessment completion",
+      value: "68%",
+      desc: "Completed / eligible",
+      icon: CheckCircle2,
+      color: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-100 dark:bg-orange-900/30",
+    },
   ];
 
   return (
     <div className="w-full max-w-5xl mx-auto bg-gradient-to-br from-background via-background to-muted/20 rounded-2xl border border-border shadow-2xl overflow-hidden">
-      {/* Header */}
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background p-5 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
             <BarChart3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-foreground">Institution Analytics Dashboard</h3>
-            <p className="text-sm text-muted-foreground">Preview — partner view</p>
+            <h3 className="font-semibold text-lg text-foreground">Partner insights overview</h3>
+            <p className="text-sm text-muted-foreground">
+              Illustrative layout · mirrors fields from aggregated institutional insights
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Content */}
+      <p className="px-5 pt-4 text-xs text-muted-foreground">
+        Synthetic sample only. Live data comes from{" "}
+        <code className="rounded bg-muted px-1 py-0.5 text-[11px]">GET /api/v1/bank/customers/insights</code>{" "}
+        when enabled for your tenant.
+      </p>
+
       <div className="p-5 space-y-5">
-        {/* Overview cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {overviewCards.map((card) => {
             const Icon = card.icon;
@@ -62,23 +95,22 @@ export const BankAnalyticsPreview: React.FC = () => {
           })}
         </div>
 
-        {/* Risk profile + Engagement row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
-                Confidence distribution
+                Risk profile distribution
               </CardTitle>
               <CardDescription className="text-xs">
-                Share of signals by confidence band (sample)
+                Customer counts by risk band (sample)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                { label: "High", pct: 35, color: "bg-blue-500" },
-                { label: "Medium", pct: 45, color: "bg-primary" },
-                { label: "Low", pct: 20, color: "bg-orange-500" },
+                { label: "Conservative", pct: 35, color: "bg-blue-500" },
+                { label: "Moderate", pct: 45, color: "bg-primary" },
+                { label: "Aggressive", pct: 20, color: "bg-orange-500" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground w-24">{item.label}</span>
@@ -90,14 +122,19 @@ export const BankAnalyticsPreview: React.FC = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Cohort &amp; intent movement</CardTitle>
+              <CardTitle className="text-base">Engagement &amp; segments</CardTitle>
               <CardDescription className="text-xs">
-                Example segment tags from signal drift (sample)
+                Dimensions exposed in insights payloads (sample tags)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {["Travel momentum", "Spend rhythm shift", "Merchant mix change", "Intent segments"].map((t) => (
+                {[
+                  "Financial health tiers",
+                  "Engagement & sessions",
+                  "Investment preferences",
+                  "Age & income bands",
+                ].map((t) => (
                   <span
                     key={t}
                     className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
