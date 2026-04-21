@@ -48,6 +48,7 @@ const FinancialPlanning = lazy(() => import("./pages/FinancialPlanning"));
 const Spending = lazy(() => import("./pages/Spending"));
 const Planning = lazy(() => import("./pages/Planning"));
 const BankAnalyticsDashboard = lazy(() => import("./pages/BankAnalyticsDashboard"));
+const ForBanksDemo = lazy(() => import("./pages/ForBanksDemo"));
 const GoalsPage = lazy(() => import("./pages/Goals"));
 const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
 const GoalFamilyPage = lazy(() => import("./pages/GoalFamily"));
@@ -130,6 +131,14 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
       <Route path="/for-banks" element={<ForBanks />} />
+      <Route
+        path="/for-banks/demo"
+        element={
+          <Suspense fallback={<LoadingState variant="expanded" />}>
+            <ForBanksDemo />
+          </Suspense>
+        }
+      />
       <Route path="/home" element={<ForBanks />} />
       <Route path="/for-individuals" element={<ForIndividuals />} />
 

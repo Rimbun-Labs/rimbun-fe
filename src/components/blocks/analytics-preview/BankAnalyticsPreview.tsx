@@ -8,6 +8,8 @@ import {
   TrendingUp,
   CheckCircle2,
   PieChart,
+  Target,
+  FileText,
 } from "lucide-react";
 
 /**
@@ -60,7 +62,7 @@ export const BankAnalyticsPreview: React.FC = () => {
           <div>
             <h3 className="font-semibold text-lg text-foreground">Partner insights overview</h3>
             <p className="text-sm text-muted-foreground">
-              Illustrative layout · mirrors fields from aggregated institutional insights
+              Illustrative layout aligned to the demo stack: trajectory → context → action → fit
             </p>
           </div>
         </div>
@@ -71,6 +73,27 @@ export const BankAnalyticsPreview: React.FC = () => {
         <code className="rounded bg-muted px-1 py-0.5 text-[11px]">GET /api/v1/bank/customers/insights</code>{" "}
         when enabled for your tenant.
       </p>
+
+      <div className="px-5 pt-3">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1">
+            <TrendingUp className="h-3 w-3" />
+            Trajectory
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1">
+            <Target className="h-3 w-3" />
+            Context
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1">
+            <Activity className="h-3 w-3" />
+            Action
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1">
+            <FileText className="h-3 w-3" />
+            Fit
+          </span>
+        </div>
+      </div>
 
       <div className="p-5 space-y-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -100,10 +123,10 @@ export const BankAnalyticsPreview: React.FC = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
-                Risk profile distribution
+                Trajectory & risk distribution
               </CardTitle>
               <CardDescription className="text-xs">
-                Customer counts by risk band (sample)
+                Portfolio trajectory and risk mix (sample)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -122,18 +145,18 @@ export const BankAnalyticsPreview: React.FC = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Engagement &amp; segments</CardTitle>
+              <CardTitle className="text-base">Context, action &amp; fit surfaces</CardTitle>
               <CardDescription className="text-xs">
-                Dimensions exposed in insights payloads (sample tags)
+                Preview labels aligned with RM workspace terms
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {[
-                  "Financial health tiers",
-                  "Engagement & sessions",
-                  "Investment preferences",
-                  "Age & income bands",
+                  "Archetype context",
+                  "Decision-support action",
+                  "Product-fit recommendation",
+                  "Evidence lineage",
                 ].map((t) => (
                   <span
                     key={t}

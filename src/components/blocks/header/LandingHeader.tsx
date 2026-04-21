@@ -79,7 +79,12 @@ export const LandingHeader = () => {
                     to={item.href}
                     className={cn(
                       "text-sm font-medium transition-colors duration-200",
-                      (item.href === "/for-banks" ? location.pathname === "/for-banks" || location.pathname === "/" || location.pathname === "/home" : location.pathname === item.href)
+                      (item.href === "/for-banks"
+                        ? location.pathname === "/for-banks" ||
+                          location.pathname === "/" ||
+                          location.pathname === "/home" ||
+                          location.pathname.startsWith("/for-banks/")
+                        : location.pathname === item.href)
                         ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground"
                     )}
