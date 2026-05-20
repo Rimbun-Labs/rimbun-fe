@@ -85,7 +85,11 @@ export const fiDemoHelp = {
   actionPayload:
     "Decision-support recommendation that translates pattern detection into the RM's next best strategy.",
   productRecommendation:
-    "Behavior-to-product fit panel for this selected lead: primary recommendation, alternatives with trade-offs, confidence band, and provenance chips.",
+    "Banking product fit (primary lane): cards, loans, deposits, and servicing options with alternatives, confidence band, and provenance chips.",
+  wealthRecommendation:
+    "Investment suitability (secondary lane): named fund or plan ideas only when relationship readiness allows — after core banking fit. Not a trade instruction; subject to risk profiling and bank policy.",
+  wealthIneligible:
+    "Wealth outreach is intentionally paused while stabilisation signals are active — same holistic policy as suppressing aggressive cross-sell.",
   recommendationConfidence:
     "How strongly available signals support the proposed product-fit story in this demo (high/medium/low), not an approval probability.",
   recommendationSignals:

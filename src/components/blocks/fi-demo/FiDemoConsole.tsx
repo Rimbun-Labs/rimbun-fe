@@ -1177,11 +1177,11 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base inline-flex items-center gap-1.5">
-                      Suitable product recommendation
-                      <FiDemoInfoHint label="Product recommendation" text={fiDemoHelp.productRecommendation} />
+                      Banking product fit (primary)
+                      <FiDemoInfoHint label="Banking product fit" text={fiDemoHelp.productRecommendation} />
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Behavior-to-product fit story for this lead, with alternatives and transparent recommendation confidence.
+                      Core banking and servicing options first — cards, loans, deposits, and restructure paths where relevant.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -1248,6 +1248,91 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                         </Badge>
                       ))}
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-dashed border-muted-foreground/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base inline-flex items-center gap-1.5">
+                      Investment suitability (secondary)
+                      <FiDemoInfoHint label="Investment suitability" text={fiDemoHelp.wealthRecommendation} />
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Fund and plan ideas when core banking is in place and capacity supports accumulate mode — gated by relationship policy.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!selected.wealthRecommendation.eligible ? (
+                      <Alert>
+                        <TriangleAlert className="h-4 w-4" />
+                        <AlertTitle className="text-sm inline-flex items-center gap-1 flex-wrap">
+                          Wealth lane paused
+                          <FiDemoInfoHint label="Why paused" text={fiDemoHelp.wealthIneligible} iconClassName="h-3 w-3" />
+                        </AlertTitle>
+                        <AlertDescription className="text-xs">
+                          {selected.wealthRecommendation.ineligibleReason}
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <>
+                        {selected.wealthRecommendation.confidenceBand ? (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[11px] font-medium uppercase tracking-wide",
+                                recommendationConfidenceBadgeClass(selected.wealthRecommendation.confidenceBand)
+                              )}
+                            >
+                              {selected.wealthRecommendation.confidenceBand} confidence
+                            </Badge>
+                            {selected.wealthRecommendation.basedOnSignals ? (
+                              <span className="text-xs text-muted-foreground">
+                                {selected.wealthRecommendation.basedOnSignals.matched}/
+                                {selected.wealthRecommendation.basedOnSignals.total} suitability signals
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        <div className="space-y-2">
+                          {selected.wealthRecommendation.options.map((option, i) => (
+                            <div
+                              key={`${option.fundName}-${i}`}
+                              className="rounded-lg border border-border bg-muted/15 p-3 space-y-1.5"
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-sm font-medium text-foreground">{option.fundName}</p>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {option.fundType}
+                                </Badge>
+                                <Badge
+                                  variant={option.tag === "recommended" ? "default" : "secondary"}
+                                  className="text-[10px] uppercase tracking-wide"
+                                >
+                                  {option.tag === "recommended" ? "Recommended" : "Alternative"}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{option.fitRationale}</p>
+                              {option.tradeoff ? (
+                                <p className="text-[11px] text-muted-foreground">
+                                  <span className="font-medium text-foreground">Trade-off:</span> {option.tradeoff}
+                                </p>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                        {selected.wealthRecommendation.provenanceChips?.length ? (
+                          <div className="pt-1 flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] text-muted-foreground">Provenance:</span>
+                            {selected.wealthRecommendation.provenanceChips.map((chip) => (
+                              <Badge key={chip} variant="outline" className="text-[10px]">
+                                {chip}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : null}
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 

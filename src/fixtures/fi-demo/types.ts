@@ -77,6 +77,25 @@ export interface FiDemoProductRecommendation {
   options: FiDemoProductOption[];
 }
 
+/** Secondary lane: investment / fund suitability after core banking fit (synthetic). */
+export interface FiDemoWealthOption {
+  fundName: string;
+  fundType: string;
+  fitRationale: string;
+  tradeoff?: string;
+  tag: "recommended" | "alternative";
+}
+
+export interface FiDemoWealthRecommendation {
+  /** When false, show policy message instead of fund options (e.g. stabilise-first). */
+  eligible: boolean;
+  ineligibleReason?: string;
+  confidenceBand?: "high" | "medium" | "low";
+  basedOnSignals?: { matched: number; total: number };
+  provenanceChips?: string[];
+  options: FiDemoWealthOption[];
+}
+
 export interface FiDemoLogicRule {
   code: string;
   expression: string;
@@ -109,8 +128,10 @@ export interface FiDemoLead {
   supportingIndicators: string[];
   /** Suggested RM strategy from the decision-support layer */
   actionPayload: FiDemoActionPayload;
-  /** Behavior → product-fit recommendation story for RM and product teams */
+  /** Behavior → banking product-fit (primary lane) */
   productRecommendation: FiDemoProductRecommendation;
+  /** Investment / fund suitability (secondary lane; gated by relationship readiness) */
+  wealthRecommendation: FiDemoWealthRecommendation;
   /** Bank-auditable logic snippets for demo transparency */
   logicEvidence: {
     rules: FiDemoLogicRule[];

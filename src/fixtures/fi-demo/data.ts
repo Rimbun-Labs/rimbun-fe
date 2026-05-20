@@ -92,6 +92,28 @@ const rawLeads: FiDemoLead[] = [
         },
       ],
     },
+    wealthRecommendation: {
+      eligible: true,
+      confidenceBand: "medium",
+      basedOnSignals: { matched: 4, total: 6 },
+      provenanceChips: ["assessment risk profile", "surplus cashflow", "core banking in place"],
+      options: [
+        {
+          fundName: "Balanced income unit trust (moderate risk)",
+          fundType: "Unit trust",
+          fitRationale:
+            "Core banking relationship and improving momentum suggest capacity for a balanced income sleeve after life-stage lending is addressed — subject to suitability assessment. Illustrative product class; production would surface names from your fund catalog.",
+          tag: "recommended",
+        },
+        {
+          fundName: "Regular savings plan — Equity growth (moderate)",
+          fundType: "Regular contribution",
+          fitRationale: "Staged wealth build for customers who prefer smaller monthly commitments before larger lump sums.",
+          tradeoff: "Longer horizon; less immediate AUM than a single subscription.",
+          tag: "alternative",
+        },
+      ],
+    },
     logicEvidence: {
       rules: [
         {
@@ -194,6 +216,12 @@ const rawLeads: FiDemoLead[] = [
         },
       ],
     },
+    wealthRecommendation: {
+      eligible: false,
+      ineligibleReason:
+        "Stabilise cashflow and debt serviceability first — investment outreach is paused while liquidity stress and declining momentum are active.",
+      options: [],
+    },
     logicEvidence: {
       rules: [
         {
@@ -294,6 +322,22 @@ const rawLeads: FiDemoLead[] = [
         },
       ],
     },
+    wealthRecommendation: {
+      eligible: true,
+      confidenceBand: "low",
+      basedOnSignals: { matched: 2, total: 5 },
+      provenanceChips: ["stable runway", "assessment horizon"],
+      options: [
+        {
+          fundName: "Short-term liquidity fund — USD sleeve",
+          fundType: "Money market / liquidity",
+          fitRationale:
+            "After banking bundle fit is confirmed, surplus from travel-season cashflow may suit a low-volatility parking sleeve — secondary to card-led engagement.",
+          tradeoff: "Not a substitute for rewards or insurance conversation in this window.",
+          tag: "recommended",
+        },
+      ],
+    },
     logicEvidence: {
       rules: [
         {
@@ -366,6 +410,15 @@ const portfolio = {
       bookSharePct: 24,
       productAngle: "Term deposit ladders and goal-based savings — low touch, high coverage.",
     },
+    {
+      id: "pt_05",
+      theme: "Suitability-gated wealth",
+      primaryArchetype: "Steady Saver",
+      bookSharePct: 14,
+      productAngle:
+        "Secondary fund and regular-savings ideas when core banking is stable and assessment supports accumulate mode — not pitched during stress queues.",
+      sampleLeadId: "lead_001",
+    },
   ],
 };
 
@@ -374,7 +427,7 @@ export const fiDemoFixture: FiDemoFixture = {
   meta: {
     asOf: "2026-04-01",
     scenarioName: "RM morning queue — synthetic",
-    disclaimerVersion: "2.5-rm-decision-support",
+    disclaimerVersion: "2.6-wealth-lane",
   },
   portfolio,
   leads: leadsSorted,
