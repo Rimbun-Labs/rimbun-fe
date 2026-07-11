@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSyncCustomerFromRoute } from "@/hooks/useSyncCustomerFromRoute";
 import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { UserCircle, AlertCircle, ClipboardList, Package } from "lucide-react";
 import type { FiDecisionRiskItem } from "@/lib/api/types/fiDecision";
 
@@ -51,7 +58,17 @@ function RiskCard({ title, risk }: { title: string; risk: FiDecisionRiskItem }) 
 const CustomerOverview: React.FC = () => {
   const customerId = useSyncCustomerFromRoute();
   const { selectedCustomer } = useSelectedCustomer();
-  const { data, loading, error, refetch } = useFiDecisionInsights();
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    explainData,
+    explainLoading,
+    explainError,
+    fetchExplain,
+  } = useFiDecisionInsights();
+  const [isExplainOpen, setIsExplainOpen] = useState(false);
 
   const label =
     selectedCustomer?.displayName ||
@@ -60,6 +77,11 @@ const CustomerOverview: React.FC = () => {
 
   const liquidity = data?.risk?.liquidityRisk;
   const stress = data?.risk?.stressRisk;
+
+  const openExplain = async () => {
+    setIsExplainOpen(true);
+    await fetchExplain();
+  };
 
   return (
     <PageContainer>
@@ -104,8 +126,11 @@ const CustomerOverview: React.FC = () => {
         {!loading && !error && data ? (
           <>
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
                 <CardTitle className="text-base">Executive summary</CardTitle>
+                <Button variant="outline" size="sm" onClick={() => void openExplain()}>
+                  Why this view
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
@@ -165,6 +190,68 @@ const CustomerOverview: React.FC = () => {
           </Alert>
         ) : null}
       </div>
+
+      <Sheet open={isExplainOpen} onOpenChange={setIsExplainOpen}>
+        <SheetContent className="w-[95vw] sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Why this view</SheetTitle>
+            <SheetDescription>
+              Key drivers behind the summary and risk signals for {label}.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 space-y-4 text-sm">
+            {explainLoading ? <Skeleton className="h-32 w-full" /> : null}
+            {!explainLoading && explainError ? (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Rationale unavailable</AlertTitle>
+                <AlertDescription>
+                  Detailed rationale could not be loaded right now.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {!explainLoading && !explainError && explainData ? (
+              <>
+                {(explainData.riskDrivers?.liquidity?.length ?? 0) > 0 ? (
+                  <div>
+                    <p className="font-medium">Liquidity</p>
+                    <ul className="mt-1 list-inside list-disc text-muted-foreground">
+                      {explainData.riskDrivers!.liquidity!.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {(explainData.riskDrivers?.stress?.length ?? 0) > 0 ? (
+                  <div>
+                    <p className="font-medium">Stress</p>
+                    <ul className="mt-1 list-inside list-disc text-muted-foreground">
+                      {explainData.riskDrivers!.stress!.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {explainData.affordabilityDrivers?.recommendation ? (
+                  <div>
+                    <p className="font-medium">Affordability</p>
+                    <p className="mt-1 text-muted-foreground">
+                      {explainData.affordabilityDrivers.recommendation}
+                    </p>
+                  </div>
+                ) : null}
+                {!explainData.riskDrivers?.liquidity?.length &&
+                !explainData.riskDrivers?.stress?.length &&
+                !explainData.affordabilityDrivers?.recommendation ? (
+                  <p className="text-muted-foreground">
+                    No additional rationale details are available for this customer.
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        </SheetContent>
+      </Sheet>
     </PageContainer>
   );
 };

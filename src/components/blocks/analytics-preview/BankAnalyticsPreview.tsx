@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 
 /**
- * Illustrative UI aligned with BankCustomerInsights (GET /dashboard/customers/insights).
- * Static mock only—no API calls. Numbers are synthetic.
+ * Illustrative portfolio snapshot for marketing — static mock only, no API calls.
  */
 export const BankAnalyticsPreview: React.FC = () => {
   const overviewCards = [

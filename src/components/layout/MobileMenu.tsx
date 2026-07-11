@@ -15,6 +15,7 @@ import {
   ClipboardList,
   Package,
   UserCircle,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -89,11 +90,21 @@ const MobileMenu: React.FC = () => {
             </h3>
             <Link
               to="/dashboard"
-              className={linkClass(isActive('/dashboard') && !location.pathname.includes('/customers'))}
+              className={linkClass(location.pathname === '/dashboard')}
               onClick={closeMobileMenu}
             >
               <LayoutDashboard className="h-4 w-4" />
               Home
+            </Link>
+            <Link
+              to="/dashboard/customers"
+              className={linkClass(
+                location.pathname === '/dashboard/customers'
+              )}
+              onClick={closeMobileMenu}
+            >
+              <Users className="h-4 w-4" />
+              Customers
             </Link>
           </div>
 

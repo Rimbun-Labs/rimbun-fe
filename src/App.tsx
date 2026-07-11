@@ -35,6 +35,10 @@ import Contact from "./pages/Contact";
 const Assessment = lazy(() => import("./pages/Assessment"));
 const AssessmentResultsPage = lazy(() => import("./pages/AssessmentResults"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Customers = lazy(() => import("./pages/Customers"));
+const CustomerOverview = lazy(() => import("./pages/CustomerOverview"));
+const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
+const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
 const Learning = lazy(() => import("./pages/Learning"));
 const LearningFolderView = lazy(() => import("./pages/LearningFolderView"));
 const LearningLibraryDetail = lazy(() => import("./pages/LearningLibraryDetail"));
@@ -52,9 +56,6 @@ const GoalsPage = lazy(() => import("./pages/Goals"));
 const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
 const GoalFamilyPage = lazy(() => import("./pages/GoalFamily"));
 const BankingProducts = lazy(() => import("./pages/BankingProducts"));
-const CustomerOverview = lazy(() => import("./pages/CustomerOverview"));
-const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
-const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
 const InvestmentCatalog = lazy(() => import("./pages/InvestmentCatalog"));
 const InsuranceExplorer = lazy(() => import("./pages/InsuranceExplorer"));
 const InsuranceProductDetail = lazy(() => import("./pages/InsuranceProductDetail"));
@@ -64,7 +65,7 @@ const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
 
 const queryClient = new QueryClient();
 
-// Authenticated operators land on triage home; marketing site for anonymous visitors.
+// Authenticated operators land on book Home.
 const RootRedirect = () => {
   const { user } = useAuth();
   if (user) {
@@ -168,7 +169,7 @@ const AppRoutes = () => {
           } 
         />
         
-        {/* Dashboard — operator triage home + customer workspace */}
+        {/* Dashboard — book Home + customer triage + customer workspace */}
         <Route 
           path="/dashboard" 
           element={
@@ -176,6 +177,14 @@ const AppRoutes = () => {
               <Dashboard />
             </Suspense>
           } 
+        />
+        <Route
+          path="/dashboard/customers"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <Customers />
+            </Suspense>
+          }
         />
         <Route
           path="/dashboard/customers/:customerId"
@@ -201,8 +210,6 @@ const AppRoutes = () => {
             </Suspense>
           }
         />
-        {/* Legacy consumer session dashboard URL → triage home */}
-        <Route path="/dashboard/:sessionId" element={<Navigate to="/dashboard" replace />} />
         
         {/* Learning Library Routes */}
         <Route 
@@ -437,9 +444,6 @@ const AppRoutes = () => {
             </Suspense>
           } 
         />
-        
-        {/* Legacy analytics URL → triage home */}
-        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
 
       </Route>
 

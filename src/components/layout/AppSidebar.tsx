@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Package,
   UserCircle,
+  Users,
 } from 'lucide-react';
 import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import {
@@ -94,6 +95,16 @@ const AppSidebar: React.FC = () => {
           >
             <LayoutDashboard className="h-4 w-4" />
             Home
+          </NavLink>
+          <NavLink
+            to="/dashboard/customers"
+            end
+            className={({ isActive }) =>
+              cn(navInactive, isActive && navActive)
+            }
+          >
+            <Users className="h-4 w-4" />
+            Customers
           </NavLink>
         </div>
 
