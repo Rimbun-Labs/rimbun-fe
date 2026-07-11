@@ -1,41 +1,52 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
-import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  GraduationCap, 
-  BookOpen, 
-  BarChart3,
+import {
+  LayoutDashboard,
   User,
   Compass,
-  X,
   LogOut,
-  DollarSign,
-  TrendingUp,
-  LineChart,
-  Target,
-  Home,
   Building2,
-  Search,
-  Shield
+  Shield,
+  ClipboardList,
+  Package,
+  UserCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Logo } from '@/components/ui/Logo';
 
+function customerIdFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/dashboard\/customers\/([^/]+)/);
+  return match?.[1] ?? null;
+}
+
 const MobileMenu: React.FC = () => {
   const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
-  const { session } = useSession();
   const { signOut } = useAuth();
+  const { customers } = useSelectedCustomer();
   const { toast } = useToast();
   const location = useLocation();
-  const hasCompletedAssessment = Boolean(session?.isCompleted);
 
-  const isActive = (path: string) => location.pathname === path;
+  const routeCustomerId = customerIdFromPath(location.pathname);
+  const customerBase = routeCustomerId
+    ? `/dashboard/customers/${routeCustomerId}`
+    : null;
+
+  const customerLabel = useMemo(() => {
+    if (!routeCustomerId) return null;
+    const row = customers.find((c) => c.customerId === routeCustomerId);
+    return row?.displayName || row?.externalCustomerId || routeCustomerId;
+  }, [customers, routeCustomerId]);
+
+  const isActive = (path: string) =>
+    path === '/dashboard'
+      ? location.pathname === '/dashboard'
+      : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const handleLogout = async () => {
     try {
@@ -54,6 +65,14 @@ const MobileMenu: React.FC = () => {
     }
   };
 
+  const linkClass = (active: boolean) =>
+    cn(
+      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+      active
+        ? "bg-accent !text-accent-foreground"
+        : "text-muted-foreground sidebar-nav-inactive"
+    );
+
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={closeMobileMenu}>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -64,132 +83,78 @@ const MobileMenu: React.FC = () => {
         </SheetHeader>
 
         <nav className="space-y-6">
-          {/* Overview Section */}
           <div className="space-y-2">
             <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Overview
+              Dashboard
             </h3>
             <Link
-              to="/home"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/home') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <Home className="h-4 w-4" />
-              Home
-            </Link>
-            <Link
-              to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive(`/dashboard${session?.id ? `/${session.id}` : ''}`) 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
+              to="/dashboard"
+              className={linkClass(isActive('/dashboard') && !location.pathname.includes('/customers'))}
               onClick={closeMobileMenu}
             >
               <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              to="/goals"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/goals') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <Target className="h-4 w-4" />
-              Goals
-            </Link>
-            <Link
-              to="/assessment"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/assessment') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <BarChart3 className="h-4 w-4" />
-              Assessment
-            </Link>
-            <Link
-              to="/spending-analysis"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/spending-analysis') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <DollarSign className="h-4 w-4" />
-              Spending
-            </Link>
-            <Link
-              to="/cash-flow-projections"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/cash-flow-projections') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <TrendingUp className="h-4 w-4" />
-              Cash Flow
+              Home
             </Link>
           </div>
 
-          {/* Explorer Section */}
+          {customerBase ? (
+            <div className="space-y-2">
+              <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                Customer
+              </h3>
+              {customerLabel ? (
+                <p className="px-2 text-xs text-muted-foreground truncate">{customerLabel}</p>
+              ) : null}
+              <Link
+                to={customerBase}
+                className={linkClass(location.pathname === customerBase)}
+                onClick={closeMobileMenu}
+              >
+                <UserCircle className="h-4 w-4" />
+                Overview
+              </Link>
+              <Link
+                to={`${customerBase}/assessment`}
+                className={linkClass(location.pathname.includes('/assessment'))}
+                onClick={closeMobileMenu}
+              >
+                <ClipboardList className="h-4 w-4" />
+                Assessment
+              </Link>
+              <Link
+                to={`${customerBase}/products`}
+                className={linkClass(location.pathname.includes('/products'))}
+                onClick={closeMobileMenu}
+              >
+                <Package className="h-4 w-4" />
+                Products
+              </Link>
+            </div>
+          ) : null}
+
           <div className="space-y-2">
             <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Explorer
+              Catalog
             </h3>
             <Link
               to="/banking-products"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/banking-products') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
+              className={linkClass(isActive('/banking-products'))}
               onClick={closeMobileMenu}
             >
               <Building2 className="h-4 w-4" />
               Banking
             </Link>
             <Link
-              to={hasCompletedAssessment ? `/investment-explorer/${session.id}` : '/assessment'}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive(`/investment-explorer/${session?.id}`) 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive",
-                !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
-              )}
+              to="/investment-explorer"
+              className={linkClass(isActive('/investment-explorer'))}
               onClick={closeMobileMenu}
-              title={!hasCompletedAssessment ? "Complete your assessment to access the Investment Explorer" : ""}
             >
               <Compass className="h-4 w-4" />
-              Investment
+              Investments
             </Link>
             <Link
               to="/insurance"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/insurance') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
+              className={linkClass(isActive('/insurance'))}
               onClick={closeMobileMenu}
             >
               <Shield className="h-4 w-4" />
@@ -197,52 +162,13 @@ const MobileMenu: React.FC = () => {
             </Link>
           </div>
 
-          {/* Learning Section */}
           <div className="space-y-2">
             <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Learning
-            </h3>
-            <Link
-              to="/learning"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/learning') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <GraduationCap className="h-4 w-4" />
-              Learning Library
-            </Link>
-            <Link
-              to={session?.id ? `/learning-path/${session.id}` : '/learning'}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive(`/learning-path/${session?.id}`) 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
-              onClick={closeMobileMenu}
-            >
-              <BookOpen className="h-4 w-4" />
-              Learning Paths
-            </Link>
-          </div>
-
-          {/* Profile Section */}
-          <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Profile
+              Account
             </h3>
             <Link
               to="/profile"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive('/profile') 
-                  ? "bg-accent !text-accent-foreground" 
-                  : "text-muted-foreground sidebar-nav-inactive"
-              )}
+              className={linkClass(isActive('/profile'))}
               onClick={closeMobileMenu}
             >
               <User className="h-4 w-4" />
@@ -250,27 +176,6 @@ const MobileMenu: React.FC = () => {
             </Link>
           </div>
 
-          {/* Administration */}
-          <div className="space-y-2">
-              <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-                Administration
-              </h3>
-              <Link
-                to="/analytics"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                  isActive('/analytics') 
-                    ? "bg-accent text-accent-foreground" 
-                    : "text-muted-foreground sidebar-nav-inactive"
-                )}
-                onClick={closeMobileMenu}
-              >
-                <LineChart className="h-4 w-4" />
-                Analytics
-              </Link>
-            </div>
-
-          {/* Logout Section */}
           <div className="space-y-2 pt-6 border-t">
             <Button
               variant="ghost"
@@ -287,4 +192,4 @@ const MobileMenu: React.FC = () => {
   );
 };
 
-export default MobileMenu; 
+export default MobileMenu;

@@ -22,6 +22,7 @@ interface ProductCardProps {
   firebaseId?: string;
   isInMyProducts?: boolean;
   onAddToMyProducts?: (product: BankingProduct) => void;
+  showMatchScore?: boolean;
 }
 
 const typeIcons: Record<BankingProduct['type'], React.ElementType> = {
@@ -147,7 +148,8 @@ export const ProductCard = ({
   matchCount = product.alignedGoals.length,
   firebaseId,
   isInMyProducts = false,
-  onAddToMyProducts
+  onAddToMyProducts,
+  showMatchScore = true,
 }: ProductCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -262,15 +264,19 @@ export const ProductCard = ({
           </div>
           
           <div className="flex items-start gap-2 flex-shrink-0">
-            <ScoreIndicator 
-              score={product.matchScore} 
-              size="sm" 
-              showInfoIcon 
-              showLabel={false}
-              product={product}
-            />
+            {showMatchScore ? (
+              <ScoreIndicator 
+                score={product.matchScore} 
+                size="sm" 
+                showInfoIcon 
+                showLabel={false}
+                product={product}
+              />
+            ) : null}
             <div className="flex flex-col items-center gap-2">
-              <EligibilityBadge status={product.eligibilityStatus} showInfoIcon />
+              {showMatchScore ? (
+                <EligibilityBadge status={product.eligibilityStatus} showInfoIcon />
+              ) : null}
               {firebaseId && (
                 <Tooltip>
                   <TooltipTrigger asChild>

@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  GraduationCap, 
-  BookOpen, 
-  BarChart3,
+import {
+  LayoutDashboard,
   User,
-  Compass,
-  DollarSign,
-  TrendingUp,
-  LineChart,
-  Target,
   ChevronDown,
   ChevronUp,
-  MoreHorizontal,
   Building2,
-  Shield
+  Shield,
+  Compass,
+  PackageOpen,
+  ClipboardList,
+  Package,
+  UserCircle,
 } from 'lucide-react';
-import { useSession } from '@/contexts/SessionContext';
+import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -40,167 +36,126 @@ const SidebarContent = React.forwardRef<
 ));
 SidebarContent.displayName = "SidebarContent";
 
+const navInactive =
+  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent text-muted-foreground sidebar-nav-inactive";
+const navActive = "bg-accent !text-accent-foreground";
+const childNav =
+  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2";
+
+/** Customer id only when path is under `/dashboard/customers/:id`. */
+function customerIdFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/dashboard\/customers\/([^/]+)/);
+  return match?.[1] ?? null;
+}
+
 const AppSidebar: React.FC = () => {
-  const { session, isLoading } = useSession();
-  const hasCompletedAssessment = Boolean(session?.isCompleted);
   const location = useLocation();
-  
-  // State for collapsible sections
-  const [isPlanningOpen, setIsPlanningOpen] = useState(false);
-  const [isExplorerOpen, setIsExplorerOpen] = useState(false);
-  const [isLearningOpen, setIsLearningOpen] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  
-  // Auto-expand sections based on current route
+  const { customers } = useSelectedCustomer();
+
+  const routeCustomerId = customerIdFromPath(location.pathname);
+  const customerBase = routeCustomerId
+    ? `/dashboard/customers/${routeCustomerId}`
+    : null;
+
+  const customerLabel = useMemo(() => {
+    if (!routeCustomerId) return null;
+    const row = customers.find((c) => c.customerId === routeCustomerId);
+    return row?.displayName || row?.externalCustomerId || routeCustomerId;
+  }, [customers, routeCustomerId]);
+
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+
   useEffect(() => {
-    // Auto-expand Financial Analysis section if on goals, spending, or planning pages
-    const isOnPlanningPage = location.pathname.includes('/goals') || 
-                             location.pathname.includes('/spending') ||
-                             location.pathname.includes('/planning');
-    setIsPlanningOpen(isOnPlanningPage);
-    
-    // Auto-expand Explorer section if on banking, investment, or insurance explorer pages
-    const isOnExplorerPage = location.pathname.includes('/banking-products') ||
-                            location.pathname.includes('/investment-explorer') ||
-                            location.pathname.includes('/insurance');
-    setIsExplorerOpen(isOnExplorerPage);
-    
-    // Auto-expand Learning section if on learning pages (but NOT investment-explorer)
-    const isOnLearningPage = location.pathname.includes('/learning') || 
-                            location.pathname.includes('/learning-path');
-    setIsLearningOpen(isOnLearningPage);
-  }, [location.pathname]);
-
-  // Show loading state for Investment Explorer link
-  const renderInvestmentExplorerLink = () => {
-    if (isLoading) {
-      return (
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground opacity-50 cursor-not-allowed ml-4 border-l-2 border-border">
-          <Compass className="h-4 w-4" />
-          Investment Explorer
-        </div>
-      );
-    }
-
-    return (
-      <NavLink
-        to={hasCompletedAssessment ? `/investment-explorer/${session.id}` : '/assessment'}
-        className={({ isActive }) =>
-          cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-            isActive 
-              ? "bg-accent !text-accent-foreground border-primary" 
-              : "text-muted-foreground sidebar-nav-inactive border-border",
-            !hasCompletedAssessment && "opacity-50 cursor-not-allowed"
-          )
-        }
-        title={!hasCompletedAssessment ? "Complete your assessment to access the Investment Explorer" : ""}
-      >
-        <Compass className="h-4 w-4" />
-        Investment Explorer
-      </NavLink>
+    const path = location.pathname;
+    setIsCatalogOpen(
+      path.includes('/banking-products') ||
+        path.includes('/investment-explorer') ||
+        path.includes('/insurance')
     );
-  };
+    setIsAccountOpen(path.includes('/profile'));
+  }, [location.pathname]);
 
   return (
     <SidebarContent>
       <nav className="space-y-4">
-        {/* Primary Navigation - Always Visible */}
         <div className="space-y-1">
+          <div className="px-3 py-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Dashboard
+            </h3>
+          </div>
           <NavLink
-            to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}
+            to="/dashboard"
+            end
             className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                isActive ? "bg-accent !text-accent-foreground" : "text-muted-foreground sidebar-nav-inactive"
-              )
+              cn(navInactive, isActive && navActive)
             }
           >
             <LayoutDashboard className="h-4 w-4" />
-            Dashboard
+            Home
           </NavLink>
         </div>
 
-        {/* Financial Analysis Section - Collapsible */}
-        <div className="space-y-1">
-          <div className="px-3 py-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Financial Analysis
-            </h3>
+        {customerBase ? (
+          <div className="space-y-1">
+            <div className="px-3 py-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Customer
+              </h3>
+              {customerLabel ? (
+                <p
+                  className="mt-1 truncate text-[11px] text-muted-foreground"
+                  title={customerLabel}
+                >
+                  {customerLabel}
+                </p>
+              ) : null}
+            </div>
+            <NavLink
+              to={customerBase}
+              end
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
+            >
+              <UserCircle className="h-4 w-4" />
+              Overview
+            </NavLink>
+            <NavLink
+              to={`${customerBase}/assessment`}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
+            >
+              <ClipboardList className="h-4 w-4" />
+              Assessment
+            </NavLink>
+            <NavLink
+              to={`${customerBase}/products`}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
+            >
+              <Package className="h-4 w-4" />
+              Products
+            </NavLink>
           </div>
-          <Collapsible open={isPlanningOpen} onOpenChange={setIsPlanningOpen}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="h-4 w-4" />
-                <span>Financial Analysis</span>
-              </div>
-              {isPlanningOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 mt-1">
-              <NavLink
-                to="/goals"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <Target className="h-4 w-4" />
-                Goals
-              </NavLink>
-              <NavLink
-                to="/spending"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <DollarSign className="h-4 w-4" />
-                Spending
-              </NavLink>
-              <NavLink
-                to="/planning"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <BarChart3 className="h-4 w-4" />
-                Planning
-              </NavLink>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+        ) : null}
 
-        {/* Explorer Section - Collapsible */}
         <div className="space-y-1">
           <div className="px-3 py-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Explorer
+              Catalog
             </h3>
           </div>
-          <Collapsible open={isExplorerOpen} onOpenChange={setIsExplorerOpen}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
+          <Collapsible open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
+            <CollapsibleTrigger className={cn(navInactive, "w-full justify-between")}>
               <div className="flex items-center gap-3">
-                <Compass className="h-4 w-4" />
-                <span>Explorer</span>
+                <PackageOpen className="h-4 w-4" />
+                <span>Catalog</span>
               </div>
-              {isExplorerOpen ? (
+              {isCatalogOpen ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
                 <ChevronDown className="h-4 w-4" />
@@ -211,9 +166,9 @@ const AppSidebar: React.FC = () => {
                 to="/banking-products"
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
+                    childNav,
+                    isActive
+                      ? "bg-accent text-accent-foreground border-primary"
                       : "text-muted-foreground sidebar-nav-inactive border-border"
                   )
                 }
@@ -221,14 +176,27 @@ const AppSidebar: React.FC = () => {
                 <Building2 className="h-4 w-4" />
                 Banking
               </NavLink>
-              {renderInvestmentExplorerLink()}
+              <NavLink
+                to="/investment-explorer"
+                className={({ isActive }) =>
+                  cn(
+                    childNav,
+                    isActive
+                      ? "bg-accent text-accent-foreground border-primary"
+                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                  )
+                }
+              >
+                <Compass className="h-4 w-4" />
+                Investments
+              </NavLink>
               <NavLink
                 to="/insurance"
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
+                    childNav,
+                    isActive
+                      ? "bg-accent text-accent-foreground border-primary"
                       : "text-muted-foreground sidebar-nav-inactive border-border"
                   )
                 }
@@ -240,114 +208,33 @@ const AppSidebar: React.FC = () => {
           </Collapsible>
         </div>
 
-        {/* Learning Section - Collapsible */}
         <div className="space-y-1">
-          <div className="px-3 py-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Learning
-            </h3>
-          </div>
-          <Collapsible open={isLearningOpen} onOpenChange={setIsLearningOpen}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
+          <Collapsible open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+            <CollapsibleTrigger className={cn(navInactive, "w-full justify-between")}>
               <div className="flex items-center gap-3">
-                <GraduationCap className="h-4 w-4" />
-                <span>Learning</span>
-              </div>
-              {isLearningOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 mt-1">
-              <NavLink
-                to="/learning"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <GraduationCap className="h-4 w-4" />
-                Learning Library
-              </NavLink>
-              <NavLink
-                to={session?.id ? `/learning-path/${session.id}` : '/learning'}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <BookOpen className="h-4 w-4" />
-                Learning Paths
-              </NavLink>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-
-        {/* Other Section - Collapsible (Collapsed by Default) */}
-        <div className="space-y-1">
-          <Collapsible open={isMoreOpen} onOpenChange={setIsMoreOpen}>
-            <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all sidebar-nav-inactive">
-              <div className="flex items-center gap-3">
-                <MoreHorizontal className="h-4 w-4" />
+                <User className="h-4 w-4" />
                 <span>Account</span>
               </div>
-              {isMoreOpen ? (
+              {isAccountOpen ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
                 <ChevronDown className="h-4 w-4" />
               )}
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-1 mt-1">
-              <NavLink
-                to="/assessment"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <BarChart3 className="h-4 w-4" />
-                Assessment
-              </NavLink>
               <NavLink
                 to="/profile"
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
+                    childNav,
+                    isActive
+                      ? "bg-accent text-accent-foreground border-primary"
                       : "text-muted-foreground sidebar-nav-inactive border-border"
                   )
                 }
               >
                 <User className="h-4 w-4" />
                 Profile
-              </NavLink>
-              <NavLink
-                to="/analytics"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                    isActive 
-                      ? "bg-accent !text-accent-foreground border-primary" 
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <LineChart className="h-4 w-4" />
-                Analytics
               </NavLink>
             </CollapsibleContent>
           </Collapsible>

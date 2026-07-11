@@ -271,7 +271,7 @@ export interface FiDecisionPropensityAndIntent {
 
 export interface FiDecisionInsightsDto {
   executiveSummary: string;
-  risk: {
+  risk?: {
     liquidityRisk: FiDecisionRiskItem;
     stressRisk: FiDecisionRiskItem;
   };
@@ -300,14 +300,16 @@ export interface FiDecisionInsightsDto {
 }
 
 export interface BankCustomerListItem {
+  /** @deprecated use customerId — kept for older UI bindings */
   userId: string;
+  customerId?: string;
+  externalCustomerId?: string;
   email?: string;
   displayName?: string;
   role?: string;
-  // Optional RM triage fields (if backend provides them)
   queueBucket?: FiQueueBucket;
   queueReason?: string;
-  queuePriorityScore?: number; // 0-100
+  queuePriorityScore?: number;
 }
 
 export interface BankCustomersResponseDto {
@@ -320,12 +322,15 @@ export interface BankCustomersResponseDto {
 }
 
 export interface FiQueueBucketSummaryDto {
+  /** @deprecated use customerId */
   userId: string;
+  customerId?: string;
+  externalCustomerId?: string;
   email?: string;
   displayName?: string;
   queueBucket: FiQueueBucket;
   queueReason: string;
-  queuePriorityScore: number; // 0-100
+  queuePriorityScore: number;
   diagnostics?: {
     readinessTier?: string;
     gateFailures?: string[];

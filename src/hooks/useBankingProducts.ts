@@ -10,18 +10,10 @@ import {
 } from '@/lib/utils/bankingTransformers';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSession } from '@/contexts/SessionContext';
-import type {
-  BankingProduct,
-  ProductComparison,
-  UserProduct,
-  BankingFinancialSummary,
-} from '@/lib/api/types/banking';
+import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 
 /**
- * Get banking product recommendations
- * Backend extracts user ID from Authorization token
- * Only enabled when user has completed assessment
+ * Recommendations for the selected tenant customer.
  */
 export function useBankingRecommendations(filters?: {
   goalId?: string;
@@ -32,68 +24,51 @@ export function useBankingRecommendations(filters?: {
   disableTypeFiltering?: boolean;
 }) {
   const { user } = useAuth();
-  const { session } = useSession();
+  const { selectedCustomerId } = useSelectedCustomer();
 
   return useQuery({
-    queryKey: ['banking', 'recommendations', user?.uid, filters],
+    queryKey: ['banking', 'recommendations', selectedCustomerId, filters],
     queryFn: async () => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      const response = await bankingApi.getRecommendations(filters);
+      const response = await bankingApi.getRecommendations(selectedCustomerId, filters);
       return transformRecommendationsResponse(response);
     },
-    enabled: !!user && !!session?.isCompleted, // Only fetch when assessment is completed
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    placeholderData: (previousData) => previousData, // Keep previous data while fetching new filter
+    enabled: !!user && !!selectedCustomerId,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 }
 
-/**
- * Compare banking products
- * Backend extracts user ID from Authorization token
- */
 export function useCompareProducts(productIds: string[]) {
   const { user } = useAuth();
+  const { selectedCustomerId } = useSelectedCustomer();
 
   return useQuery({
-    queryKey: ['banking', 'compare', user?.uid, productIds],
+    queryKey: ['banking', 'compare', selectedCustomerId, productIds],
     queryFn: async () => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      const response = await bankingApi.compareProducts(productIds);
+      const response = await bankingApi.compareProducts(selectedCustomerId, productIds);
       return transformComparisonResponse(response);
     },
-    enabled: !!user && productIds.length >= 2,
+    enabled: !!user && !!selectedCustomerId && productIds.length >= 2,
     staleTime: 5 * 60 * 1000,
   });
 }
 
-/**
- * Get user's banking profile
- * Backend extracts user ID from Authorization token
- */
 export function useBankingProfile() {
   const { user } = useAuth();
+  const { selectedCustomerId } = useSelectedCustomer();
 
   return useQuery({
-    queryKey: ['banking', 'profile', user?.uid],
+    queryKey: ['banking', 'profile', selectedCustomerId],
     queryFn: async () => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      const response = await bankingApi.getProfile();
+      const response = await bankingApi.getProfile(selectedCustomerId);
       return transformProfileResponse(response);
     },
-    enabled: !!user,
+    enabled: !!user && !!selectedCustomerId,
     staleTime: 5 * 60 * 1000,
   });
 }
 
-/**
- * Get product catalog
- */
+/** Shared catalog — not customer-scoped. */
 export function useProductCatalog(filters?: {
   productType?: string;
   bank?: string;
@@ -103,90 +78,57 @@ export function useProductCatalog(filters?: {
     queryKey: ['banking', 'catalog', filters],
     queryFn: async () => {
       const response = await bankingApi.getProducts(filters);
-      
-      // Log for debugging
-      console.log('[Catalog] API response structure:', {
-        hasProducts: !!response.products,
-        productsCount: response.products?.length || 0,
-        total: response.total,
-        firstProduct: response.products?.[0] ? {
-          id: response.products[0].id,
-          productName: response.products[0].productName,
-          bankName: response.products[0].bankName,
-          productType: response.products[0].productType,
-          hasAttributes: !!response.products[0].attributes,
-        } : null,
-      });
-      
       return {
         products: response.products.map(transformCatalogItem),
         total: response.total,
         filters: response.filters,
       };
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes (catalog changes less frequently)
+    staleTime: 10 * 60 * 1000,
   });
 }
 
-/**
- * Get product history
- * Backend extracts user ID from Authorization token
- */
 export function useProductHistory(filters?: {
   productId?: string;
   limit?: number;
   offset?: number;
 }) {
   const { user } = useAuth();
+  const { selectedCustomerId } = useSelectedCustomer();
 
   return useQuery({
-    queryKey: ['banking', 'profile', 'history', user?.uid, filters],
+    queryKey: ['banking', 'profile', 'history', selectedCustomerId, filters],
     queryFn: async () => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      const response = await bankingApi.getProductHistory(filters);
+      const response = await bankingApi.getProductHistory(selectedCustomerId, filters);
       return transformProfileResponse(response);
     },
-    enabled: !!user,
+    enabled: !!user && !!selectedCustomerId,
     staleTime: 5 * 60 * 1000,
   });
 }
 
-/**
- * Add product to user's profile
- * Backend extracts user ID from Authorization token
- * Fields vary by product type - only send relevant fields
- */
 export function useAddProduct() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  
+  const { selectedCustomerId } = useSelectedCustomer();
+
   return useMutation({
-    mutationFn: async (productData: { 
+    mutationFn: async (productData: {
       productId: string;
-      // Savings/Fixed Deposit fields
       currentBalance?: number;
-      // Credit Card fields
       outstandingBalance?: number;
       creditLimit?: number;
-      // Loan fields
       loanAmount?: number;
       monthlyPayment?: number;
-      // Common optional fields
       openedDate?: string;
       lastUsedDate?: string;
     }) => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      await bankingApi.addProduct(productData);
+      await bankingApi.addProduct(selectedCustomerId, productData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
       queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
       queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
-      toast.success('Product added to your profile');
+      toast.success('Product added to customer profile');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to add product');
@@ -194,33 +136,21 @@ export function useAddProduct() {
   });
 }
 
-/**
- * Update product in user's profile
- * Backend extracts user ID from Authorization token
- * Can update individual fields without sending all fields
- */
 export function useUpdateProduct(productId: string) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  
+  const { selectedCustomerId } = useSelectedCustomer();
+
   return useMutation({
     mutationFn: async (productData: {
-      // Savings/Fixed Deposit fields
       currentBalance?: number;
-      // Credit Card fields
       outstandingBalance?: number;
       creditLimit?: number;
-      // Loan fields
       loanAmount?: number;
       monthlyPayment?: number;
-      // Common optional fields
       openedDate?: string;
       lastUsedDate?: string;
     }) => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      await bankingApi.updateProduct(productId, productData);
+      await bankingApi.updateProduct(selectedCustomerId, productId, productData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
@@ -235,27 +165,20 @@ export function useUpdateProduct(productId: string) {
   });
 }
 
-/**
- * Delete product from user's profile
- * Backend extracts user ID from Authorization token
- */
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  
+  const { selectedCustomerId } = useSelectedCustomer();
+
   return useMutation({
     mutationFn: async (productId: string) => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      await bankingApi.deleteProduct(productId);
+      await bankingApi.deleteProduct(selectedCustomerId, productId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banking', 'profile'] });
       queryClient.invalidateQueries({ queryKey: ['banking', 'summary'] });
       queryClient.invalidateQueries({ queryKey: singleViewProfileQueryKey });
       queryClient.invalidateQueries({ queryKey: profileNeedsQueryKey });
-      toast.success('Product removed from your profile');
+      toast.success('Product removed from customer profile');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to remove product');
@@ -263,22 +186,14 @@ export function useDeleteProduct() {
   });
 }
 
-/**
- * Get financial summary (assets, liabilities, net worth, debt ratios)
- * Backend extracts user ID from Authorization token
- */
 export function useBankingFinancialSummary() {
   const { user } = useAuth();
+  const { selectedCustomerId } = useSelectedCustomer();
 
   return useQuery({
-    queryKey: ['banking', 'summary', user?.uid],
-    queryFn: async () => {
-      if (!user) {
-        throw new Error('User must be authenticated');
-      }
-      return await bankingApi.getFinancialSummary();
-    },
-    enabled: !!user,
-    staleTime: 2 * 60 * 1000, // 2 minutes (summary changes when products change)
+    queryKey: ['banking', 'summary', selectedCustomerId],
+    queryFn: async () => bankingApi.getFinancialSummary(selectedCustomerId),
+    enabled: !!user && !!selectedCustomerId,
+    staleTime: 2 * 60 * 1000,
   });
 }

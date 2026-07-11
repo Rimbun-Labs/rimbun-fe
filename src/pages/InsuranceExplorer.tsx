@@ -118,7 +118,7 @@ const InsuranceExplorer = () => {
       <PageHeader
         icon={Shield}
         title="Insurance"
-        description="Safety first, then cover for your goals"
+        description="Insurance products and coverage options"
         action={
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-lg border px-3 py-2">

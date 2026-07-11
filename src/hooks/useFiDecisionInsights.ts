@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
 import {
   getBankCustomers,
   getFiDecisionExplain,
@@ -18,9 +19,14 @@ const DECISION_CACHE_MS = 60000;
 
 export const useFiDecisionInsights = () => {
   const { user, userRegistrationComplete } = useAuth();
+  const {
+    selectedCustomerId,
+    setSelectedCustomerId,
+    refetchCustomers: refetchTenantCustomers,
+  } = useSelectedCustomer();
+
   const [customers, setCustomers] = useState<FiQueueBucketSummaryDto[]>([]);
   const [bookSummary, setBookSummary] = useState<FiQueueBookSummary | undefined>(undefined);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [customersLoading, setCustomersLoading] = useState(true);
   const [customersError, setCustomersError] = useState<Error | null>(null);
   const [data, setData] = useState<FiDecisionInsightsDto | null>(null);
@@ -46,15 +52,20 @@ export const useFiDecisionInsights = () => {
       setCustomers(list);
       setBookSummary(meta?.bookSummary);
       if (list.length > 0) {
-        setSelectedCustomerId((prev) => prev || list[0].userId);
+        const ids = list.map(
+          (c) => c.userId || (c as { customerId?: string }).customerId || ""
+        );
+        if (!selectedCustomerId || !ids.includes(selectedCustomerId)) {
+          setSelectedCustomerId(ids[0]);
+        }
       }
+      await refetchTenantCustomers();
     } catch (err: any) {
       const nextErr =
         err instanceof Error ? err : new Error(err?.response?.data?.message || "Failed to fetch customers");
       setCustomersError(nextErr);
       setCustomers([]);
       setBookSummary(undefined);
-      setSelectedCustomerId("");
     } finally {
       setCustomersLoading(false);
     }

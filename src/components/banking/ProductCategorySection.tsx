@@ -17,6 +17,7 @@ interface ProductCategorySectionProps {
   onAddToCompare: (product: BankingProduct) => void;
   isInCompare: (productId: string) => boolean;
   firebaseId?: string;
+  showMatchScores?: boolean;
 }
 
 const typeIcons: Record<BankingProduct['type'], React.ElementType> = {
@@ -48,6 +49,7 @@ export const ProductCategorySection = ({
   onAddToCompare,
   isInCompare,
   firebaseId,
+  showMatchScores = true,
 }: ProductCategorySectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const Icon = typeIcons[type] || PiggyBank;
@@ -80,7 +82,8 @@ export const ProductCategorySection = ({
                           {topProduct.name || `${topProduct.bank} ${typeLabels[topProduct.type]}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {topProduct.bank} • Match: {topProduct.matchScore}%
+                          {topProduct.bank}
+                          {showMatchScores ? ` • Match: ${topProduct.matchScore}%` : ''}
                         </p>
                       </div>
                     )}
@@ -106,9 +109,10 @@ export const ProductCategorySection = ({
                       onSelect={onProductSelect}
                       onCompare={onAddToCompare}
                       isInCompare={isInCompare(product.id)}
-                      isTopRecommendation={product.matchScore >= 90}
+                      isTopRecommendation={showMatchScores && product.matchScore >= 90}
                       matchCount={product.alignedGoals.length}
                       firebaseId={firebaseId}
+                      showMatchScore={showMatchScores}
                     />
                   ))}
                 </div>

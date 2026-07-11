@@ -22,8 +22,8 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
   const isHomePage = location.pathname === '/';
   const hasCompletedAssessment = Boolean(session?.id && session?.isCompleted);
 
-  // Show full layout only if assessment is completed or on non-home pages
-  const showFullLayout = hasCompletedAssessment || !isHomePage;
+  // Operator console: always show chrome on authenticated app routes (not gated on consumer assessment).
+  const showFullLayout = !isHomePage || hasCompletedAssessment;
 
   const useMaxWidth = useContainer && containMaxWidth;
   const innerClassName = useContainer

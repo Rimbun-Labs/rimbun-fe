@@ -1398,13 +1398,17 @@ const BankAnalyticsDashboard: React.FC = () => {
                 <div>
                   <p className="text-xs text-muted-foreground">Liquidity risk</p>
                   <p className="text-sm font-medium">
-                    {decisionData ? `${decisionData.risk.liquidityRisk.band.toUpperCase()} (${asPercent(decisionData.risk.liquidityRisk.score)})` : '—'}
+                    {decisionData?.risk?.liquidityRisk
+                      ? `${decisionData.risk.liquidityRisk.band.toUpperCase()} (${asPercent(decisionData.risk.liquidityRisk.score)})`
+                      : '—'}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Stress risk</p>
                   <p className="text-sm font-medium">
-                    {decisionData ? `${decisionData.risk.stressRisk.band.toUpperCase()} (${asPercent(decisionData.risk.stressRisk.score)})` : '—'}
+                    {decisionData?.risk?.stressRisk
+                      ? `${decisionData.risk.stressRisk.band.toUpperCase()} (${asPercent(decisionData.risk.stressRisk.score)})`
+                      : '—'}
                   </p>
                 </div>
                 <div>
@@ -1561,13 +1565,24 @@ const BankAnalyticsDashboard: React.FC = () => {
                         <div className="rounded-md border p-3">
                           <p className="text-xs text-muted-foreground">Key reason</p>
                           <p className="text-sm font-medium">
-                            {decisionData.risk.liquidityRisk.reasons[0] || decisionData.risk.stressRisk.reasons[0] || 'No primary rationale available'}
+                            {decisionData.risk?.liquidityRisk?.reasons?.[0] ||
+                              decisionData.risk?.stressRisk?.reasons?.[0] ||
+                              'No primary rationale available'}
                           </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <DecisionRiskCard title="Liquidity risk" risk={decisionData.risk.liquidityRisk} />
-                        <DecisionRiskCard title="Stress risk" risk={decisionData.risk.stressRisk} />
+                        {decisionData.risk?.liquidityRisk ? (
+                          <DecisionRiskCard title="Liquidity risk" risk={decisionData.risk.liquidityRisk} />
+                        ) : null}
+                        {decisionData.risk?.stressRisk ? (
+                          <DecisionRiskCard title="Stress risk" risk={decisionData.risk.stressRisk} />
+                        ) : null}
+                        {!decisionData.risk?.liquidityRisk && !decisionData.risk?.stressRisk ? (
+                          <p className="text-sm text-muted-foreground md:col-span-2">
+                            Risk signals unavailable for this customer.
+                          </p>
+                        ) : null}
                       </div>
                     </CardContent>
                   </Card>
@@ -1598,12 +1613,22 @@ const BankAnalyticsDashboard: React.FC = () => {
                           <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Why now</p>
                           <ul className="list-inside list-disc space-y-1 text-sm">
                             <li>
-                              Liquidity {decisionData.risk.liquidityRisk.band.toUpperCase()} ({asPercent(decisionData.risk.liquidityRisk.score)})
+                              Liquidity{' '}
+                              {decisionData.risk?.liquidityRisk
+                                ? `${decisionData.risk.liquidityRisk.band.toUpperCase()} (${asPercent(decisionData.risk.liquidityRisk.score)})`
+                                : '—'}
                             </li>
                             <li>
-                              Stress {decisionData.risk.stressRisk.band.toUpperCase()} ({asPercent(decisionData.risk.stressRisk.score)})
+                              Stress{' '}
+                              {decisionData.risk?.stressRisk
+                                ? `${decisionData.risk.stressRisk.band.toUpperCase()} (${asPercent(decisionData.risk.stressRisk.score)})`
+                                : '—'}
                             </li>
-                            <li>{decisionData.risk.liquidityRisk.reasons[0] || decisionData.risk.stressRisk.reasons[0] || 'Primary rationale unavailable'}</li>
+                            <li>
+                              {decisionData.risk?.liquidityRisk?.reasons?.[0] ||
+                                decisionData.risk?.stressRisk?.reasons?.[0] ||
+                                'Primary rationale unavailable'}
+                            </li>
                           </ul>
                         </div>
                         <div className="rounded-md border p-3">
@@ -1661,7 +1686,8 @@ const BankAnalyticsDashboard: React.FC = () => {
                                   <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                                     <p>Category: {actionCategoryLabel[action.category]}</p>
                                     <p>
-                                      Risk context: liquidity {decisionData.risk.liquidityRisk.band} / stress {decisionData.risk.stressRisk.band}
+                                      Risk context: liquidity {decisionData.risk?.liquidityRisk?.band ?? '—'} / stress{' '}
+                                      {decisionData.risk?.stressRisk?.band ?? '—'}
                                     </p>
                                     {action.category === 'cross_sell' && decisionData.offerSuppression?.crossSellSuppressed ? (
                                       <p>Suppression active: cross-sell should be secondary until stabilisation improves.</p>

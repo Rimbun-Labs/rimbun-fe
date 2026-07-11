@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { 
@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from '@/hooks/useTheme';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
-import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
 import { Logo } from '@/components/ui/Logo';
@@ -30,13 +29,10 @@ interface AppHeaderProps {
 const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { theme, setTheme } = useTheme();
   const { toggleMobileMenu } = useMobileMenu();
-  const { session } = useSession();
   const { signOut, user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const location = useLocation();
-  const isHomePage = location.pathname === '/';
-  const hasCompletedAssessment = Boolean(session?.isCompleted);
+  const appHome = user ? '/dashboard' : '/home';
 
   const handleLogout = async () => {
     try {
@@ -87,7 +83,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
                 </Button>
               </div>
             )}
-            <Link to="/home" className="flex items-center space-x-2">
+            <Link to={appHome} className="flex items-center space-x-2">
               <Logo size="md" showText className="hidden md:flex" />
               <Logo size="md" className="md:hidden" />
             </Link>
@@ -97,10 +93,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
           <div className="flex items-center gap-2 md:gap-4">
             {/* Home Link */}
             <Link
-              to="/home"
+              to={appHome}
               className={cn(
                 "hidden md:flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                location.pathname === "/home"
+                location.pathname === appHome || (user && location.pathname === "/dashboard")
                   ? "text-accent-foreground bg-accent"
                   : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
               )}

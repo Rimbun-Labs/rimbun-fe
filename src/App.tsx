@@ -1,4 +1,4 @@
-import React, { useEffect, useState, lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import { AppLayout, ContentLayout, PublicLayout, LandingLayout } from "./compone
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { useSession } from "./contexts/SessionContext";
+import { SelectedCustomerProvider } from "./contexts/SelectedCustomerContext";
 import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
@@ -47,12 +47,15 @@ const CashFlowProjections = lazy(() => import("./pages/CashFlowProjections"));
 const FinancialPlanning = lazy(() => import("./pages/FinancialPlanning"));
 const Spending = lazy(() => import("./pages/Spending"));
 const Planning = lazy(() => import("./pages/Planning"));
-const BankAnalyticsDashboard = lazy(() => import("./pages/BankAnalyticsDashboard"));
 const ForBanksDemo = lazy(() => import("./pages/ForBanksDemo"));
 const GoalsPage = lazy(() => import("./pages/Goals"));
 const GoalDetailPage = lazy(() => import("./pages/GoalDetail"));
 const GoalFamilyPage = lazy(() => import("./pages/GoalFamily"));
 const BankingProducts = lazy(() => import("./pages/BankingProducts"));
+const CustomerOverview = lazy(() => import("./pages/CustomerOverview"));
+const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
+const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
+const InvestmentCatalog = lazy(() => import("./pages/InvestmentCatalog"));
 const InsuranceExplorer = lazy(() => import("./pages/InsuranceExplorer"));
 const InsuranceProductDetail = lazy(() => import("./pages/InsuranceProductDetail"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -61,62 +64,12 @@ const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
 
 const queryClient = new QueryClient();
 
-// Component to handle root route redirection
+// Authenticated operators land on triage home; marketing site for anonymous visitors.
 const RootRedirect = () => {
   const { user } = useAuth();
-  const { hasCompletedAssessment } = useSession();
-  const [isCheckingAssessment, setIsCheckingAssessment] = useState(false);
-  const [assessmentStatus, setAssessmentStatus] = useState<{ hasAssessment: boolean; sessionId?: string; isIncomplete?: boolean } | null>(null);
-
-  // 🔑 SMART ROUTE PROTECTION: Only redirect if we're on the root path
-  // This prevents aggressive redirects when users intentionally navigate to specific routes
-  const isRootPath = window.location.pathname === '/';
-  
-  // 🔑 NEW: Check if user is in retake mode to prevent redirect conflicts
-  const isRetakeMode = window.location.pathname === '/assessment' && 
-                      new URLSearchParams(window.location.search).get('mode') === 'retake';
-
-  useEffect(() => {
-    const checkUserAssessment = async () => {
-      if (user && !isCheckingAssessment) {
-        setIsCheckingAssessment(true);
-        try {
-          const status = await hasCompletedAssessment();
-          setAssessmentStatus(status);
-        } catch (error) {
-          console.error('Failed to check assessment status:', error);
-          setAssessmentStatus({ hasAssessment: false });
-        } finally {
-          setIsCheckingAssessment(false);
-        }
-      }
-    };
-
-    checkUserAssessment();
-  }, [user, isCheckingAssessment]);
-
-  // Show loading while checking assessment status
-  if (user && isCheckingAssessment) {
-    return <div className="min-h-screen flex items-center justify-center">Checking your account...</div>;
-  }
-
-  // If user is authenticated, check assessment status
   if (user) {
-    // 🔑 FIXED: Only redirect to dashboard if we're on root path AND user has complete assessment AND not in retake mode
-    if (isRootPath && assessmentStatus?.hasAssessment && assessmentStatus.sessionId && !assessmentStatus.isIncomplete && !isRetakeMode) {
-      return <Navigate to={`/dashboard/${assessmentStatus.sessionId}`} replace />;
-    }
-    // If user has incomplete assessment, redirect to assessment to complete it
-    else if (assessmentStatus?.isIncomplete) {
-      return <Navigate to="/assessment" replace />;
-    }
-    // If user has no assessment, go to dashboard (which will show assessment prompt)
-    else if (isRootPath) {
-      return <Navigate to="/dashboard" replace />;
-    }
+    return <Navigate to="/dashboard" replace />;
   }
-
-  // If user is not authenticated, show B2B homepage (For Banks)
   return <ForBanks />;
 };
 
@@ -215,7 +168,7 @@ const AppRoutes = () => {
           } 
         />
         
-        {/* Dashboard Routes */}
+        {/* Dashboard — operator triage home + customer workspace */}
         <Route 
           path="/dashboard" 
           element={
@@ -224,14 +177,32 @@ const AppRoutes = () => {
             </Suspense>
           } 
         />
-        <Route 
-          path="/dashboard/:sessionId" 
+        <Route
+          path="/dashboard/customers/:customerId"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
-              <Dashboard />
+              <CustomerOverview />
             </Suspense>
-          } 
+          }
         />
+        <Route
+          path="/dashboard/customers/:customerId/assessment"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerAssessment />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/dashboard/customers/:customerId/products"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerProducts />
+            </Suspense>
+          }
+        />
+        {/* Legacy consumer session dashboard URL → triage home */}
+        <Route path="/dashboard/:sessionId" element={<Navigate to="/dashboard" replace />} />
         
         {/* Learning Library Routes */}
         <Route 
@@ -434,6 +405,14 @@ const AppRoutes = () => {
             </Suspense>
           } 
         />
+        <Route
+          path="/investment-explorer"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <InvestmentCatalog />
+            </Suspense>
+          }
+        />
         <Route 
           path="/investment-explorer/:sessionId" 
           element={
@@ -459,15 +438,8 @@ const AppRoutes = () => {
           } 
         />
         
-        {/* Bank Analytics (Protected by backend - will show error if no permission) */}
-        <Route 
-          path="/analytics" 
-          element={
-            <Suspense fallback={<LoadingState variant="expanded" />}>
-              <BankAnalyticsDashboard />
-            </Suspense>
-          } 
-        />
+        {/* Legacy analytics URL → triage home */}
+        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
 
       </Route>
 
@@ -485,6 +457,7 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             <SessionProvider>
+              <SelectedCustomerProvider>
               <SubscriptionProvider>
                 <ThemeProvider>
                   <TooltipProvider>
@@ -496,6 +469,7 @@ const App = () => {
                   </TooltipProvider>
                 </ThemeProvider>
               </SubscriptionProvider>
+              </SelectedCustomerProvider>
             </SessionProvider>
           </AuthProvider>
         </BrowserRouter>

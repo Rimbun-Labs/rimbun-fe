@@ -13,12 +13,15 @@ interface BrowseAllTabProps {
   firebaseId?: string;
   compareProducts: BankingProduct[];
   onAddToCompare: (product: BankingProduct) => void;
+  /** Tenant inventory only — no recommendation merge / match scores. */
+  catalogOnly?: boolean;
 }
 
 export const BrowseAllTab = ({
   firebaseId,
   compareProducts,
   onAddToCompare,
+  catalogOnly = false,
 }: BrowseAllTabProps) => {
   const navigate = useNavigate();
   const { data: catalogData, isLoading: isLoadingCatalog, error: catalogError } = useProductCatalog();
@@ -29,6 +32,10 @@ export const BrowseAllTab = ({
   // If not recommended, keep catalog data (0% score is fine for non-recommended products)
   const products = useMemo(() => {
     if (!catalogData?.products) return [];
+
+    if (catalogOnly) {
+      return catalogData.products;
+    }
     
     // Create map of recommendations by productId for quick lookup
     const recommendationsMap = new Map<string, BankingProduct>();
@@ -62,7 +69,7 @@ export const BrowseAllTab = ({
       // This is fine - not all products will be recommended
       return catalogProduct;
     });
-  }, [catalogData, recommendationsData]);
+  }, [catalogData, recommendationsData, catalogOnly]);
 
   const productsByType = useMemo(() => {
     const grouped: Record<string, BankingProduct[]> = {};
@@ -105,7 +112,7 @@ export const BrowseAllTab = ({
 
   const isInCompare = (productId: string) => compareProducts.some((p) => p.id === productId);
 
-  const isLoading = isLoadingCatalog || isLoadingRecommendations;
+  const isLoading = isLoadingCatalog || (!catalogOnly && isLoadingRecommendations);
   const error = catalogError;
 
   if (isLoading) {
@@ -130,9 +137,13 @@ export const BrowseAllTab = ({
           <Grid3x3 className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Browse All Products</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            {catalogOnly ? 'All products' : 'Browse All Products'}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Explore all available banking products
+            {catalogOnly
+              ? 'Products available to offer'
+              : 'Explore all available banking products'}
           </p>
         </div>
       </div>
@@ -148,6 +159,7 @@ export const BrowseAllTab = ({
               onAddToCompare={onAddToCompare}
               isInCompare={isInCompare}
               firebaseId={firebaseId}
+              showMatchScores={!catalogOnly}
             />
           ))}
         </div>
