@@ -6,11 +6,25 @@ import { apiClient } from '@/lib/api/client';
 import { storageUtils } from '@/lib/storage/storageUtils';
 import { useNavigate } from 'react-router-dom';
 
+/** Bank operator identity from GET /dashboard/me. */
+export type OperatorSession = {
+  authenticated: true;
+  tenantUserId: string;
+  tenantId: string;
+  tenantName: string | null;
+  tenantSlug: string | null;
+  role: string;
+  email?: string;
+  uid?: string;
+};
+
 interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
   /** True once Firebase session is resolved against tenant_user via /dashboard/me. */
   userRegistrationComplete: boolean;
+  /** Entitled operator workspace; null when signed out or not entitled. */
+  operator: OperatorSession | null;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<any>;
@@ -23,6 +37,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRegistrationComplete, setUserRegistrationComplete] = useState(false);
+  const [operator, setOperator] = useState<OperatorSession | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,14 +47,42 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
       if (!nextUser) {
         setUserRegistrationComplete(false);
+        setOperator(null);
         return;
       }
 
       try {
-        const { data } = await apiClient.get<{ authenticated?: boolean }>('/dashboard/me');
-        setUserRegistrationComplete(data?.authenticated === true);
+        const { data } = await apiClient.get<{
+          authenticated?: boolean;
+          tenantUserId?: string;
+          tenantId?: string;
+          tenantName?: string | null;
+          tenantSlug?: string | null;
+          role?: string;
+          email?: string;
+          uid?: string;
+        }>('/dashboard/me');
+
+        if (data?.authenticated && data.tenantUserId && data.tenantId && data.role) {
+          const session: OperatorSession = {
+            authenticated: true,
+            tenantUserId: data.tenantUserId,
+            tenantId: data.tenantId,
+            tenantName: data.tenantName ?? null,
+            tenantSlug: data.tenantSlug ?? null,
+            role: data.role,
+            email: data.email,
+            uid: data.uid,
+          };
+          setOperator(session);
+          setUserRegistrationComplete(true);
+        } else {
+          setOperator(null);
+          setUserRegistrationComplete(false);
+        }
       } catch (err) {
         console.warn('AuthContext: /dashboard/me failed — no tenant_user entitlement or auth error', err);
+        setOperator(null);
         setUserRegistrationComplete(false);
       }
     });
@@ -73,6 +116,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     userService.clearDatabaseUserId();
     storageUtils.removeItem('assessmentSessionId');
     setUserRegistrationComplete(false);
+    setOperator(null);
 
     navigate('/');
   };
@@ -83,6 +127,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         user,
         loading,
         userRegistrationComplete,
+        operator,
         signInWithEmail,
         signInWithGoogle,
         signUp,

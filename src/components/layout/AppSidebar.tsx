@@ -245,7 +245,7 @@ const AppSidebar: React.FC = () => {
                 }
               >
                 <User className="h-4 w-4" />
-                Profile
+                Account
               </NavLink>
             </CollapsibleContent>
           </Collapsible>

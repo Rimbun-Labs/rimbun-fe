@@ -183,7 +183,7 @@ const MobileMenu: React.FC = () => {
               onClick={closeMobileMenu}
             >
               <User className="h-4 w-4" />
-              Profile
+              Account
             </Link>
           </div>
 

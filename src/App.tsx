@@ -44,7 +44,7 @@ const LearningFolderView = lazy(() => import("./pages/LearningFolderView"));
 const LearningLibraryDetail = lazy(() => import("./pages/LearningLibraryDetail"));
 const LearningPathDetail = lazy(() => import("./pages/LearningPathDetail"));
 const LearningPaths = lazy(() => import("./pages/LearningPaths"));
-const Profile = lazy(() => import("./pages/Profile"));
+const Profile = lazy(() => import("./pages/OperatorAccount"));
 const InvestmentExplorer = lazy(() => import("./pages/InvestmentExplorer"));
 const SpendingAnalysis = lazy(() => import("./pages/SpendingAnalysis"));
 const CashFlowProjections = lazy(() => import("./pages/CashFlowProjections"));

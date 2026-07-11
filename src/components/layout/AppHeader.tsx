@@ -29,10 +29,11 @@ interface AppHeaderProps {
 const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { theme, setTheme } = useTheme();
   const { toggleMobileMenu } = useMobileMenu();
-  const { signOut, user } = useAuth();
+  const { signOut, user, operator } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
   const appHome = user ? '/dashboard' : '/home';
+  const tenantLabel = operator?.tenantName?.trim() || null;
 
   const handleLogout = async () => {
     try {
@@ -87,6 +88,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
               <Logo size="md" showText className="hidden md:flex" />
               <Logo size="md" className="md:hidden" />
             </Link>
+            {tenantLabel ? (
+              <>
+                <span
+                  className="hidden sm:block h-5 w-px bg-border"
+                  aria-hidden
+                />
+                <span
+                  className="hidden sm:block max-w-[12rem] truncate text-sm text-muted-foreground"
+                  title={tenantLabel}
+                >
+                  {tenantLabel}
+                </span>
+              </>
+            ) : null}
           </div>
           
           {/* Right Section: Navigation and Actions */}
@@ -121,7 +136,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to="/profile">Profile</Link>
+                  <Link to="/profile">Account</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
