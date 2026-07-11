@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBankCustomerInsights } from '@/hooks/useBankCustomerInsights';
 import { useFiDecisionInsights } from '@/hooks/useFiDecisionInsights';
-import { useBankPermission } from '@/hooks/useBankPermission';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RefreshCw, AlertCircle, Shield, ArrowLeft, Sparkles, CircleAlert } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowLeft, Sparkles, CircleAlert } from 'lucide-react';
 import { OverviewCards } from '@/components/dashboard/bank/OverviewCards';
 import { RiskProfileChart } from '@/components/dashboard/bank/RiskProfileChart';
 import { FinancialHealthSection } from '@/components/dashboard/bank/FinancialHealthSection';
@@ -702,7 +701,6 @@ function DecisionRiskCard({ title, risk }: { title: string; risk: FiDecisionRisk
 
 const BankAnalyticsDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { hasPermission, isLoading: permissionLoading } = useBankPermission();
   const { data, loading, error, refetch } = useBankCustomerInsights();
   const {
     customers,
@@ -984,48 +982,6 @@ const BankAnalyticsDashboard: React.FC = () => {
         rows: typeof portfolioRows;
       }>;
   }, [portfolioRows, selectedCustomerId, portfolioSort]);
-
-  // Show loading state while checking permission
-  if (permissionLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle permission denied
-  if (!hasPermission) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive" className="max-w-2xl mx-auto">
-          <Shield className="h-4 w-4" />
-          <AlertTitle>Access Denied</AlertTitle>
-          <AlertDescription className="mt-2">
-            You don't have permission to access the Bank Analytics Dashboard. 
-            This feature is only available to bank administrators and super administrators.
-            <div className="mt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/dashboard')}
-                className="mt-2"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   // Show error state
   if (error) {
@@ -1931,7 +1887,7 @@ const BankAnalyticsDashboard: React.FC = () => {
           <SheetHeader>
             <SheetTitle>Decision explainability</SheetTitle>
             <SheetDescription>
-              Transparent rationale from <code>/api/v1/bank/customers/{'{userId}'}/fi-decision/explain</code>.
+              Transparent rationale from <code>/api/v1/dashboard/customers/{'{customerId}'}/fi-decision/explain</code>.
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-4 text-sm">

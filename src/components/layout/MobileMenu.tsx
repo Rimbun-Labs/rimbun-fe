@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { useMobileMenu } from '@/hooks/useMobileMenu';
 import { useSession } from '@/contexts/SessionContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useBankPermission } from '@/hooks/useBankPermission';
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
 import { 
@@ -35,7 +34,6 @@ const MobileMenu: React.FC = () => {
   const { toast } = useToast();
   const location = useLocation();
   const hasCompletedAssessment = Boolean(session?.isCompleted);
-  const { hasPermission: hasBankPermission, isLoading: isLoadingPermission } = useBankPermission();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -252,9 +250,8 @@ const MobileMenu: React.FC = () => {
             </Link>
           </div>
 
-          {/* Administration Section - Only shown if user has bank permission */}
-          {!isLoadingPermission && hasBankPermission && (
-            <div className="space-y-2">
+          {/* Administration */}
+          <div className="space-y-2">
               <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
                 Administration
               </h3>
@@ -272,7 +269,6 @@ const MobileMenu: React.FC = () => {
                 Analytics
               </Link>
             </div>
-          )}
 
           {/* Logout Section */}
           <div className="space-y-2 pt-6 border-t">

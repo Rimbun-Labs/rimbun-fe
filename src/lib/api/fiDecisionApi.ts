@@ -23,7 +23,7 @@ export const getBankCustomers = async (
   if (trimmed.length >= 2) {
     params.set("q", trimmed);
   }
-  const response = await apiClient.get(`/bank/customers?${params.toString()}`);
+  const response = await apiClient.get(`/dashboard/customers?${params.toString()}`);
   const responseData = response.data;
   if (responseData?.data && Array.isArray(responseData.data)) {
     return (responseData as BankCustomersResponseDto).data;
@@ -51,7 +51,7 @@ export const getFiQueueBuckets = async (
   if (includeBookSummary) {
     params.set("includeBookSummary", "true");
   }
-  const response = await apiClient.get(`/bank/customers/fi-queue-buckets?${params.toString()}`);
+  const response = await apiClient.get(`/dashboard/customers/fi-queue-buckets?${params.toString()}`);
   const responseData = response.data;
   const meta = responseData?.meta as FiQueueBucketsResponseMeta | undefined;
   if (responseData?.data && Array.isArray(responseData.data)) {
@@ -61,15 +61,15 @@ export const getFiQueueBuckets = async (
   return { data: [], meta };
 };
 
-export const getFiDecisionInsights = async (userId: string): Promise<FiDecisionInsightsDto> => {
-  const response = await apiClient.get(`/bank/customers/${userId}/fi-decision`);
+export const getFiDecisionInsights = async (customerId: string): Promise<FiDecisionInsightsDto> => {
+  const response = await apiClient.get(`/dashboard/customers/${customerId}/fi-decision`);
   const responseData = response.data;
   if (responseData?.data) return responseData.data as FiDecisionInsightsDto;
   return responseData as FiDecisionInsightsDto;
 };
 
-export const getFiDecisionExplain = async (userId: string): Promise<FiDecisionExplainDto> => {
-  const response = await apiClient.get(`/bank/customers/${userId}/fi-decision/explain`);
+export const getFiDecisionExplain = async (customerId: string): Promise<FiDecisionExplainDto> => {
+  const response = await apiClient.get(`/dashboard/customers/${customerId}/fi-decision/explain`);
   const responseData = response.data;
   if (responseData?.data) return responseData.data as FiDecisionExplainDto;
   return responseData as FiDecisionExplainDto;

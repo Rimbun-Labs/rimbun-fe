@@ -188,11 +188,3 @@ export interface CustomerSegments {
   };
 }
 
-/**
- * Permission Check Response
- */
-export interface BankPermissionResponse {
-  hasPermission: boolean;
-  role: string;
-}
-

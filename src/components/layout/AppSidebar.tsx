@@ -19,7 +19,6 @@ import {
   Shield
 } from 'lucide-react';
 import { useSession } from '@/contexts/SessionContext';
-import { useBankPermission } from '@/hooks/useBankPermission';
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -44,7 +43,6 @@ SidebarContent.displayName = "SidebarContent";
 const AppSidebar: React.FC = () => {
   const { session, isLoading } = useSession();
   const hasCompletedAssessment = Boolean(session?.isCompleted);
-  const { hasPermission: hasBankPermission, isLoading: isLoadingPermission } = useBankPermission();
   const location = useLocation();
   
   // State for collapsible sections
@@ -337,32 +335,23 @@ const AppSidebar: React.FC = () => {
                 <User className="h-4 w-4" />
                 Profile
               </NavLink>
-              {!isLoadingPermission && hasBankPermission && (
-                <NavLink
-                  to="/analytics"
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
-                      isActive 
-                        ? "bg-accent !text-accent-foreground border-primary" 
-                        : "text-muted-foreground sidebar-nav-inactive border-border"
-                    )
-                  }
-                >
-                  <LineChart className="h-4 w-4" />
-                  Analytics
-                </NavLink>
-              )}
+              <NavLink
+                to="/analytics"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2",
+                    isActive 
+                      ? "bg-accent !text-accent-foreground border-primary" 
+                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                  )
+                }
+              >
+                <LineChart className="h-4 w-4" />
+                Analytics
+              </NavLink>
             </CollapsibleContent>
           </Collapsible>
         </div>
-
-        {/* Debug info - Remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="px-2 text-xs text-muted-foreground mt-4 pt-4 border-t">
-            <div>Permission Check: {isLoadingPermission ? 'Loading...' : hasBankPermission ? '✅ Has Access' : '❌ No Access'}</div>
-          </div>
-        )}
       </nav>
     </SidebarContent>
   );

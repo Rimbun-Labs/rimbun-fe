@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 /**
- * Illustrative UI aligned with BankCustomerInsights (GET /bank/customers/insights).
+ * Illustrative UI aligned with BankCustomerInsights (GET /dashboard/customers/insights).
  * Static mock only—no API calls. Numbers are synthetic.
  */
 export const BankAnalyticsPreview: React.FC = () => {
@@ -70,7 +70,7 @@ export const BankAnalyticsPreview: React.FC = () => {
 
       <p className="px-5 pt-4 text-xs text-muted-foreground">
         Synthetic sample only. Live data comes from{" "}
-        <code className="rounded bg-muted px-1 py-0.5 text-[11px]">GET /api/v1/bank/customers/insights</code>{" "}
+        <code className="rounded bg-muted px-1 py-0.5 text-[11px]">GET /api/v1/dashboard/customers/insights</code>{" "}
         when enabled for your tenant.
       </p>
 
