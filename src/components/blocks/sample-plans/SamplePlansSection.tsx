@@ -178,8 +178,8 @@ export const SamplePlansSection: React.FC<SamplePlansSectionProps> = ({ classNam
               size="lg"
               className="border-2"
             >
-              <Link to="/signup">
-                Get Your Own Plan
+              <Link to="/contact">
+                Request a demo
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

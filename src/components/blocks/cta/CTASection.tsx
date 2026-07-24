@@ -89,9 +89,9 @@ export const CTASection = ({ className }: CTASectionProps) => {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <Link to="/signup">
+                <Link to="/contact">
                   <span className="flex items-center">
-                    Begin Your Assessment
+                    Request a demo
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>

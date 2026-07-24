@@ -27,7 +27,7 @@ export const LandingHeader = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { operator } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export const LandingHeader = () => {
               </motion.button>
 
               {/* Auth Buttons */}
-              {user ? (
+              {operator ? (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -137,21 +137,12 @@ export const LandingHeader = () => {
                   <Button asChild variant="outline" size="sm" className="border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent">
                     <Link to="/login">Sign In</Link>
                   </Button>
-                  {location.pathname === "/for-individuals" ? (
-                    <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <Link to="/signup">
-                        Take Your Assessment
-                        <ArrowRight className="ml-2 h-3 w-3" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <a href="mailto:team@rimbun.co">
-                        Request a demo
-                        <ArrowRight className="ml-2 h-3 w-3" />
-                      </a>
-                    </Button>
-                  )}
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <a href="mailto:team@rimbun.co">
+                      Request a demo
+                      <ArrowRight className="ml-2 h-3 w-3" />
+                    </a>
+                  </Button>
                 </motion.div>
               )}
 

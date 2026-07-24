@@ -8,27 +8,26 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, operator, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner 
-          size="md" 
-          variant="primary" 
+        <LoadingSpinner
+          size="md"
+          variant="primary"
           text="Checking authentication..."
         />
       </div>
     );
   }
 
-  if (!user) {
-    // Redirect to login page but save the attempted url
+  if (!user || !operator) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

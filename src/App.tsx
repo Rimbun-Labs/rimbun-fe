@@ -20,9 +20,7 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import ForBanks from "./pages/ForBanks";
 import ForIndividuals from "./pages/ForIndividuals";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
-import EmailConfirmation from "./pages/EmailConfirmation";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -65,10 +63,13 @@ const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
 
 const queryClient = new QueryClient();
 
-// Authenticated operators land on book Home.
+// Entitled operators land on book Home.
 const RootRedirect = () => {
-  const { user } = useAuth();
-  if (user) {
+  const { operator, loading } = useAuth();
+  if (loading) {
+    return <LoadingState variant="expanded" />;
+  }
+  if (operator) {
     return <Navigate to="/dashboard" replace />;
   }
   return <ForBanks />;
@@ -79,8 +80,9 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/signup/check-email" element={<EmailConfirmation />} />
+      {/* Public B2C signup is disabled until productized; point people at demo/contact. */}
+      <Route path="/signup" element={<Navigate to="/contact" replace />} />
+      <Route path="/signup/check-email" element={<Navigate to="/contact" replace />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
