@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const AboutUs: React.FC = () => {
   return (
@@ -18,44 +19,66 @@ const AboutUs: React.FC = () => {
             </a>
           </p>
         </section>
-        
+
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
           <p className="text-lg text-muted-foreground mb-4">
-            At Rimbun Labs, we believe clearer financial context leads to better decisions. Our mission is to
-            help people and partner institutions turn fragmented financial activity into explainable,
-            confidence-scored signals—so teams can review and act with appropriate oversight.
-          </p>
-          <p>
-            We pair that intelligence layer with optional learning paths where they help users build context,
-            without replacing regulated judgment or personalized advice.
+            Rimbun Labs helps financial institutions and payment platforms turn payment
+            behavior into explainable product-activation opportunities, so teams can act
+            with clearer context and appropriate oversight.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">What We Do</h2>
+          <h2 className="text-2xl font-semibold mb-4">What we offer</h2>
           <p className="mb-4">
-            Rimbun Labs builds financial intelligence tooling for Financial Institutions and end users. Our product surfaces:
+            Explainable product-activation opportunities from payment behavior,
+            mapped to your available non-credit products, ready for your teams to act on.
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li><strong>Signal-oriented views:</strong> Patterns and intent signals from financial activity, with confidence metadata</li>
-            <li><strong>Partner-ready outputs:</strong> Summaries and integrations designed for product and servicing workflows</li>
-            <li><strong>Assessments &amp; context:</strong> Scenario-based inputs to enrich profiles—not a substitute for advice</li>
-            <li><strong>Optional learning:</strong> Curated paths where education supports understanding of signals and goals</li>
-            <li><strong>Transparency:</strong> Traceable signal history to support human review where required</li>
+            <li>
+              <strong>Opportunity detection</strong> from transaction behavior
+            </li>
+            <li>
+              <strong>Product mapping</strong> to your inventory and constraints
+            </li>
+            <li>
+              <strong>Explainable recommendations</strong> with clear rationale
+            </li>
+            <li>
+              <strong>Delivery your way:</strong> API into CRM, push, or in-app;
+              a Rimbun workspace to review the book and customers; or both
+            </li>
+            <li>
+              <strong>Improvement over time</strong> from the outcomes you share back
+            </li>
           </ul>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Our Approach</h2>
           <p className="mb-4">
-            We combine data discipline with a trust-first tone:
+            Clients remain in control of their data, product catalog, constraints, and
+            customer outcomes. Rimbun owns enrichment, opportunity detection, scoring,
+            ranking, explainability, and model improvement.
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li><strong>Ingest to action:</strong> Normalize events, detect signals, and expose outputs partners can operationalize</li>
-            <li><strong>Confidence, not hype:</strong> Signals indicate likelihoods; human review stays in the loop where it matters</li>
-            <li><strong>Privacy by design:</strong> Minimize direct PII dependency and use identifiers appropriate to your deployment</li>
-            <li><strong>Education where it helps:</strong> Learning content supports comprehension—it does not replace regulated advice</li>
+            <li>
+              <strong>Flexible delivery:</strong> Integrate into existing systems, use
+              the Rimbun workspace, or combine both
+            </li>
+            <li>
+              <strong>Explainability:</strong> Recommendations include rationale so
+              teams can review before acting
+            </li>
+            <li>
+              <strong>Privacy-aware:</strong> Minimize unnecessary PII and use
+              identifiers appropriate to each deployment
+            </li>
+            <li>
+              <strong>Non-credit focus:</strong> Activation for available non-credit
+              products, not credit eligibility or repayment scoring
+            </li>
           </ul>
         </section>
 
@@ -69,7 +92,7 @@ const AboutUs: React.FC = () => {
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover shrink-0 border-2 border-border"
               />
               <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-foreground">Adrian Koh — Founder & CEO</h3>
+                <h3 className="text-lg font-semibold text-foreground">Adrian Koh, Founder & CEO</h3>
                 <p className="text-muted-foreground mt-1">
                   A corporate strategist and economist in the national government of Brunei. Adrian executed policies and strategic plans for the national SME body of Brunei. He has worked in the SEA tech ecosystem and has helped startups raise pre-A and Series A funding.
                 </p>
@@ -82,7 +105,7 @@ const AboutUs: React.FC = () => {
                 className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover shrink-0 border-2 border-border"
               />
               <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-foreground">Jaitun Shah — Co-Founder & COO</h3>
+                <h3 className="text-lg font-semibold text-foreground">Jaitun Shah, Co-Founder & COO</h3>
                 <p className="text-muted-foreground mt-1">
                   A product leader turned operator, Jaitun spent nearly a decade leading complex automotive programs like Ford&apos;s autonomous vehicle initiatives. He leverages this operational rigor to drive startup growth, recently expediting a €5M Series A raise.
                 </p>
@@ -92,24 +115,31 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Important Disclaimer</h2>
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 my-4">
-            <p className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Educational Purpose Only</p>
-            <p className="text-yellow-700 dark:text-yellow-300">
-              Rimbun Labs provides educational and analytical tooling, not investment, financial, or legal advice.
-              Signals, assessments, and recommendations are informational and may require human review in your
-              jurisdiction. They should not be construed as personalized investment advice. Always consult a
-              qualified professional before making investment decisions.
+          <h2 className="text-2xl font-semibold mb-4">Important notice</h2>
+          <div className="bg-muted/50 border-l-4 border-border p-4 my-4">
+            <p className="font-semibold text-foreground mb-2">Decision support for partners</p>
+            <p className="text-muted-foreground">
+              Rimbun provides analytical recommendations to client institutions. It does
+              not replace regulated judgment, underwriting, or customer-facing advice
+              issued by the client. Partners retain control over how recommendations are
+              reviewed, delivered, and acted on.
             </p>
           </div>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Get Started</h2>
+          <h2 className="text-2xl font-semibold mb-4">Get started</h2>
           <p className="mb-4">
-            For individuals: take the assessment to enrich your profile, then explore insights and optional
-            learning. For Financial Institutions and partners: contact us to discuss integration and how signal outputs fit your
-            workflows.
+            If you represent a financial institution or payment platform and want to
+            explore how Rimbun fits your workflows,{" "}
+            <Link to="/contact" className="text-primary hover:underline">
+              contact us
+            </Link>{" "}
+            or email{" "}
+            <a href="mailto:team@rimbun.co" className="text-primary hover:underline">
+              team@rimbun.co
+            </a>
+            .
           </p>
         </section>
       </div>
