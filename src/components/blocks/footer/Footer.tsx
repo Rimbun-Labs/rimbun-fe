@@ -13,7 +13,7 @@ interface FooterProps {
 
 const footerLinks = {
   company: [
-    { name: "For Financial Institutions", href: "/for-banks" },
+    { name: "Clients", href: "/clients" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" }
   ],
@@ -38,7 +38,7 @@ export const Footer = ({ className }: FooterProps) => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Link to="/for-banks" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group">
               <div className="relative group-hover:scale-105 transition-all duration-300">
                 <Logo size="lg" variant="footer" />
               </div>

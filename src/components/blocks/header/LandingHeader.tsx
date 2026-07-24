@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 
 const navigation = [
-  { name: "For Financial Institutions", href: "/for-banks" },
+  { name: "Clients", href: "/clients" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
@@ -58,7 +58,7 @@ export const LandingHeader = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Link to="/for-banks" className="flex items-center space-x-3 group">
+              <Link to="/" className="flex items-center space-x-3 group">
                 <div className="relative group-hover:scale-105 transition-all duration-300">
                   <Logo size="lg" variant="header" />
                 </div>
@@ -79,11 +79,10 @@ export const LandingHeader = () => {
                     to={item.href}
                     className={cn(
                       "text-sm font-medium transition-colors duration-200",
-                      (item.href === "/for-banks"
-                        ? location.pathname === "/for-banks" ||
+                      (item.href === "/clients"
+                        ? location.pathname === "/clients" ||
                           location.pathname === "/" ||
-                          location.pathname === "/home" ||
-                          location.pathname.startsWith("/for-banks/")
+                          location.pathname.startsWith("/clients/")
                         : location.pathname === item.href)
                         ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground"

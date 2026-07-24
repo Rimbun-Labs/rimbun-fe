@@ -20,7 +20,7 @@ export default function ForBanksDemo() {
         <div className="container px-4 md:px-6 max-w-6xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-muted-foreground">
-              <Link to="/for-banks">
+              <Link to="/clients">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to For Financial Institutions
               </Link>

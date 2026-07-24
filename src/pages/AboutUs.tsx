@@ -121,7 +121,7 @@ const AboutUs: React.FC = () => {
             <p className="text-muted-foreground">
               Rimbun provides analytical recommendations to client institutions. It does
               not replace regulated judgment, underwriting, or customer-facing advice
-              issued by the client. Partners retain control over how recommendations are
+              issued by the client. Clients retain control over how recommendations are
               reviewed, delivered, and acted on.
             </p>
           </div>

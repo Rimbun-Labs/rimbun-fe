@@ -7,34 +7,37 @@ import { BankAnalyticsPreview } from "@/components/blocks/analytics-preview";
 import { motion } from "framer-motion";
 import { ArrowRight, BarChart3, Building2, CheckCircle2, FileText, Shield, Sparkles, Target } from "lucide-react";
 
+const DOCS_URL = "https://docs.rimbun.co/";
+const DOCS_API_URL = "https://docs.rimbun.co/api";
+
 const pillars = [
   {
     icon: BarChart3,
-    title: "Trajectory",
-    description: "Detect early drift in behavior and liquidity momentum before static snapshots show it.",
+    title: "Detect",
+    description: "Find customer opportunities from payment behavior, not static snapshots alone.",
   },
   {
     icon: Target,
-    title: "Context",
-    description: "Translate transactions into archetype and indicator narratives RM and risk teams can use.",
+    title: "Map",
+    description: "Match opportunities to your available non-credit products and constraints.",
   },
   {
     icon: Sparkles,
-    title: "Action",
-    description: "Generate next-step strategies with clear rationale for outreach, servicing, and triage.",
+    title: "Recommend",
+    description: "Return ranked activations with clear rationale your teams can review.",
   },
   {
     icon: FileText,
-    title: "Fit",
-    description: "Recommend suitable product options with confidence, trade-offs, and supporting evidence.",
+    title: "Deliver",
+    description: "Act through the Rimbun workspace or embed recommendations in your channels via API.",
   },
 ];
 
-const capabilitiesToday = [
-  "Institutional cohort and health aggregation aligned with partner insight surfaces",
-  "Explainability fields where confidence and source metadata exist",
-  "Behavior-informed decision-support workflows for RM and product teams",
-  "Governance-ready access patterns for regulated review environments",
+const capabilities = [
+  "Client workspace to review the book, customers, and recommended actions",
+  "API for embedding recommendations into CRM, push, in-app, and other channels",
+  "Explainable outputs with rationale your teams can audit before acting",
+  "Outcome feedback that improves future recommendations over time",
 ];
 
 export default function ForBanks() {
@@ -53,7 +56,7 @@ export default function ForBanks() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20"
             >
               <Building2 className="h-4 w-4" />
-              <span>For Financial Institutions</span>
+              <span>For financial institutions and payment platforms</span>
             </motion.div>
 
             <motion.h1
@@ -62,7 +65,7 @@ export default function ForBanks() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-foreground"
             >
-              Customer Intelligence for Financial Institutions
+              Product-activation opportunities from payment behavior
             </motion.h1>
 
             <motion.p
@@ -71,8 +74,8 @@ export default function ForBanks() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Detect trajectory, understand context, and drive next-best actions for partner teams—risk, engagement,
-              servicing, and suitable product-fit recommendations where relevant.
+              Rimbun detects opportunities from payment behavior and maps them to your
+              non-credit products, with explainable recommendations teams can act on.
             </motion.p>
 
             <motion.div
@@ -82,35 +85,20 @@ export default function ForBanks() {
               className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center"
             >
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <a href="mailto:team@rimbun.co">
-                  Request a demo
+                <Link to="/contact">
+                  Contact us
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-border">
-                <Link to="/for-banks/demo">Preview RM workspace</Link>
+                <Link to="/clients/demo">Preview workspace</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="border-border">
+                <a href={DOCS_API_URL} target="_blank" rel="noopener noreferrer">
+                  API docs
+                </a>
               </Button>
             </motion.div>
-
-            <motion.ul
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="pt-6 border-t border-border/40 max-w-2xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground"
-            >
-              <li className="flex items-center gap-2 justify-center sm:justify-start">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span>Decision-support, not autonomous approval</span>
-              </li>
-              <li className="flex items-center gap-2 justify-center sm:justify-start">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span>Explainability where confidence exists</span>
-              </li>
-              <li className="flex items-center gap-2 justify-center sm:justify-start">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                <span>Privacy-first, audit-aware access</span>
-              </li>
-            </motion.ul>
           </div>
         </div>
       </section>
@@ -123,10 +111,10 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl font-bold text-center mb-4 text-foreground"
           >
-            The decision-support stack
+            How it works
           </motion.h2>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10 text-sm md:text-base">
-            One operating layer from signal to action: trajectory, context, strategy, and fit.
+            From payment behavior to explainable activation, delivered where your teams already work.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {pillars.map((item, i) => (
@@ -157,9 +145,10 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="text-center mb-8"
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">See it in workflow context</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Client workspace</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Portfolio-level intelligence snapshot here, with lead-level trajectory and action flow in the RM workspace demo.
+              Review the book and customer opportunities in the Rimbun workspace. SSO sign-in for entitled
+              client operators.
             </p>
           </motion.div>
           <motion.div
@@ -177,16 +166,49 @@ export default function ForBanks() {
             className="flex flex-col sm:flex-row gap-4 justify-center mt-8"
           >
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link to="/for-banks/demo">
-                Open interactive demo
+              <Link to="/clients/demo">
+                Open workspace preview
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/login">Sign in</Link>
             </Button>
           </motion.div>
         </div>
       </section>
 
-      <section id="platform" className="py-12 md:py-16 bg-muted/30">
+      <section className="py-14 md:py-18 bg-muted/30">
+        <div className="container px-4 md:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto text-center space-y-6"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">API for your channels</h2>
+            <p className="text-muted-foreground">
+              Embed explainable recommendations into CRM, push, in-app, and other client systems.
+              Full reference and quickstart live in the developer docs.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <a href={DOCS_API_URL} target="_blank" rel="noopener noreferrer">
+                  Open API reference
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
+                  Developer docs
+                </a>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section id="platform" className="py-12 md:py-16">
         <div className="container px-4 md:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -196,11 +218,11 @@ export default function ForBanks() {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground mb-4">
               <Shield className="h-3.5 w-3.5" />
-              Deployment-ready for FI environments
+              Built for regulated client environments
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Capabilities in production focus</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">What clients get</h2>
             <ul className="space-y-3 text-sm text-muted-foreground text-left max-w-2xl mx-auto">
-              {capabilitiesToday.map((label) => (
+              {capabilities.map((label) => (
                 <li key={label} className="flex items-start gap-3">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-primary mt-0.5" />
                   <span>{label}</span>
@@ -219,19 +241,19 @@ export default function ForBanks() {
             viewport={{ once: true }}
             className="max-w-2xl mx-auto text-center space-y-6"
           >
-            <h2 className="text-3xl font-bold text-foreground">Ready to evaluate fit for your environment?</h2>
+            <h2 className="text-3xl font-bold text-foreground">Ready to see how Rimbun fits?</h2>
             <p className="text-muted-foreground">
-              We align integration scope to your governance requirements and rollout priorities.
+              Tell us about your environment and we will help you evaluate workspace, API, or both.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <a href="mailto:team@rimbun.co">
-                  Request a demo
+                <Link to="/contact">
+                  Contact us
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link to="/for-banks/demo">Preview RM workspace</Link>
+                <Link to="/clients/demo">Preview workspace</Link>
               </Button>
             </div>
           </motion.div>

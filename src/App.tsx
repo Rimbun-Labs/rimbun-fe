@@ -86,16 +86,21 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/for-banks" element={<ForBanks />} />
+      <Route path="/clients" element={<ForBanks />} />
       <Route
-        path="/for-banks/demo"
+        path="/clients/demo"
         element={
           <Suspense fallback={<LoadingState variant="expanded" />}>
             <ForBanksDemo />
           </Suspense>
         }
       />
-      <Route path="/home" element={<ForBanks />} />
+      {/* Legacy paths — keep bookmarks and old links working */}
+      <Route path="/partners" element={<Navigate to="/clients" replace />} />
+      <Route path="/partners/demo" element={<Navigate to="/clients/demo" replace />} />
+      <Route path="/for-banks" element={<Navigate to="/clients" replace />} />
+      <Route path="/for-banks/demo" element={<Navigate to="/clients/demo" replace />} />
+      <Route path="/home" element={<Navigate to="/clients" replace />} />
       <Route path="/for-individuals" element={<ForIndividuals />} />
 
       {/* Public routes with same landing header as For Banks / For Individuals */}

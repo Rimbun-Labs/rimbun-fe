@@ -32,7 +32,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { signOut, user, operator } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
-  const appHome = user ? '/dashboard' : '/home';
+  const appHome = user ? '/dashboard' : '/';
   const tenantLabel = operator?.tenantName?.trim() || null;
 
   const handleLogout = async () => {
