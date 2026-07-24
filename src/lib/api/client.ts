@@ -9,37 +9,44 @@ export const apiClient = axios.create({
   },
 });
 
+function isPublicApiRequest(url?: string, params?: Record<string, unknown>): boolean {
+  if (!url) return false;
+
+  const isFundsWithFit =
+    url.includes('/investment/funds') &&
+    (params?.includeFit === true ||
+      params?.includeFit === 'true' ||
+      params?.includeFit === '1');
+
+  return (
+    url.includes('/personas') ||
+    url.includes('/contact') ||
+    (url.includes('/investment/funds') && !isFundsWithFit)
+  );
+}
+
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
-  async (config) => {
+  async (requestConfig) => {
     // Skip auth for public endpoints (personas, contact). For investment/funds, only skip auth when NOT requesting profile fit.
-    const isFundsWithFit =
-      config.url?.includes('/investment/funds') &&
-      (config.params?.includeFit === true || config.params?.includeFit === 'true' || config.params?.includeFit === '1');
-    const isPublicEndpoint =
-      config.url?.includes('/personas') ||
-      config.url?.includes('/contact') ||
-      (config.url?.includes('/investment/funds') && !isFundsWithFit);
-
-    if (isPublicEndpoint) {
-      // Remove any existing auth header for public endpoints
-      delete config.headers.Authorization;
-      return config;
+    if (isPublicApiRequest(requestConfig.url, requestConfig.params)) {
+      delete requestConfig.headers.Authorization;
+      return requestConfig;
     }
-    
+
     // Get current user and fresh token
     const { auth } = await import('../firebase/config');
     const user = auth.currentUser;
-    
+
     if (user) {
       // Get fresh token (Firebase SDK auto-refreshes if needed)
       const idToken = await user.getIdToken();
-      config.headers.Authorization = `Bearer ${idToken}`;
+      requestConfig.headers.Authorization = `Bearer ${idToken}`;
     }
     // Note: Removed fallback to stored token - if no current user, let backend return 401
     // This prevents sending expired tokens and ensures proper error handling
-    
-    return config;
+
+    return requestConfig;
   },
   (error) => {
     return Promise.reject(error);
@@ -53,7 +60,7 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
+
     // Handle specific error codes
     if (error.response) {
       // Log all error responses for debugging
@@ -66,19 +73,24 @@ apiClient.interceptors.response.use(
         message: errorData?.message || errorData?.error || error.message,
         fullErrorData: errorData,
       });
-      
+
       // Also log the full error data as a separate object for easier inspection
       console.error('Full Backend Error Data:', JSON.stringify(errorData, null, 2));
-      
-      // Handle 401 Unauthorized - token refresh or redirect to login
-      if (error.response.status === 401 && !originalRequest._retry) {
+
+      // Handle 401 Unauthorized - token refresh or redirect to login.
+      // Never bounce public marketing forms (e.g. /contact) into the login gate.
+      if (
+        error.response.status === 401 &&
+        !originalRequest?._retry &&
+        !isPublicApiRequest(originalRequest?.url, originalRequest?.params)
+      ) {
         originalRequest._retry = true;
-        
+
         // Try to refresh the token
         try {
           const { auth } = await import('../firebase/config');
           const user = auth.currentUser;
-          
+
           if (user) {
             // Force token refresh
             const newToken = await user.getIdToken(true);
@@ -89,11 +101,11 @@ apiClient.interceptors.response.use(
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
         }
-        
+
         // Token refresh failed or no user - clear auth state and redirect to login
         storageUtils.removeItem('firebaseIdToken');
         storageUtils.removeItem('databaseUserId');
-        
+
         // Only redirect if we're in a browser environment
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;
@@ -104,7 +116,7 @@ apiClient.interceptors.response.use(
           }
         }
       }
-      
+
       // Handle 500 errors
       if (error.response.status >= 500) {
         console.error('Server error (500+) - Full error details logged above');
@@ -120,7 +132,7 @@ apiClient.interceptors.response.use(
       // Something else happened
       console.error('API Error (other):', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
