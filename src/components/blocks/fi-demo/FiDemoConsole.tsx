@@ -91,7 +91,7 @@ function DecisionSupportPanel({
       </div>
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 inline-flex items-center gap-1">
-          Reason codes (illustrative)
+          Reason codes
           <FiDemoInfoHint label="Reason codes" text={fiDemoHelp.reasonCodes} iconClassName="h-3 w-3" />
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -128,13 +128,12 @@ function DecisionSupportPanel({
         <CardTitle className="text-base flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-violet-600 dark:text-violet-400 shrink-0" />
           <span className="inline-flex items-center gap-1.5">
-            Decision support (synthetic)
+            Decision support
             <FiDemoInfoHint label="Decision support" text={fiDemoHelp.decisionSupportTitle} />
           </span>
         </CardTitle>
         <CardDescription className="text-xs">
-          Behavior-informed review tier and reason codes — for credit ops routing and RM talk tracks, not a substitute
-          for policy-led approval.
+          Behavior-informed review tier and reason codes for routing and outreach.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">{body}</CardContent>
@@ -261,7 +260,7 @@ function LogicEvidenceBody({ lead }: { lead: FiDemoLead }) {
 
       <div>
         <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-          Trigger transactions (synthetic)
+          Trigger transactions
         </h4>
         <Table>
           <TableHeader>
@@ -351,7 +350,7 @@ function CustomerSnapshotBody({ lead, privacyMode }: { lead: FiDemoLead; privacy
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
           <dt className="text-xs text-muted-foreground flex items-center gap-1">
-            Facility / balance (illustrative)
+            Facility / balance
             <FiDemoInfoHint label="Facility / balance" text={fiDemoHelp.dtFacilityBalance} iconClassName="h-3 w-3" />
           </dt>
           <dd className={cn("font-semibold tabular-nums", privacyMode && "blur-sm")}>
@@ -396,7 +395,7 @@ function CustomerSnapshotBody({ lead, privacyMode }: { lead: FiDemoLead; privacy
 
       <div>
         <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 inline-flex items-center gap-1">
-          Decision support (synthetic)
+          Decision support
           <FiDemoInfoHint label="Decision support" text={fiDemoHelp.decisionSupportTitle} iconClassName="h-3 w-3" />
         </h4>
         <DecisionSupportPanel support={lead.decisionSupport} variant="embedded" />
@@ -439,7 +438,7 @@ function CustomerSnapshotBody({ lead, privacyMode }: { lead: FiDemoLead; privacy
           Category signals
         </h4>
         <p className="text-sm text-muted-foreground">
-          {anomalyCount} row{anomalyCount === 1 ? "" : "s"} flagged &gt;2× category average (fixture rule).
+          {anomalyCount} row{anomalyCount === 1 ? "" : "s"} flagged &gt;2× category average.
         </p>
       </div>
 
@@ -448,7 +447,7 @@ function CustomerSnapshotBody({ lead, privacyMode }: { lead: FiDemoLead; privacy
           <Separator />
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-              RM notes (synthetic)
+              Notes
             </h4>
             <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
               {lead.snapshotHighlights.map((line, i) => (
@@ -460,7 +459,7 @@ function CustomerSnapshotBody({ lead, privacyMode }: { lead: FiDemoLead; privacy
       )}
 
       <p className="text-[11px] text-muted-foreground border-t border-border pt-4">
-        Synthetic snapshot for demo — not a live core banking or CRM record.
+        Sample customer snapshot for this preview.
       </p>
     </div>
   );
@@ -661,7 +660,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-lg text-foreground">RM workspace (demo)</h2>
+              <h2 className="font-semibold text-lg text-foreground">Workspace preview</h2>
               <p className="text-sm text-muted-foreground">
                 {meta.scenarioName} · As of {meta.asOf} · Portfolio view + sample leads
               </p>
@@ -706,8 +705,8 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
             <span className="inline-flex items-center gap-1.5">
               <FiDemoInfoHint label="Portfolio overview" text={fiDemoHelp.portfolioOverviewTab} />
             </span>{" "}
-            Aggregated view of this RM&apos;s <strong className="text-foreground">synthetic book</strong> — use it to
-            size segments, spot pulse mix, and brief product teams on bundle angles (fixtures only).{" "}
+            Aggregated view of this book — use it to size segments, spot pulse mix, and brief
+            product teams on bundle angles.{" "}
             <span className="block mt-2 text-xs">
               Tip for live demos: append{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
@@ -887,7 +886,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
 
         <TabsContent value="leads" className="p-4 md:p-6 mt-0">
           {!selected ? (
-            <p className="text-sm text-muted-foreground">No sample leads in fixture.</p>
+            <p className="text-sm text-muted-foreground">No sample leads available.</p>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
               {/* Narrow triage rail — pick one customer; detail is always on the right */}
@@ -899,7 +898,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                     <FiDemoInfoHint label="Today's outreach" text={fiDemoHelp.todaysOutreach} />
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Triage only — ranked by modeled priority (fixture). One row is{" "}
+                    Triage only — ranked by modeled priority. One row is{" "}
                     <strong className="text-foreground">selected</strong>; engagement context loads on the right. Deep
                     link:{" "}
                     <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">?lead=lead_002</code>
@@ -1052,7 +1051,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                     {nextActionHint(selected.pulse)}
                   </p>
                   <p className="mt-2 text-[11px] text-muted-foreground">
-                    Need the full synthetic dossier? Use <strong className="text-foreground">Open snapshot</strong> — the
+                    Need the full customer view? Use <strong className="text-foreground">Open snapshot</strong> — the
                     cards below are supporting context for the conversation.
                   </p>
                 </div>
@@ -1094,8 +1093,8 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                         <div className="text-[11px] text-muted-foreground leading-relaxed space-y-2 pt-1">
                           <p>
                             <span className="font-semibold text-foreground">What is health momentum?</span> A{" "}
-                            <strong className="text-foreground">synthetic 0–100 behavioral momentum index</strong> for
-                            this demo. It summarizes how{" "}
+                            <strong className="text-foreground">0–100 behavioral momentum index</strong> for
+                            this preview. It summarizes how{" "}
                             <strong className="text-foreground">consistent, supportive</strong> patterns in cashflow and
                             spend behavior look <strong className="text-foreground">over time</strong> — as a trajectory,
                             not a snapshot. It is <strong className="text-foreground">not</strong> a credit score, bureau
@@ -1383,7 +1382,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                     <div>
                       <div className="flex justify-between text-sm mb-1 gap-2">
                         <span className="text-muted-foreground inline-flex items-center gap-1">
-                          Days of runway (illustrative)
+                          Days of runway
                           <FiDemoInfoHint
                             label="Days of runway"
                             text={fiDemoHelp.liquidityMeter}
@@ -1438,7 +1437,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                       <FiDemoInfoHint label="Behavior timeline" text={fiDemoHelp.behaviorTimeline} />
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Illustrative spend clusters for talk tracks — not literal events (synthetic demo).
+                      Spend clusters for talk tracks — sample events in this preview.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1483,7 +1482,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
                       <FiDemoInfoHint label="Recent category activity" text={fiDemoHelp.recentCategoryActivity} />
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Rows flagged when amount &gt; 2× category 6-month average (fixture rule).
+                      Rows flagged when amount &gt; 2× category 6-month average.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="overflow-x-auto">
@@ -1559,7 +1558,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
               Call script
               <FiDemoInfoHint label="Call script" text={fiDemoHelp.callScript} />
             </SheetTitle>
-            <SheetDescription>Three bullets to open the conversation — synthetic copy for demo.</SheetDescription>
+            <SheetDescription>Three bullets to open the conversation.</SheetDescription>
           </SheetHeader>
           <ul className="mt-6 space-y-4 text-sm text-muted-foreground list-disc pl-5">
             {selected?.callScriptBullets.map((b, i) => (
@@ -1577,7 +1576,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
               <FiDemoInfoHint label="Customer snapshot" text={fiDemoHelp.customerSnapshot} />
             </SheetTitle>
             <SheetDescription>
-              Consolidated view for the selected sample lead — fixtures only, not core banking or CRM.
+              Consolidated view for the selected sample lead.
             </SheetDescription>
           </SheetHeader>
           {selected && (
@@ -1596,7 +1595,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
               <FiDemoInfoHint label="Logic evidence" text={fiDemoHelp.logicEvidence} />
             </SheetTitle>
             <SheetDescription>
-              Rule lineage and trigger rows for the selected sample lead — transparent demo math, not production policy.
+              Rule lineage and trigger rows for the selected sample lead.
             </SheetDescription>
           </SheetHeader>
           {selected && <LogicEvidenceBody lead={selected} />}
@@ -1604,8 +1603,7 @@ export const FiDemoConsole: React.FC<FiDemoConsoleProps> = ({ data }) => {
       </Sheet>
 
       <p className="px-5 pb-4 text-[11px] text-muted-foreground border-t border-border/60 pt-3 mx-4 mb-4">
-        Synthetic RM workspace — not connected to live core banking or CRM. Portfolio aggregates and lead rows are
-        illustrative (disclaimer v{meta.disclaimerVersion}).
+        Sample workspace preview — demo data only, not connected to live customers or your systems.
       </p>
     </div>
     </TooltipProvider>

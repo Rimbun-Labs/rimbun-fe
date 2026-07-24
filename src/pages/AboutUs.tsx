@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const DOCS_API_URL = 'https://docs.rimbun.co/api';
+
 const AboutUs: React.FC = () => {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-16">
@@ -24,16 +26,15 @@ const AboutUs: React.FC = () => {
           <h2 className="text-2xl font-semibold mb-4">Our Mission</h2>
           <p className="text-lg text-muted-foreground mb-4">
             Rimbun Labs helps financial institutions and payment platforms turn payment
-            behavior into explainable product-activation opportunities, so teams can act
-            with clearer context and appropriate oversight.
+            behavior into explainable product-activation opportunities.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">What we offer</h2>
           <p className="mb-4">
-            Explainable product-activation opportunities from payment behavior,
-            mapped to your available non-credit products, ready for your teams to act on.
+            Rimbun detects opportunities from payment behavior and maps them to your
+            non-credit products, with explainable recommendations teams can act on.
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>
@@ -46,8 +47,16 @@ const AboutUs: React.FC = () => {
               <strong>Explainable recommendations</strong> with clear rationale
             </li>
             <li>
-              <strong>Delivery your way:</strong> API into CRM, push, or in-app;
-              a Rimbun workspace to review the book and customers; or both
+              <strong>Client workspace</strong> to review the book, customers, and
+              recommended actions
+            </li>
+            <li>
+              <strong>API</strong> to embed the same intelligence in CRM, push,
+              in-app, and other channels (
+              <a href={DOCS_API_URL} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                docs.rimbun.co/api
+              </a>
+              )
             </li>
             <li>
               <strong>Improvement over time</strong> from the outcomes you share back
@@ -64,12 +73,8 @@ const AboutUs: React.FC = () => {
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li>
-              <strong>Flexible delivery:</strong> Integrate into existing systems, use
-              the Rimbun workspace, or combine both
-            </li>
-            <li>
-              <strong>Explainability:</strong> Recommendations include rationale so
-              teams can review before acting
+              <strong>Explainability:</strong> Recommendations include rationale your
+              teams can use
             </li>
             <li>
               <strong>Privacy-aware:</strong> Minimize unnecessary PII and use
@@ -77,7 +82,7 @@ const AboutUs: React.FC = () => {
             </li>
             <li>
               <strong>Non-credit focus:</strong> Activation for available non-credit
-              products, not credit eligibility or repayment scoring
+              products
             </li>
           </ul>
         </section>
@@ -115,27 +120,17 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Important notice</h2>
-          <div className="bg-muted/50 border-l-4 border-border p-4 my-4">
-            <p className="font-semibold text-foreground mb-2">Decision support for partners</p>
-            <p className="text-muted-foreground">
-              Rimbun provides analytical recommendations to client institutions. It does
-              not replace regulated judgment, underwriting, or customer-facing advice
-              issued by the client. Clients retain control over how recommendations are
-              reviewed, delivered, and acted on.
-            </p>
-          </div>
-        </section>
-
-        <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Get started</h2>
           <p className="mb-4">
-            If you represent a financial institution or payment platform and want to
-            explore how Rimbun fits your workflows,{" "}
+            Explore the{" "}
+            <Link to="/clients" className="text-primary hover:underline">
+              clients
+            </Link>{" "}
+            page,{" "}
             <Link to="/contact" className="text-primary hover:underline">
               contact us
-            </Link>{" "}
-            or email{" "}
+            </Link>
+            , or email{" "}
             <a href="mailto:team@rimbun.co" className="text-primary hover:underline">
               team@rimbun.co
             </a>

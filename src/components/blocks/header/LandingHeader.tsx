@@ -66,7 +66,9 @@ export const LandingHeader = () => {
                   <span className="font-bold text-xl text-foreground">
                     Rimbun
                   </span>
-                  <span className="text-xs text-muted-foreground -mt-1">Financial Intelligence Signals Platform</span>
+                  <span className="text-xs text-muted-foreground -mt-1">
+                    Product-activation opportunities from payment behavior
+                  </span>
                 </div>
               </Link>
             </motion.div>

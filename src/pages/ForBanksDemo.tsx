@@ -8,7 +8,7 @@ import { FiDemoConsole, FiDemoDisclaimerBanner } from "@/components/blocks/fi-de
 import { fiDemoFixture } from "@/fixtures/fi-demo/data";
 
 /**
- * Public synthetic RM / “actionable lead” demo — fixtures only, no API calls.
+ * Public client workspace preview — sample data only, no API calls.
  */
 export default function ForBanksDemo() {
   return (
@@ -22,18 +22,18 @@ export default function ForBanksDemo() {
             <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 text-muted-foreground">
               <Link to="/clients">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to For Financial Institutions
+                Back to Clients
               </Link>
             </Button>
           </div>
 
           <div className="space-y-2 max-w-3xl">
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-              RM workspace preview
+              Client workspace preview
             </h1>
             <p className="text-muted-foreground text-lg">
-              Start with a portfolio breakdown (archetypes, pulse mix, product hints), then drill into sample leads —
-              synthetic “who to call next” flow for design partners (fixtures only).
+              Start with a portfolio overview, then open sample customer leads to explore
+              recommended actions and supporting context.
             </p>
           </div>
 

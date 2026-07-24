@@ -1,120 +1,119 @@
 /**
- * Short hover explanations for the public FI RM demo — aligned with fixture copy, not production policy.
+ * Short hover explanations for the public client workspace preview.
  */
 
 import type { FiDemoBookPulse, FiDemoPulse } from "@/fixtures/fi-demo/types";
 
 export const fiDemoHelp = {
   pulseImminentRisk:
-    "Imminent risk: modeled signals suggest tightening cashflow or early distress. Queue for proactive outreach (e.g. restructuring) before conditions worsen. Stronger urgency than Watch — not a prediction of default.",
+    "Imminent risk: modeled signals suggest tightening cashflow or early distress. Queue for proactive outreach before conditions worsen. Stronger urgency than Watch.",
   pulseHighValueUpsell:
-    "High-value upsell: modeled fit for a structured revenue or relationship expansion conversation (e.g. life-stage lending). Priority for origination-style outreach — not a guarantee of take-up.",
+    "High-value upsell: modeled fit for a structured revenue or relationship expansion conversation. Priority for origination-style outreach.",
   pulseWatch:
-    "Watch: spend or behavior is elevated or interesting — worth monitoring or a light-touch / cross-sell angle. Lower urgency than Imminent risk; not an emergency flag.",
+    "Watch: spend or behavior is elevated or interesting — worth monitoring or a light-touch / cross-sell angle. Lower urgency than Imminent risk.",
   pulseBookNeutral:
-    "No active queue pulse: customers not currently tagged with upsell, risk, or watch for priority-queue purposes — typical “run the book” majority.",
+    "No active queue pulse: customers not currently tagged with upsell, risk, or watch for priority-queue purposes — typical run-the-book majority.",
 
   kpiCustomersInBook:
-    "Synthetic count of relationships attributed to this RM in the demo. Not a live core-banking total.",
+    "Count of relationships attributed to this book in the preview.",
   kpiWithModeledSignals:
-    "Customers with enough history in the story for clustering or scoring. Smaller than “in book” because not everyone has usable signals.",
+    "Customers with enough history for clustering or scoring. Smaller than “in book” because not everyone has usable signals.",
   kpiQueueDepth:
-    "How many customers sit in the modeled priority queue (outreach / review ordering) in this scenario — broader than the sample leads on screen.",
+    "How many customers sit in the modeled priority queue in this scenario — broader than the sample leads on screen.",
   kpiAvgPropensity:
-    "Book-wide average of modeled propensity (0–1) for “next best action” fit. Fixture number for the synthetic book — not recalculated from the three sample leads.",
+    "Book-wide average of modeled propensity (0–1) for next-best-action fit.",
   kpiLiquidityStress:
-    "Approximate count of customers with a liquidity stress pattern in the narrative (e.g. burn vs. baseline). Illustrative, not a regulatory metric.",
+    "Approximate count of customers with a liquidity stress pattern in the narrative (for example burn vs baseline).",
 
   sectionArchetypeMix:
-    "Segment labels (e.g. life stage + spend style) for campaigns and talk tracks. Percent = share of this synthetic book; counts are illustrative.",
+    "Segment labels (for example life stage + spend style) for campaigns and talk tracks. Percent = share of this book.",
   sectionPriorityPulseBook:
     "Where the modeled queue is focusing: upsell opportunity, early risk, watch, or no active pulse. Book-level mix — not the same as one customer’s pulse badge.",
   sectionProductHints:
     "Themes for proposition design — which archetypes and angles to bundle. Open jumps to a sample lead that illustrates the story.",
 
   todaysOutreach:
-    "Ranked triage list for this demo. Priority uses propensity × balance in fixtures. Select a row to load detail on the right.",
+    "Ranked triage list for this preview. Priority uses propensity × balance. Select a row to load detail on the right.",
   engagementContext:
     "Detail column for the selected customer: working strip, decision support, liquidity, timeline, and category table.",
-  /** Lead workspace tab — combined with engagement for one tooltip on the column header */
   engagementAndLeadWorkspace:
-    "Lead workspace tab: triage list plus this detail column for one selected customer — working strip, decision support, liquidity, timeline, and category activity (fixtures only).",
+    "Lead workspace tab: triage list plus this detail column for one selected customer — working strip, decision support, liquidity, timeline, and category activity.",
   workingOn:
-    "Who you are focused on for this demo session — pseudonym, archetype, pulse, and suggested next step.",
+    "Who you are focused on for this session — name, archetype, pulse, and suggested next step.",
 
   decisionSupportTitle:
-    "Synthetic routing narrative: how behavior might change review priority or file ordering. Not credit approval — production merges bureau, application, and policy.",
+    "How behavior might change review priority or file ordering in this preview.",
   reviewTier:
-    "Hint for where the file lands in process (standard vs. more diligence vs. priority review). Routing and attention, not an approve/deny outcome.",
+    "Hint for where the file lands in process (standard vs more diligence vs priority review). Routing and attention.",
   reasonCodes:
-    "Short tags for audit-friendly storytelling — why behavior mattered for routing in this demo. Illustrative codes, not bureau reason codes.",
+    "Short tags for why behavior mattered for routing in this preview.",
 
   nextTenMinutes:
-    "Placeholder RM actions for the conversation — buttons do not call core banking in this mock.",
+    "Suggested actions for the conversation in this preview.",
   healthMomentum:
-    "Synthetic 0–100 behavioral momentum index (demo): summarizes how supportive cashflow and spend-behavior patterns look over ~six months as a trajectory — not a credit score, bureau outcome, or medical meaning. Bar height = index that month (higher ≈ more supportive/opportunity-rich patterns in the story; lower ≈ more pressured/less supportive). Bar color = month-over-month change (green up, amber down, gray flat); first month is the window baseline. Net trend: rising = momentum strengthening (often expansion/cross-sell when other signals agree); falling = momentum weakening (often earlier help/restructure when other signals agree — not automatic distress); flat = no strong drift — use pulse, liquidity, and archetype next. Demo illustration only.",
+    "0–100 behavioral momentum index: summarizes how supportive cashflow and spend-behavior patterns look over about six months as a trajectory. Bar height = index that month; bar color = month-over-month change. Net trend rising, falling, or flat guides expansion vs help conversations alongside pulse, liquidity, and archetype.",
   liquidityMeter:
-    "Illustrative runway and burn vs. 6-month average — demo math to trigger a liquidity conversation, not a certified forecast.",
+    "Runway and burn vs 6-month average — used to trigger a liquidity conversation in this preview.",
   behaviorTimeline:
-    "Themed markers over time for talk tracks — illustrative spend clusters, not verified life events.",
+    "Themed markers over time for talk tracks — spend clusters in this preview.",
   recentCategoryActivity:
-    "Recent debits by category vs. a 6-month average for that category. Anomaly uses the demo rule: amount more than twice the category average.",
+    "Recent debits by category vs a 6-month average for that category. Anomaly when amount is more than twice the category average.",
 
-  tableCategory: "Merchant category bucket used for comparison (e.g. Furniture, Travel).",
-  tableAmount: "Transaction amount in the demo fixture.",
+  tableCategory: "Merchant category bucket used for comparison (for example Furniture, Travel).",
+  tableAmount: "Transaction amount in this preview.",
   tableAvg6m:
-    "Illustrative typical spend in this category over six months — baseline for the anomaly flag.",
-  tableDaysAgo: "How long ago this transaction appeared in the synthetic feed.",
+    "Typical spend in this category over six months — baseline for the anomaly flag.",
+  tableDaysAgo: "How long ago this transaction appeared in the feed.",
   tableAnomaly:
-    "Flagged when amount exceeds twice the category’s 6-month average — simple demo rule.",
+    "Flagged when amount exceeds twice the category’s 6-month average.",
   tableMerchantHint:
-    "Illustrative merchant string used in logic trace to show which transaction cluster triggered the signal.",
+    "Merchant string used in logic trace to show which transaction cluster triggered the signal.",
 
   dtPropensity:
-    "0–1 score for strength of the modeled next-action story (e.g. upsell vs. restructure). Higher means stronger narrative fit, not a guaranteed sale.",
+    "0–1 score for strength of the modeled next-action story (for example upsell vs restructure). Higher means stronger narrative fit.",
   dtFacilityBalance:
-    "Rough exposure used to size importance of the conversation in the demo.",
+    "Rough exposure used to size importance of the conversation in this preview.",
   dtPriorityScore:
-    "Propensity × loan balance so larger relationships rank higher in the triage list — queue ordering, not credit quality.",
+    "Propensity × loan balance so larger relationships rank higher in the triage list — queue ordering.",
   dtMerchantCluster:
-    "Opaque ID grouping similar merchants or spend themes — features for models; not a merchant name.",
+    "ID grouping similar merchants or spend themes — features for models; not a merchant name.",
   dtLiquidityDemo:
-    "Runway and burn snapshot from fixtures — supports the liquidity meter and stress flag in the demo.",
+    "Runway and burn snapshot — supports the liquidity meter and stress flag in this preview.",
   supportingIndicators:
-    "Deterministic-style cues describing why this archetype or intent is inferred from transaction behavior.",
+    "Cues describing why this archetype or intent is inferred from transaction behavior.",
   actionPayload:
-    "Decision-support recommendation that translates pattern detection into the RM's next best strategy.",
+    "Recommendation that translates pattern detection into the next best strategy.",
   productRecommendation:
     "Banking product fit (primary lane): cards, loans, deposits, and servicing options with alternatives, confidence band, and provenance chips.",
   wealthRecommendation:
-    "Investment suitability (secondary lane): named fund or plan ideas only when relationship readiness allows — after core banking fit. Not a trade instruction; subject to risk profiling and bank policy.",
+    "Investment suitability (secondary lane): named fund or plan ideas when relationship readiness allows — after core banking fit.",
   wealthIneligible:
-    "Wealth outreach is intentionally paused while stabilisation signals are active — same holistic policy as suppressing aggressive cross-sell.",
+    "Wealth outreach is paused while stabilisation signals are active.",
   recommendationConfidence:
-    "How strongly available signals support the proposed product-fit story in this demo (high/medium/low), not an approval probability.",
+    "How strongly available signals support the proposed product-fit story in this preview (high/medium/low).",
   recommendationSignals:
     "Count of matched indicators out of indicators evaluated in this recommendation routine.",
   recommendationProvenance:
-    "Data-source hints for the recommendation narrative (e.g., statement-derived, trend, cluster).",
+    "Data-source hints for the recommendation narrative (for example statement-derived, trend, cluster).",
   logicEvidence:
-    "Transparency drawer with rule lineage and trigger transactions. Shows auditable path from signal to action.",
+    "Transparency drawer with rule lineage and trigger transactions. Shows the path from signal to action.",
 
   archetypeBadge:
-    "Segment label summarizing stable patterns (life stage + spend). Useful for campaigns; not a value judgment.",
+    "Segment label summarizing stable patterns (life stage + spend). Useful for campaigns.",
 
   bookShare:
-    "Estimated share of this synthetic book aligned with the theme — for proposition planning, not pricing.",
+    "Estimated share of this book aligned with the theme — for proposition planning.",
   jumpToLead:
-    "Opens a sample customer row that illustrates this theme, if one exists in the fixture.",
+    "Opens a sample customer row that illustrates this theme, if one exists.",
 
-  portfolioOverviewTab: "Aggregated synthetic book: KPIs, segment mix, pulse mix, and product themes.",
+  portfolioOverviewTab: "Aggregated book: KPIs, segment mix, pulse mix, and product themes.",
 
-  callScript: "Three scripted bullets to open the conversation — synthetic copy only.",
+  callScript: "Three scripted bullets to open the conversation.",
   customerSnapshot:
-    "Side panel dossier for the selected lead — same fixtures as the main column, consolidated for storytelling.",
+    "Side panel for the selected lead — same data as the main column, consolidated for review.",
 
   privacyMode:
-    "Blurs identifiers and sensitive numbers while keeping behavioral labels visible for demo flow.",
+    "Blurs identifiers and sensitive numbers while keeping behavioral labels visible.",
 } as const;
 
 export function fiDemoPulseHelpText(pulse: FiDemoPulse): string {

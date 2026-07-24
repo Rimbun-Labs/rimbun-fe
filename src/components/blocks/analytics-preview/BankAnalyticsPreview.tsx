@@ -146,7 +146,7 @@ export const BankAnalyticsPreview: React.FC = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Context, action &amp; fit surfaces</CardTitle>
               <CardDescription className="text-xs">
-                Preview labels aligned with RM workspace terms
+                Preview labels aligned with workspace terms
               </CardDescription>
             </CardHeader>
             <CardContent>
