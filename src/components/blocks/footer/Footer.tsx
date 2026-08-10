@@ -46,12 +46,12 @@ export const Footer = ({ className }: FooterProps) => {
                 <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                   Rimbun
                 </span>
-                <span className="text-xs text-muted-foreground -mt-1">Financial Intelligence &amp; Intent Signals</span>
+                <span className="text-xs text-muted-foreground -mt-1">Behavioral risk &amp; growth signals</span>
               </div>
             </Link>
             
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Turn customer financial activity into confidence-scored intent signals and partner-ready outputs—with optional learning tools where they help.
+              Rimbun helps Southeast Asian banks turn transaction data into behavioral risk and growth signals for early warning and better cross-sell — without replacing core systems.
             </p>
           </motion.div>
 

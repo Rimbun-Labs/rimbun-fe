@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Sparkles, ArrowRight, TrendingUp, Brain, Target, CheckCircle } from "lucide-react";
+import { Building2, ArrowRight, TrendingUp, Brain, Target, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -13,21 +13,21 @@ const stages = [
   {
     id: 1,
     title: "Ingest",
-    description: "Connect customer activity streams and ingest transaction-level events from trusted sources.",
+    description: "Connect approved transaction and account-activity feeds from your existing systems.",
     icon: Brain,
     color: "blue" as const
   },
   {
     id: 2,
-    title: "Normalize + Signal",
-    description: "Standardize events and detect confidence-scored patterns such as spend rhythm and merchant shifts.",
+    title: "Detect",
+    description: "Normalize events and surface explainable behavioral risk and opportunity signals.",
     icon: TrendingUp,
     color: "green" as const
   },
   {
     id: 3,
-    title: "Action",
-    description: "Deliver partner-ready outputs and recommendations for human-reviewed decisions in apps and operations.",
+    title: "Act",
+    description: "Deliver next-best actions and product-fit recommendations for human-reviewed workflows.",
     icon: Target,
     color: "purple" as const
   }
@@ -36,11 +36,10 @@ const stages = [
 export const HeroSection = ({ className }: HeroSectionProps) => {
   const [currentStage, setCurrentStage] = useState(0);
 
-  // Auto-advance stages - slowed down for better user experience
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentStage((prev) => (prev + 1) % stages.length);
-    }, 6000); // Increased from 4000ms to 6000ms for better readability
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,7 +47,6 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
     <section className={cn("py-20 md:py-28 relative", className)}>
       <div className="container px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Main Content */}
           <div className="flex flex-col justify-center space-y-10">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -56,18 +54,16 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="space-y-8"
             >
-              {/* Badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
                 className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 backdrop-blur-sm"
               >
-                <Sparkles className="h-4 w-4" />
-                <span>Financial Intelligence + Intent Signals</span>
+                <Building2 className="h-4 w-4" />
+                <span>For Southeast Asian banks &amp; financial institutions</span>
               </motion.div>
 
-              {/* Main Heading */}
               <div className="space-y-6">
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
@@ -75,7 +71,7 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.3, duration: 0.8 }}
                   className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl/none text-foreground"
                 >
-                  Convert financial activity into trusted intent signals
+                  Turn bank transaction data into behavioral risk and growth signals
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 30 }}
@@ -83,12 +79,11 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                   transition={{ delay: 0.4, duration: 0.8 }}
                   className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed"
                 >
-                  Move from fragmented events to explainable, confidence-scored insights that indicate customer needs and support responsible human review.
+                  Rimbun helps risk and commercial teams see early behavioral drift and better cross-sell opportunities from the data you already hold — without replacing your core banking stack.
                 </motion.p>
               </div>
             </motion.div>
 
-            {/* Interactive Stages */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -149,14 +144,12 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
               </div>
             </motion.div>
             
-            {/* Button Group */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
               className="flex flex-col gap-4 min-[400px]:flex-row"
             >
-              {/* Primary CTA - Demo / integration conversation */}
               <Button 
                 asChild 
                 size="lg"
@@ -170,16 +163,15 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
                 </Link>
               </Button>
               
-              {/* Secondary CTA - explore intelligence views */}
               <Button 
                 asChild 
                 variant="outline" 
                 size="lg"
                 className="group border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent"
               >
-                <Link to="/explore">
+                <Link to="/for-banks">
                   <span className="flex items-center">
-                    Explore Insights
+                    See how it works for banks
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
@@ -191,4 +183,4 @@ export const HeroSection = ({ className }: HeroSectionProps) => {
       </div>
     </section>
   );
-}; 
+};

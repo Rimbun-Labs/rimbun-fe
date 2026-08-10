@@ -62,7 +62,7 @@ export default function ForBanks() {
               transition={{ duration: 0.5, delay: 0.05 }}
               className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-foreground"
             >
-              Customer Intelligence for Financial Institutions
+              Behavioral risk and growth intelligence for banks
             </motion.h1>
 
             <motion.p
@@ -71,8 +71,8 @@ export default function ForBanks() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Detect trajectory, understand context, and drive next-best actions for partner teams—risk, engagement,
-              servicing, and suitable product-fit recommendations where relevant.
+              Detect trajectory early, explain customer context, and drive next-best actions for risk, servicing, and
+              suitable product-fit — from transaction behavior you already have.
             </motion.p>
 
             <motion.div
