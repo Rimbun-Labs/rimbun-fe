@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Lock, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import { authService } from '@/lib/auth/authService';
-import { toast } from 'sonner';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
+import { authService } from "@/lib/auth/authService";
+import { LandingHeader } from "@/components/blocks/header/LandingHeader";
+import { Footer } from "@/components/blocks/footer";
+
+const fieldClass =
+  "h-12 rounded-xl border-border bg-card text-[15px] shadow-none focus-visible:ring-1 focus-visible:ring-foreground/20 focus-visible:ring-offset-0";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const code = searchParams.get('oobCode');
-  
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const code = searchParams.get("oobCode");
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (!code) {
-      setError('Invalid reset link. Please request a new password reset.');
+      setError("This reset link is invalid or has expired.");
     }
   }, [code]);
 
@@ -30,172 +32,153 @@ const ResetPassword = () => {
     e.preventDefault();
     setError(null);
 
-    // Validation
     if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match.");
       return;
     }
 
     if (!code) {
-      setError('Invalid reset code');
+      setError("This reset link is invalid or has expired.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const { error } = await authService.confirmPasswordReset(code, newPassword);
-      
-      if (error) {
-        setError(error.message || 'Failed to reset password. The link may have expired.');
+      const { error: resetError } = await authService.confirmPasswordReset(
+        code,
+        newPassword
+      );
+
+      if (resetError) {
+        setError(
+          resetError.message || "Could not reset the password. The link may have expired."
+        );
       } else {
         setIsSuccess(true);
-        toast.success('Password reset successful!');
-        
-        // Redirect to login after 2 seconds
         setTimeout(() => {
-          navigate('/login');
+          navigate("/login");
         }, 2000);
       }
-    } catch (error) {
-      setError('Failed to reset password. The link may have expired.');
+    } catch {
+      setError("Could not reset the password. The link may have expired.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:px-0">
-        <div className="lg:p-8">
-          <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-center mb-4">
-                  <div className="rounded-full bg-green-100 p-4">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                </div>
-                <CardTitle className="text-center">Password Reset Successful</CardTitle>
-                <CardDescription className="text-center">
-                  Your password has been reset successfully
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-center text-muted-foreground">
-                  You can now log in with your new password.
-                </p>
-                <Button className="w-full" onClick={() => navigate('/login')}>
-                  Go to Login
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:px-0">
-      <div className="lg:p-8">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-center mb-4">
-                <div className="rounded-full bg-primary/10 p-4">
-                  <Lock className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-              <CardTitle>Reset Password</CardTitle>
-              <CardDescription>
-                Enter your new password
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {error && !code && (
-                <div className="p-4 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
-              )}
+    <div className="homepage flex min-h-screen flex-col">
+      <LandingHeader />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && code && (
-                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
-                    <p className="text-sm text-destructive">{error}</p>
-                  </div>
-                )}
+      <main className="flex flex-1 flex-col items-center px-6 pt-28 pb-20 md:pt-36">
+        <div className="w-full max-w-[400px]">
+          {isSuccess ? (
+            <>
+              <h1 className="text-center text-[32px] font-semibold tracking-tight text-foreground md:text-[40px]">
+                Password updated
+              </h1>
+              <p className="mt-3 text-center text-[17px] leading-relaxed text-muted-foreground">
+                You can sign in with your new password.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="mt-10 inline-flex h-12 w-full items-center justify-center rounded-full bg-foreground text-[17px] font-medium text-background transition-opacity hover:opacity-85"
+              >
+                Sign in
+              </button>
+            </>
+          ) : (
+            <>
+              <h1 className="text-center text-[32px] font-semibold tracking-tight text-foreground md:text-[40px]">
+                Reset password
+              </h1>
+              <p className="mt-3 text-center text-[17px] leading-relaxed text-muted-foreground">
+                Choose a new password for your account.
+              </p>
 
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
+              {error ? (
+                <div className="mt-8 flex items-start gap-2 text-destructive">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p className="text-[15px]">{error}</p>
+                </div>
+              ) : null}
+
+              <form onSubmit={handleSubmit} className="mt-10 grid gap-5">
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="newPassword"
+                    className="text-[13px] font-medium text-muted-foreground"
+                  >
+                    New password
+                  </Label>
                   <Input
                     id="newPassword"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password"
+                    placeholder="At least 6 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isLoading}
+                    disabled={isLoading || !code}
                     required
+                    className={fieldClass}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters long
-                  </p>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="grid gap-2">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-[13px] font-medium text-muted-foreground"
+                  >
+                    Confirm password
+                  </Label>
                   <Input
                     id="confirmPassword"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Confirm new password"
+                    placeholder="Repeat password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isLoading}
+                    disabled={isLoading || !code}
                     required
+                    className={fieldClass}
                   />
                 </div>
-
-                <div className="flex items-center space-x-2">
+                <label className="flex items-center gap-2 text-[15px] text-muted-foreground">
                   <input
                     type="checkbox"
                     id="showPassword"
                     checked={showPassword}
                     onChange={(e) => setShowPassword(e.target.checked)}
-                    className="rounded border-gray-300"
+                    className="h-4 w-4 rounded border-border"
                   />
-                  <label htmlFor="showPassword" className="text-sm text-muted-foreground cursor-pointer">
-                    Show password
-                  </label>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading || !code}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Resetting Password...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="mr-2 h-4 w-4" />
-                      Reset Password
-                    </>
-                  )}
-                </Button>
+                  Show password
+                </label>
+                <button
+                  type="submit"
+                  disabled={isLoading || !code}
+                  className="mt-1 inline-flex h-12 w-full items-center justify-center rounded-full bg-foreground text-[17px] font-medium text-background transition-opacity hover:opacity-85 disabled:opacity-50"
+                >
+                  {isLoading ? "Updating…" : "Update password"}
+                </button>
               </form>
-            </CardContent>
-          </Card>
+
+              <p className="mt-8 text-center text-[15px] text-muted-foreground">
+                <Link to="/login" className="text-primary hover:underline">
+                  Back to sign in
+                </Link>
+              </p>
+            </>
+          )}
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };
 
 export default ResetPassword;
-

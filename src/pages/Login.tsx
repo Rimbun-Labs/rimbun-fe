@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/ui/icons";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AlertCircle } from "lucide-react";
 import { LandingHeader } from "@/components/blocks/header/LandingHeader";
@@ -21,7 +20,6 @@ const fieldClass =
 
 const Login = () => {
   const { signInWithEmail, signInWithGoogle, operator, loading: authLoading } = useAuth();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accessRestricted, setAccessRestricted] = useState(false);
@@ -75,11 +73,6 @@ const Login = () => {
       }
       const errorMessage = err instanceof Error ? err.message : "Failed to sign in";
       setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
-      });
     } finally {
       setIsLoading(false);
     }
@@ -101,11 +94,6 @@ const Login = () => {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to sign in with Google";
       setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
-      });
     } finally {
       setIsLoading(false);
     }

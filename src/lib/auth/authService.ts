@@ -17,6 +17,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { storageUtils } from '../storage/storageUtils';
+import { toAuthError } from './authErrorMessage';
 
 interface AuthResponse {
   user: FirebaseUser | null;
@@ -37,7 +38,7 @@ export const authService = {
       return { user, error: null };
     } catch (error) {
       console.error('Sign up error:', error);
-      return { user: null, error: error as Error };
+      return { user: null, error: toAuthError(error) };
     }
   },
 
@@ -48,7 +49,7 @@ export const authService = {
       return { user, error: null };
     } catch (error) {
       console.error('Sign in error:', error);
-      return { user: null, error: error as Error };
+      return { user: null, error: toAuthError(error) };
     }
   },
 
@@ -80,7 +81,7 @@ export const authService = {
         return { user: null, error: new Error('Authentication popup blocked by browser security. Please try again or use email/password login.') };
       }
       
-      return { user: null, error: error as Error };
+      return { user: null, error: toAuthError(error) };
     }
   },
 
@@ -94,7 +95,7 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Error during sign out:', error);
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -114,7 +115,7 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Email verification error:', error);
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -124,7 +125,7 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Resend verification email error:', error);
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -134,7 +135,7 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Password reset email error:', error);
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -144,7 +145,7 @@ export const authService = {
       return { error: null };
     } catch (error) {
       console.error('Password reset confirmation error:', error);
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -157,21 +158,9 @@ export const authService = {
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Re-authentication error:', error);
-      
-      // Provide user-friendly error messages
-      if (error.code === 'auth/wrong-password') {
-        return { error: new Error('Current password is incorrect') };
-      } else if (error.code === 'auth/user-mismatch') {
-        return { error: new Error('User mismatch') };
-      } else if (error.code === 'auth/user-not-found') {
-        return { error: new Error('User not found') };
-      } else if (error.code === 'auth/invalid-credential') {
-        return { error: new Error('Invalid credentials') };
-      }
-      
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   },
 
@@ -184,17 +173,9 @@ export const authService = {
 
       await firebaseUpdatePassword(user, newPassword);
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Update password error:', error);
-      
-      // Provide user-friendly error messages
-      if (error.code === 'auth/requires-recent-login') {
-        return { error: new Error('Please re-authenticate to change your password') };
-      } else if (error.code === 'auth/weak-password') {
-        return { error: new Error('Password is too weak. Please choose a stronger password') };
-      }
-      
-      return { error: error as Error };
+      return { error: toAuthError(error) };
     }
   }
 }; 
