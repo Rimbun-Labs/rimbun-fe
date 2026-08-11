@@ -43,11 +43,10 @@ const AboutUs: React.FC = () => {
                   Founder & CEO
                 </p>
                 <p className="mt-4 text-[17px] leading-relaxed text-muted-foreground">
-                  A corporate strategist and economist in the national government
-                  of Brunei. Adrian executed policies and strategic plans for the
-                  national SME body of Brunei. He has worked in the SEA tech
-                  ecosystem and has helped startups raise pre-A and Series A
-                  funding.
+                  Adrian comes from strategy and economics in Brunei’s
+                  government, including work with the national SME body, and from
+                  the SEA tech ecosystem. He brings that institutional and
+                  startup context to Rimbun.
                 </p>
               </div>
             </div>
@@ -66,10 +65,9 @@ const AboutUs: React.FC = () => {
                   Co-Founder & COO
                 </p>
                 <p className="mt-4 text-[17px] leading-relaxed text-muted-foreground">
-                  A product leader turned operator, Jaitun spent nearly a decade
-                  leading complex automotive programs like Ford&apos;s autonomous
-                  vehicle initiatives. He leverages this operational rigor to
-                  drive startup growth, recently expediting a €5M Series A raise.
+                  Jaitun is a product leader and operator. He spent nearly a
+                  decade shipping complex programs, including Ford’s autonomous
+                  vehicle work. He runs how Rimbun gets built and delivered.
                 </p>
               </div>
             </div>
