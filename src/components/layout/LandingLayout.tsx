@@ -9,7 +9,7 @@ import { Footer } from "@/components/blocks/footer";
  */
 const LandingLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="homepage min-h-screen flex flex-col">
       <LandingHeader />
       <main className="flex-1 pt-16">
         <Outlet />
