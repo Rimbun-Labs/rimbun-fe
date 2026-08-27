@@ -18,6 +18,10 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 // Lightweight pages - keep in main bundle (frequently used, small size)
 import ForBanks from "./pages/ForBanks";
+import ForBusinesses from "./pages/ForBusinesses";
+import ForBanksAudience from "./pages/ForBanksAudience";
+import ForInsurersLenders from "./pages/ForInsurersLenders";
+import PlatformHome from "./pages/PlatformHome";
 import ForIndividuals from "./pages/ForIndividuals";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -87,6 +91,11 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
       <Route path="/clients" element={<ForBanks />} />
+      {/* Trial IA — unified platform homepage + audience routes (not `/` yet) */}
+      <Route path="/platform" element={<PlatformHome />} />
+      <Route path="/banks" element={<ForBanksAudience />} />
+      <Route path="/businesses" element={<ForBusinesses />} />
+      <Route path="/insurers-lenders" element={<ForInsurersLenders />} />
       <Route
         path="/clients/demo"
         element={
