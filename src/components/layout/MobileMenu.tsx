@@ -7,7 +7,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
-  User,
   Compass,
   LogOut,
   Building2,
@@ -16,37 +15,60 @@ import {
   Package,
   UserCircle,
   Users,
+  Wallet,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Landmark,
+  CalendarDays,
+  Plug,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Logo } from '@/components/ui/Logo';
+import { APP_ROOT, appCustomers, businessWorkspaceBase } from '@/lib/appPaths';
 
 function customerIdFromPath(pathname: string): string | null {
-  const match = pathname.match(/^\/dashboard\/customers\/([^/]+)/);
+  const match = pathname.match(/^\/app\/customers\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
 const MobileMenu: React.FC = () => {
   const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
-  const { signOut } = useAuth();
+  const { signOut, operator } = useAuth();
   const { customers } = useSelectedCustomer();
   const { toast } = useToast();
   const location = useLocation();
+  const isBusinessTenant = operator?.tenantType === "business";
 
   const routeCustomerId = customerIdFromPath(location.pathname);
   const customerBase = routeCustomerId
-    ? `/dashboard/customers/${routeCustomerId}`
+    ? `${appCustomers()}/${routeCustomerId}`
     : null;
+
+  const routeCustomer = useMemo(() => {
+    if (!routeCustomerId) return null;
+    return customers.find((c) => c.customerId === routeCustomerId) ?? null;
+  }, [customers, routeCustomerId]);
+
+  const isBusinessCustomerView = routeCustomer?.customerType === "business";
+  const businessBase = isBusinessTenant
+    ? businessWorkspaceBase()
+    : isBusinessCustomerView && routeCustomerId
+      ? businessWorkspaceBase(routeCustomerId)
+      : null;
 
   const customerLabel = useMemo(() => {
     if (!routeCustomerId) return null;
-    const row = customers.find((c) => c.customerId === routeCustomerId);
-    return row?.displayName || row?.externalCustomerId || routeCustomerId;
-  }, [customers, routeCustomerId]);
+    return (
+      routeCustomer?.displayName ||
+      routeCustomer?.externalCustomerId ||
+      routeCustomerId
+    );
+  }, [routeCustomer, routeCustomerId]);
 
   const isActive = (path: string) =>
-    path === '/dashboard'
-      ? location.pathname === '/dashboard'
+    path === APP_ROOT
+      ? location.pathname === APP_ROOT
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const handleLogout = async () => {
@@ -84,108 +106,165 @@ const MobileMenu: React.FC = () => {
         </SheetHeader>
 
         <nav className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Dashboard
-            </h3>
-            <Link
-              to="/dashboard"
-              className={linkClass(location.pathname === '/dashboard')}
-              onClick={closeMobileMenu}
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              Home
-            </Link>
-            <Link
-              to="/dashboard/customers"
-              className={linkClass(
-                location.pathname === '/dashboard/customers'
-              )}
-              onClick={closeMobileMenu}
-            >
-              <Users className="h-4 w-4" />
-              Customers
-            </Link>
-          </div>
-
-          {customerBase ? (
+          {isBusinessTenant ? (
             <div className="space-y-2">
               <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-                Customer
+                Workspace
               </h3>
-              {customerLabel ? (
-                <p className="px-2 text-xs text-muted-foreground truncate">{customerLabel}</p>
-              ) : null}
-              <Link
-                to={customerBase}
-                className={linkClass(location.pathname === customerBase)}
-                onClick={closeMobileMenu}
-              >
-                <UserCircle className="h-4 w-4" />
-                Overview
+              <Link to={APP_ROOT} className={linkClass(location.pathname === APP_ROOT)} onClick={closeMobileMenu}>
+                <LayoutDashboard className="h-4 w-4" />
+                Home
               </Link>
-              <Link
-                to={`${customerBase}/assessment`}
-                className={linkClass(location.pathname.includes('/assessment'))}
-                onClick={closeMobileMenu}
-              >
-                <ClipboardList className="h-4 w-4" />
-                Assessment
+              <Link to={`${APP_ROOT}/accounts`} className={linkClass(isActive(`${APP_ROOT}/accounts`))} onClick={closeMobileMenu}>
+                <Wallet className="h-4 w-4" />
+                Accounts
               </Link>
-              <Link
-                to={`${customerBase}/products`}
-                className={linkClass(location.pathname.includes('/products'))}
-                onClick={closeMobileMenu}
-              >
-                <Package className="h-4 w-4" />
-                Products
+              <Link to={`${APP_ROOT}/money-in`} className={linkClass(isActive(`${APP_ROOT}/money-in`))} onClick={closeMobileMenu}>
+                <ArrowDownLeft className="h-4 w-4" />
+                Money in
+              </Link>
+              <Link to={`${APP_ROOT}/money-out`} className={linkClass(isActive(`${APP_ROOT}/money-out`))} onClick={closeMobileMenu}>
+                <ArrowUpRight className="h-4 w-4" />
+                Money out
+              </Link>
+              <Link to={`${APP_ROOT}/financing`} className={linkClass(isActive(`${APP_ROOT}/financing`))} onClick={closeMobileMenu}>
+                <Landmark className="h-4 w-4" />
+                Financing
+              </Link>
+              <Link to={`${APP_ROOT}/plans`} className={linkClass(isActive(`${APP_ROOT}/plans`))} onClick={closeMobileMenu}>
+                <CalendarDays className="h-4 w-4" />
+                Plans
+              </Link>
+              <Link to={`${APP_ROOT}/connections`} className={linkClass(isActive(`${APP_ROOT}/connections`))} onClick={closeMobileMenu}>
+                <Plug className="h-4 w-4" />
+                Connections
               </Link>
             </div>
-          ) : null}
+          ) : (
+            <>
+              <div className="space-y-2">
+                <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                  Workspace
+                </h3>
+                <Link
+                  to={APP_ROOT}
+                  className={linkClass(location.pathname === APP_ROOT)}
+                  onClick={closeMobileMenu}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Home
+                </Link>
+                <Link
+                  to={appCustomers()}
+                  className={linkClass(location.pathname === appCustomers())}
+                  onClick={closeMobileMenu}
+                >
+                  <Users className="h-4 w-4" />
+                  Customers
+                </Link>
+              </div>
 
-          <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Catalog
-            </h3>
-            <Link
-              to="/banking-products"
-              className={linkClass(isActive('/banking-products'))}
-              onClick={closeMobileMenu}
-            >
-              <Building2 className="h-4 w-4" />
-              Banking
-            </Link>
-            <Link
-              to="/investment-explorer"
-              className={linkClass(isActive('/investment-explorer'))}
-              onClick={closeMobileMenu}
-            >
-              <Compass className="h-4 w-4" />
-              Investments
-            </Link>
-            <Link
-              to="/insurance"
-              className={linkClass(isActive('/insurance'))}
-              onClick={closeMobileMenu}
-            >
-              <Shield className="h-4 w-4" />
-              Insurance
-            </Link>
-          </div>
+              {customerBase ? (
+                <div className="space-y-2">
+                  <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                    Customer
+                  </h3>
+                  {customerLabel ? (
+                    <p className="px-2 text-xs text-muted-foreground truncate">{customerLabel}</p>
+                  ) : null}
+                  {isBusinessCustomerView && businessBase ? (
+                    <>
+                      <Link to={businessBase} className={linkClass(location.pathname === businessBase)} onClick={closeMobileMenu}>
+                        <Building2 className="h-4 w-4" />
+                        Overview
+                      </Link>
+                      <Link to={`${businessBase}/accounts`} className={linkClass(isActive(`${businessBase}/accounts`))} onClick={closeMobileMenu}>
+                        <Wallet className="h-4 w-4" />
+                        Accounts
+                      </Link>
+                      <Link to={`${businessBase}/money-in`} className={linkClass(isActive(`${businessBase}/money-in`))} onClick={closeMobileMenu}>
+                        <ArrowDownLeft className="h-4 w-4" />
+                        Money in
+                      </Link>
+                      <Link to={`${businessBase}/money-out`} className={linkClass(isActive(`${businessBase}/money-out`))} onClick={closeMobileMenu}>
+                        <ArrowUpRight className="h-4 w-4" />
+                        Money out
+                      </Link>
+                      <Link to={`${businessBase}/financing`} className={linkClass(isActive(`${businessBase}/financing`))} onClick={closeMobileMenu}>
+                        <Landmark className="h-4 w-4" />
+                        Financing
+                      </Link>
+                      <Link to={`${businessBase}/plans`} className={linkClass(isActive(`${businessBase}/plans`))} onClick={closeMobileMenu}>
+                        <CalendarDays className="h-4 w-4" />
+                        Plans
+                      </Link>
+                      <Link to={`${customerBase}/products`} className={linkClass(location.pathname.includes('/products'))} onClick={closeMobileMenu}>
+                        <Package className="h-4 w-4" />
+                        Products
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to={customerBase}
+                        className={linkClass(location.pathname === customerBase)}
+                        onClick={closeMobileMenu}
+                      >
+                        <UserCircle className="h-4 w-4" />
+                        Overview
+                      </Link>
+                      <Link
+                        to={`${customerBase}/assessment`}
+                        className={linkClass(location.pathname.includes('/assessment'))}
+                        onClick={closeMobileMenu}
+                      >
+                        <ClipboardList className="h-4 w-4" />
+                        Assessment
+                      </Link>
+                      <Link
+                        to={`${customerBase}/products`}
+                        className={linkClass(location.pathname.includes('/products'))}
+                        onClick={closeMobileMenu}
+                      >
+                        <Package className="h-4 w-4" />
+                        Products
+                      </Link>
+                    </>
+                  )}
+                </div>
+              ) : null}
 
-          <div className="space-y-2">
-            <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-              Account
-            </h3>
-            <Link
-              to="/profile"
-              className={linkClass(isActive('/profile'))}
-              onClick={closeMobileMenu}
-            >
-              <User className="h-4 w-4" />
-              Account
-            </Link>
-          </div>
+              <div className="space-y-2">
+                <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                  Catalog
+                </h3>
+                <Link
+                  to="/banking-products"
+                  className={linkClass(isActive('/banking-products'))}
+                  onClick={closeMobileMenu}
+                >
+                  <Building2 className="h-4 w-4" />
+                  Banking
+                </Link>
+                <Link
+                  to="/investment-explorer"
+                  className={linkClass(isActive('/investment-explorer'))}
+                  onClick={closeMobileMenu}
+                >
+                  <Compass className="h-4 w-4" />
+                  Investments
+                </Link>
+                <Link
+                  to="/insurance"
+                  className={linkClass(isActive('/insurance'))}
+                  onClick={closeMobileMenu}
+                >
+                  <Shield className="h-4 w-4" />
+                  Insurance
+                </Link>
+              </div>
+            </>
+          )}
 
           <div className="space-y-2 pt-6 border-t">
             <Button

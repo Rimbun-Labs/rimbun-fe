@@ -28,10 +28,10 @@ export const CustomerPicker: React.FC<Props> = ({ className }) => {
   const onSelect = (id: string) => {
     setSelectedCustomerId(id);
     const match = location.pathname.match(
-      /^\/dashboard\/customers\/[^/]+(\/.*)?$/
+      /^\/app\/customers\/[^/]+(\/.*)?$/
     );
     if (match) {
-      navigate(`/dashboard/customers/${id}${match[1] ?? ""}`);
+      navigate(`/app/customers/${id}${match[1] ?? ""}`);
     }
   };
 

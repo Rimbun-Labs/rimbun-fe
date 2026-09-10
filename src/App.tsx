@@ -36,11 +36,48 @@ import Contact from "./pages/Contact";
 // Heavy pages - lazy load for code splitting
 const Assessment = lazy(() => import("./pages/Assessment"));
 const AssessmentResultsPage = lazy(() => import("./pages/AssessmentResults"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AppHome = lazy(() => import("./pages/AppHome"));
 const Customers = lazy(() => import("./pages/Customers"));
 const CustomerOverview = lazy(() => import("./pages/CustomerOverview"));
 const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
 const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
+const BusinessOverview = lazy(() => import("./pages/business/BusinessOverview"));
+const BusinessAccounts = lazy(() => import("./pages/business/BusinessAccounts"));
+const BusinessMoneyIn = lazy(() => import("./pages/business/BusinessMoneyIn"));
+const BusinessMoneyOut = lazy(() => import("./pages/business/BusinessMoneyOut"));
+const BusinessFinancing = lazy(() => import("./pages/business/BusinessFinancing"));
+const BusinessPlans = lazy(() => import("./pages/business/BusinessPlans"));
+const BusinessConnections = lazy(() => import("./pages/business/BusinessConnections"));
+const CustomerBusinessOverview = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessOverview,
+  }))
+);
+const CustomerBusinessAccounts = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessAccounts,
+  }))
+);
+const CustomerBusinessMoneyIn = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessMoneyIn,
+  }))
+);
+const CustomerBusinessMoneyOut = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessMoneyOut,
+  }))
+);
+const CustomerBusinessFinancing = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessFinancing,
+  }))
+);
+const CustomerBusinessPlans = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessPlans,
+  }))
+);
 const Learning = lazy(() => import("./pages/Learning"));
 const LearningFolderView = lazy(() => import("./pages/LearningFolderView"));
 const LearningLibraryDetail = lazy(() => import("./pages/LearningLibraryDetail"));
@@ -67,14 +104,14 @@ const PersonaDetail = lazy(() => import("./pages/PersonaDetail"));
 
 const queryClient = new QueryClient();
 
-// Entitled operators land on book Home.
+// Entitled operators land in the app zone; content varies by tenant type.
 const RootRedirect = () => {
   const { operator, loading } = useAuth();
   if (loading) {
     return <LoadingState variant="expanded" />;
   }
   if (operator) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
   return <ForBanks />;
 };
@@ -185,17 +222,65 @@ const AppRoutes = () => {
           } 
         />
         
-        {/* Dashboard — book Home + customer triage + customer workspace */}
-        <Route 
-          path="/dashboard" 
+        {/* App zone — product shell; home content is tenant-aware */}
+        <Route
+          path="/app"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
-              <Dashboard />
+              <AppHome />
             </Suspense>
           } 
         />
         <Route
-          path="/dashboard/customers"
+          path="/app/accounts"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessAccounts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/money-in"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessMoneyIn />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/money-out"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessMoneyOut />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/financing"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessFinancing />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/plans"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessPlans />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/connections"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessConnections />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <Customers />
@@ -203,7 +288,7 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/customers/:customerId"
+          path="/app/customers/:customerId"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerOverview />
@@ -211,7 +296,7 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/customers/:customerId/assessment"
+          path="/app/customers/:customerId/assessment"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerAssessment />
@@ -219,10 +304,58 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/dashboard/customers/:customerId/products"
+          path="/app/customers/:customerId/products"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerProducts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessOverview />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/accounts"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessAccounts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/money-in"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessMoneyIn />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/money-out"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessMoneyOut />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/financing"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessFinancing />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/plans"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessPlans />
             </Suspense>
           }
         />

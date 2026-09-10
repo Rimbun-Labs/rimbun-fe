@@ -306,6 +306,7 @@ export interface BankCustomerListItem {
   externalCustomerId?: string;
   email?: string;
   displayName?: string;
+  customerType?: "individual" | "business" | string;
   role?: string;
   queueBucket?: FiQueueBucket;
   queueReason?: string;
@@ -374,6 +375,18 @@ export interface FiQueueBucketsResponseMeta {
   timestamp?: string | number;
   version?: string;
   bookSummary?: FiQueueBookSummary;
+}
+
+/** FI portfolio of business customers ranked by open warnings/actions. */
+export interface BusinessPortfolioQueueItem {
+  customerId: string;
+  externalCustomerId: string;
+  displayName: string;
+  customerType: "business";
+  openWarningCount: number;
+  openActionCount: number;
+  topWarningTitle: string | null;
+  topWarningSeverity: string | null;
 }
 
 export interface FiDecisionExplainDto {

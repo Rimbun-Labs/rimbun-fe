@@ -50,7 +50,7 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session
           </CardContent>
           <CardFooter>
             <Button asChild variant="outline" className="w-full">
-              <Link to={session?.id ? `/dashboard/${session.id}` : '/dashboard'}>View Dashboard</Link>
+              <Link to="/app">View Dashboard</Link>
             </Button>
           </CardFooter>
         </Card>
@@ -74,7 +74,7 @@ const AssessmentComplete: React.FC<AssessmentCompleteProps> = ({ result, session
       
       <div className="flex justify-center gap-4">
         <Button asChild variant="default" size="lg">
-          <Link to="/dashboard">View Your Dashboard</Link>
+          <Link to="/app">View Your Dashboard</Link>
         </Button>
         <Button asChild variant="outline" size="lg">
           <Link to="/learning">Explore Learning Modules</Link>

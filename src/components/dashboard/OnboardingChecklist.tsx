@@ -45,14 +45,14 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
       label: 'Complete Assessment',
       description: 'Understand your risk profile and investment preferences',
       completed: assessmentComplete,
-      route: sessionId ? `/dashboard/${sessionId}` : '/dashboard',
+      route: sessionId ? `/app` : '/app',
     },
     {
       id: 'dashboard',
       label: 'Explore Your Dashboard',
       description: 'View your investment profile and portfolio insights',
       completed: hasVisitedDashboard && assessmentComplete,
-      route: sessionId ? `/dashboard/${sessionId}` : '/dashboard',
+      route: sessionId ? `/app` : '/app',
     },
     {
       id: 'financial-planning',

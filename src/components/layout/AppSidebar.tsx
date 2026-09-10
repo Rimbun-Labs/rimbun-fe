@@ -3,7 +3,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
-  User,
   ChevronDown,
   ChevronUp,
   Building2,
@@ -14,13 +13,21 @@ import {
   Package,
   UserCircle,
   Users,
+  Wallet,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Landmark,
+  CalendarDays,
+  Plug,
 } from 'lucide-react';
 import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
 } from '@/components/ui/collapsible';
+import { APP_ROOT, appCustomers, businessWorkspaceBase } from '@/lib/appPaths';
 
 const SidebarContent = React.forwardRef<
   HTMLDivElement,
@@ -43,29 +50,45 @@ const navActive = "bg-accent !text-accent-foreground";
 const childNav =
   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ml-4 border-l-2";
 
-/** Customer id only when path is under `/dashboard/customers/:id`. */
+/** Customer id only when path is under `/app/customers/:id`. */
 function customerIdFromPath(pathname: string): string | null {
-  const match = pathname.match(/^\/dashboard\/customers\/([^/]+)/);
+  const match = pathname.match(/^\/app\/customers\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
 const AppSidebar: React.FC = () => {
   const location = useLocation();
   const { customers } = useSelectedCustomer();
+  const { operator } = useAuth();
+  const isBusinessTenant = operator?.tenantType === "business";
 
   const routeCustomerId = customerIdFromPath(location.pathname);
   const customerBase = routeCustomerId
-    ? `/dashboard/customers/${routeCustomerId}`
+    ? `${appCustomers()}/${routeCustomerId}`
     : null;
+
+  const routeCustomer = useMemo(() => {
+    if (!routeCustomerId) return null;
+    return customers.find((c) => c.customerId === routeCustomerId) ?? null;
+  }, [customers, routeCustomerId]);
+
+  const isBusinessCustomerView = routeCustomer?.customerType === "business";
+  const businessBase = isBusinessTenant
+    ? businessWorkspaceBase()
+    : isBusinessCustomerView && routeCustomerId
+      ? businessWorkspaceBase(routeCustomerId)
+      : null;
 
   const customerLabel = useMemo(() => {
     if (!routeCustomerId) return null;
-    const row = customers.find((c) => c.customerId === routeCustomerId);
-    return row?.displayName || row?.externalCustomerId || routeCustomerId;
-  }, [customers, routeCustomerId]);
+    return (
+      routeCustomer?.displayName ||
+      routeCustomer?.externalCustomerId ||
+      routeCustomerId
+    );
+  }, [routeCustomer, routeCustomerId]);
 
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   useEffect(() => {
     const path = location.pathname;
@@ -74,8 +97,73 @@ const AppSidebar: React.FC = () => {
         path.includes('/investment-explorer') ||
         path.includes('/insurance')
     );
-    setIsAccountOpen(path.includes('/profile'));
   }, [location.pathname]);
+
+  if (isBusinessTenant) {
+    return (
+      <SidebarContent>
+        <nav className="space-y-4">
+          <div className="space-y-1">
+            <div className="px-3 py-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Workspace
+              </h3>
+            </div>
+            <NavLink
+              to={APP_ROOT}
+              end
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Home
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/accounts`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <Wallet className="h-4 w-4" />
+              Accounts
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/money-in`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <ArrowDownLeft className="h-4 w-4" />
+              Money in
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/money-out`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <ArrowUpRight className="h-4 w-4" />
+              Money out
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/financing`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <Landmark className="h-4 w-4" />
+              Financing
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/plans`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <CalendarDays className="h-4 w-4" />
+              Plans
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/connections`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <Plug className="h-4 w-4" />
+              Connections
+            </NavLink>
+          </div>
+        </nav>
+      </SidebarContent>
+    );
+  }
 
   return (
     <SidebarContent>
@@ -83,11 +171,11 @@ const AppSidebar: React.FC = () => {
         <div className="space-y-1">
           <div className="px-3 py-2">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Dashboard
+              Workspace
             </h3>
           </div>
           <NavLink
-            to="/dashboard"
+            to={APP_ROOT}
             end
             className={({ isActive }) =>
               cn(navInactive, isActive && navActive)
@@ -97,7 +185,7 @@ const AppSidebar: React.FC = () => {
             Home
           </NavLink>
           <NavLink
-            to="/dashboard/customers"
+            to={appCustomers()}
             end
             className={({ isActive }) =>
               cn(navInactive, isActive && navActive)
@@ -123,34 +211,105 @@ const AppSidebar: React.FC = () => {
                 </p>
               ) : null}
             </div>
-            <NavLink
-              to={customerBase}
-              end
-              className={({ isActive }) =>
-                cn(navInactive, isActive && navActive)
-              }
-            >
-              <UserCircle className="h-4 w-4" />
-              Overview
-            </NavLink>
-            <NavLink
-              to={`${customerBase}/assessment`}
-              className={({ isActive }) =>
-                cn(navInactive, isActive && navActive)
-              }
-            >
-              <ClipboardList className="h-4 w-4" />
-              Assessment
-            </NavLink>
-            <NavLink
-              to={`${customerBase}/products`}
-              className={({ isActive }) =>
-                cn(navInactive, isActive && navActive)
-              }
-            >
-              <Package className="h-4 w-4" />
-              Products
-            </NavLink>
+            {isBusinessCustomerView && businessBase ? (
+              <>
+                <NavLink
+                  to={businessBase}
+                  end
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Building2 className="h-4 w-4" />
+                  Overview
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/accounts`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Wallet className="h-4 w-4" />
+                  Accounts
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/money-in`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <ArrowDownLeft className="h-4 w-4" />
+                  Money in
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/money-out`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <ArrowUpRight className="h-4 w-4" />
+                  Money out
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/financing`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Landmark className="h-4 w-4" />
+                  Financing
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/plans`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Plans
+                </NavLink>
+                <NavLink
+                  to={`${customerBase}/products`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Package className="h-4 w-4" />
+                  Products
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to={customerBase}
+                  end
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <UserCircle className="h-4 w-4" />
+                  Overview
+                </NavLink>
+                <NavLink
+                  to={`${customerBase}/assessment`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Assessment
+                </NavLink>
+                <NavLink
+                  to={`${customerBase}/products`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Package className="h-4 w-4" />
+                  Products
+                </NavLink>
+              </>
+            )}
           </div>
         ) : null}
 
@@ -214,38 +373,6 @@ const AppSidebar: React.FC = () => {
               >
                 <Shield className="h-4 w-4" />
                 Insurance
-              </NavLink>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-
-        <div className="space-y-1">
-          <Collapsible open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-            <CollapsibleTrigger className={cn(navInactive, "w-full justify-between")}>
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4" />
-                <span>Account</span>
-              </div>
-              {isAccountOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 mt-1">
-              <NavLink
-                to="/profile"
-                className={({ isActive }) =>
-                  cn(
-                    childNav,
-                    isActive
-                      ? "bg-accent text-accent-foreground border-primary"
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
-                  )
-                }
-              >
-                <User className="h-4 w-4" />
-                Account
               </NavLink>
             </CollapsibleContent>
           </Collapsible>

@@ -52,7 +52,7 @@ const EmailConfirmation = () => {
     if (auth.currentUser?.emailVerified) {
       toast.success('Email verified!');
     }
-    navigate('/dashboard');
+    navigate('/app');
   };
 
   return (

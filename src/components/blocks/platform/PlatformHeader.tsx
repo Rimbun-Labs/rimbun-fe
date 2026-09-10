@@ -95,7 +95,7 @@ export function PlatformHeader() {
           <div className="flex items-center gap-3">
             {operator ? (
               <Link
-                to="/dashboard"
+                to="/app"
                 className="hidden text-[13px] text-[#6b7280] hover:text-foreground sm:inline"
               >
                 Dashboard

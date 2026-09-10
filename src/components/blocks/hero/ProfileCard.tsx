@@ -80,7 +80,7 @@ export const ProfileCard = ({ session, isLoading }: ProfileCardProps) => {
                 isCompleted ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"
               )}
             >
-              <Link to={isCompleted ? `/dashboard/${session.id}` : "/assessment"}>
+              <Link to={isCompleted ? `/app` : "/assessment"}>
                 {isCompleted ? "View Full Profile" : "Take Assessment"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

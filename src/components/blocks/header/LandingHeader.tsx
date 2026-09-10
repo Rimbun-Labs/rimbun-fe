@@ -90,7 +90,7 @@ export const LandingHeader = () => {
 
             {operator ? (
               <Link
-                to="/dashboard"
+                to="/app"
                 className="hidden text-[13px] text-muted-foreground hover:text-foreground sm:inline"
               >
                 Dashboard
@@ -166,7 +166,7 @@ export const LandingHeader = () => {
               </a>
               {operator ? (
                 <Link
-                  to="/dashboard"
+                  to="/app"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="py-2 text-[15px] text-foreground"
                 >

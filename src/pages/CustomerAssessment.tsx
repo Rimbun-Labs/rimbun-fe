@@ -29,7 +29,7 @@ const CustomerAssessment: React.FC = () => {
         setLoading(true);
         setError(false);
         const response = await apiClient.get(
-          `/dashboard/customers/${customerId}/assessment`
+          `/app/customers/${customerId}/assessment`
         );
         const body = response.data;
         const data = body?.data !== undefined ? body.data : body;

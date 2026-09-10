@@ -18,6 +18,8 @@ export type OperatorSession = {
   tenantId: string;
   tenantName: string | null;
   tenantSlug: string | null;
+  /** bank | ewallet | business | lender | insurer | platform_internal */
+  tenantType: string;
   role: string;
   email?: string;
   uid?: string;
@@ -47,6 +49,7 @@ type MeResponse = {
   tenantId?: string;
   tenantName?: string | null;
   tenantSlug?: string | null;
+  tenantType?: string | null;
   role?: string;
   email?: string;
   uid?: string;
@@ -62,6 +65,7 @@ function toOperatorSession(data: MeResponse): OperatorSession | null {
     tenantId: data.tenantId,
     tenantName: data.tenantName ?? null,
     tenantSlug: data.tenantSlug ?? null,
+    tenantType: data.tenantType ?? "bank",
     role: data.role,
     email: data.email,
     uid: data.uid,

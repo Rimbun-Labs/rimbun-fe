@@ -13,6 +13,7 @@ export type TenantCustomerOption = {
   customerId: string;
   externalCustomerId: string;
   displayName: string;
+  customerType?: "individual" | "business" | string;
 };
 
 type SelectedCustomerContextValue = {
@@ -36,6 +37,7 @@ function normalizeCustomerRow(row: Record<string, unknown>): TenantCustomerOptio
     customerId,
     externalCustomerId: String(row.externalCustomerId ?? row.email ?? ""),
     displayName: String(row.displayName ?? row.externalCustomerId ?? customerId),
+    customerType: row.customerType ? String(row.customerType) : "individual",
   };
 }
 

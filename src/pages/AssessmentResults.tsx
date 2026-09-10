@@ -26,11 +26,11 @@ const AssessmentResults: React.FC = () => {
   };
 
   const handleGoToDashboard = () => {
-    navigate(sessionId ? `/dashboard/${sessionId}` : '/dashboard');
+    navigate('/app');
   };
 
   const handleStartLearning = () => {
-    navigate(sessionId ? `/dashboard/${sessionId}` : '/dashboard');
+    navigate('/app');
   };
 
   // Build "What this means" bullets and subtitle from score data

@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 type BankingProductsProps = {
   /**
-   * Customer-scoped products view (under `/dashboard/customers/:id/products`).
+   * Customer-scoped products view (under `/app/customers/:id/products`).
    * Catalog mode (`/banking-products`) is tenant inventory only.
    */
   workspaceMode?: boolean;

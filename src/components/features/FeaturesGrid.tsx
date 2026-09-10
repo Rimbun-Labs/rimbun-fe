@@ -52,7 +52,7 @@ const features: Feature[] = [
         <div className="h-2 bg-muted rounded w-2/3" />
       </div>
     ),
-    path: '/dashboard',
+    path: '/app',
     assessmentRequired: true,
   },
   {

@@ -43,7 +43,7 @@ const JourneyTracker: React.FC<JourneyTrackerProps> = ({ variant = 'compact', cl
       step: 0,
       title: 'Assessment',
       icon: BarChart,
-      route: session?.id ? `/dashboard/${session.id}` : '/dashboard',
+      route: session?.id ? `/app` : '/app',
     },
     {
       step: 1,

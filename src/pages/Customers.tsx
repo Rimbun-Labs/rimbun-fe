@@ -14,11 +14,16 @@ import {
 } from "@/components/ui/accordion";
 import { Users, RefreshCw, AlertCircle, CircleAlert } from "lucide-react";
 import type {
+  BusinessPortfolioQueueItem,
   FiQueueBucket,
   FiQueueBucketSummaryDto,
   FiQueueBookSummary,
 } from "@/lib/api/types/fiDecision";
 import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
+import { getBankCustomers, getBusinessPortfolioQueue } from "@/lib/api/fiDecisionApi";
+import { businessWorkspaceBase } from "@/lib/businessPaths";
+
+type CustomerTypeFilter = "all" | "individual" | "business";
 
 const queueBucketLabel: Record<FiQueueBucket, string> = {
   ACT_NOW: "Act now",
@@ -65,17 +70,55 @@ const Customers: React.FC = () => {
     customersLoading,
     customersError,
     refetchCustomers,
-    searchWalkInCustomers,
   } = useFiDecisionInsights();
 
   const [query, setQuery] = useState("");
   const [hideNeedsData, setHideNeedsData] = useState(false);
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<CustomerTypeFilter>("all");
+  const [businessQueue, setBusinessQueue] = useState<BusinessPortfolioQueueItem[]>([]);
+  const [businessQueueLoading, setBusinessQueueLoading] = useState(false);
+  const [businessQueueError, setBusinessQueueError] = useState<Error | null>(null);
   const [walkInInput, setWalkInInput] = useState("");
   const [walkInResults, setWalkInResults] = useState<
-    Array<{ customerId: string; displayName?: string; email?: string; externalCustomerId?: string }>
+    Array<{
+      customerId: string;
+      displayName?: string;
+      email?: string;
+      externalCustomerId?: string;
+      customerType?: string;
+    }>
   >([]);
   const [walkInLoading, setWalkInLoading] = useState(false);
   const walkInDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (customerTypeFilter !== "business") {
+      setBusinessQueue([]);
+      setBusinessQueueError(null);
+      return;
+    }
+    let cancelled = false;
+    setBusinessQueueLoading(true);
+    setBusinessQueueError(null);
+    void getBusinessPortfolioQueue(50, 0)
+      .then((rows) => {
+        if (!cancelled) setBusinessQueue(rows);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setBusinessQueueError(
+            err instanceof Error ? err : new Error("Failed to load business portfolio")
+          );
+          setBusinessQueue([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBusinessQueueLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [customerTypeFilter]);
 
   useEffect(() => {
     if (walkInDebounceRef.current) clearTimeout(walkInDebounceRef.current);
@@ -88,13 +131,16 @@ const Customers: React.FC = () => {
     setWalkInLoading(true);
     walkInDebounceRef.current = setTimeout(async () => {
       try {
-        const rows = await searchWalkInCustomers(cleaned);
+        const type =
+          customerTypeFilter === "all" ? undefined : customerTypeFilter;
+        const rows = await getBankCustomers(50, 0, cleaned, type);
         setWalkInResults(
           rows.map((r) => ({
             customerId: String(r.customerId ?? r.userId ?? ""),
             displayName: r.displayName,
             email: r.email,
             externalCustomerId: r.externalCustomerId,
+            customerType: r.customerType,
           }))
         );
       } catch {
@@ -106,7 +152,7 @@ const Customers: React.FC = () => {
     return () => {
       if (walkInDebounceRef.current) clearTimeout(walkInDebounceRef.current);
     };
-  }, [walkInInput, searchWalkInCustomers]);
+  }, [walkInInput, customerTypeFilter]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -127,6 +173,18 @@ const Customers: React.FC = () => {
     });
   }, [customers, query, hideNeedsData]);
 
+  const filteredBusiness = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return businessQueue.filter((c) => {
+      if (!q) return true;
+      const hay = [c.displayName, c.externalCustomerId, c.customerId]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [businessQueue, query]);
+
   const bucketGroups: BucketGroup[] = useMemo(() => {
     const map = new Map<BucketGroup["id"], FiQueueBucketSummaryDto[]>();
     for (const id of BUCKET_ORDER) map.set(id, []);
@@ -144,11 +202,19 @@ const Customers: React.FC = () => {
     })).filter((g) => g.rows.length > 0);
   }, [filtered]);
 
-  const openCustomer = (id: string) => {
+  const openCustomer = (id: string, customerType?: string) => {
     if (!id) return;
     setSelectedCustomerId(id);
-    navigate(`/dashboard/customers/${id}`);
+    if (customerType === "business" || customerTypeFilter === "business") {
+      navigate(businessWorkspaceBase(id));
+      return;
+    }
+    navigate(`/app/customers/${id}`);
   };
+
+  const showBusinessQueue = customerTypeFilter === "business";
+  const showIndividualQueue =
+    customerTypeFilter === "all" || customerTypeFilter === "individual";
 
   return (
     <PageContainer>
@@ -160,17 +226,50 @@ const Customers: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetchCustomers()}
-            disabled={customersLoading}
+            onClick={() => {
+              void refetchCustomers();
+              if (customerTypeFilter === "business") {
+                void getBusinessPortfolioQueue(50, 0)
+                  .then(setBusinessQueue)
+                  .catch(() => setBusinessQueue([]));
+              }
+            }}
+            disabled={customersLoading || businessQueueLoading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${customersLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${
+                customersLoading || businessQueueLoading ? "animate-spin" : ""
+              }`}
+            />
             Refresh
           </Button>
         }
       />
 
       <div className="mt-6 space-y-4">
-        {bookSummary ? <BookSummaryStrip summary={bookSummary} /> : null}
+        {showIndividualQueue && bookSummary ? (
+          <BookSummaryStrip summary={bookSummary} />
+        ) : null}
+
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["all", "All types"],
+              ["individual", "Individuals"],
+              ["business", "Businesses"],
+            ] as const
+          ).map(([value, label]) => (
+            <Button
+              key={value}
+              type="button"
+              size="sm"
+              variant={customerTypeFilter === value ? "secondary" : "outline"}
+              onClick={() => setCustomerTypeFilter(value)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
 
         <div className="rounded-md border p-3 space-y-2">
           <p className="text-xs font-medium text-muted-foreground">
@@ -192,11 +291,14 @@ const Customers: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="h-auto w-full justify-start px-2 py-1.5 text-left text-xs"
-                    onClick={() => openCustomer(row.customerId)}
+                    onClick={() => openCustomer(row.customerId, row.customerType)}
                   >
                     <span className="font-medium">
                       {row.displayName || row.externalCustomerId || row.customerId}
                     </span>
+                    {row.customerType ? (
+                      <span className="ml-1 text-muted-foreground">· {row.customerType}</span>
+                    ) : null}
                     {row.email ? (
                       <span className="ml-1 text-muted-foreground">· {row.email}</span>
                     ) : null}
@@ -214,93 +316,145 @@ const Customers: React.FC = () => {
             placeholder="Filter this queue page"
             className="h-9 flex-1 rounded-md border bg-background px-3 text-sm"
           />
-          <Button
-            type="button"
-            variant={hideNeedsData ? "secondary" : "outline"}
-            onClick={() => setHideNeedsData((v) => !v)}
-            className="h-9"
-          >
-            {hideNeedsData ? "Showing actionable only" : "Hide Needs data"}
-          </Button>
+          {showIndividualQueue ? (
+            <Button
+              type="button"
+              variant={hideNeedsData ? "secondary" : "outline"}
+              onClick={() => setHideNeedsData((v) => !v)}
+              className="h-9"
+            >
+              {hideNeedsData ? "Showing actionable only" : "Hide Needs data"}
+            </Button>
+          ) : null}
         </div>
 
-        {customersError ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Unable to load queue</AlertTitle>
-            <AlertDescription>
-              The customer queue could not be loaded. Please try again.
-            </AlertDescription>
-          </Alert>
+        {showBusinessQueue ? (
+          <>
+            {businessQueueError ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Unable to load business portfolio</AlertTitle>
+                <AlertDescription>
+                  Business warnings/actions could not be loaded. Please try again.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {businessQueueLoading ? (
+              <Skeleton className="h-40 w-full" />
+            ) : filteredBusiness.length === 0 ? (
+              <Alert>
+                <CircleAlert className="h-4 w-4" />
+                <AlertTitle>No business customers</AlertTitle>
+                <AlertDescription>
+                  No business customers match this view yet.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <ul className="space-y-2">
+                {filteredBusiness.map((row) => (
+                  <li key={row.customerId}>
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-md border px-3 py-3 text-left hover:bg-accent"
+                      onClick={() => openCustomer(row.customerId, "business")}
+                    >
+                      <div>
+                        <p className="font-medium">
+                          {row.displayName || row.externalCustomerId || row.customerId}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {row.openWarningCount} open warning
+                          {row.openWarningCount === 1 ? "" : "s"} · {row.openActionCount}{" "}
+                          open action{row.openActionCount === 1 ? "" : "s"}
+                          {row.topWarningTitle ? ` · ${row.topWarningTitle}` : ""}
+                        </p>
+                      </div>
+                      <Badge variant="outline">
+                        {row.openWarningCount > 0 ? "Needs attention" : "Stable"}
+                      </Badge>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         ) : null}
 
-        {customersLoading ? (
-          <Skeleton className="h-40 w-full" />
-        ) : customers.length === 0 ? (
-          <Alert>
-            <CircleAlert className="h-4 w-4" />
-            <AlertTitle>No customers in queue</AlertTitle>
-            <AlertDescription>
-              No customers are available yet. Refresh after customers have been added.
-            </AlertDescription>
-          </Alert>
-        ) : filtered.length === 0 ? (
-          <Alert>
-            <CircleAlert className="h-4 w-4" />
-            <AlertTitle>No matches</AlertTitle>
-            <AlertDescription>Try clearing filters or search.</AlertDescription>
-          </Alert>
-        ) : (
-          <Accordion
-            type="multiple"
-            defaultValue={bucketGroups.slice(0, 2).map((g) => g.id)}
-            className="rounded-md border px-3"
-          >
-            {bucketGroups.map((group) => (
-              <AccordionItem key={group.id} value={group.id}>
-                <AccordionTrigger className="text-sm">
-                  <span className="flex items-center gap-2">
-                    {group.title}
-                    <Badge variant="outline">{group.rows.length}</Badge>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-2">
-                  {group.rows.map((customer) => {
-                    const id = customerIdOf(customer);
-                    const bucket = customer.queueBucket;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => openCustomer(id)}
-                        className="flex w-full flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
-                      >
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="max-w-[320px] truncate text-sm font-medium">
-                              {customerTitle(customer)}
-                            </p>
-                            {bucket ? (
-                              <Badge variant="outline" className={queueBucketBadgeClass(bucket)}>
-                                {queueBucketLabel[bucket]}
-                              </Badge>
-                            ) : null}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {customer.queueReason
-                              ? `${customer.queueReason} · Priority ${customer.queuePriorityScore ?? 0}/100`
-                              : "Queue pending…"}
-                          </p>
-                        </div>
-                        <span className="text-xs font-medium text-primary">Open</span>
-                      </button>
-                    );
-                  })}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        )}
+        {showIndividualQueue ? (
+          <>
+            {customersError ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Unable to load queue</AlertTitle>
+                <AlertDescription>
+                  The customer queue could not be loaded. Please try again.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+
+            {customersLoading ? (
+              <Skeleton className="h-40 w-full" />
+            ) : customers.length === 0 ? (
+              <Alert>
+                <CircleAlert className="h-4 w-4" />
+                <AlertTitle>No customers in queue</AlertTitle>
+                <AlertDescription>
+                  No customers are available yet. Refresh after customers have been added.
+                </AlertDescription>
+              </Alert>
+            ) : filtered.length === 0 ? (
+              <Alert>
+                <CircleAlert className="h-4 w-4" />
+                <AlertTitle>No matches</AlertTitle>
+                <AlertDescription>Try a different filter or search.</AlertDescription>
+              </Alert>
+            ) : (
+              <Accordion type="multiple" defaultValue={bucketGroups.map((g) => g.id)}>
+                {bucketGroups.map((group) => (
+                  <AccordionItem key={group.id} value={group.id}>
+                    <AccordionTrigger>
+                      <span className="flex items-center gap-2">
+                        {group.title}
+                        <Badge variant="outline">{group.rows.length}</Badge>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-2">
+                        {group.rows.map((row) => {
+                          const id = customerIdOf(row);
+                          return (
+                            <li key={id}>
+                              <button
+                                type="button"
+                                className="flex w-full items-center justify-between rounded-md border px-3 py-3 text-left hover:bg-accent"
+                                onClick={() => openCustomer(id, "individual")}
+                              >
+                                <div>
+                                  <p className="font-medium">{customerTitle(row)}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {row.queueReason || "Queued for follow-up"}
+                                  </p>
+                                </div>
+                                {row.queueBucket ? (
+                                  <Badge
+                                    variant="outline"
+                                    className={queueBucketBadgeClass(row.queueBucket)}
+                                  >
+                                    {queueBucketLabel[row.queueBucket]}
+                                  </Badge>
+                                ) : null}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
+          </>
+        ) : null}
       </div>
     </PageContainer>
   );
@@ -308,26 +462,22 @@ const Customers: React.FC = () => {
 
 function BookSummaryStrip({ summary }: { summary: FiQueueBookSummary }) {
   return (
-    <div className="rounded-lg border border-primary/25 bg-muted/30 p-4 space-y-3">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-foreground">Queue snapshot</p>
-          <p className="text-xs text-muted-foreground">
-            Priority customers in the current queue
-          </p>
-        </div>
-        {summary.mode === "ranked" ? (
-          <Badge variant="outline" className="shrink-0">
-            Priority order
-          </Badge>
-        ) : null}
+    <div className="grid gap-2 sm:grid-cols-4 rounded-md border p-3 text-sm">
+      <div>
+        <p className="text-xs text-muted-foreground">Act now</p>
+        <p className="font-semibold">{summary.countsByQueueBucket?.ACT_NOW ?? 0}</p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {(Object.keys(queueBucketLabel) as FiQueueBucket[]).map((bucket) => (
-          <Badge key={bucket} variant="outline" className={queueBucketBadgeClass(bucket)}>
-            {queueBucketLabel[bucket]}: {summary.countsByQueueBucket?.[bucket] ?? 0}
-          </Badge>
-        ))}
+      <div>
+        <p className="text-xs text-muted-foreground">Monitor</p>
+        <p className="font-semibold">{summary.countsByQueueBucket?.MONITOR ?? 0}</p>
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground">Hold</p>
+        <p className="font-semibold">{summary.countsByQueueBucket?.SUPPRESSED_HOLD ?? 0}</p>
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground">Needs data</p>
+        <p className="font-semibold">{summary.countsByQueueBucket?.NEEDS_DATA ?? 0}</p>
       </div>
     </div>
   );

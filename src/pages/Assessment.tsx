@@ -278,7 +278,7 @@ const Assessment: React.FC = () => {
       // Invalidate banking recommendations so they refetch with new assessment data
       queryClient.invalidateQueries({ queryKey: ['banking', 'recommendations'] });
       
-      navigate(`/dashboard/${sessionId}`);
+      navigate(`/app`);
     }
   }, [results, sessionId, hasNewlyCompletedAssessment, navigate, queryClient]);
 
@@ -325,7 +325,7 @@ const Assessment: React.FC = () => {
 
   const handleCloseContextDialog = () => {
     setShowStartPage(false);
-    navigate('/dashboard'); // Navigate to dashboard instead of back
+    navigate('/app'); // Navigate to dashboard instead of back
   };
   
   // Directly progress to next question - called after answer has been processed
@@ -368,9 +368,9 @@ const Assessment: React.FC = () => {
   // Handlers for completed assessment interstitial
   const handleViewResults = () => {
     if (completedSessionId) {
-      navigate(`/dashboard/${completedSessionId}`);
+      navigate(`/app`);
     } else {
-      navigate('/dashboard');
+      navigate('/app');
     }
   };
 

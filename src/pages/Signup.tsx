@@ -78,7 +78,7 @@ const Signup = () => {
     setError(null);
     try {
       await signInWithGoogle();
-      navigate('/dashboard');
+      navigate('/app');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
       setError(errorMessage);

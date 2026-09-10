@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import type {
   BankCustomerListItem,
   BankCustomersResponseDto,
+  BusinessPortfolioQueueItem,
   FiDecisionExplainDto,
   FiDecisionInsightsDto,
   FiQueueBucketSummaryDto,
@@ -24,12 +25,16 @@ function withCustomerIdAlias<T extends Record<string, unknown>>(
 export const getBankCustomers = async (
   limit = 50,
   offset = 0,
-  q?: string
+  q?: string,
+  customerType?: "individual" | "business"
 ): Promise<BankCustomerListItem[]> => {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   const trimmed = q != null ? sanitizeCustomerSearchQuery(q) : "";
   if (trimmed.length >= 2) {
     params.set("q", trimmed);
+  }
+  if (customerType) {
+    params.set("customerType", customerType);
   }
   const response = await apiClient.get(`/dashboard/customers?${params.toString()}`);
   const responseData = response.data;
@@ -77,6 +82,37 @@ export const getFiQueueBuckets = async (
     data: rows.map((r) => withCustomerIdAlias(r)) as unknown as FiQueueBucketSummaryDto[],
     meta,
   };
+};
+
+export const getBusinessPortfolioQueue = async (
+  limit = 50,
+  offset = 0
+): Promise<BusinessPortfolioQueueItem[]> => {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const response = await apiClient.get(
+    `/dashboard/customers/business-queue?${params.toString()}`
+  );
+  const responseData = response.data;
+  let rows: Record<string, unknown>[] = [];
+  if (responseData?.data && Array.isArray(responseData.data)) {
+    rows = responseData.data as Record<string, unknown>[];
+  } else if (Array.isArray(responseData)) {
+    rows = responseData as Record<string, unknown>[];
+  }
+  return rows.map((r) => ({
+    customerId: String(r.customerId ?? ""),
+    externalCustomerId: String(r.externalCustomerId ?? ""),
+    displayName: String(r.displayName ?? ""),
+    customerType: "business" as const,
+    openWarningCount: Number(r.openWarningCount ?? 0),
+    openActionCount: Number(r.openActionCount ?? 0),
+    topWarningTitle: r.topWarningTitle != null ? String(r.topWarningTitle) : null,
+    topWarningSeverity:
+      r.topWarningSeverity != null ? String(r.topWarningSeverity) : null,
+  }));
 };
 
 export const getFiDecisionInsights = async (

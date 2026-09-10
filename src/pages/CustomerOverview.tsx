@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useSyncCustomerFromRoute } from "@/hooks/useSyncCustomerFromRoute";
 import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
 import { useFiDecisionInsights } from "@/hooks/useFiDecisionInsights";
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/sheet";
 import { UserCircle, AlertCircle, ClipboardList, Package } from "lucide-react";
 import type { FiDecisionRiskItem } from "@/lib/api/types/fiDecision";
+import { businessWorkspaceBase } from "@/lib/businessPaths";
+import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 
 function asPercent(score: number): string {
   return `${Math.round(score)}%`;
@@ -57,7 +59,7 @@ function RiskCard({ title, risk }: { title: string; risk: FiDecisionRiskItem }) 
 
 const CustomerOverview: React.FC = () => {
   const customerId = useSyncCustomerFromRoute();
-  const { selectedCustomer } = useSelectedCustomer();
+  const { selectedCustomer, loading: customersLoading } = useSelectedCustomer();
   const {
     data,
     loading,
@@ -69,6 +71,15 @@ const CustomerOverview: React.FC = () => {
     fetchExplain,
   } = useFiDecisionInsights();
   const [isExplainOpen, setIsExplainOpen] = useState(false);
+
+  // Business customers use the shared business workspace, not consumer FI insights.
+  if (!customersLoading && selectedCustomer?.customerType === "business" && customerId) {
+    return <Navigate to={businessWorkspaceBase(customerId)} replace />;
+  }
+
+  if (customersLoading && !selectedCustomer) {
+    return <LoadingState variant="expanded" />;
+  }
 
   const label =
     selectedCustomer?.displayName ||
@@ -92,13 +103,13 @@ const CustomerOverview: React.FC = () => {
         action={
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/dashboard/customers/${customerId}/assessment`}>
+              <Link to={`/app/customers/${customerId}/assessment`}>
                 <ClipboardList className="h-4 w-4 mr-2" />
                 Assessment
               </Link>
             </Button>
             <Button asChild size="sm">
-              <Link to={`/dashboard/customers/${customerId}/products`}>
+              <Link to={`/app/customers/${customerId}/products`}>
                 <Package className="h-4 w-4 mr-2" />
                 Products
               </Link>

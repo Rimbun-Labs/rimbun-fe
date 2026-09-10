@@ -32,7 +32,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { signOut, user, operator } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
-  const appHome = user ? '/dashboard' : '/';
+  const appHome = user ? '/app' : '/';
   const tenantLabel = operator?.tenantName?.trim() || null;
 
   const handleLogout = async () => {
@@ -111,7 +111,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
               to={appHome}
               className={cn(
                 "hidden md:flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                location.pathname === appHome || (user && location.pathname === "/dashboard")
+                location.pathname === appHome || (user && location.pathname.startsWith("/app"))
                   ? "text-accent-foreground bg-accent"
                   : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
               )}
