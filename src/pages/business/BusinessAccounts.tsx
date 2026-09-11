@@ -1,14 +1,20 @@
 import React from "react";
 import { BusinessWorkspaceShell } from "@/components/business/BusinessWorkspaceShell";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const BusinessAccountsPage: React.FC<{ customerIdOverride?: string }> = ({
   customerIdOverride,
 }) => (
   <BusinessWorkspaceShell
-    title="Accounts & transactions"
-    description="Connected financial accounts. Classification follows business cash-flow taxonomy."
+    title="Cash"
+    description="Base-currency accounts and balances. Financing facilities stay linked from Money out when needed."
     customerIdOverride={customerIdOverride}
   >
     {(ws) => (
@@ -18,8 +24,8 @@ const BusinessAccountsPage: React.FC<{ customerIdOverride?: string }> = ({
             <CardHeader>
               <CardTitle>No accounts yet</CardTitle>
               <CardDescription>
-                Ingest a statement via partner API or wait for sync. Empty accounts can still host
-                manual working-capital records.
+                Import account balances and bank transactions from Data. Empty
+                accounts can still host manual working-capital records.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -35,12 +41,16 @@ const BusinessAccountsPage: React.FC<{ customerIdOverride?: string }> = ({
                 </div>
                 <CardDescription>
                   {a.accountType || "Account"} · {a.currency}
-                  {a.lastSyncedAt ? ` · synced ${new Date(a.lastSyncedAt).toLocaleString()}` : ""}
+                  {a.balanceAsOf
+                    ? ` · balance as of ${a.balanceAsOf}`
+                    : " · balance date missing"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-sm">
-                Balance: {a.currentBalance ?? "—"} {a.currency}
-                {a.availableBalance != null ? ` · available ${a.availableBalance}` : ""}
+                Reported balance: {a.currentBalance ?? "—"} {a.currency}
+                {a.availableBalance != null
+                  ? ` · available ${a.availableBalance}`
+                  : ""}
               </CardContent>
             </Card>
           ))

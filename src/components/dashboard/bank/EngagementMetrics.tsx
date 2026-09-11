@@ -14,9 +14,9 @@ export const EngagementMetrics: React.FC<EngagementMetricsProps> = ({ data }) =>
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Engagement Metrics</CardTitle>
+        <CardTitle>Engagement</CardTitle>
         <CardDescription>
-          User activity and platform usage statistics
+          Platform activity for individual customers in this book
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -24,7 +24,7 @@ export const EngagementMetrics: React.FC<EngagementMetricsProps> = ({ data }) =>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Active Users</span>
+            <span className="text-sm font-medium">With activity</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

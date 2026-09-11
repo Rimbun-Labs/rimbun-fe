@@ -3,7 +3,7 @@ import { PageContainer, PageHeader } from "@/components/layout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Building2, RefreshCw } from "lucide-react";
+import { AlertCircle, Building2 } from "lucide-react";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
 
 type Props = {
@@ -27,12 +27,6 @@ export function BusinessWorkspaceShell({
         icon={Building2}
         title={title}
         description={description}
-        action={
-          <Button variant="outline" size="sm" onClick={() => void workspace.refetch()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
-        }
       />
 
       {workspace.loading ? (
@@ -44,7 +38,16 @@ export function BusinessWorkspaceShell({
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Could not load workspace</AlertTitle>
-          <AlertDescription>{workspace.error.message}</AlertDescription>
+          <AlertDescription className="space-y-3">
+            <p>{workspace.error.message}</p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void workspace.refetch()}
+            >
+              Try again
+            </Button>
+          </AlertDescription>
         </Alert>
       ) : (
         children(workspace)

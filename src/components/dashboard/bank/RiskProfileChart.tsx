@@ -73,6 +73,18 @@ export const RiskProfileChart: React.FC<RiskProfileChartProps> = ({ data }) => {
     );
   };
 
+  const total =
+    data.conservative.count + data.moderate.count + data.aggressive.count;
+
+  if (total === 0) {
+    return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        No assessed risk profiles yet. Profiles appear after individual
+        assessments complete.
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <ResponsiveContainer width="100%" height={300}>

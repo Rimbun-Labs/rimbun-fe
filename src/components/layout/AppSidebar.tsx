@@ -122,7 +122,7 @@ const AppSidebar: React.FC = () => {
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
               <Wallet className="h-4 w-4" />
-              Accounts
+              Cash
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/money-in`}
@@ -139,13 +139,6 @@ const AppSidebar: React.FC = () => {
               Money out
             </NavLink>
             <NavLink
-              to={`${APP_ROOT}/financing`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
-            >
-              <Landmark className="h-4 w-4" />
-              Financing
-            </NavLink>
-            <NavLink
               to={`${APP_ROOT}/plans`}
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
@@ -157,7 +150,14 @@ const AppSidebar: React.FC = () => {
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
               <Plug className="h-4 w-4" />
-              Connections
+              Data
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/financing`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <Landmark className="h-4 w-4" />
+              Financing
             </NavLink>
           </div>
         </nav>
@@ -192,7 +192,7 @@ const AppSidebar: React.FC = () => {
             }
           >
             <Users className="h-4 w-4" />
-            Customers
+            Customer portfolio
           </NavLink>
         </div>
 
@@ -230,7 +230,7 @@ const AppSidebar: React.FC = () => {
                   }
                 >
                   <Wallet className="h-4 w-4" />
-                  Accounts
+                  Cash
                 </NavLink>
                 <NavLink
                   to={`${businessBase}/money-in`}
@@ -251,15 +251,6 @@ const AppSidebar: React.FC = () => {
                   Money out
                 </NavLink>
                 <NavLink
-                  to={`${businessBase}/financing`}
-                  className={({ isActive }) =>
-                    cn(navInactive, isActive && navActive)
-                  }
-                >
-                  <Landmark className="h-4 w-4" />
-                  Financing
-                </NavLink>
-                <NavLink
                   to={`${businessBase}/plans`}
                   className={({ isActive }) =>
                     cn(navInactive, isActive && navActive)
@@ -267,6 +258,24 @@ const AppSidebar: React.FC = () => {
                 >
                   <CalendarDays className="h-4 w-4" />
                   Plans
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/connections`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Plug className="h-4 w-4" />
+                  Data
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/financing`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Landmark className="h-4 w-4" />
+                  Financing
                 </NavLink>
                 <NavLink
                   to={`${customerBase}/products`}

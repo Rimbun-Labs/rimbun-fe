@@ -12,9 +12,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { LoadingState } from "@/components/dashboard/ui/LoadingState";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SelectedCustomerProvider } from "./contexts/SelectedCustomerContext";
-import { AssessmentPersistenceProvider } from '@/components/assessment/AssessmentPersistenceProvider';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
-import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 // Lightweight pages - keep in main bundle (frequently used, small size)
 import ForBanks from "./pages/ForBanks";
@@ -611,17 +609,13 @@ const App = () => {
           <AuthProvider>
             <SessionProvider>
               <SelectedCustomerProvider>
-              <SubscriptionProvider>
                 <ThemeProvider>
                   <TooltipProvider>
                     <Toaster />
                     <Sonner />
-                    <AssessmentPersistenceProvider>
-                      <AppRoutes />
-                    </AssessmentPersistenceProvider>
+                    <AppRoutes />
                   </TooltipProvider>
                 </ThemeProvider>
-              </SubscriptionProvider>
               </SelectedCustomerProvider>
             </SessionProvider>
           </AuthProvider>

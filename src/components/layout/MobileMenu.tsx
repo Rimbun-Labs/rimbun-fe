@@ -117,7 +117,7 @@ const MobileMenu: React.FC = () => {
               </Link>
               <Link to={`${APP_ROOT}/accounts`} className={linkClass(isActive(`${APP_ROOT}/accounts`))} onClick={closeMobileMenu}>
                 <Wallet className="h-4 w-4" />
-                Accounts
+                Cash
               </Link>
               <Link to={`${APP_ROOT}/money-in`} className={linkClass(isActive(`${APP_ROOT}/money-in`))} onClick={closeMobileMenu}>
                 <ArrowDownLeft className="h-4 w-4" />
@@ -127,17 +127,17 @@ const MobileMenu: React.FC = () => {
                 <ArrowUpRight className="h-4 w-4" />
                 Money out
               </Link>
-              <Link to={`${APP_ROOT}/financing`} className={linkClass(isActive(`${APP_ROOT}/financing`))} onClick={closeMobileMenu}>
-                <Landmark className="h-4 w-4" />
-                Financing
-              </Link>
               <Link to={`${APP_ROOT}/plans`} className={linkClass(isActive(`${APP_ROOT}/plans`))} onClick={closeMobileMenu}>
                 <CalendarDays className="h-4 w-4" />
                 Plans
               </Link>
               <Link to={`${APP_ROOT}/connections`} className={linkClass(isActive(`${APP_ROOT}/connections`))} onClick={closeMobileMenu}>
                 <Plug className="h-4 w-4" />
-                Connections
+                Data
+              </Link>
+              <Link to={`${APP_ROOT}/financing`} className={linkClass(isActive(`${APP_ROOT}/financing`))} onClick={closeMobileMenu}>
+                <Landmark className="h-4 w-4" />
+                Financing
               </Link>
             </div>
           ) : (
@@ -160,7 +160,7 @@ const MobileMenu: React.FC = () => {
                   onClick={closeMobileMenu}
                 >
                   <Users className="h-4 w-4" />
-                  Customers
+                  Customer portfolio
                 </Link>
               </div>
 
@@ -180,7 +180,7 @@ const MobileMenu: React.FC = () => {
                       </Link>
                       <Link to={`${businessBase}/accounts`} className={linkClass(isActive(`${businessBase}/accounts`))} onClick={closeMobileMenu}>
                         <Wallet className="h-4 w-4" />
-                        Accounts
+                        Cash
                       </Link>
                       <Link to={`${businessBase}/money-in`} className={linkClass(isActive(`${businessBase}/money-in`))} onClick={closeMobileMenu}>
                         <ArrowDownLeft className="h-4 w-4" />
@@ -190,13 +190,17 @@ const MobileMenu: React.FC = () => {
                         <ArrowUpRight className="h-4 w-4" />
                         Money out
                       </Link>
-                      <Link to={`${businessBase}/financing`} className={linkClass(isActive(`${businessBase}/financing`))} onClick={closeMobileMenu}>
-                        <Landmark className="h-4 w-4" />
-                        Financing
-                      </Link>
                       <Link to={`${businessBase}/plans`} className={linkClass(isActive(`${businessBase}/plans`))} onClick={closeMobileMenu}>
                         <CalendarDays className="h-4 w-4" />
                         Plans
+                      </Link>
+                      <Link to={`${businessBase}/connections`} className={linkClass(isActive(`${businessBase}/connections`))} onClick={closeMobileMenu}>
+                        <Plug className="h-4 w-4" />
+                        Data
+                      </Link>
+                      <Link to={`${businessBase}/financing`} className={linkClass(isActive(`${businessBase}/financing`))} onClick={closeMobileMenu}>
+                        <Landmark className="h-4 w-4" />
+                        Financing
                       </Link>
                       <Link to={`${customerBase}/products`} className={linkClass(location.pathname.includes('/products'))} onClick={closeMobileMenu}>
                         <Package className="h-4 w-4" />

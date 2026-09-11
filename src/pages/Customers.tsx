@@ -220,7 +220,7 @@ const Customers: React.FC = () => {
     <PageContainer>
       <PageHeader
         icon={Users}
-        title="Customers"
+        title="Customer portfolio"
         description="Where to put energy next — ranked queue and search for customers to contact or propose plans."
         action={
           <Button

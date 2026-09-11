@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { 
   Sun,
   Moon,
@@ -31,7 +30,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { toggleMobileMenu } = useMobileMenu();
   const { signOut, user, operator } = useAuth();
   const { toast } = useToast();
-  const location = useLocation();
   const appHome = user ? '/app' : '/';
   const tenantLabel = operator?.tenantName?.trim() || null;
 
@@ -106,19 +104,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
           
           {/* Right Section: Navigation and Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Home Link */}
-            <Link
-              to={appHome}
-              className={cn(
-                "hidden md:flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                location.pathname === appHome || (user && location.pathname.startsWith("/app"))
-                  ? "text-accent-foreground bg-accent"
-                  : "text-muted-foreground hover:text-accent-foreground hover:bg-accent"
-              )}
-            >
-              Home
-            </Link>
-
             <Button
               variant="ghost"
               size="icon"

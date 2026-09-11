@@ -1,24 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  createForecast,
   getBusinessProfile,
   getDesignatedBusinessSubject,
-  getLatestForecast,
-  listActions,
   listBusinessAccounts,
   listFacilities,
   listObligations,
   listPlanEvents,
   listReceivables,
-  listWarnings,
-  type BusinessAction,
-  type BusinessForecast,
   type BusinessObligation,
   type BusinessPlanEvent,
   type BusinessProfile,
   type BusinessReceivable,
-  type BusinessWarning,
   type FinancingFacility,
   type FinancialAccount,
 } from "@/lib/api/businessApi";
@@ -32,9 +25,6 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
   const [obligations, setObligations] = useState<BusinessObligation[]>([]);
   const [facilities, setFacilities] = useState<FinancingFacility[]>([]);
   const [planEvents, setPlanEvents] = useState<BusinessPlanEvent[]>([]);
-  const [forecast, setForecast] = useState<BusinessForecast | null>(null);
-  const [warnings, setWarnings] = useState<BusinessWarning[]>([]);
-  const [actions, setActions] = useState<BusinessAction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -65,9 +55,6 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
         nextObligations,
         nextFacilities,
         nextPlans,
-        nextForecast,
-        nextWarnings,
-        nextActions,
       ] = await Promise.all([
         getBusinessProfile(id),
         listBusinessAccounts(id),
@@ -75,9 +62,6 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
         listObligations(id),
         listFacilities(id),
         listPlanEvents(id),
-        getLatestForecast(id),
-        listWarnings(id),
-        listActions(id),
       ]);
       setProfile(nextProfile);
       setAccounts(nextAccounts);
@@ -85,9 +69,6 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
       setObligations(nextObligations);
       setFacilities(nextFacilities);
       setPlanEvents(nextPlans);
-      setForecast(nextForecast);
-      setWarnings(nextWarnings);
-      setActions(nextActions);
     } catch (err) {
       setError(
         err instanceof Error
@@ -103,23 +84,6 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
     void refetch();
   }, [refetch]);
 
-  const runForecast = useCallback(async () => {
-    if (!customerId) return null;
-    try {
-      const next = await createForecast(customerId);
-      setForecast(next);
-      await refetch();
-      return next;
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err
-          : new Error("Forecast engine is not available yet"),
-      );
-      return null;
-    }
-  }, [customerId, refetch]);
-
   return {
     customerId,
     profile,
@@ -128,12 +92,8 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
     obligations,
     facilities,
     planEvents,
-    forecast,
-    warnings,
-    actions,
     loading,
     error,
     refetch,
-    runForecast,
   };
 }

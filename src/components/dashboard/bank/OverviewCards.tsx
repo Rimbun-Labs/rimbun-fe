@@ -6,17 +6,25 @@ import type { BankCustomerInsights } from '@/lib/api/types/bankInsights';
 
 interface OverviewCardsProps {
   data: BankCustomerInsights;
+  /** Individuals-mode copy; default keeps older labels for reuse. */
+  variant?: 'default' | 'individuals';
 }
 
-export const OverviewCards: React.FC<OverviewCardsProps> = ({ data }) => {
+export const OverviewCards: React.FC<OverviewCardsProps> = ({
+  data,
+  variant = 'default',
+}) => {
   const { formatNumber } = useFormatters();
+  const individuals = variant === 'individuals';
 
   const cards = [
     {
-      title: 'Total Customers',
+      title: individuals ? 'Individual records' : 'Customer records',
       value: formatNumber(data.totalCustomers),
       icon: Users,
-      description: 'Registered users in your organization',
+      description: individuals
+        ? 'Individual customers in this book'
+        : 'Customer records in your organization',
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     },
@@ -29,10 +37,12 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ data }) => {
       bgColor: 'bg-green-100 dark:bg-green-900/30',
     },
     {
-      title: 'Active Users (30d)',
+      title: individuals ? 'With activity (30d)' : 'Active (30d)',
       value: formatNumber(data.engagement.activeUsers.last30Days),
       icon: Activity,
-      description: 'Users active in the last 30 days',
+      description: individuals
+        ? 'Individuals with platform activity in the last 30 days'
+        : 'Customers with platform activity in the last 30 days',
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-100 dark:bg-purple-900/30',
     },
@@ -74,4 +84,3 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({ data }) => {
     </div>
   );
 };
-

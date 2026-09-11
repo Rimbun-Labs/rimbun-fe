@@ -23,6 +23,8 @@ export type FinancialAccount = {
   currency: string;
   currentBalance: string | null;
   availableBalance: string | null;
+  balanceAsOf: string | null;
+  balanceSource: string | null;
   status: string;
   lastSyncedAt: string | null;
 };
@@ -125,8 +127,12 @@ export async function getDesignatedBusinessSubject(): Promise<{
   return unwrap(data);
 }
 
-export async function getBusinessProfile(customerId: string): Promise<BusinessProfile | null> {
-  const { data } = await apiClient.get(`/dashboard/customers/${customerId}/business-profile`);
+export async function getBusinessProfile(
+  customerId: string,
+): Promise<BusinessProfile | null> {
+  const { data } = await apiClient.get(
+    `/dashboard/customers/${customerId}/business-profile`,
+  );
   return unwrap(data);
 }
 
@@ -139,22 +145,30 @@ export async function upsertBusinessProfile(
     countryCode?: string;
     industryCode?: string;
     industryLabel?: string;
-  }
+  },
 ): Promise<BusinessProfile> {
   const { data } = await apiClient.put(
     `/dashboard/customers/${customerId}/business-profile`,
-    body
+    body,
   );
   return unwrap(data);
 }
 
-export async function listBusinessAccounts(customerId: string): Promise<FinancialAccount[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/accounts`);
+export async function listBusinessAccounts(
+  customerId: string,
+): Promise<FinancialAccount[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/accounts`,
+  );
   return unwrap(data) ?? [];
 }
 
-export async function listReceivables(customerId: string): Promise<BusinessReceivable[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/receivables`);
+export async function listReceivables(
+  customerId: string,
+): Promise<BusinessReceivable[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/receivables`,
+  );
   return unwrap(data) ?? [];
 }
 
@@ -168,14 +182,21 @@ export async function createReceivable(
     status?: string;
     externalId?: string;
     source?: string;
-  }
+  },
 ): Promise<BusinessReceivable> {
-  const { data } = await apiClient.post(`/business/customers/${customerId}/receivables`, body);
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/receivables`,
+    body,
+  );
   return unwrap(data);
 }
 
-export async function listObligations(customerId: string): Promise<BusinessObligation[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/obligations`);
+export async function listObligations(
+  customerId: string,
+): Promise<BusinessObligation[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/obligations`,
+  );
   return unwrap(data) ?? [];
 }
 
@@ -189,14 +210,21 @@ export async function createObligation(
     status?: string;
     externalId?: string;
     source?: string;
-  }
+  },
 ): Promise<BusinessObligation> {
-  const { data } = await apiClient.post(`/business/customers/${customerId}/obligations`, body);
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/obligations`,
+    body,
+  );
   return unwrap(data);
 }
 
-export async function listFacilities(customerId: string): Promise<FinancingFacility[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/facilities`);
+export async function listFacilities(
+  customerId: string,
+): Promise<FinancingFacility[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/facilities`,
+  );
   return unwrap(data) ?? [];
 }
 
@@ -209,14 +237,21 @@ export async function createFacility(
     availableAmount?: number;
     lenderName?: string;
     source?: string;
-  }
+  },
 ): Promise<FinancingFacility> {
-  const { data } = await apiClient.post(`/business/customers/${customerId}/facilities`, body);
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/facilities`,
+    body,
+  );
   return unwrap(data);
 }
 
-export async function listPlanEvents(customerId: string): Promise<BusinessPlanEvent[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/plan-events`);
+export async function listPlanEvents(
+  customerId: string,
+): Promise<BusinessPlanEvent[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/plan-events`,
+  );
   return unwrap(data) ?? [];
 }
 
@@ -230,40 +265,300 @@ export async function createPlanEvent(
     currency?: string;
     scenario?: string;
     source?: string;
-  }
+  },
 ): Promise<BusinessPlanEvent> {
-  const { data } = await apiClient.post(`/business/customers/${customerId}/plan-events`, body);
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/plan-events`,
+    body,
+  );
   return unwrap(data);
 }
 
-export async function getLatestForecast(customerId: string): Promise<BusinessForecast | null> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/forecast`);
+export async function getBusinessOverview(
+  customerId: string,
+): Promise<BusinessOverview> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/overview`,
+  );
   return unwrap(data);
 }
 
-export async function createForecast(customerId: string): Promise<BusinessForecast> {
-  const { data } = await apiClient.post(`/business/customers/${customerId}/forecast`);
+export type BusinessOverviewWeeklyPoint = {
+  week: number;
+  day: number;
+  date: string;
+  projectedBalance: number;
+  netFlow: number;
+  confirmedNet: number;
+  expectedNet: number;
+  plannedNet: number;
+  modelledNet: number;
+};
+
+export type BusinessOverviewMetric = {
+  code: string;
+  suppressed: boolean;
+  suppressionReason?: string;
+  value: unknown;
+  unit?: string;
+  currency?: string;
+  asOf: string;
+  confidence: number;
+  calculationVersion: string;
+  formula: string;
+  evidence: Record<string, unknown>;
+};
+
+export type BusinessOverviewForecast = {
+  id: string;
+  scenario?: string;
+  confidence: string | null;
+  qualityFlags: unknown;
+  modelVersion: string;
+  weeklyBalances: BusinessOverviewWeeklyPoint[];
+  minBalanceHorizon: number | null;
+  minBalanceDate: string | null;
+  shortfallDate: string | null;
+  shortfallAmount: string | null;
+  expectedInBeforeLow: number;
+  commitmentsBeforeLow: number;
+  eventEvidence: Array<Record<string, unknown>>;
+  calculationVersion: string;
+  bufferBreachDate?: string | null;
+};
+
+export type BusinessOverview = {
+  asOf: string;
+  demoBadge: boolean;
+  baseCurrency: string;
+  cashAvailable: number;
+  cashPositionComplete: boolean;
+  cashPosition: Array<{
+    accountId: string;
+    balanceAsOf: string | null;
+    observedBalance: number | null;
+    transactionNetAfterBalance: number;
+    calculatedBalance: number | null;
+  }>;
+  excludedCurrencies: string[];
+  accountCount: number;
+  forecast: BusinessOverviewForecast | null;
+  planOverlay: BusinessOverviewForecast | null;
+  primaryAction: {
+    id: string;
+    title: string;
+    rationale: string;
+    priority: string;
+    dueDate: string | null;
+    evidence?: Record<string, unknown>;
+  } | null;
+  actions: Array<{
+    id: string;
+    title: string;
+    rationale: string;
+    priority: string;
+    dueDate: string | null;
+    actionType: string;
+    evidence?: Record<string, unknown>;
+  }>;
+  warnings: Array<{
+    id: string;
+    title: string;
+    rationale: string;
+    severity: string;
+    warningType: string;
+    evidence?: Record<string, unknown>;
+  }>;
+  capabilities: {
+    active: Array<"high_frequency_sales" | "invoice_led">;
+    sources: Record<string, Array<"declared" | "industry" | "facts">>;
+    high_frequency_sales: boolean;
+    invoice_led: boolean;
+  };
+  modules: {
+    high_frequency_sales: {
+      capability: "high_frequency_sales";
+      label: string;
+      metrics: BusinessOverviewMetric[];
+      settlement: {
+        matchedCount: number;
+        unmatchedCount: number;
+        reconciliationRate: number | null;
+        periodStart?: string;
+        periodEnd?: string;
+        calculationVersion: string;
+      };
+    } | null;
+    invoice_led: {
+      capability: "invoice_led";
+      label: string;
+      metrics: BusinessOverviewMetric[];
+      actions: Array<Record<string, unknown>>;
+    } | null;
+  };
+  freshness: {
+    latestBalanceAsOf: string | null;
+    accountsSyncedAt: string | null;
+    salesDaysInPeriod: number;
+    openReceivableCount: number;
+  };
+};
+
+export async function getLatestForecast(
+  customerId: string,
+): Promise<BusinessForecast | null> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/forecast`,
+  );
   return unwrap(data);
 }
 
-export async function listWarnings(customerId: string): Promise<BusinessWarning[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/warnings`);
+export async function listWarnings(
+  customerId: string,
+): Promise<BusinessWarning[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/warnings`,
+  );
   return unwrap(data) ?? [];
 }
 
-export async function listActions(customerId: string): Promise<BusinessAction[]> {
-  const { data } = await apiClient.get(`/business/customers/${customerId}/actions`);
+export async function listActions(
+  customerId: string,
+): Promise<BusinessAction[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/actions`,
+  );
   return unwrap(data) ?? [];
 }
 
 export async function updateAction(
   customerId: string,
   actionId: string,
-  body: { status: string; completionNotes?: string }
+  body: { status: string; completionNotes?: string },
 ): Promise<BusinessAction> {
   const { data } = await apiClient.put(
     `/business/customers/${customerId}/actions/${actionId}`,
-    body
+    body,
+  );
+  return unwrap(data);
+}
+
+export type BusinessImportSourceType =
+  | "account_balances_csv"
+  | "bank_csv"
+  | "pos_csv"
+  | "invoices_csv"
+  | "bills_csv"
+  | "invoice_payments_csv"
+  | "settlements_csv";
+
+export type BusinessImportTemplate = {
+  sourceType: BusinessImportSourceType;
+  label: string;
+  headers: string[];
+  sampleCsv: string;
+};
+
+export type BusinessImportPreview = {
+  sourceType: BusinessImportSourceType;
+  filename: string | null;
+  contentHash: string;
+  delimiter: "," | ";";
+  headers: string[];
+  mapping: Record<string, string | null>;
+  requiredFields: string[];
+  mappableFields?: string[];
+  baseCurrency: string;
+  previewRows: Array<{
+    rowNumber: number;
+    payload: Record<string, string | number | null>;
+    validationState: "valid" | "invalid";
+    errorCodes: string[];
+    errorMessage?: string;
+  }>;
+  summary: {
+    rowCount: number;
+    validCount: number;
+    invalidCount: number;
+    createdEstimate: number;
+    errorCodes: string[];
+  };
+};
+
+export type BusinessImportBatch = {
+  id: string;
+  sourceType: string;
+  originalFilename: string | null;
+  status: string;
+  rowCount: number | null;
+  createdCount: number | null;
+  skippedCount: number | null;
+  errorCount: number | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  contentHash: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  reversedAt: string | null;
+};
+
+export async function listImportTemplates(): Promise<BusinessImportTemplate[]> {
+  const { data } = await apiClient.get("/business/import-templates");
+  return unwrap(data) ?? [];
+}
+
+export async function listImportBatches(
+  customerId: string,
+): Promise<BusinessImportBatch[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/imports`,
+  );
+  return unwrap(data) ?? [];
+}
+
+export async function previewImport(
+  customerId: string,
+  body: {
+    sourceType: BusinessImportSourceType;
+    filename?: string;
+    csvText: string;
+    mapping?: Record<string, string | null>;
+  },
+): Promise<BusinessImportPreview> {
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/imports/preview`,
+    body,
+  );
+  return unwrap(data);
+}
+
+export async function confirmImport(
+  customerId: string,
+  body: {
+    sourceType: BusinessImportSourceType;
+    filename?: string;
+    csvText: string;
+    mapping: Record<string, string | null>;
+  },
+): Promise<{
+  batch: BusinessImportBatch;
+  duplicate: boolean;
+  message?: string;
+  forecastId?: string;
+}> {
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/imports/confirm`,
+    body,
+  );
+  return unwrap(data);
+}
+
+export async function reverseImport(
+  customerId: string,
+  batchId: string,
+): Promise<{ batch: BusinessImportBatch; alreadyReversed: boolean }> {
+  const { data } = await apiClient.post(
+    `/business/customers/${customerId}/imports/${batchId}/reverse`,
   );
   return unwrap(data);
 }
