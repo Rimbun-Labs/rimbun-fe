@@ -37,18 +37,18 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
     <ThemeProvider>
       <MobileMenuProvider>
         <SidebarProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="flex min-h-screen w-full min-w-0 flex-col">
             <div className="fixed top-0 left-0 right-0 z-50">
               <AppHeader showFullNav={showFullLayout} />
             </div>
-            <div className="flex w-full pt-16">
+            <div className="flex w-full min-w-0 pt-16">
               {showFullLayout && (
                 <div className="hidden md:block w-64 shrink-0">
                   <AppSidebar />
                 </div>
               )}
               <main
-                className={`flex-1 min-w-0 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
+                className={`min-w-0 flex-1 overflow-y-auto ${useContainer ? 'p-4 md:p-6 bg-secondary/20' : 'bg-background'}`}
               >
                 <div className={innerClassName} style={innerStyle}>
                   <Outlet />

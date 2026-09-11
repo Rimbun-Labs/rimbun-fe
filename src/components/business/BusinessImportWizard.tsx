@@ -44,7 +44,7 @@ const SOURCE_OPTIONS: Array<{
   {
     value: "invoices_csv",
     title: "Invoices",
-    blurb: "Open and paid customer invoices for Money in.",
+    blurb: "Open and paid customer invoices (Money → Coming in).",
   },
   {
     value: "invoice_payments_csv",
@@ -59,7 +59,7 @@ const SOURCE_OPTIONS: Array<{
   {
     value: "bills_csv",
     title: "Bills & commitments",
-    blurb: "Supplier bills and recurring outflows for Money out.",
+    blurb: "Supplier bills and recurring outflows (Money → Going out).",
   },
 ];
 

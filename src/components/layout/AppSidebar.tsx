@@ -14,11 +14,9 @@ import {
   UserCircle,
   Users,
   Wallet,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Landmark,
   CalendarDays,
   Plug,
+  Upload,
 } from 'lucide-react';
 import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,7 +104,7 @@ const AppSidebar: React.FC = () => {
           <div className="space-y-1">
             <div className="px-3 py-2">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Workspace
+                Business
               </h3>
             </div>
             <NavLink
@@ -118,25 +116,11 @@ const AppSidebar: React.FC = () => {
               Home
             </NavLink>
             <NavLink
-              to={`${APP_ROOT}/accounts`}
+              to={`${APP_ROOT}/money`}
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
               <Wallet className="h-4 w-4" />
-              Cash
-            </NavLink>
-            <NavLink
-              to={`${APP_ROOT}/money-in`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
-            >
-              <ArrowDownLeft className="h-4 w-4" />
-              Money in
-            </NavLink>
-            <NavLink
-              to={`${APP_ROOT}/money-out`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
-            >
-              <ArrowUpRight className="h-4 w-4" />
-              Money out
+              Money
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/plans`}
@@ -145,19 +129,27 @@ const AppSidebar: React.FC = () => {
               <CalendarDays className="h-4 w-4" />
               Plans
             </NavLink>
+          </div>
+
+          <div className="space-y-1">
+            <div className="px-3 py-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Data
+              </h3>
+            </div>
             <NavLink
-              to={`${APP_ROOT}/connections`}
+              to={`${APP_ROOT}/import`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <Upload className="h-4 w-4" />
+              Import data
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/sources`}
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
               <Plug className="h-4 w-4" />
-              Data
-            </NavLink>
-            <NavLink
-              to={`${APP_ROOT}/financing`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
-            >
-              <Landmark className="h-4 w-4" />
-              Financing
+              Sources
             </NavLink>
           </div>
         </nav>
@@ -221,34 +213,16 @@ const AppSidebar: React.FC = () => {
                   }
                 >
                   <Building2 className="h-4 w-4" />
-                  Overview
+                  Home
                 </NavLink>
                 <NavLink
-                  to={`${businessBase}/accounts`}
+                  to={`${businessBase}/money`}
                   className={({ isActive }) =>
                     cn(navInactive, isActive && navActive)
                   }
                 >
                   <Wallet className="h-4 w-4" />
-                  Cash
-                </NavLink>
-                <NavLink
-                  to={`${businessBase}/money-in`}
-                  className={({ isActive }) =>
-                    cn(navInactive, isActive && navActive)
-                  }
-                >
-                  <ArrowDownLeft className="h-4 w-4" />
-                  Money in
-                </NavLink>
-                <NavLink
-                  to={`${businessBase}/money-out`}
-                  className={({ isActive }) =>
-                    cn(navInactive, isActive && navActive)
-                  }
-                >
-                  <ArrowUpRight className="h-4 w-4" />
-                  Money out
+                  Money
                 </NavLink>
                 <NavLink
                   to={`${businessBase}/plans`}
@@ -259,23 +233,28 @@ const AppSidebar: React.FC = () => {
                   <CalendarDays className="h-4 w-4" />
                   Plans
                 </NavLink>
+                <div className="px-3 pb-1 pt-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Data
+                  </h3>
+                </div>
                 <NavLink
-                  to={`${businessBase}/connections`}
+                  to={`${businessBase}/import`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Upload className="h-4 w-4" />
+                  Import data
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/sources`}
                   className={({ isActive }) =>
                     cn(navInactive, isActive && navActive)
                   }
                 >
                   <Plug className="h-4 w-4" />
-                  Data
-                </NavLink>
-                <NavLink
-                  to={`${businessBase}/financing`}
-                  className={({ isActive }) =>
-                    cn(navInactive, isActive && navActive)
-                  }
-                >
-                  <Landmark className="h-4 w-4" />
-                  Financing
+                  Sources
                 </NavLink>
                 <NavLink
                   to={`${customerBase}/products`}

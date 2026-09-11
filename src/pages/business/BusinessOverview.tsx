@@ -1,28 +1,45 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  AlertCircle,
+  Banknote,
+  Building2,
+  CalendarDays,
+  ChevronRight,
+  CircleDollarSign,
+  CreditCard,
+  Landmark,
+  Link2,
+  QrCode,
+  Receipt,
+  ShieldCheck,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Wallet,
+  FileText,
+  type LucideIcon,
+} from "lucide-react";
+import { PAGE_HEADER } from "@/lib/constants/spacing";
+import { ActionDetailSheet } from "@/components/business/ActionDetailSheet";
 import { BusinessWorkspaceShell } from "@/components/business/BusinessWorkspaceShell";
 import {
-  businessMetricLabel,
   EvidenceDrawer,
   type EvidencePayload,
 } from "@/components/business/EvidenceDrawer";
 import { WeeklyForecastChart } from "@/components/business/WeeklyForecastChart";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   getBusinessOverview,
+  updateAction,
   type BusinessOverview,
+  type BusinessOverviewAction,
   type BusinessOverviewMetric,
   type BusinessOverviewWeeklyPoint,
 } from "@/lib/api/businessApi";
 import { businessWorkspaceBase } from "@/lib/businessPaths";
+import { cn } from "@/lib/utils";
+
 function money(
   value: string | number | null | undefined,
   currency = "USD",
@@ -37,6 +54,37 @@ function money(
   }).format(n);
 }
 
+function formatShortDate(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function timeGreeting(now = new Date()): string {
+  const h = now.getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function formatUpdatedAgo(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso.includes("T") ? iso : `${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return null;
+  const days = Math.max(
+    0,
+    Math.floor((Date.now() - d.getTime()) / (24 * 60 * 60 * 1000)),
+  );
+  if (days === 0) return "Updated today";
+  if (days === 1) return "Updated 1 day ago";
+  return `Updated ${days} days ago`;
+}
+
 function metricValue(m: BusinessOverviewMetric | undefined, currency: string) {
   if (!m || m.suppressed || m.value == null) return "—";
   if (typeof m.value === "number") {
@@ -45,9 +93,129 @@ function metricValue(m: BusinessOverviewMetric | undefined, currency: string) {
     return money(m.value, m.currency ?? currency);
   }
   if (typeof m.value === "object") {
-    return JSON.stringify(m.value);
+    return "See details";
   }
   return String(m.value);
+}
+
+function urgencyTone(label: string | undefined): string {
+  const v = (label ?? "").toLowerCase();
+  if (v.includes("high"))
+    return "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300";
+  if (v.includes("medium"))
+    return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300";
+  return "border-border bg-muted/40 text-muted-foreground";
+}
+
+/** Icon + tint from action meaning (type / impact), with urgency as fallback. */
+function actionVisual(action: BusinessOverviewAction): {
+  Icon: LucideIcon;
+  wrap: string;
+  icon: string;
+} {
+  const type = (action.actionType ?? "").toLowerCase();
+  const kind = (action.impactKind ?? "").toLowerCase();
+  const urgency = (action.urgency ?? action.urgencyLabel ?? "").toLowerCase();
+
+  if (
+    type.includes("settlement") ||
+    type.includes("unmatched") ||
+    kind === "cash_release"
+  ) {
+    return {
+      Icon: AlertCircle,
+      wrap: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300",
+      icon: "text-red-600 dark:text-red-300",
+    };
+  }
+  if (type.includes("receivable") || type.includes("invoice") || kind === "cash_accelerated") {
+    return {
+      Icon: Receipt,
+      wrap: "bg-orange-100 text-orange-800 dark:bg-orange-950/50 dark:text-orange-300",
+      icon: "text-orange-600 dark:text-orange-300",
+    };
+  }
+  if (
+    type.includes("funding") ||
+    type.includes("facility") ||
+    type.includes("borrow")
+  ) {
+    return {
+      Icon: Landmark,
+      wrap: "bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300",
+      icon: "text-sky-700 dark:text-sky-300",
+    };
+  }
+  if (
+    type.includes("shortfall") ||
+    type.includes("prepare_cash") ||
+    type.includes("gap")
+  ) {
+    return {
+      Icon: CalendarDays,
+      wrap: "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-300",
+      icon: "text-amber-700 dark:text-amber-300",
+    };
+  }
+  if (type.includes("plan") || type.includes("delay") || type.includes("hire")) {
+    return {
+      Icon: CalendarDays,
+      wrap: "bg-violet-100 text-violet-800 dark:bg-violet-950/50 dark:text-violet-300",
+      icon: "text-violet-700 dark:text-violet-300",
+    };
+  }
+  if (type.includes("supplier") || type.includes("reschedule")) {
+    return {
+      Icon: Banknote,
+      wrap: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300",
+      icon: "text-emerald-700 dark:text-emerald-300",
+    };
+  }
+  if (kind === "cost_saving" || type.includes("fee")) {
+    return {
+      Icon: CircleDollarSign,
+      wrap: "bg-teal-100 text-teal-800 dark:bg-teal-950/50 dark:text-teal-300",
+      icon: "text-teal-700 dark:text-teal-300",
+    };
+  }
+  if (kind === "cash_protected" || urgency.includes("high")) {
+    return {
+      Icon: TrendingDown,
+      wrap: "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-300",
+      icon: "text-amber-700 dark:text-amber-300",
+    };
+  }
+  if (urgency.includes("medium")) {
+    return {
+      Icon: Landmark,
+      wrap: "bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300",
+      icon: "text-sky-700 dark:text-sky-300",
+    };
+  }
+  return {
+    Icon: CircleDollarSign,
+    wrap: "bg-muted text-muted-foreground",
+    icon: "text-muted-foreground",
+  };
+}
+
+function actionSubtitle(
+  action: BusinessOverviewAction,
+  currency: string,
+): string {
+  const unmatchedGross =
+    action.impactKind === "cash_release" &&
+    action.evidenceRows[0]?.amount != null
+      ? Number(action.evidenceRows[0].amount)
+      : null;
+  if (unmatchedGross != null) {
+    const n = action.evidenceRows.length;
+    return `${money(unmatchedGross, currency)} unmatched${
+      n > 0 ? ` · ${n} expected payout${n === 1 ? "" : "s"}` : ""
+    }`;
+  }
+  if (action.impactLabel) return action.impactLabel;
+  return action.why ?? action.rationale;
 }
 
 const BusinessOverviewPage: React.FC<{ customerIdOverride?: string }> = ({
@@ -55,9 +223,10 @@ const BusinessOverviewPage: React.FC<{ customerIdOverride?: string }> = ({
 }) => {
   return (
     <BusinessWorkspaceShell
-      title="Overview"
-      description="What cash you can use, the next 13 weeks, and the single most important next step."
+      title="Home"
+      description="Here's your cash position and what to focus on next."
       customerIdOverride={customerIdOverride}
+      hideHeader
     >
       {(ws) => <OverviewBody customerId={ws.customerId} />}
     </BusinessWorkspaceShell>
@@ -72,6 +241,9 @@ const OverviewBody: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [evidence, setEvidence] = useState<EvidencePayload | null>(null);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [selectedAction, setSelectedAction] =
+    useState<BusinessOverviewAction | null>(null);
+  const [actionOpen, setActionOpen] = useState(false);
   const [showPlan, setShowPlan] = useState(false);
 
   const load = useCallback(async () => {
@@ -97,8 +269,42 @@ const OverviewBody: React.FC<{
     setEvidenceOpen(true);
   };
 
+  const openAction = (action: BusinessOverviewAction) => {
+    setSelectedAction(action);
+    setActionOpen(true);
+  };
+
+  const setActionStatus = async (
+    actionId: string,
+    status: "completed" | "dismissed",
+  ) => {
+    await updateAction(customerId, actionId, { status });
+    setActionOpen(false);
+    setSelectedAction(null);
+    await load();
+  };
+
   if (loading && !overview) {
-    return <p className="text-sm text-muted-foreground">Loading outlook…</p>;
+    return (
+      <div className="space-y-10">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className={PAGE_HEADER.content}>
+            <div className={PAGE_HEADER.icon.container}>
+              <Building2
+                className={cn(PAGE_HEADER.icon.size, "text-primary")}
+              />
+            </div>
+            <div>
+              <h1 className={PAGE_HEADER.title}>{timeGreeting()}</h1>
+              <p className={PAGE_HEADER.description}>
+                Here&apos;s your cash position and what to focus on next.
+              </p>
+            </div>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
   }
   if (error && !overview) {
     return (
@@ -120,375 +326,444 @@ const OverviewBody: React.FC<{
   const invoiceModule = overview.modules?.invoice_led ?? null;
   const salesMetrics = salesModule?.metrics ?? [];
   const invoiceMetrics = invoiceModule?.metrics ?? [];
+  const summary = overview.cashSummary;
+  const base = businessWorkspaceBase(customerId);
+  const asOf = overview.freshness.latestBalanceAsOf;
+  const updatedAgo = formatUpdatedAgo(
+    overview.freshness.accountsSyncedAt ?? asOf,
+  );
+
+  const byCode = (code: string) =>
+    [...salesMetrics, ...invoiceMetrics].find(
+      (m) => m.code === code && !m.suppressed && m.value != null,
+    );
+
+  const netSales = byCode("net_sales");
+  const coverage = byCode("commitment_coverage");
+  const salesDays =
+    overview.freshness.salesDaysInPeriod ||
+    (typeof netSales?.evidence?.["Sales days"] === "number"
+      ? Number(netSales.evidence["Sales days"])
+      : 0);
+  const openReceivableCount = overview.freshness.openReceivableCount;
+  const unmatchedFromRecon = byCode("pos_bank_reconciliation_rate");
+  const openReceivableAmount =
+    typeof unmatchedFromRecon?.evidence?.unmatchedSettlementAmount === "number"
+      ? Number(unmatchedFromRecon.evidence.unmatchedSettlementAmount)
+      : null;
+
+  const thirdStatus =
+    summary && summary.residualFundingNeedIdr > 0
+      ? {
+          label:
+            summary.cashBufferTargetIdr != null
+              ? `Funding needed to keep ${money(summary.cashBufferTargetIdr, ccy)} buffer`
+              : "Funding needed",
+          value: money(summary.residualFundingNeedIdr, ccy),
+          Icon: ShieldCheck,
+          wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
+        }
+      : summary && summary.addressableCashPressureIdr > 0
+        ? {
+            label: "Cash you can free up",
+            value: money(summary.addressableCashPressureIdr, ccy),
+            Icon: CircleDollarSign,
+            wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
+          }
+        : {
+            label: "Open actions",
+            value: String(summary?.openActionCount ?? overview.actions.length),
+            Icon: CircleDollarSign,
+            wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
+          };
+  const ThirdStatusIcon = thirdStatus.Icon;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        {overview.demoBadge ? <Badge>Demo data</Badge> : null}
-        <Badge variant="outline">asOf {overview.asOf}</Badge>
-        {active?.calculationVersion ? (
-          <Badge variant="secondary">{active.calculationVersion}</Badge>
-        ) : null}
-        {overlay ? (
-          <label className="ml-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              checked={showPlan}
-              onChange={(e) => setShowPlan(e.target.checked)}
+    <div className="space-y-10">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className={PAGE_HEADER.content}>
+          <div className={PAGE_HEADER.icon.container}>
+            <Building2
+              className={cn(PAGE_HEADER.icon.size, "text-primary")}
             />
-            Show plan overlay
-          </label>
-        ) : null}
-      </div>
-
-      {showPlan && overlay ? (
-        <p className="text-sm text-muted-foreground">
-          Comparing baseline vs one plan. Cards below use the plan path; the
-          chart shows both lines. Baseline low{" "}
-          {money(baseline?.minBalanceHorizon, ccy)}
-          {baseline?.minBalanceDate ? ` on ${baseline.minBalanceDate}` : ""}
-          {overlay.bufferBreachDate
-            ? ` · plan breaches buffer on ${overlay.bufferBreachDate}`
-            : " · plan stays above buffer"}
-          .
-        </p>
-      ) : null}
-
-      {!overview.cashPositionComplete ? (
-        <Card className="border-amber-300/60 dark:border-amber-700/50">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Add a dated account balance
-            </CardTitle>
-            <CardDescription>
-              Transactions show how cash moved, but they cannot establish how
-              much cash the business started with. Import a closing balance and
-              its date to complete this outlook.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild size="sm">
-              <Link
-                to={`${businessWorkspaceBase(customerId)}/connections`}
-              >
-                Add account balances
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Card
-          className="cursor-pointer"
-          onClick={() =>
-            openEvidence({
-              title: "Cash available",
-              formula: "Sum of base-currency account balances",
-              asOf: overview.asOf,
-              evidence: {
-                accountCount: overview.accountCount,
-                excludedCurrencies: overview.excludedCurrencies,
-                cashAvailable: overview.cashAvailable,
-              },
-            })
-          }
-        >
-          <CardHeader className="pb-2">
-            <CardDescription>Cash available ({ccy})</CardDescription>
-            <CardTitle className="text-2xl">
-              {overview.cashPositionComplete
-                ? money(overview.cashAvailable, ccy)
-                : "Incomplete"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {overview.accountCount} account
-            {overview.accountCount === 1 ? "" : "s"}
-            {overview.excludedCurrencies.length
-              ? ` · excluded ${overview.excludedCurrencies.join(", ")}`
-              : ""}
-          </CardContent>
-        </Card>
-
-        <Card
-          className="cursor-pointer"
-          onClick={() =>
-            openEvidence({
-              title: "13-week low point",
-              formula: "Minimum weekly projected balance in horizon",
-              asOf: overview.asOf,
-              calculationVersion: active?.calculationVersion,
-              qualityFlags: Array.isArray(active?.qualityFlags)
-                ? (active?.qualityFlags as string[])
-                : undefined,
-              evidence: {
-                scenario: active?.scenario ?? "baseline",
-                minBalanceHorizon: active?.minBalanceHorizon,
-                minBalanceDate: active?.minBalanceDate,
-                bufferBreachDate: active?.bufferBreachDate,
-                confidence: active?.confidence,
-              },
-            })
-          }
-        >
-          <CardHeader className="pb-2">
-            <CardDescription>
-              13-week lowest balance
-              {showPlan && overlay ? " (with plan)" : ""}
-            </CardDescription>
-            <CardTitle className="text-2xl">
-              {money(active?.minBalanceHorizon, ccy)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {active?.minBalanceDate
-              ? `On ${active.minBalanceDate}`
-              : "No outlook yet"}
-            {active?.bufferBreachDate
-              ? ` · buffer breach ${active.bufferBreachDate}`
-              : ""}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Before the low point</CardDescription>
-            <CardTitle className="text-lg">
-              In {money(active?.expectedInBeforeLow, ccy)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Commitments due {money(active?.commitmentsBeforeLow, ccy)}
-          </CardContent>
-        </Card>
-      </div>
-
-      {overview.primaryAction ? (
-        <Card
-          className="border-amber-300/60 dark:border-amber-700/50 cursor-pointer"
-          onClick={() =>
-            openEvidence({
-              title: overview.primaryAction!.title,
-              evidence: overview.primaryAction!.evidence ?? {},
-              asOf: overview.asOf,
-            })
-          }
-        >
-          <CardHeader>
-            <CardDescription>Most important action</CardDescription>
-            <CardTitle className="text-xl">
-              {overview.primaryAction.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>{overview.primaryAction.rationale}</p>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{overview.primaryAction.priority}</Badge>
-              {overview.primaryAction.dueDate ? (
-                <Badge variant="outline">
-                  due {overview.primaryAction.dueDate}
-                </Badge>
+          </div>
+          <div>
+            <h1 className={PAGE_HEADER.title}>{timeGreeting()}</h1>
+            <p className={PAGE_HEADER.description}>
+              Here&apos;s your cash position and what to focus on next.
+            </p>
+          </div>
+        </div>
+        {asOf ? (
+          <div className="flex items-start gap-2 text-sm text-muted-foreground sm:pt-1">
+            <CalendarDays className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="leading-snug sm:text-right">
+              <p>Data as of {formatShortDate(asOf)}</p>
+              {updatedAgo ? (
+                <p className="text-xs text-muted-foreground/80">{updatedAgo}</p>
               ) : null}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        ) : null}
+      </div>
+
+      {!overview.cashPositionComplete ? (
+        <div className="rounded-lg border border-amber-300/70 bg-amber-50/50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/20">
+          <p className="font-medium">Add a dated account balance</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Needed before cash decisions are complete.
+          </p>
+          <Button asChild size="sm" className="mt-3" variant="outline">
+            <Link to={`${base}/import`}>Import balances</Link>
+          </Button>
+        </div>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>13-week cash outlook</CardTitle>
-          <CardDescription>
-            Click a week for evidence. Solid line is baseline; dashed line is
-            with the plan when overlay is on. The action queue always reflects
-            the baseline scenario (plan effects stay in the comparison).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <WeeklyForecastChart
-            currency={ccy}
-            points={
-              (baseline?.weeklyBalances ?? []) as BusinessOverviewWeeklyPoint[]
-            }
-            overlayPoints={
-              showPlan && overlay
-                ? (overlay.weeklyBalances as BusinessOverviewWeeklyPoint[])
-                : undefined
-            }
-            onSelectWeek={(point) =>
-              openEvidence({
-                title: `Week ${point.week} · ${point.date}`,
-                formula:
-                  "Opening path + confirmed/expected/planned/modelled net flows",
-                asOf: overview.asOf,
-                calculationVersion: active?.calculationVersion,
-                evidence: point as unknown as Record<string, unknown>,
-              })
-            }
-          />
-        </CardContent>
-      </Card>
+      {/* Status — tinted icon left of label/value, no card chrome */}
+      <section className="grid gap-8 sm:grid-cols-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+            <Wallet className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">Cash balance</p>
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {overview.cashPositionComplete
+                ? money(overview.cashAvailable, ccy)
+                : "—"}
+            </p>
+          </div>
+        </div>
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300">
+            <TrendingDown className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">Lowest projected</p>
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {money(active?.minBalanceHorizon, ccy)}
+            </p>
+            {active?.minBalanceDate ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                on {formatShortDate(active.minBalanceDate)}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex min-w-0 items-start gap-3">
+          <div
+            className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+              thirdStatus.wrap,
+            )}
+          >
+            <ThirdStatusIcon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">{thirdStatus.label}</p>
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {thirdStatus.value}
+            </p>
+          </div>
+        </div>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Action queue</CardTitle>
-            <CardDescription>Ranked operational next steps</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {overview.actions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No open actions.</p>
-            ) : (
-              overview.actions.map((a) => (
+      {/* Actions — clearly tappable list rows */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">What to do next</h2>
+          <p className="text-sm text-muted-foreground">
+            Ranked by cash impact. Tap to see details and explore options.
+          </p>
+        </div>
+        {overview.actions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No open actions.</p>
+        ) : (
+          <div className="space-y-2">
+            {overview.actions.map((a) => {
+              const visual = actionVisual(a);
+              const Icon = visual.Icon;
+              return (
                 <button
                   key={a.id}
                   type="button"
-                  className="w-full rounded-lg border p-3 text-left hover:bg-muted/40"
-                  onClick={() =>
-                    openEvidence({
-                      title: a.title,
-                      evidence: a.evidence ?? {},
-                      asOf: overview.asOf,
-                    })
-                  }
+                  className="flex w-full items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onClick={() => openAction(a)}
                 >
-                  <div className="mb-1 flex items-center gap-2">
-                    <Badge variant="outline">{a.priority}</Badge>
-                    <span className="font-medium">{a.title}</span>
+                  <span
+                    className={cn(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                      visual.wrap,
+                    )}
+                  >
+                    <Icon className={cn("h-5 w-5", visual.icon)} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">{a.title}</p>
+                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                      {actionSubtitle(a, ccy)}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{a.rationale}</p>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium",
+                      urgencyTone(a.urgencyLabel),
+                    )}
+                  >
+                    {a.urgencyLabel}
+                  </span>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
                 </button>
-              ))
-            )}
-          </CardContent>
-        </Card>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Data freshness</CardTitle>
-            <CardDescription>
-              Confidence{" "}
-              {active?.confidence != null
-                ? Number(active.confidence).toFixed(2)
-                : "—"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              Sales days (28d): {overview.freshness.salesDaysInPeriod || "—"}
+      {/* Chart — projected cash path */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">13-week cash outlook</h2>
+            <p className="text-sm text-muted-foreground">
+              {showPlan && overlay
+                ? "Solid line is expected cash; dashed line includes your plan. Tap a week for the breakdown."
+                : "Expected cash over the next 13 weeks. Tap a week for the breakdown."}
             </p>
-            <p>Open receivables: {overview.freshness.openReceivableCount}</p>
-            <p>
-              Latest balance date:{" "}
-              {overview.freshness.latestBalanceAsOf
-                ? overview.freshness.latestBalanceAsOf
-                : "—"}
+          </div>
+          {overlay ? (
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                checked={showPlan}
+                onChange={(e) => setShowPlan(e.target.checked)}
+              />
+              Compare with plan
+            </label>
+          ) : null}
+        </div>
+        <WeeklyForecastChart
+          currency={ccy}
+          points={
+            (baseline?.weeklyBalances ?? []) as BusinessOverviewWeeklyPoint[]
+          }
+          overlayPoints={
+            showPlan && overlay
+              ? (overlay.weeklyBalances as BusinessOverviewWeeklyPoint[])
+              : undefined
+          }
+          onSelectWeek={(point) =>
+            openEvidence({
+              title: `Week ${point.week} · ${formatShortDate(point.date)}`,
+              evidence: {
+                "Expected cash (closing)": point.projectedBalance,
+                "Net movement this week": point.netFlow,
+                "Confirmed this week": point.confirmedNet,
+                "Expected this week": point.expectedNet,
+                "From plans this week": point.plannedNet,
+              },
+            })
+          }
+        />
+      </section>
+
+      {/* Supporting — Key drivers + Recent data */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border bg-background p-5">
+          <div className="mb-4">
+            <h3 className="text-base font-semibold">Key drivers</h3>
+            <p className="text-sm text-muted-foreground">
+              Main inputs behind the outlook.
             </p>
-            <Button asChild variant="outline" size="sm">
-              <Link
-                to={`${businessWorkspaceBase(customerId)}/connections`}
-              >
-                Open Data
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {overview.capabilities?.high_frequency_sales && salesModule ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{salesModule.label}</CardTitle>
-            <CardDescription>
-              Settlement and operating cash ratios — not accounting profit
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {salesMetrics.map((m) => (
-              <button
-                key={m.code}
-                type="button"
-                className="rounded-lg border p-3 text-left hover:bg-muted/40"
-                onClick={() =>
-                  openEvidence({
-                    title: businessMetricLabel(m.code) ?? m.code,
-                    metric: m,
-                    asOf: m.asOf,
-                  })
-                }
-              >
-                <p className="text-xs text-muted-foreground">
-                  {businessMetricLabel(m.code) ?? m.code}
-                </p>
-                <p className="mt-1 text-lg font-semibold">
-                  {metricValue(m, ccy)}
-                </p>
-                {m.suppressed ? (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {m.suppressionReason ?? "suppressed"}
-                  </p>
-                ) : null}
-              </button>
-            ))}
-            <div className="rounded-lg border p-3">
-              <p className="text-xs text-muted-foreground">POS↔bank matched</p>
-              <p className="mt-1 text-lg font-semibold">
-                {salesModule.settlement.matchedCount} /{" "}
-                {salesModule.settlement.matchedCount +
-                  salesModule.settlement.unmatchedCount}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {overview.capabilities?.invoice_led && invoiceModule ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{invoiceModule.label}</CardTitle>
-            <CardDescription>
-              Aging, concentration, and collection pressure
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {invoiceMetrics.map((m) => (
-                <button
-                  key={m.code}
-                  type="button"
-                  className="rounded-lg border p-3 text-left hover:bg-muted/40"
-                  onClick={() =>
-                    openEvidence({
-                      title: businessMetricLabel(m.code) ?? m.code,
-                      metric: m,
-                      asOf: m.asOf,
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              className="rounded-xl border p-3 text-left transition-colors hover:bg-muted/40"
+              onClick={() =>
+                netSales
+                  ? openEvidence({
+                      title: "Net sales",
+                      metric: netSales,
                     })
-                  }
-                >
-                  <p className="text-xs text-muted-foreground">
-                    {businessMetricLabel(m.code) ?? m.code}
-                  </p>
-                  <p className="mt-1 text-lg font-semibold line-clamp-3">
-                    {metricValue(m, ccy)}
-                  </p>
-                </button>
-              ))}
-            </div>
-            {(invoiceModule.actions ?? []).slice(0, 3).map((a, idx) => (
-              <div key={idx} className="rounded-lg border p-3 text-sm">
-                <p className="font-medium">
-                  {String(a.recommendedStep ?? a.problem)}
+                  : undefined
+              }
+            >
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <p className="text-xs text-muted-foreground">Net sales (28d)</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight">
+                {netSales ? metricValue(netSales, ccy) : "—"}
+              </p>
+              {salesDays > 0 ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {salesDays} sales day{salesDays === 1 ? "" : "s"}
                 </p>
-                <p className="mt-1 text-muted-foreground">
-                  {String(a.whyNow ?? "")}
+              ) : null}
+            </button>
+
+            <div className="rounded-xl border p-3">
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+                <Users className="h-4 w-4" />
+              </span>
+              <p className="text-xs text-muted-foreground">Sales days</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight">
+                {salesDays || "—"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">of 28 days</p>
+            </div>
+
+            <Link
+              to={`${base}/money?tab=in`}
+              className="rounded-xl border p-3 transition-colors hover:bg-muted/40"
+            >
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+                <CreditCard className="h-4 w-4" />
+              </span>
+              <p className="text-xs text-muted-foreground">Open receivables</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight">
+                {openReceivableAmount != null
+                  ? money(openReceivableAmount, ccy)
+                  : openReceivableCount > 0
+                    ? `${openReceivableCount}`
+                    : "—"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {openReceivableCount} open
+              </p>
+            </Link>
+
+            <button
+              type="button"
+              className="rounded-xl border p-3 text-left transition-colors hover:bg-muted/40"
+              onClick={() =>
+                coverage
+                  ? openEvidence({
+                      title: "Commitment coverage",
+                      metric: coverage,
+                    })
+                  : undefined
+              }
+            >
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-800 dark:bg-violet-950/50 dark:text-violet-300">
+                <Link2 className="h-4 w-4" />
+              </span>
+              <p className="text-xs text-muted-foreground">
+                Commitment coverage
+              </p>
+              <p className="mt-1 text-lg font-semibold tracking-tight">
+                {coverage && typeof coverage.value === "number"
+                  ? `${(coverage.value * 100).toFixed(1)}%`
+                  : "—"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                of expected outflows
+              </p>
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-background p-5">
+          <div className="mb-4">
+            <h3 className="text-base font-semibold">Recent data</h3>
+            <p className="text-sm text-muted-foreground">
+              Latest data and imports.
+            </p>
+          </div>
+          <div className="divide-y rounded-xl border">
+            <Link
+              to={`${base}/money`}
+              className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/40"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+                <Building2 className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Bank statements</p>
+                <p className="text-xs text-muted-foreground">
+                  {asOf ? formatShortDate(asOf) : "No balance date"}
                 </p>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-xs font-medium",
+                  overview.cashPositionComplete
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+                )}
+              >
+                {overview.cashPositionComplete ? "Up to date" : "Needs update"}
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </Link>
 
+            <Link
+              to={`${base}/import`}
+              className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/40"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+                <QrCode className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Sales</p>
+                <p className="text-xs text-muted-foreground">
+                  {salesDays > 0
+                    ? `${salesDays} days in period`
+                    : "No sales loaded"}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-xs font-medium",
+                  salesDays > 0
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+                )}
+              >
+                {salesDays > 0 ? "Up to date" : "Needs update"}
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </Link>
+
+            <Link
+              to={`${base}/money?tab=out`}
+              className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/40"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+                <FileText className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">Bills</p>
+                <p className="text-xs text-muted-foreground">
+                  {asOf ? formatShortDate(asOf) : "Commitments in workspace"}
+                </p>
+              </div>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                Up to date
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </Link>
+          </div>
+          <Link
+            to={`${base}/import`}
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline dark:text-sky-400"
+          >
+            Go to data
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      <ActionDetailSheet
+        open={actionOpen}
+        onOpenChange={setActionOpen}
+        action={selectedAction}
+        currency={ccy}
+        onMarkDone={(id) => void setActionStatus(id, "completed")}
+        onDismiss={(id) => void setActionStatus(id, "dismissed")}
+      />
       <EvidenceDrawer
         open={evidenceOpen}
         onOpenChange={setEvidenceOpen}

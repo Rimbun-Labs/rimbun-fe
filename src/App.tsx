@@ -41,11 +41,17 @@ const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
 const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
 const BusinessOverview = lazy(() => import("./pages/business/BusinessOverview"));
 const BusinessAccounts = lazy(() => import("./pages/business/BusinessAccounts"));
+const BusinessMoney = lazy(() => import("./pages/business/BusinessMoney"));
 const BusinessMoneyIn = lazy(() => import("./pages/business/BusinessMoneyIn"));
 const BusinessMoneyOut = lazy(() => import("./pages/business/BusinessMoneyOut"));
+const BusinessUpcomingCash = lazy(
+  () => import("./pages/business/BusinessUpcomingCash"),
+);
 const BusinessFinancing = lazy(() => import("./pages/business/BusinessFinancing"));
 const BusinessPlans = lazy(() => import("./pages/business/BusinessPlans"));
 const BusinessConnections = lazy(() => import("./pages/business/BusinessConnections"));
+const BusinessImport = lazy(() => import("./pages/business/BusinessImport"));
+const BusinessSources = lazy(() => import("./pages/business/BusinessSources"));
 const CustomerBusinessOverview = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessOverview,
@@ -54,6 +60,11 @@ const CustomerBusinessOverview = lazy(() =>
 const CustomerBusinessAccounts = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessAccounts,
+  }))
+);
+const CustomerBusinessMoney = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessMoney,
   }))
 );
 const CustomerBusinessMoneyIn = lazy(() =>
@@ -66,6 +77,11 @@ const CustomerBusinessMoneyOut = lazy(() =>
     default: m.CustomerBusinessMoneyOut,
   }))
 );
+const CustomerBusinessUpcomingCash = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessUpcomingCash,
+  }))
+);
 const CustomerBusinessFinancing = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessFinancing,
@@ -74,6 +90,21 @@ const CustomerBusinessFinancing = lazy(() =>
 const CustomerBusinessPlans = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessPlans,
+  }))
+);
+const CustomerBusinessImport = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessImport,
+  }))
+);
+const CustomerBusinessSources = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessSources,
+  }))
+);
+const CustomerBusinessConnections = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessConnections,
   }))
 );
 const Learning = lazy(() => import("./pages/Learning"));
@@ -230,10 +261,26 @@ const AppRoutes = () => {
           } 
         />
         <Route
+          path="/app/money"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessMoney />
+            </Suspense>
+          }
+        />
+        <Route
           path="/app/accounts"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <BusinessAccounts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/upcoming-cash"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessUpcomingCash />
             </Suspense>
           }
         />
@@ -266,6 +313,22 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <BusinessPlans />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/import"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessImport />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/sources"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessSources />
             </Suspense>
           }
         />
@@ -318,10 +381,26 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/app/customers/:customerId/business/money"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessMoney />
+            </Suspense>
+          }
+        />
+        <Route
           path="/app/customers/:customerId/business/accounts"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerBusinessAccounts />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/upcoming-cash"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessUpcomingCash />
             </Suspense>
           }
         />
@@ -354,6 +433,30 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerBusinessPlans />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/import"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessImport />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/sources"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessSources />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/connections"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessConnections />
             </Suspense>
           }
         />

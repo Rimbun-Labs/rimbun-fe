@@ -16,11 +16,9 @@ import {
   UserCircle,
   Users,
   Wallet,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Landmark,
   CalendarDays,
   Plug,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -107,39 +105,38 @@ const MobileMenu: React.FC = () => {
 
         <nav className="space-y-6">
           {isBusinessTenant ? (
-            <div className="space-y-2">
-              <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
-                Workspace
-              </h3>
-              <Link to={APP_ROOT} className={linkClass(location.pathname === APP_ROOT)} onClick={closeMobileMenu}>
-                <LayoutDashboard className="h-4 w-4" />
-                Home
-              </Link>
-              <Link to={`${APP_ROOT}/accounts`} className={linkClass(isActive(`${APP_ROOT}/accounts`))} onClick={closeMobileMenu}>
-                <Wallet className="h-4 w-4" />
-                Cash
-              </Link>
-              <Link to={`${APP_ROOT}/money-in`} className={linkClass(isActive(`${APP_ROOT}/money-in`))} onClick={closeMobileMenu}>
-                <ArrowDownLeft className="h-4 w-4" />
-                Money in
-              </Link>
-              <Link to={`${APP_ROOT}/money-out`} className={linkClass(isActive(`${APP_ROOT}/money-out`))} onClick={closeMobileMenu}>
-                <ArrowUpRight className="h-4 w-4" />
-                Money out
-              </Link>
-              <Link to={`${APP_ROOT}/plans`} className={linkClass(isActive(`${APP_ROOT}/plans`))} onClick={closeMobileMenu}>
-                <CalendarDays className="h-4 w-4" />
-                Plans
-              </Link>
-              <Link to={`${APP_ROOT}/connections`} className={linkClass(isActive(`${APP_ROOT}/connections`))} onClick={closeMobileMenu}>
-                <Plug className="h-4 w-4" />
-                Data
-              </Link>
-              <Link to={`${APP_ROOT}/financing`} className={linkClass(isActive(`${APP_ROOT}/financing`))} onClick={closeMobileMenu}>
-                <Landmark className="h-4 w-4" />
-                Financing
-              </Link>
-            </div>
+            <>
+              <div className="space-y-2">
+                <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                  Business
+                </h3>
+                <Link to={APP_ROOT} className={linkClass(location.pathname === APP_ROOT)} onClick={closeMobileMenu}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  Home
+                </Link>
+                <Link to={`${APP_ROOT}/money`} className={linkClass(isActive(`${APP_ROOT}/money`))} onClick={closeMobileMenu}>
+                  <Wallet className="h-4 w-4" />
+                  Money
+                </Link>
+                <Link to={`${APP_ROOT}/plans`} className={linkClass(isActive(`${APP_ROOT}/plans`))} onClick={closeMobileMenu}>
+                  <CalendarDays className="h-4 w-4" />
+                  Plans
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
+                  Data
+                </h3>
+                <Link to={`${APP_ROOT}/import`} className={linkClass(isActive(`${APP_ROOT}/import`))} onClick={closeMobileMenu}>
+                  <Upload className="h-4 w-4" />
+                  Import data
+                </Link>
+                <Link to={`${APP_ROOT}/sources`} className={linkClass(isActive(`${APP_ROOT}/sources`))} onClick={closeMobileMenu}>
+                  <Plug className="h-4 w-4" />
+                  Sources
+                </Link>
+              </div>
+            </>
           ) : (
             <>
               <div className="space-y-2">
@@ -176,31 +173,26 @@ const MobileMenu: React.FC = () => {
                     <>
                       <Link to={businessBase} className={linkClass(location.pathname === businessBase)} onClick={closeMobileMenu}>
                         <Building2 className="h-4 w-4" />
-                        Overview
+                        Home
                       </Link>
-                      <Link to={`${businessBase}/accounts`} className={linkClass(isActive(`${businessBase}/accounts`))} onClick={closeMobileMenu}>
+                      <Link to={`${businessBase}/money`} className={linkClass(isActive(`${businessBase}/money`))} onClick={closeMobileMenu}>
                         <Wallet className="h-4 w-4" />
-                        Cash
-                      </Link>
-                      <Link to={`${businessBase}/money-in`} className={linkClass(isActive(`${businessBase}/money-in`))} onClick={closeMobileMenu}>
-                        <ArrowDownLeft className="h-4 w-4" />
-                        Money in
-                      </Link>
-                      <Link to={`${businessBase}/money-out`} className={linkClass(isActive(`${businessBase}/money-out`))} onClick={closeMobileMenu}>
-                        <ArrowUpRight className="h-4 w-4" />
-                        Money out
+                        Money
                       </Link>
                       <Link to={`${businessBase}/plans`} className={linkClass(isActive(`${businessBase}/plans`))} onClick={closeMobileMenu}>
                         <CalendarDays className="h-4 w-4" />
                         Plans
                       </Link>
-                      <Link to={`${businessBase}/connections`} className={linkClass(isActive(`${businessBase}/connections`))} onClick={closeMobileMenu}>
-                        <Plug className="h-4 w-4" />
+                      <h3 className="px-2 pt-3 text-sm font-semibold text-muted-foreground sidebar-section-header">
                         Data
+                      </h3>
+                      <Link to={`${businessBase}/import`} className={linkClass(isActive(`${businessBase}/import`))} onClick={closeMobileMenu}>
+                        <Upload className="h-4 w-4" />
+                        Import data
                       </Link>
-                      <Link to={`${businessBase}/financing`} className={linkClass(isActive(`${businessBase}/financing`))} onClick={closeMobileMenu}>
-                        <Landmark className="h-4 w-4" />
-                        Financing
+                      <Link to={`${businessBase}/sources`} className={linkClass(isActive(`${businessBase}/sources`))} onClick={closeMobileMenu}>
+                        <Plug className="h-4 w-4" />
+                        Sources
                       </Link>
                       <Link to={`${customerBase}/products`} className={linkClass(location.pathname.includes('/products'))} onClick={closeMobileMenu}>
                         <Package className="h-4 w-4" />

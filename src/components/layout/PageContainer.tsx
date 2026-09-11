@@ -10,9 +10,9 @@ interface PageContainerProps {
 
 /**
  * Standardized page container component
- * 
+ *
  * Provides consistent padding and spacing across all pages
- * 
+ *
  * Usage:
  * <PageContainer>
  *   <PageHeader ... />
@@ -24,18 +24,16 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   className,
   spacing = 'default',
 }) => {
-  const spacingClass = spacing === 'tight' 
-    ? SPACING.page.tight 
-    : spacing === 'loose'
-    ? SPACING.page.section
-    : SPACING.page.section;
+  const spacingClass =
+    spacing === 'tight'
+      ? SPACING.page.tight
+      : spacing === 'loose'
+        ? SPACING.page.section
+        : SPACING.page.section;
 
   return (
-    <div className={cn(SPACING.page.container, 'min-w-0', className)}>
-      <div className={cn('w-full min-w-0', spacingClass)}>
-        {children}
-      </div>
+    <div className={cn(SPACING.page.container, 'min-w-0 w-full', className)}>
+      <div className={cn('w-full min-w-0', spacingClass)}>{children}</div>
     </div>
   );
 };
-

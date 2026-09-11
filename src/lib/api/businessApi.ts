@@ -327,6 +327,47 @@ export type BusinessOverviewForecast = {
   bufferBreachDate?: string | null;
 };
 
+export type BusinessOverviewAction = {
+  id: string;
+  title: string;
+  rationale: string;
+  why?: string;
+  priority: string;
+  dueDate: string | null;
+  actionType: string | null;
+  impactIdr: number | null;
+  impactCurrency: string | null;
+  impactKind: string | null;
+  impactLabel: string | null;
+  urgency: string;
+  urgencyLabel: string;
+  baselineSummary: string | null;
+  scenarioSummary: string | null;
+  baselineMetric?: Record<string, unknown> | null;
+  scenarioMetric?: Record<string, unknown> | null;
+  evidenceRows: Array<{
+    label: string;
+    amount: number | null;
+    date: string | null;
+    detail: string | null;
+  }>;
+  relatedEntityIds: string[];
+  effectiveDate: string | null;
+  validUntil: string | null;
+  actionKey: string | null;
+  evidence?: Record<string, unknown>;
+};
+
+export type BusinessOverviewCashSummary = {
+  addressableCashPressureIdr: number;
+  residualFundingNeedIdr: number;
+  residualFundingDate: string | null;
+  cashBufferTargetIdr?: number | null;
+  costSavingsIdr: number;
+  openActionCount: number;
+  attribution: Array<Record<string, unknown>>;
+};
+
 export type BusinessOverview = {
   asOf: string;
   demoBadge: boolean;
@@ -344,23 +385,9 @@ export type BusinessOverview = {
   accountCount: number;
   forecast: BusinessOverviewForecast | null;
   planOverlay: BusinessOverviewForecast | null;
-  primaryAction: {
-    id: string;
-    title: string;
-    rationale: string;
-    priority: string;
-    dueDate: string | null;
-    evidence?: Record<string, unknown>;
-  } | null;
-  actions: Array<{
-    id: string;
-    title: string;
-    rationale: string;
-    priority: string;
-    dueDate: string | null;
-    actionType: string;
-    evidence?: Record<string, unknown>;
-  }>;
+  cashSummary?: BusinessOverviewCashSummary;
+  primaryAction: BusinessOverviewAction | null;
+  actions: BusinessOverviewAction[];
   warnings: Array<{
     id: string;
     title: string;
@@ -387,6 +414,7 @@ export type BusinessOverview = {
         periodStart?: string;
         periodEnd?: string;
         calculationVersion: string;
+        unmatchedAmount?: number;
       };
     } | null;
     invoice_led: {

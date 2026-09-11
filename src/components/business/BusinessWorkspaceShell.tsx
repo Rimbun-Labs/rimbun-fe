@@ -10,24 +10,27 @@ type Props = {
   title: string;
   description: string;
   customerIdOverride?: string;
-  children: (workspace: ReturnType<typeof useBusinessWorkspace>) => React.ReactNode;
+  /** When true, page renders its own header (e.g. Home with data-as-of aside). */
+  hideHeader?: boolean;
+  children: (
+    workspace: ReturnType<typeof useBusinessWorkspace>,
+  ) => React.ReactNode;
 };
 
 export function BusinessWorkspaceShell({
   title,
   description,
   customerIdOverride,
+  hideHeader = false,
   children,
 }: Props) {
   const workspace = useBusinessWorkspace(customerIdOverride);
 
   return (
     <PageContainer>
-      <PageHeader
-        icon={Building2}
-        title={title}
-        description={description}
-      />
+      {!hideHeader ? (
+        <PageHeader icon={Building2} title={title} description={description} />
+      ) : null}
 
       {workspace.loading ? (
         <div className="space-y-3">

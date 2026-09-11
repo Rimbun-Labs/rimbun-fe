@@ -1,9 +1,7 @@
 import React from "react";
 import {
-  Area,
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -15,9 +13,14 @@ import type { BusinessOverviewWeeklyPoint } from "@/lib/api/businessApi";
 type Props = {
   currency: string;
   points: BusinessOverviewWeeklyPoint[];
-  /** Optional second series (plan overlay projected cash). */
+  /** Dashed series when user compares with plan. */
   overlayPoints?: BusinessOverviewWeeklyPoint[];
   onSelectWeek?: (point: BusinessOverviewWeeklyPoint) => void;
+};
+
+const COLORS = {
+  cash: "#0f172a",
+  withPlan: "#64748b",
 };
 
 function formatMoney(n: number, currency: string) {
@@ -28,6 +31,33 @@ function formatMoney(n: number, currency: string) {
   }).format(n);
 }
 
+function LegendItem({
+  color,
+  label,
+  dashed,
+}: {
+  color: string;
+  label: string;
+  dashed?: boolean;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span
+        className="inline-block w-5 border-t-2"
+        style={{
+          borderColor: color,
+          borderStyle: dashed ? "dashed" : "solid",
+        }}
+      />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * Owner-facing cash outlook: projected balance over weeks.
+ * Weekly flow breakdown lives in week detail, not on the chart face.
+ */
 export function WeeklyForecastChart({
   currency,
   points,
@@ -37,111 +67,119 @@ export function WeeklyForecastChart({
   if (!points.length) {
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
-        Weekly forecast points appear after the outlook is calculated.
+        Weekly outlook appears after cash is calculated.
       </p>
     );
   }
+
+  const showPlan = Boolean(overlayPoints && overlayPoints.length > 0);
 
   const overlayByWeek = new Map(
     (overlayPoints ?? []).map((p) => [p.week, p.projectedBalance]),
   );
   const data = points.map((p) => ({
-    ...p,
-    overlayBalance: overlayByWeek.get(p.week) ?? null,
+    week: p.week,
+    date: p.date,
+    expectedCash: p.projectedBalance,
+    withPlan: overlayByWeek.get(p.week) ?? null,
+    _point: p,
   }));
 
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart
-          data={data}
-          onClick={(state) => {
-            const payload = (
-              state as {
-                activePayload?: Array<{ payload: BusinessOverviewWeeklyPoint }>;
-              }
-            )?.activePayload?.[0]?.payload;
-            if (payload && onSelectWeek) onSelectWeek(payload);
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis
-            dataKey="week"
-            tickFormatter={(w) => `W${w}`}
-            tick={{ fontSize: 12 }}
-          />
-          <YAxis
-            tickFormatter={(v) =>
-              new Intl.NumberFormat(undefined, {
-                notation: "compact",
-                maximumFractionDigits: 1,
-              }).format(Number(v))
-            }
-            tick={{ fontSize: 12 }}
-            width={56}
-          />
-          <Tooltip
-            formatter={(value: number, name: string) => [
-              formatMoney(value, currency),
-              name,
-            ]}
-            labelFormatter={(_, payload) => {
-              const p = payload?.[0]?.payload as
-                | BusinessOverviewWeeklyPoint
-                | undefined;
-              return p ? `Week ${p.week} · ${p.date}` : "";
+    <div className="w-full space-y-3">
+      <div className="h-72 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 12, right: 16, left: 12, bottom: 28 }}
+            onClick={(state) => {
+              const row = (
+                state as {
+                  activePayload?: Array<{
+                    payload: { _point: BusinessOverviewWeeklyPoint };
+                  }>;
+                }
+              )?.activePayload?.[0]?.payload;
+              if (row?._point && onSelectWeek) onSelectWeek(row._point);
             }}
-          />
-          <Legend />
-          <Area
-            type="monotone"
-            dataKey="confirmedNet"
-            name="Confirmed net"
-            stackId="flow"
-            fill="hsl(var(--chart-1))"
-            stroke="hsl(var(--chart-1))"
-            fillOpacity={0.25}
-          />
-          <Area
-            type="monotone"
-            dataKey="expectedNet"
-            name="Expected net"
-            stackId="flow"
-            fill="hsl(var(--chart-2))"
-            stroke="hsl(var(--chart-2))"
-            fillOpacity={0.2}
-          />
-          <Area
-            type="monotone"
-            dataKey="plannedNet"
-            name="Planned net"
-            stackId="flow"
-            fill="hsl(var(--chart-3))"
-            stroke="hsl(var(--chart-3))"
-            fillOpacity={0.2}
-          />
-          <Line
-            type="monotone"
-            dataKey="projectedBalance"
-            name="Baseline cash"
-            stroke="hsl(var(--foreground))"
-            strokeWidth={2}
-            dot={{ r: 3 }}
-          />
-          {overlayPoints && overlayPoints.length > 0 ? (
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis
+              dataKey="week"
+              tickFormatter={(w) => `W${w}`}
+              tick={{ fontSize: 12, fill: "#64748b" }}
+              label={{
+                value: "Week",
+                position: "insideBottom",
+                offset: -14,
+                style: { fontSize: 12, fill: "#64748b" },
+              }}
+            />
+            <YAxis
+              tickFormatter={(v) =>
+                new Intl.NumberFormat(undefined, {
+                  notation: "compact",
+                  maximumFractionDigits: 1,
+                }).format(Number(v))
+              }
+              tick={{ fontSize: 12, fill: "#64748b" }}
+              width={68}
+              label={{
+                value: `Cash (${currency})`,
+                angle: -90,
+                position: "insideLeft",
+                offset: 4,
+                style: { fontSize: 12, fill: "#64748b" },
+              }}
+            />
+            <Tooltip
+              formatter={(value: number, name: string) => [
+                formatMoney(Number(value), currency),
+                name,
+              ]}
+              labelFormatter={(_, payload) => {
+                const row = payload?.[0]?.payload as
+                  | { week: number; date: string }
+                  | undefined;
+                return row ? `Week ${row.week} · ${row.date}` : "";
+              }}
+            />
             <Line
               type="monotone"
-              dataKey="overlayBalance"
-              name="With plan"
-              stroke="hsl(var(--destructive))"
-              strokeWidth={2}
-              strokeDasharray="5 4"
-              dot={{ r: 2 }}
-              connectNulls
+              dataKey="expectedCash"
+              name="Expected cash"
+              stroke={COLORS.cash}
+              strokeWidth={2.5}
+              dot={{ r: 3.5, fill: "#fff", stroke: COLORS.cash, strokeWidth: 2 }}
+              activeDot={{ r: 5 }}
             />
-          ) : null}
-        </ComposedChart>
-      </ResponsiveContainer>
+            {showPlan ? (
+              <Line
+                type="monotone"
+                dataKey="withPlan"
+                name="With plan"
+                stroke={COLORS.withPlan}
+                strokeWidth={2}
+                strokeDasharray="6 4"
+                dot={{
+                  r: 2.5,
+                  fill: "#fff",
+                  stroke: COLORS.withPlan,
+                  strokeWidth: 2,
+                }}
+                connectNulls
+              />
+            ) : null}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2">
+        <LegendItem color={COLORS.cash} label="Expected cash" />
+        {showPlan ? (
+          <LegendItem color={COLORS.withPlan} label="With plan" dashed />
+        ) : null}
+      </div>
     </div>
   );
 }
