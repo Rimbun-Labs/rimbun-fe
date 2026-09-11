@@ -17,6 +17,7 @@ import {
   CalendarDays,
   Plug,
   Upload,
+  FileText,
 } from 'lucide-react';
 import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -129,6 +130,13 @@ const AppSidebar: React.FC = () => {
               <CalendarDays className="h-4 w-4" />
               Plans
             </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/review`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <FileText className="h-4 w-4" />
+              Review
+            </NavLink>
           </div>
 
           <div className="space-y-1">
@@ -232,6 +240,15 @@ const AppSidebar: React.FC = () => {
                 >
                   <CalendarDays className="h-4 w-4" />
                   Plans
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/review`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <FileText className="h-4 w-4" />
+                  Review
                 </NavLink>
                 <div className="px-3 pb-1 pt-3">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

@@ -327,6 +327,20 @@ export type BusinessOverviewForecast = {
   bufferBreachDate?: string | null;
 };
 
+export type BusinessClaimType =
+  | "observed"
+  | "calculated"
+  | "conditional"
+  | "benchmark_based";
+
+export type BusinessImpactBasis =
+  | "gross_amount"
+  | "minimum_cash_change"
+  | "funding_need_reduction"
+  | "cost_saving";
+
+export type BusinessEvidenceQuality = "complete" | "partial" | "insufficient";
+
 export type BusinessOverviewAction = {
   id: string;
   title: string;
@@ -339,6 +353,14 @@ export type BusinessOverviewAction = {
   impactCurrency: string | null;
   impactKind: string | null;
   impactLabel: string | null;
+  claimType?: BusinessClaimType | null;
+  impactBasis?: BusinessImpactBasis | null;
+  evidenceQuality?: BusinessEvidenceQuality | null;
+  grossAmountIdr?: number | null;
+  assumptions?: string[];
+  standaloneMinCashChangeIdr?: number | null;
+  standaloneFundingNeedReductionIdr?: number | null;
+  sequentialFundingNeedReductionIdr?: number | null;
   urgency: string;
   urgencyLabel: string;
   baselineSummary: string | null;
@@ -359,10 +381,18 @@ export type BusinessOverviewAction = {
 };
 
 export type BusinessOverviewCashSummary = {
+  baselineFundingNeedIdr?: number;
+  conditionalFundingReductionIdr?: number;
+  residualFundingNeedIfActionsSucceedIdr?: number;
+  verifiedMissingCashIdr?: number;
+  estimatedCostOpportunityIdr?: number;
+  /** @deprecated use conditionalFundingReductionIdr */
   addressableCashPressureIdr: number;
+  /** @deprecated use residualFundingNeedIfActionsSucceedIdr */
   residualFundingNeedIdr: number;
   residualFundingDate: string | null;
   cashBufferTargetIdr?: number | null;
+  /** @deprecated use estimatedCostOpportunityIdr */
   costSavingsIdr: number;
   openActionCount: number;
   attribution: Array<Record<string, unknown>>;
@@ -415,6 +445,8 @@ export type BusinessOverview = {
         periodEnd?: string;
         calculationVersion: string;
         unmatchedAmount?: number;
+        actionableMissingCount?: number;
+        actionableMissingAmount?: number;
       };
     } | null;
     invoice_led: {
@@ -429,6 +461,7 @@ export type BusinessOverview = {
     accountsSyncedAt: string | null;
     salesDaysInPeriod: number;
     openReceivableCount: number;
+    openReceivableAmount?: number | null;
   };
 };
 
@@ -462,7 +495,13 @@ export async function listActions(
 export async function updateAction(
   customerId: string,
   actionId: string,
-  body: { status: string; completionNotes?: string },
+  body: {
+    status: string;
+    completionNotes?: string;
+    outcome?: "recovered" | "negotiated" | "completed" | "attempted_no_result";
+    actualAmount?: number;
+    completedAt?: string;
+  },
 ): Promise<BusinessAction> {
   const { data } = await apiClient.put(
     `/business/customers/${customerId}/actions/${actionId}`,

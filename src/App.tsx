@@ -52,6 +52,7 @@ const BusinessPlans = lazy(() => import("./pages/business/BusinessPlans"));
 const BusinessConnections = lazy(() => import("./pages/business/BusinessConnections"));
 const BusinessImport = lazy(() => import("./pages/business/BusinessImport"));
 const BusinessSources = lazy(() => import("./pages/business/BusinessSources"));
+const BusinessReview = lazy(() => import("./pages/business/BusinessReview"));
 const CustomerBusinessOverview = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessOverview,
@@ -105,6 +106,11 @@ const CustomerBusinessSources = lazy(() =>
 const CustomerBusinessConnections = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessConnections,
+  }))
+);
+const CustomerBusinessReview = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessReview,
   }))
 );
 const Learning = lazy(() => import("./pages/Learning"));
@@ -317,6 +323,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/app/review"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessReview />
+            </Suspense>
+          }
+        />
+        <Route
           path="/app/import"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
@@ -433,6 +447,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerBusinessPlans />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/review"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessReview />
             </Suspense>
           }
         />

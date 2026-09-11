@@ -38,6 +38,11 @@ import {
   type BusinessOverviewWeeklyPoint,
 } from "@/lib/api/businessApi";
 import { businessWorkspaceBase } from "@/lib/businessPaths";
+import {
+  cashSummaryValues,
+  claimTypeLabel,
+  residualFundingCopy,
+} from "@/lib/business/claimLabels";
 import { cn } from "@/lib/utils";
 
 function money(
@@ -203,19 +208,30 @@ function actionSubtitle(
   action: BusinessOverviewAction,
   currency: string,
 ): string {
+  const classification = claimTypeLabel(
+    action.claimType,
+    action.evidenceQuality,
+  );
   const unmatchedGross =
     action.impactKind === "cash_release" &&
-    action.evidenceRows[0]?.amount != null
-      ? Number(action.evidenceRows[0].amount)
+    (action.grossAmountIdr != null || action.evidenceRows[0]?.amount != null)
+      ? Number(action.grossAmountIdr ?? action.evidenceRows[0]?.amount)
       : null;
   if (unmatchedGross != null) {
-    const n = action.evidenceRows.length;
-    return `${money(unmatchedGross, currency)} unmatched${
-      n > 0 ? ` · ${n} expected payout${n === 1 ? "" : "s"}` : ""
+    const detailCount = Math.max(
+      0,
+      action.evidenceRows.length > 1
+        ? action.evidenceRows.length - 1
+        : action.evidenceRows.length,
+    );
+    return `${classification} · ${money(unmatchedGross, currency)} unmatched${
+      detailCount > 0
+        ? ` · ${detailCount} expected payout${detailCount === 1 ? "" : "s"}`
+        : ""
     }`;
   }
-  if (action.impactLabel) return action.impactLabel;
-  return action.why ?? action.rationale;
+  if (action.impactLabel) return `${classification} · ${action.impactLabel}`;
+  return `${classification} · ${action.why ?? action.rationale}`;
 }
 
 const BusinessOverviewPage: React.FC<{ customerIdOverride?: string }> = ({
@@ -277,8 +293,17 @@ const OverviewBody: React.FC<{
   const setActionStatus = async (
     actionId: string,
     status: "completed" | "dismissed",
+    extras?: {
+      outcome?: "recovered" | "negotiated" | "completed" | "attempted_no_result";
+      actualAmount?: number;
+      completedAt?: string;
+      completionNotes?: string;
+    },
   ) => {
-    await updateAction(customerId, actionId, { status });
+    await updateAction(customerId, actionId, {
+      status,
+      ...extras,
+    });
     setActionOpen(false);
     setSelectedAction(null);
     await load();
@@ -327,6 +352,7 @@ const OverviewBody: React.FC<{
   const salesMetrics = salesModule?.metrics ?? [];
   const invoiceMetrics = invoiceModule?.metrics ?? [];
   const summary = overview.cashSummary;
+  const cash = cashSummaryValues(summary);
   const base = businessWorkspaceBase(customerId);
   const asOf = overview.freshness.latestBalanceAsOf;
   const updatedAgo = formatUpdatedAgo(
@@ -346,37 +372,25 @@ const OverviewBody: React.FC<{
       ? Number(netSales.evidence["Sales days"])
       : 0);
   const openReceivableCount = overview.freshness.openReceivableCount;
-  const unmatchedFromRecon = byCode("pos_bank_reconciliation_rate");
   const openReceivableAmount =
-    typeof unmatchedFromRecon?.evidence?.unmatchedSettlementAmount === "number"
-      ? Number(unmatchedFromRecon.evidence.unmatchedSettlementAmount)
+    typeof overview.freshness.openReceivableAmount === "number"
+      ? overview.freshness.openReceivableAmount
       : null;
 
-  const thirdStatus =
-    summary && summary.residualFundingNeedIdr > 0
-      ? {
-          label:
-            summary.cashBufferTargetIdr != null
-              ? `Funding needed to keep ${money(summary.cashBufferTargetIdr, ccy)} buffer`
-              : "Funding needed",
-          value: money(summary.residualFundingNeedIdr, ccy),
-          Icon: ShieldCheck,
-          wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
-        }
-      : summary && summary.addressableCashPressureIdr > 0
-        ? {
-            label: "Cash you can free up",
-            value: money(summary.addressableCashPressureIdr, ccy),
-            Icon: CircleDollarSign,
-            wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
-          }
-        : {
-            label: "Open actions",
-            value: String(summary?.openActionCount ?? overview.actions.length),
-            Icon: CircleDollarSign,
-            wrap: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
-          };
-  const ThirdStatusIcon = thirdStatus.Icon;
+  const daysBelowBuffer =
+    overview.actions
+      .map((a) => a.scenarioMetric?.daysBelowBuffer)
+      .find((d): d is number => typeof d === "number") ??
+    overview.actions
+      .map((a) => a.baselineMetric?.daysBelowBuffer)
+      .find((d): d is number => typeof d === "number") ??
+    null;
+
+  const residualCopy = residualFundingCopy(
+    cash.residualFundingNeedIfActionsSucceedIdr,
+    ccy,
+    typeof daysBelowBuffer === "number" ? daysBelowBuffer : null,
+  );
 
   return (
     <div className="space-y-10">
@@ -419,14 +433,14 @@ const OverviewBody: React.FC<{
         </div>
       ) : null}
 
-      {/* Status — tinted icon left of label/value, no card chrome */}
-      <section className="grid gap-8 sm:grid-cols-3">
+      {/* Status — operating cash + funding risk signals */}
+      <section className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
             <Wallet className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Cash balance</p>
+            <p className="text-sm text-muted-foreground">Current operating cash</p>
             <p className="mt-0.5 text-2xl font-semibold tracking-tight">
               {overview.cashPositionComplete
                 ? money(overview.cashAvailable, ccy)
@@ -435,38 +449,80 @@ const OverviewBody: React.FC<{
           </div>
         </div>
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
             <TrendingDown className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Lowest projected</p>
-            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
-              {money(active?.minBalanceHorizon, ccy)}
+            <p className="text-sm text-muted-foreground">
+              Calculated 13-week funding risk
             </p>
-            {active?.minBalanceDate ? (
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {cash.baselineFundingNeedIdr > 0
+                ? money(cash.baselineFundingNeedIdr, ccy)
+                : money(active?.minBalanceHorizon, ccy)}
+            </p>
+            {cash.baselineFundingNeedIdr <= 0 && active?.minBalanceDate ? (
               <p className="mt-0.5 text-sm text-muted-foreground">
-                on {formatShortDate(active.minBalanceDate)}
+                lowest on {formatShortDate(active.minBalanceDate)}
               </p>
             ) : null}
           </div>
         </div>
         <div className="flex min-w-0 items-start gap-3">
-          <div
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-              thirdStatus.wrap,
-            )}
-          >
-            <ThirdStatusIcon className="h-5 w-5" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300">
+            <AlertCircle className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">{thirdStatus.label}</p>
+            <p className="text-sm text-muted-foreground">Verified missing cash</p>
             <p className="mt-0.5 text-2xl font-semibold tracking-tight">
-              {thirdStatus.value}
+              {cash.verifiedMissingCashIdr > 0
+                ? money(cash.verifiedMissingCashIdr, ccy)
+                : "—"}
             </p>
           </div>
         </div>
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+            <CircleDollarSign className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">
+              Conditional reduction if actions succeed
+            </p>
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {cash.conditionalFundingReductionIdr > 0
+                ? money(cash.conditionalFundingReductionIdr, ccy)
+                : "—"}
+            </p>
+          </div>
+        </div>
+        <div className="flex min-w-0 items-start gap-3 sm:col-span-2 lg:col-span-1">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">
+              Residual funding need if actions succeed
+            </p>
+            <p className="mt-0.5 text-2xl font-semibold tracking-tight">
+              {cash.residualFundingNeedIfActionsSucceedIdr > 0
+                ? money(cash.residualFundingNeedIfActionsSucceedIdr, ccy)
+                : money(0, ccy)}
+            </p>
+            {cash.residualFundingDate ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                first pressure {formatShortDate(cash.residualFundingDate)}
+              </p>
+            ) : null}
+          </div>
+        </div>
       </section>
+
+      {residualCopy ? (
+        <p className="rounded-lg border border-sky-200/80 bg-sky-50/50 px-4 py-3 text-sm text-sky-950 dark:border-sky-900 dark:bg-sky-950/20 dark:text-sky-100">
+          {residualCopy}
+        </p>
+      ) : null}
 
       {/* Actions — clearly tappable list rows */}
       <section className="space-y-3">
@@ -627,7 +683,7 @@ const OverviewBody: React.FC<{
                 {openReceivableAmount != null
                   ? money(openReceivableAmount, ccy)
                   : openReceivableCount > 0
-                    ? `${openReceivableCount}`
+                    ? String(openReceivableCount)
                     : "—"}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -761,7 +817,9 @@ const OverviewBody: React.FC<{
         onOpenChange={setActionOpen}
         action={selectedAction}
         currency={ccy}
-        onMarkDone={(id) => void setActionStatus(id, "completed")}
+        onMarkDone={(id, payload) =>
+          void setActionStatus(id, "completed", payload)
+        }
         onDismiss={(id) => void setActionStatus(id, "dismissed")}
       />
       <EvidenceDrawer

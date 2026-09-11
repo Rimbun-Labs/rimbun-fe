@@ -19,6 +19,7 @@ import {
   CalendarDays,
   Plug,
   Upload,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -122,6 +123,10 @@ const MobileMenu: React.FC = () => {
                   <CalendarDays className="h-4 w-4" />
                   Plans
                 </Link>
+                <Link to={`${APP_ROOT}/review`} className={linkClass(isActive(`${APP_ROOT}/review`))} onClick={closeMobileMenu}>
+                  <FileText className="h-4 w-4" />
+                  Review
+                </Link>
               </div>
               <div className="space-y-2">
                 <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
@@ -182,6 +187,10 @@ const MobileMenu: React.FC = () => {
                       <Link to={`${businessBase}/plans`} className={linkClass(isActive(`${businessBase}/plans`))} onClick={closeMobileMenu}>
                         <CalendarDays className="h-4 w-4" />
                         Plans
+                      </Link>
+                      <Link to={`${businessBase}/review`} className={linkClass(isActive(`${businessBase}/review`))} onClick={closeMobileMenu}>
+                        <FileText className="h-4 w-4" />
+                        Review
                       </Link>
                       <h3 className="px-2 pt-3 text-sm font-semibold text-muted-foreground sidebar-section-header">
                         Data
