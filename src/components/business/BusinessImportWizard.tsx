@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   confirmImport,
+  downloadImportOriginal,
+  getImportBatch,
   listImportBatches,
   listImportTemplates,
   previewImport,
   reverseImport,
   type BusinessImportBatch,
+  type BusinessImportBatchDetail,
   type BusinessImportPreview,
   type BusinessImportSourceType,
   type BusinessImportTemplate,
@@ -20,6 +23,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const SOURCE_OPTIONS: Array<{
   value: BusinessImportSourceType;
@@ -70,6 +79,28 @@ type Props = {
   onComplete?: () => void;
 };
 
+function sourceTypeTitle(sourceType: string): string {
+  return (
+    SOURCE_OPTIONS.find((o) => o.value === sourceType)?.title ?? sourceType
+  );
+}
+
+function batchHeading(b: BusinessImportBatch): string {
+  const title = sourceTypeTitle(b.sourceType);
+  return b.originalFilename ? `${title} · ${b.originalFilename}` : title;
+}
+
+function payloadPreview(payload: Record<string, unknown> | null): string {
+  if (!payload) return "—";
+  const entries = Object.entries(payload).filter(
+    ([, v]) => v != null && v !== "",
+  );
+  return entries
+    .slice(0, 6)
+    .map(([k, v]) => `${k}: ${String(v)}`)
+    .join(" · ");
+}
+
 function downloadText(filename: string, text: string) {
   const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -97,6 +128,11 @@ export const BusinessImportWizard: React.FC<Props> = ({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [viewDetail, setViewDetail] =
+    useState<BusinessImportBatchDetail | null>(null);
+  const [viewError, setViewError] = useState<string | null>(null);
 
   const refreshBatches = useCallback(async () => {
     if (!customerId) return;
@@ -210,7 +246,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
 
   const onReverse = async (batchId: string) => {
     const ok = window.confirm(
-      "Remove this import? Facts created by this batch will be deleted.",
+      "Remove this import? Facts created by this batch will be deleted, and the original file copy will be removed.",
     );
     if (!ok) return;
     setBusy(true);
@@ -224,6 +260,37 @@ export const BusinessImportWizard: React.FC<Props> = ({
       setError(err instanceof Error ? err.message : "Reverse failed");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const onView = async (batchId: string) => {
+    setViewOpen(true);
+    setViewLoading(true);
+    setViewError(null);
+    setViewDetail(null);
+    try {
+      const detail = await getImportBatch(customerId, batchId, {
+        limit: 50,
+        offset: 0,
+      });
+      setViewDetail(detail);
+    } catch (err) {
+      setViewError(
+        err instanceof Error ? err.message : "Could not load import",
+      );
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  const onDownloadOriginal = async (batchId: string) => {
+    try {
+      const file = await downloadImportOriginal(customerId, batchId);
+      downloadText(file.filename, file.csvText);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Could not download original file",
+      );
     }
   };
 
@@ -465,8 +532,8 @@ export const BusinessImportWizard: React.FC<Props> = ({
         <CardHeader>
           <CardTitle>Import history</CardTitle>
           <CardDescription>
-            Remove an import to delete only that batch&apos;s facts and refresh
-            the outlook.
+            View the original file you uploaded, or remove an import to delete
+            that batch&apos;s facts and refresh the outlook.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -479,10 +546,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
               >
                 <div className="space-y-0.5 text-sm">
-                  <div className="font-medium">
-                    {b.sourceType}
-                    {b.originalFilename ? ` · ${b.originalFilename}` : ""}
-                  </div>
+                  <div className="font-medium">{batchHeading(b)}</div>
                   <div className="text-xs text-muted-foreground">
                     {b.status} · {b.createdCount ?? 0} new ·{" "}
                     {b.skippedCount ?? 0} skipped · {b.errorCount ?? 0} errors
@@ -491,23 +555,153 @@ export const BusinessImportWizard: React.FC<Props> = ({
                       : ""}
                   </div>
                 </div>
-                {b.status === "imported" || b.status === "partial" ? (
+                <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={busy}
-                    onClick={() => void onReverse(b.id)}
+                    disabled={busy || viewLoading}
+                    onClick={() => void onView(b.id)}
                   >
-                    Remove import
+                    View
                   </Button>
-                ) : (
-                  <Badge variant="outline">{b.status}</Badge>
-                )}
+                  {b.status === "imported" || b.status === "partial" ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => void onReverse(b.id)}
+                    >
+                      Remove import
+                    </Button>
+                  ) : (
+                    <Badge variant="outline">{b.status}</Badge>
+                  )}
+                </div>
               </div>
             ))
           )}
         </CardContent>
       </Card>
+
+      <Sheet
+        open={viewOpen}
+        onOpenChange={(open) => {
+          setViewOpen(open);
+          if (!open) {
+            setViewDetail(null);
+            setViewError(null);
+          }
+        }}
+      >
+        <SheetContent className="w-full overflow-y-auto sm:!max-w-3xl lg:!max-w-5xl">
+          <SheetHeader>
+            <SheetTitle>
+              {viewDetail
+                ? batchHeading(viewDetail.batch)
+                : "Imported file"}
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="mt-4 space-y-4 text-sm">
+            {viewLoading ? (
+              <p className="text-muted-foreground">Loading…</p>
+            ) : null}
+            {viewError ? (
+              <p className="text-destructive">{viewError}</p>
+            ) : null}
+            {viewDetail?.message ? (
+              <p className="text-muted-foreground">{viewDetail.message}</p>
+            ) : null}
+
+            {viewDetail && viewDetail.batch.hasOriginal !== false ? (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void onDownloadOriginal(viewDetail.batch.id)}
+                >
+                  Download original
+                </Button>
+              </div>
+            ) : null}
+
+            {viewDetail && viewDetail.failedRows.length > 0 ? (
+              <div>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Rejected / failed rows ({viewDetail.failedRows.length}
+                  {typeof viewDetail.batch.errorCount === "number" &&
+                  viewDetail.batch.errorCount > viewDetail.failedRows.length
+                    ? ` of ${viewDetail.batch.errorCount}`
+                    : ""}
+                  )
+                </p>
+                <ul className="max-h-40 space-y-2 overflow-y-auto">
+                  {viewDetail.failedRows.map((f) => (
+                    <li
+                      key={f.rowNumber}
+                      className="rounded-md border border-destructive/30 p-2 text-xs"
+                    >
+                      <p className="font-medium">Row {f.rowNumber}</p>
+                      <p className="text-muted-foreground">
+                        {(f.errorCodes ?? []).join(", ") || "error"}
+                        {f.errorMessage ? ` · ${f.errorMessage}` : ""}
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        {payloadPreview(f.sample)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {viewDetail && viewDetail.headers.length > 0 ? (
+              <div>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  File rows
+                  {viewDetail.truncated
+                    ? ` · showing ${viewDetail.rows.length} of ${viewDetail.totalRows}`
+                    : ` · ${viewDetail.totalRows}`}
+                </p>
+                <div className="max-h-[50vh] overflow-auto rounded-md border">
+                  <table className="w-full min-w-[28rem] border-collapse text-left text-xs">
+                    <thead className="sticky top-0 bg-background">
+                      <tr>
+                        <th className="border-b px-2 py-1 font-medium">#</th>
+                        {viewDetail.headers.map((h) => (
+                          <th
+                            key={h}
+                            className="border-b px-2 py-1 font-medium"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {viewDetail.rows.map((row) => (
+                        <tr key={row.rowNumber} className="align-top">
+                          <td className="border-b px-2 py-1 text-muted-foreground">
+                            {row.rowNumber}
+                          </td>
+                          {row.cells.map((cell, i) => (
+                            <td
+                              key={`${row.rowNumber}-${i}`}
+                              className="border-b px-2 py-1 whitespace-pre-wrap"
+                            >
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

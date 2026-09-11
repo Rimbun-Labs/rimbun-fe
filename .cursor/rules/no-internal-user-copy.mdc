@@ -1,0 +1,20 @@
+---
+description: Never show internal/engineering wording in user-facing UI or API messages
+alwaysApply: true
+---
+
+# No internal wording for users
+
+Never put engineering, migration, security-implementation, or debug language in copy the operator sees.
+
+**Forbidden in UI / API user messages:** legacy, removed, deprecated, formula injection, XSS, gzip, blob, staging, fingerprint, NODE_ENV, schema, migration, PoC, internalMetadata explanations, “as text not evaluated”, stack traces, table/column names.
+
+**Do instead:** short plain language about what the person can do next.
+
+Examples:
+- Bad: “Original file was not retained for this import (legacy or removed).”
+- Good: “This import was saved before file preview was available. Import the file again to view it.”
+- Bad: “Formula characters are shown as text, not evaluated.”
+- Good: “What was in the file you uploaded.” (or omit)
+
+Apply to buttons, sheet descriptions, empty states, toasts, and any `message` field returned to the frontend for display.

@@ -567,6 +567,8 @@ export type BusinessImportBatch = {
   createdAt: string;
   completedAt: string | null;
   reversedAt: string | null;
+  hasOriginal?: boolean;
+  originalByteSize?: number | null;
 };
 
 export async function listImportTemplates(): Promise<BusinessImportTemplate[]> {
@@ -581,6 +583,45 @@ export async function listImportBatches(
     `/business/customers/${customerId}/imports`,
   );
   return unwrap(data) ?? [];
+}
+
+export type BusinessImportBatchDetail = {
+  batch: BusinessImportBatch & { hasOriginal?: boolean };
+  headers: string[];
+  rows: Array<{ rowNumber: number; cells: string[] }>;
+  totalRows: number;
+  limit: number;
+  offset: number;
+  truncated: boolean;
+  failedRows: Array<{
+    rowNumber: number;
+    errorCodes: string[];
+    errorMessage: string | null;
+    sample: Record<string, string>;
+  }>;
+  message?: string;
+};
+
+export async function getImportBatch(
+  customerId: string,
+  batchId: string,
+  params?: { limit?: number; offset?: number },
+): Promise<BusinessImportBatchDetail> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/imports/${batchId}`,
+    { params },
+  );
+  return unwrap(data);
+}
+
+export async function downloadImportOriginal(
+  customerId: string,
+  batchId: string,
+): Promise<{ filename: string; mimeType: string; csvText: string }> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/imports/${batchId}/original`,
+  );
+  return unwrap(data);
 }
 
 export async function previewImport(
