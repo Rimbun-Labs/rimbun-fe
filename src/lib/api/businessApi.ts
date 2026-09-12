@@ -661,6 +661,169 @@ export async function confirmImport(
   return unwrap(data);
 }
 
+export type BusinessConnectorCatalogItem = {
+  providerKey: string;
+  displayName: string;
+  shortDescription: string;
+  authorizationType: "oauth2" | "api_key" | "hosted_consent" | "none" | string;
+  environments: string[];
+  available: boolean;
+  pilotRequired: boolean;
+};
+
+export type BusinessSourceConnection = {
+  id: string;
+  providerKey: string;
+  displayName: string | null;
+  authorizationType: string;
+  environment: string;
+  status: string;
+  capabilities: string[];
+  externalOrganizationId: string | null;
+  lastSuccessfulSyncAt: string | null;
+  lastAttemptedSyncAt: string | null;
+  lastSyncStatus: string | null;
+  lastSyncErrorCode: string | null;
+  lastSyncErrorSummary: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BusinessSourceSyncRun = {
+  id: string;
+  connectionId: string;
+  trigger: string;
+  status: string;
+  capabilitiesRequested: string[];
+  recordsSeen: number;
+  recordsInserted: number;
+  recordsUpdated: number;
+  recordsUnchanged: number;
+  recordsSkipped: number;
+  recordsFailed: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  errorCode: string | null;
+  errorSummary: string | null;
+  createdAt: string;
+};
+
+export type AuthorizeBusinessConnectorResult = {
+  connection: BusinessSourceConnection;
+  state?: string | null;
+  authorizationUrl?: string;
+};
+
+export type DisconnectBusinessConnectorResult = {
+  connection: BusinessSourceConnection;
+  remoteRevokeFailed: boolean;
+};
+
+function connectorErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === "object" && "response" in err) {
+    const data = (err as { response?: { data?: { message?: string } } })
+      .response?.data;
+    if (data?.message) return data.message;
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
+
+export async function listBusinessConnectorCatalog(
+  customerId: string,
+): Promise<BusinessConnectorCatalogItem[]> {
+  try {
+    const { data } = await apiClient.get(
+      `/business/customers/${customerId}/connectors/catalog`,
+    );
+    return unwrap(data) ?? [];
+  } catch (err) {
+    const status = (err as { response?: { status?: number } })?.response
+      ?.status;
+    if (status === 403 || status === 404) return [];
+    throw err;
+  }
+}
+
+export async function listBusinessConnectorConnections(
+  customerId: string,
+): Promise<BusinessSourceConnection[]> {
+  try {
+    const { data } = await apiClient.get(
+      `/business/customers/${customerId}/connectors`,
+    );
+    return unwrap(data) ?? [];
+  } catch (err) {
+    const status = (err as { response?: { status?: number } })?.response
+      ?.status;
+    if (status === 403 || status === 404) return [];
+    throw err;
+  }
+}
+
+export async function authorizeBusinessConnector(
+  customerId: string,
+  provider: string,
+  body: {
+    redirectUri: string;
+    environment?: "sandbox" | "production";
+    credentials?: Record<string, unknown>;
+    displayName?: string;
+  },
+): Promise<AuthorizeBusinessConnectorResult> {
+  try {
+    const { data } = await apiClient.post(
+      `/business/customers/${customerId}/connectors/${provider}/authorize`,
+      body,
+    );
+    return unwrap(data);
+  } catch (err) {
+    throw new Error(
+      connectorErrorMessage(err, "Could not start connecting this source"),
+    );
+  }
+}
+
+export async function syncBusinessConnector(
+  customerId: string,
+  connectionId: string,
+): Promise<BusinessSourceSyncRun> {
+  try {
+    const { data } = await apiClient.post(
+      `/business/customers/${customerId}/connectors/${connectionId}/sync`,
+    );
+    return unwrap(data);
+  } catch (err) {
+    throw new Error(connectorErrorMessage(err, "Could not sync this source"));
+  }
+}
+
+export async function disconnectBusinessConnector(
+  customerId: string,
+  connectionId: string,
+): Promise<DisconnectBusinessConnectorResult> {
+  try {
+    const { data } = await apiClient.post(
+      `/business/customers/${customerId}/connectors/${connectionId}/disconnect`,
+    );
+    return unwrap(data);
+  } catch (err) {
+    throw new Error(
+      connectorErrorMessage(err, "Could not disconnect this source"),
+    );
+  }
+}
+
+export async function listBusinessConnectorRuns(
+  customerId: string,
+  connectionId: string,
+): Promise<BusinessSourceSyncRun[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/connectors/${connectionId}/runs`,
+  );
+  return unwrap(data) ?? [];
+}
+
 export async function reverseImport(
   customerId: string,
   batchId: string,

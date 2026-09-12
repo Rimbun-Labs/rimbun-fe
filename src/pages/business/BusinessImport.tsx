@@ -15,11 +15,11 @@ const BusinessImportPage: React.FC<{ customerIdOverride?: string }> = ({
 }) => (
   <BusinessWorkspaceShell
     title="Import data"
-    description="Bring files into Rimbun — bank exports, POS, invoices, bills, settlements. Money only shows what was loaded; this is where source facts change."
+    description="Bring bank, sales, invoice, and bill files into this business."
     customerIdOverride={customerIdOverride}
   >
     {(ws) => {
-      const sourcesPath = `${businessWorkspaceBase(customerIdOverride)}/sources`;
+      const connectionsPath = `${businessWorkspaceBase(customerIdOverride)}/connections`;
       return (
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
@@ -35,13 +35,16 @@ const BusinessImportPage: React.FC<{ customerIdOverride?: string }> = ({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Connected sources</CardTitle>
+                <CardTitle>Live connections</CardTitle>
                 <CardDescription>
-                  No live connectors yet.{" "}
-                  <Link to={sourcesPath} className="underline underline-offset-2">
-                    See Sources
-                  </Link>{" "}
-                  for status; use file import below for now.
+                  Prefer a linked account?{" "}
+                  <Link
+                    to={connectionsPath}
+                    className="underline underline-offset-2"
+                  >
+                    Open Connections
+                  </Link>
+                  .
                 </CardDescription>
               </CardHeader>
             </Card>

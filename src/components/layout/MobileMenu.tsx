@@ -136,8 +136,12 @@ const MobileMenu: React.FC = () => {
                   <Upload className="h-4 w-4" />
                   Import data
                 </Link>
-                <Link to={`${APP_ROOT}/sources`} className={linkClass(isActive(`${APP_ROOT}/sources`))} onClick={closeMobileMenu}>
+                <Link to={`${APP_ROOT}/connections`} className={linkClass(isActive(`${APP_ROOT}/connections`))} onClick={closeMobileMenu}>
                   <Plug className="h-4 w-4" />
+                  Connections
+                </Link>
+                <Link to={`${APP_ROOT}/sources`} className={linkClass(isActive(`${APP_ROOT}/sources`))} onClick={closeMobileMenu}>
+                  <ClipboardList className="h-4 w-4" />
                   Sources
                 </Link>
               </div>
@@ -199,8 +203,12 @@ const MobileMenu: React.FC = () => {
                         <Upload className="h-4 w-4" />
                         Import data
                       </Link>
-                      <Link to={`${businessBase}/sources`} className={linkClass(isActive(`${businessBase}/sources`))} onClick={closeMobileMenu}>
+                      <Link to={`${businessBase}/connections`} className={linkClass(isActive(`${businessBase}/connections`))} onClick={closeMobileMenu}>
                         <Plug className="h-4 w-4" />
+                        Connections
+                      </Link>
+                      <Link to={`${businessBase}/sources`} className={linkClass(isActive(`${businessBase}/sources`))} onClick={closeMobileMenu}>
+                        <ClipboardList className="h-4 w-4" />
                         Sources
                       </Link>
                       <Link to={`${customerBase}/products`} className={linkClass(location.pathname.includes('/products'))} onClick={closeMobileMenu}>

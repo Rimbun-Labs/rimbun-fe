@@ -153,10 +153,17 @@ const AppSidebar: React.FC = () => {
               Import data
             </NavLink>
             <NavLink
-              to={`${APP_ROOT}/sources`}
+              to={`${APP_ROOT}/connections`}
               className={({ isActive }) => cn(navInactive, isActive && navActive)}
             >
               <Plug className="h-4 w-4" />
+              Connections
+            </NavLink>
+            <NavLink
+              to={`${APP_ROOT}/sources`}
+              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+            >
+              <ClipboardList className="h-4 w-4" />
               Sources
             </NavLink>
           </div>
@@ -265,12 +272,21 @@ const AppSidebar: React.FC = () => {
                   Import data
                 </NavLink>
                 <NavLink
-                  to={`${businessBase}/sources`}
+                  to={`${businessBase}/connections`}
                   className={({ isActive }) =>
                     cn(navInactive, isActive && navActive)
                   }
                 >
                   <Plug className="h-4 w-4" />
+                  Connections
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/sources`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <ClipboardList className="h-4 w-4" />
                   Sources
                 </NavLink>
                 <NavLink

@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { businessWorkspaceBase } from "@/lib/appPaths";
+import {
+  connectionStatusLabel,
+  useBusinessConnectorConnections,
+} from "@/hooks/useBusinessConnectors";
 
 const FACILITY_TYPES = [
   { value: "working_capital", label: "Working capital facility" },
@@ -68,43 +72,37 @@ const BusinessSourcesPage: React.FC<{ customerIdOverride?: string }> = ({
   return (
     <BusinessWorkspaceShell
       title="Sources"
-      description="Where Rimbun gets its facts from — file imports, connected systems when available, and durable context like credit facilities."
+      description="A quick look at what feeds this business — connections, files, and credit lines you add by hand."
       customerIdOverride={customerIdOverride}
     >
       {(ws) => {
         const importPath = `${businessWorkspaceBase(customerIdOverride)}/import`;
+        const connectionsPath = `${businessWorkspaceBase(customerIdOverride)}/connections`;
         const currencyValue = currency || ws.profile?.baseCurrency || "IDR";
-        const hasFileCoverage =
+        const hasCoverage =
           ws.accounts.length > 0 ||
           ws.receivables.length > 0 ||
           ws.obligations.length > 0;
 
         return (
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Connected systems</CardTitle>
-                <CardDescription>
-                  No bank, POS, or accounting connectors are linked yet. When
-                  they are, you will see connection status and last sync here.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Until then, feed operating data with files from Import data.
-                </p>
-                <Button asChild className="mt-3" variant="outline">
-                  <Link to={importPath}>Go to Import data</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <SourcesSummary
+              customerId={ws.customerId}
+              importPath={importPath}
+              connectionsPath={connectionsPath}
+              accountCount={ws.accounts.length}
+              receivableCount={ws.receivables.length}
+              obligationCount={ws.obligations.length}
+              facilityCount={ws.facilities.length}
+              hasCoverage={hasCoverage}
+            />
 
             <Card>
               <CardHeader>
                 <CardTitle>Credit facilities</CardTitle>
                 <CardDescription>
-                  Record existing credit lines as source facts (lender, drawn,
-                  still available). This is Data — not a cash decision page.
+                  Keep track of credit lines you already have — lender, drawn,
+                  and still available.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -254,35 +252,89 @@ const BusinessSourcesPage: React.FC<{ customerIdOverride?: string }> = ({
                 </Collapsible>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>What is already in the workspace</CardTitle>
-                <CardDescription>
-                  {hasFileCoverage
-                    ? "Operating facts currently available (from imports)."
-                    : "Nothing loaded from files yet — start with Import data."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-inside list-disc text-sm text-muted-foreground">
-                  <li>{ws.accounts.length} cash account(s)</li>
-                  <li>
-                    {ws.receivables.length} expected receipt(s) (Money)
-                  </li>
-                  <li>{ws.obligations.length} commitment(s) (Money)</li>
-                  <li>
-                    {ws.facilities.length} credit{" "}
-                    {ws.facilities.length === 1 ? "facility" : "facilities"}
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
           </div>
         );
       }}
     </BusinessWorkspaceShell>
   );
 };
+
+function SourcesSummary({
+  customerId,
+  importPath,
+  connectionsPath,
+  accountCount,
+  receivableCount,
+  obligationCount,
+  facilityCount,
+  hasCoverage,
+}: {
+  customerId: string;
+  importPath: string;
+  connectionsPath: string;
+  accountCount: number;
+  receivableCount: number;
+  obligationCount: number;
+  facilityCount: number;
+  hasCoverage: boolean;
+}) {
+  const connections = useBusinessConnectorConnections(customerId);
+  const active = (connections.data ?? []).filter((c) => c.status !== "revoked");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-3">
+        <Button asChild variant="outline" size="sm">
+          <Link to={connectionsPath}>Manage connections</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link to={importPath}>Import data</Link>
+        </Button>
+      </div>
+
+      {active.length > 0 ? (
+        <ul className="space-y-2 text-sm">
+          {active.map((c) => (
+            <li
+              key={c.id}
+              className="flex flex-wrap items-center justify-between gap-2"
+            >
+              <span>
+                {c.displayName || c.providerKey}
+                {c.externalOrganizationId
+                  ? ` · ${c.externalOrganizationId}`
+                  : ""}
+              </span>
+              <Badge variant="outline">
+                {connectionStatusLabel(c.status)}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          No bank, sales, or accounting accounts connected yet.
+        </p>
+      )}
+
+      <div>
+        <p className="text-sm font-medium">
+          {hasCoverage
+            ? "Already loaded for this business"
+            : "Nothing loaded yet"}
+        </p>
+        <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
+          <li>{accountCount} cash account(s)</li>
+          <li>{receivableCount} expected receipt(s)</li>
+          <li>{obligationCount} commitment(s)</li>
+          <li>
+            {facilityCount} credit{" "}
+            {facilityCount === 1 ? "facility" : "facilities"}
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 export default BusinessSourcesPage;
