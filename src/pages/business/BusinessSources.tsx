@@ -76,8 +76,7 @@ const BusinessSourcesPage: React.FC<{ customerIdOverride?: string }> = ({
       customerIdOverride={customerIdOverride}
     >
       {(ws) => {
-        const importPath = `${businessWorkspaceBase(customerIdOverride)}/import`;
-        const connectionsPath = `${businessWorkspaceBase(customerIdOverride)}/connections`;
+        const sourcesPath = `${businessWorkspaceBase(customerIdOverride)}/sources`;
         const currencyValue = currency || ws.profile?.baseCurrency || "IDR";
         const hasCoverage =
           ws.accounts.length > 0 ||
@@ -88,8 +87,7 @@ const BusinessSourcesPage: React.FC<{ customerIdOverride?: string }> = ({
           <div className="space-y-6">
             <SourcesSummary
               customerId={ws.customerId}
-              importPath={importPath}
-              connectionsPath={connectionsPath}
+              sourcesPath={sourcesPath}
               accountCount={ws.accounts.length}
               receivableCount={ws.receivables.length}
               obligationCount={ws.obligations.length}
@@ -261,8 +259,7 @@ const BusinessSourcesPage: React.FC<{ customerIdOverride?: string }> = ({
 
 function SourcesSummary({
   customerId,
-  importPath,
-  connectionsPath,
+  sourcesPath,
   accountCount,
   receivableCount,
   obligationCount,
@@ -270,8 +267,7 @@ function SourcesSummary({
   hasCoverage,
 }: {
   customerId: string;
-  importPath: string;
-  connectionsPath: string;
+  sourcesPath: string;
   accountCount: number;
   receivableCount: number;
   obligationCount: number;
@@ -283,31 +279,27 @@ function SourcesSummary({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-3">
-        <Button asChild variant="outline" size="sm">
-          <Link to={connectionsPath}>Manage connections</Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link to={importPath}>Import data</Link>
-        </Button>
-      </div>
-
       {active.length > 0 ? (
         <ul className="space-y-2 text-sm">
           {active.map((c) => (
             <li
               key={c.id}
-              className="flex flex-wrap items-center justify-between gap-2"
+              className="border-b last:border-0"
             >
-              <span>
-                {c.displayName || c.providerKey}
-                {c.externalOrganizationId
-                  ? ` · ${c.externalOrganizationId}`
-                  : ""}
-              </span>
-              <Badge variant="outline">
-                {connectionStatusLabel(c.status)}
-              </Badge>
+              <Link
+                to={`${sourcesPath}/${c.id}`}
+                className="flex flex-wrap items-center justify-between gap-2 py-2"
+              >
+                <span>
+                  {c.displayName || c.providerKey}
+                  {c.externalOrganizationId
+                    ? ` · ${c.externalOrganizationId}`
+                    : ""}
+                </span>
+                <Badge variant="outline">
+                  {connectionStatusLabel(c.status)}
+                </Badge>
+              </Link>
             </li>
           ))}
         </ul>

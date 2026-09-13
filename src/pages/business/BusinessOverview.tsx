@@ -77,19 +77,6 @@ function timeGreeting(now = new Date()): string {
   return "Good evening";
 }
 
-function formatUpdatedAgo(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso.includes("T") ? iso : `${iso}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return null;
-  const days = Math.max(
-    0,
-    Math.floor((Date.now() - d.getTime()) / (24 * 60 * 60 * 1000)),
-  );
-  if (days === 0) return "Updated today";
-  if (days === 1) return "Updated 1 day ago";
-  return `Updated ${days} days ago`;
-}
-
 function metricValue(m: BusinessOverviewMetric | undefined, currency: string) {
   if (!m || m.suppressed || m.value == null) return "—";
   if (typeof m.value === "number") {
@@ -354,10 +341,8 @@ const OverviewBody: React.FC<{
   const summary = overview.cashSummary;
   const cash = cashSummaryValues(summary);
   const base = businessWorkspaceBase(customerId);
-  const asOf = overview.freshness.latestBalanceAsOf;
-  const updatedAgo = formatUpdatedAgo(
-    overview.freshness.accountsSyncedAt ?? asOf,
-  );
+  const asOf = overview.asOf;
+  const latestBalanceAsOf = overview.freshness.latestBalanceAsOf;
 
   const byCode = (code: string) =>
     [...salesMetrics, ...invoiceMetrics].find(
@@ -412,9 +397,11 @@ const OverviewBody: React.FC<{
           <div className="flex items-start gap-2 text-sm text-muted-foreground sm:pt-1">
             <CalendarDays className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="leading-snug sm:text-right">
-              <p>Data as of {formatShortDate(asOf)}</p>
-              {updatedAgo ? (
-                <p className="text-xs text-muted-foreground/80">{updatedAgo}</p>
+              <p>Analysis as of {formatShortDate(asOf)}</p>
+              {latestBalanceAsOf ? (
+                <p className="text-xs text-muted-foreground/80">
+                  Latest balance dated {formatShortDate(latestBalanceAsOf)}
+                </p>
               ) : null}
             </div>
           </div>

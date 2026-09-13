@@ -3,8 +3,11 @@ import { toast } from "sonner";
 import {
   authorizeBusinessConnector,
   disconnectBusinessConnector,
+  getBusinessConnectorSummary,
+  listBusinessConnectorActivity,
   listBusinessConnectorCatalog,
   listBusinessConnectorConnections,
+  listBusinessConnectorRuns,
   syncBusinessConnector,
   type BusinessConnectorCatalogItem,
   type BusinessSourceConnection,
@@ -42,6 +45,57 @@ export function useBusinessConnectorConnections(
       );
       return syncing ? 3_000 : false;
     },
+  });
+}
+
+export function useBusinessConnectorSummary(
+  customerId: string | undefined,
+  connectionId: string | undefined,
+) {
+  return useQuery({
+    queryKey: [
+      ...businessConnectorsQueryKey(customerId ?? ""),
+      "summary",
+      connectionId,
+    ],
+    queryFn: () => getBusinessConnectorSummary(customerId!, connectionId!),
+    enabled: Boolean(customerId && connectionId),
+    staleTime: 15_000,
+    retry: false,
+  });
+}
+
+export function useBusinessConnectorActivity(
+  customerId: string | undefined,
+  connectionId: string | undefined,
+) {
+  return useQuery({
+    queryKey: [
+      ...businessConnectorsQueryKey(customerId ?? ""),
+      "activity",
+      connectionId,
+    ],
+    queryFn: () => listBusinessConnectorActivity(customerId!, connectionId!),
+    enabled: Boolean(customerId && connectionId),
+    staleTime: 15_000,
+    retry: false,
+  });
+}
+
+export function useBusinessConnectorRuns(
+  customerId: string | undefined,
+  connectionId: string | undefined,
+) {
+  return useQuery({
+    queryKey: [
+      ...businessConnectorsQueryKey(customerId ?? ""),
+      "runs",
+      connectionId,
+    ],
+    queryFn: () => listBusinessConnectorRuns(customerId!, connectionId!),
+    enabled: Boolean(customerId && connectionId),
+    staleTime: 15_000,
+    retry: false,
   });
 }
 
@@ -90,11 +144,23 @@ export function useSyncBusinessConnector(customerId: string | undefined) {
       queryClient.invalidateQueries({
         queryKey: businessConnectorsQueryKey(customerId ?? ""),
       });
+      if (run.status === "failed") {
+        toast.error(run.errorSummary || "Sync failed");
+        return;
+      }
       if (run.status === "partial") {
         toast.warning("Sync completed with some records skipped");
-      } else {
-        toast.success("Sync completed");
+        return;
       }
+      const parts = [
+        run.recordsInserted ? `${run.recordsInserted} new` : null,
+        run.recordsUpdated ? `${run.recordsUpdated} updated` : null,
+      ].filter(Boolean);
+      toast.success(
+        parts.length > 0
+          ? `Sync completed (${parts.join(", ")})`
+          : "Sync completed",
+      );
     },
     onError: (error: Error) => {
       toast.error(error.message || "Could not sync");

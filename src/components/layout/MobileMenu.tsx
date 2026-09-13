@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useMobileMenu } from '@/hooks/useMobileMenu';
-import { useAuth } from '@/contexts/AuthContext';
-import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
+import React, { useMemo } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useMobileMenu } from "@/hooks/useMobileMenu";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
 import { useToast } from "@/components/ui/use-toast";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Compass,
@@ -20,11 +20,17 @@ import {
   Plug,
   Upload,
   FileText,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Logo } from '@/components/ui/Logo';
-import { APP_ROOT, appCustomers, businessWorkspaceBase } from '@/lib/appPaths';
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Logo } from "@/components/ui/Logo";
+import { APP_ROOT, appCustomers, businessWorkspaceBase } from "@/lib/appPaths";
 
 function customerIdFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/app\/customers\/([^/]+)/);
@@ -82,7 +88,8 @@ const MobileMenu: React.FC = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to log out",
+        description:
+          error instanceof Error ? error.message : "Failed to log out",
       });
     }
   };
@@ -92,7 +99,7 @@ const MobileMenu: React.FC = () => {
       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
       active
         ? "bg-accent !text-accent-foreground"
-        : "text-muted-foreground sidebar-nav-inactive"
+        : "text-muted-foreground sidebar-nav-inactive",
     );
 
   return (
@@ -111,19 +118,43 @@ const MobileMenu: React.FC = () => {
                 <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
                   Business
                 </h3>
-                <Link to={APP_ROOT} className={linkClass(location.pathname === APP_ROOT)} onClick={closeMobileMenu}>
+                <Link
+                  to={APP_ROOT}
+                  className={linkClass(location.pathname === APP_ROOT)}
+                  onClick={closeMobileMenu}
+                >
                   <LayoutDashboard className="h-4 w-4" />
                   Home
                 </Link>
-                <Link to={`${APP_ROOT}/money`} className={linkClass(isActive(`${APP_ROOT}/money`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/money`}
+                  className={linkClass(isActive(`${APP_ROOT}/money`))}
+                  onClick={closeMobileMenu}
+                >
                   <Wallet className="h-4 w-4" />
                   Money
                 </Link>
-                <Link to={`${APP_ROOT}/plans`} className={linkClass(isActive(`${APP_ROOT}/plans`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/performance`}
+                  className={linkClass(isActive(`${APP_ROOT}/performance`))}
+                  onClick={closeMobileMenu}
+                >
+                  <Activity className="h-4 w-4" />
+                  Performance
+                </Link>
+                <Link
+                  to={`${APP_ROOT}/plans`}
+                  className={linkClass(isActive(`${APP_ROOT}/plans`))}
+                  onClick={closeMobileMenu}
+                >
                   <CalendarDays className="h-4 w-4" />
                   Plans
                 </Link>
-                <Link to={`${APP_ROOT}/review`} className={linkClass(isActive(`${APP_ROOT}/review`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/review`}
+                  className={linkClass(isActive(`${APP_ROOT}/review`))}
+                  onClick={closeMobileMenu}
+                >
                   <FileText className="h-4 w-4" />
                   Review
                 </Link>
@@ -132,15 +163,27 @@ const MobileMenu: React.FC = () => {
                 <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
                   Data
                 </h3>
-                <Link to={`${APP_ROOT}/import`} className={linkClass(isActive(`${APP_ROOT}/import`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/import`}
+                  className={linkClass(isActive(`${APP_ROOT}/import`))}
+                  onClick={closeMobileMenu}
+                >
                   <Upload className="h-4 w-4" />
                   Import data
                 </Link>
-                <Link to={`${APP_ROOT}/connections`} className={linkClass(isActive(`${APP_ROOT}/connections`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/connections`}
+                  className={linkClass(isActive(`${APP_ROOT}/connections`))}
+                  onClick={closeMobileMenu}
+                >
                   <Plug className="h-4 w-4" />
                   Connections
                 </Link>
-                <Link to={`${APP_ROOT}/sources`} className={linkClass(isActive(`${APP_ROOT}/sources`))} onClick={closeMobileMenu}>
+                <Link
+                  to={`${APP_ROOT}/sources`}
+                  className={linkClass(isActive(`${APP_ROOT}/sources`))}
+                  onClick={closeMobileMenu}
+                >
                   <ClipboardList className="h-4 w-4" />
                   Sources
                 </Link>
@@ -176,42 +219,98 @@ const MobileMenu: React.FC = () => {
                     Customer
                   </h3>
                   {customerLabel ? (
-                    <p className="px-2 text-xs text-muted-foreground truncate">{customerLabel}</p>
+                    <p className="px-2 text-xs text-muted-foreground truncate">
+                      {customerLabel}
+                    </p>
                   ) : null}
                   {isBusinessCustomerView && businessBase ? (
                     <>
-                      <Link to={businessBase} className={linkClass(location.pathname === businessBase)} onClick={closeMobileMenu}>
+                      <Link
+                        to={businessBase}
+                        className={linkClass(
+                          location.pathname === businessBase,
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <Building2 className="h-4 w-4" />
                         Home
                       </Link>
-                      <Link to={`${businessBase}/money`} className={linkClass(isActive(`${businessBase}/money`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/money`}
+                        className={linkClass(isActive(`${businessBase}/money`))}
+                        onClick={closeMobileMenu}
+                      >
                         <Wallet className="h-4 w-4" />
                         Money
                       </Link>
-                      <Link to={`${businessBase}/plans`} className={linkClass(isActive(`${businessBase}/plans`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/performance`}
+                        className={linkClass(
+                          isActive(`${businessBase}/performance`),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
+                        <Activity className="h-4 w-4" />
+                        Performance
+                      </Link>
+                      <Link
+                        to={`${businessBase}/plans`}
+                        className={linkClass(isActive(`${businessBase}/plans`))}
+                        onClick={closeMobileMenu}
+                      >
                         <CalendarDays className="h-4 w-4" />
                         Plans
                       </Link>
-                      <Link to={`${businessBase}/review`} className={linkClass(isActive(`${businessBase}/review`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/review`}
+                        className={linkClass(
+                          isActive(`${businessBase}/review`),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <FileText className="h-4 w-4" />
                         Review
                       </Link>
                       <h3 className="px-2 pt-3 text-sm font-semibold text-muted-foreground sidebar-section-header">
                         Data
                       </h3>
-                      <Link to={`${businessBase}/import`} className={linkClass(isActive(`${businessBase}/import`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/import`}
+                        className={linkClass(
+                          isActive(`${businessBase}/import`),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <Upload className="h-4 w-4" />
                         Import data
                       </Link>
-                      <Link to={`${businessBase}/connections`} className={linkClass(isActive(`${businessBase}/connections`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/connections`}
+                        className={linkClass(
+                          isActive(`${businessBase}/connections`),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <Plug className="h-4 w-4" />
                         Connections
                       </Link>
-                      <Link to={`${businessBase}/sources`} className={linkClass(isActive(`${businessBase}/sources`))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${businessBase}/sources`}
+                        className={linkClass(
+                          isActive(`${businessBase}/sources`),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <ClipboardList className="h-4 w-4" />
                         Sources
                       </Link>
-                      <Link to={`${customerBase}/products`} className={linkClass(location.pathname.includes('/products'))} onClick={closeMobileMenu}>
+                      <Link
+                        to={`${customerBase}/products`}
+                        className={linkClass(
+                          location.pathname.includes("/products"),
+                        )}
+                        onClick={closeMobileMenu}
+                      >
                         <Package className="h-4 w-4" />
                         Products
                       </Link>
@@ -220,7 +319,9 @@ const MobileMenu: React.FC = () => {
                     <>
                       <Link
                         to={customerBase}
-                        className={linkClass(location.pathname === customerBase)}
+                        className={linkClass(
+                          location.pathname === customerBase,
+                        )}
                         onClick={closeMobileMenu}
                       >
                         <UserCircle className="h-4 w-4" />
@@ -228,7 +329,9 @@ const MobileMenu: React.FC = () => {
                       </Link>
                       <Link
                         to={`${customerBase}/assessment`}
-                        className={linkClass(location.pathname.includes('/assessment'))}
+                        className={linkClass(
+                          location.pathname.includes("/assessment"),
+                        )}
                         onClick={closeMobileMenu}
                       >
                         <ClipboardList className="h-4 w-4" />
@@ -236,7 +339,9 @@ const MobileMenu: React.FC = () => {
                       </Link>
                       <Link
                         to={`${customerBase}/products`}
-                        className={linkClass(location.pathname.includes('/products'))}
+                        className={linkClass(
+                          location.pathname.includes("/products"),
+                        )}
                         onClick={closeMobileMenu}
                       >
                         <Package className="h-4 w-4" />
@@ -253,7 +358,7 @@ const MobileMenu: React.FC = () => {
                 </h3>
                 <Link
                   to="/banking-products"
-                  className={linkClass(isActive('/banking-products'))}
+                  className={linkClass(isActive("/banking-products"))}
                   onClick={closeMobileMenu}
                 >
                   <Building2 className="h-4 w-4" />
@@ -261,7 +366,7 @@ const MobileMenu: React.FC = () => {
                 </Link>
                 <Link
                   to="/investment-explorer"
-                  className={linkClass(isActive('/investment-explorer'))}
+                  className={linkClass(isActive("/investment-explorer"))}
                   onClick={closeMobileMenu}
                 >
                   <Compass className="h-4 w-4" />
@@ -269,7 +374,7 @@ const MobileMenu: React.FC = () => {
                 </Link>
                 <Link
                   to="/insurance"
-                  className={linkClass(isActive('/insurance'))}
+                  className={linkClass(isActive("/insurance"))}
                   onClick={closeMobileMenu}
                 >
                   <Shield className="h-4 w-4" />

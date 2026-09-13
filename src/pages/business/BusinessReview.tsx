@@ -209,8 +209,7 @@ const ReviewBody: React.FC<{ customerId: string }> = ({ customerId }) => {
             Cash & working capital review
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            As of {formatShortDate(overview.freshness.latestBalanceAsOf)} ·{" "}
-            {ccy}
+            Analysis as of {formatShortDate(overview.asOf)} · {ccy}
           </p>
         </header>
 

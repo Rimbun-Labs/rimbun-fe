@@ -52,7 +52,13 @@ const BusinessPlans = lazy(() => import("./pages/business/BusinessPlans"));
 const BusinessConnections = lazy(() => import("./pages/business/BusinessConnections"));
 const BusinessImport = lazy(() => import("./pages/business/BusinessImport"));
 const BusinessSources = lazy(() => import("./pages/business/BusinessSources"));
+const BusinessSourceDetail = lazy(
+  () => import("./pages/business/BusinessSourceDetail"),
+);
 const BusinessReview = lazy(() => import("./pages/business/BusinessReview"));
+const BusinessPerformance = lazy(
+  () => import("./pages/business/BusinessPerformance"),
+);
 const CustomerBusinessOverview = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessOverview,
@@ -103,6 +109,11 @@ const CustomerBusinessSources = lazy(() =>
     default: m.CustomerBusinessSources,
   }))
 );
+const CustomerBusinessSourceDetail = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessSourceDetail,
+  }))
+);
 const CustomerBusinessConnections = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessConnections,
@@ -111,6 +122,11 @@ const CustomerBusinessConnections = lazy(() =>
 const CustomerBusinessReview = lazy(() =>
   import("./pages/business/CustomerBusinessPages").then((m) => ({
     default: m.CustomerBusinessReview,
+  }))
+);
+const CustomerBusinessPerformance = lazy(() =>
+  import("./pages/business/CustomerBusinessPages").then((m) => ({
+    default: m.CustomerBusinessPerformance,
   }))
 );
 const Learning = lazy(() => import("./pages/Learning"));
@@ -331,6 +347,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/app/performance"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessPerformance />
+            </Suspense>
+          }
+        />
+        <Route
           path="/app/import"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
@@ -343,6 +367,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <BusinessSources />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/sources/:connectionId"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <BusinessSourceDetail />
             </Suspense>
           }
         />
@@ -459,6 +491,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/app/customers/:customerId/business/performance"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessPerformance />
+            </Suspense>
+          }
+        />
+        <Route
           path="/app/customers/:customerId/business/import"
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
@@ -471,6 +511,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <CustomerBusinessSources />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/customers/:customerId/business/sources/:connectionId"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <CustomerBusinessSourceDetail />
             </Suspense>
           }
         />

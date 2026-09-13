@@ -283,6 +283,63 @@ export async function getBusinessOverview(
   return unwrap(data);
 }
 
+export type BusinessPerformanceMoney = {
+  amount: string | null;
+  currency: string;
+};
+
+export type BusinessPerformanceSnapshot = {
+  period: { from: string | null; to: string; days: number | null };
+  currency: string;
+  multiCurrency: boolean;
+  hasProcessorActivity: boolean;
+  hasBankDepositData: boolean;
+  overallCollections: BusinessPerformanceMoney;
+  feesAndDeductions: BusinessPerformanceMoney;
+  netProceeds: BusinessPerformanceMoney;
+  refundsAndReversals: BusinessPerformanceMoney;
+  transactionVolume: number;
+  collectionsOverTime: Array<{
+    date: string;
+    transactionCount: number;
+    grossAmount: string;
+    netAmount: string | null;
+    currency: string;
+  }>;
+  channelMix: Array<{
+    channel: string;
+    transactionCount: number;
+    grossAmount: string;
+    netAmount: string | null;
+    currency: string;
+  }>;
+  expectedPayouts: {
+    total: BusinessPerformanceMoney;
+    count: number;
+    items: Array<{
+      label: string;
+      expectedDate: string | null;
+      amount: string;
+      currency: string;
+      matchStatus: string;
+    }>;
+  };
+  actualDeposited: BusinessPerformanceMoney | null;
+  unmatchedPayoutDifference: BusinessPerformanceMoney | null;
+  caveats: string[];
+};
+
+export async function getBusinessPerformance(
+  customerId: string,
+  opts?: { days?: number },
+): Promise<BusinessPerformanceSnapshot> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/performance`,
+    { params: opts?.days ? { days: opts.days } : undefined },
+  );
+  return unwrap(data);
+}
+
 export type BusinessOverviewWeeklyPoint = {
   week: number;
   day: number;
@@ -720,12 +777,51 @@ export type DisconnectBusinessConnectorResult = {
 };
 
 function connectorErrorMessage(err: unknown, fallback: string): string {
-  if (err && typeof err === "object" && "response" in err) {
-    const data = (err as { response?: { data?: { message?: string } } })
-      .response?.data;
-    if (data?.message) return data.message;
+  const data =
+    err && typeof err === "object" && "response" in err
+      ? (
+          err as {
+            response?: {
+              data?: { code?: string; details?: unknown; message?: string };
+            };
+          }
+        ).response?.data
+      : undefined;
+
+  const code = typeof data?.code === "string" ? data.code : undefined;
+  switch (code) {
+    case "AUTH_EXPIRED":
+      return "That API key was rejected or cannot read transactions. Create a secret key with Transaction Read, then try again.";
+    case "RATE_LIMITED":
+      return "Too many requests to Xendit. Try again in a moment.";
+    case "PROVIDER_UNAVAILABLE":
+      return "Could not verify with Xendit. Try again in a moment.";
+    default:
+      break;
   }
-  if (err instanceof Error && err.message) return err.message;
+
+  // Prefer short, already operator-safe detail strings from our API — never
+  // stringify the whole error payload or surface requestId.
+  const details = data?.details;
+  if (typeof details === "string" && details.trim() && details.length < 220) {
+    if (/Transaction Read/i.test(details)) {
+      return details;
+    }
+    if (/rejected|API key/i.test(details)) {
+      return "That API key was rejected. Check it and try again.";
+    }
+    if (
+      /reach Xendit|verify with Xendit|Xendit HTTP|rejected the request/i.test(
+        details,
+      )
+    ) {
+      return "Could not verify with Xendit. Try again in a moment.";
+    }
+    if (/rate limit/i.test(details)) {
+      return "Too many requests to Xendit. Try again in a moment.";
+    }
+  }
+
   return fallback;
 }
 
@@ -820,6 +916,56 @@ export async function listBusinessConnectorRuns(
 ): Promise<BusinessSourceSyncRun[]> {
   const { data } = await apiClient.get(
     `/business/customers/${customerId}/connectors/${connectionId}/runs`,
+  );
+  return unwrap(data) ?? [];
+}
+
+export type BusinessConnectorSummary = {
+  connection: BusinessSourceConnection;
+  activityCount: number;
+  lastActivityAt: string | null;
+  latestRun: BusinessSourceSyncRun | null;
+  recentRuns: BusinessSourceSyncRun[];
+};
+
+export type BusinessProcessorActivityItem = {
+  id: string;
+  provider: string;
+  externalId: string;
+  referenceId: string | null;
+  transactionType: string;
+  status: string;
+  providerStatus: string | null;
+  cashflow: string | null;
+  channelCategory: string | null;
+  channelCode: string | null;
+  currency: string;
+  grossAmount: string;
+  feeAmount: string | null;
+  netAmount: string | null;
+  settlementStatus: string | null;
+  expectedSettlementAt: string | null;
+  occurredAt: string;
+};
+
+export async function getBusinessConnectorSummary(
+  customerId: string,
+  connectionId: string,
+): Promise<BusinessConnectorSummary> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/connectors/${connectionId}/summary`,
+  );
+  return unwrap(data);
+}
+
+export async function listBusinessConnectorActivity(
+  customerId: string,
+  connectionId: string,
+  limit = 50,
+): Promise<BusinessProcessorActivityItem[]> {
+  const { data } = await apiClient.get(
+    `/business/customers/${customerId}/connectors/${connectionId}/activity`,
+    { params: { limit } },
   );
   return unwrap(data) ?? [];
 }

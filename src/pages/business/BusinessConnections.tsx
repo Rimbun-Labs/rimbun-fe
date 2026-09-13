@@ -66,8 +66,15 @@ function ConnectionsBody({ customerId }: { customerId: string }) {
   const activeConnections = (connections.data ?? []).filter(
     (c) => c.status !== "revoked",
   );
-  const availableProviders = (catalog.data ?? []).filter((p) => p.available);
-  const unavailableProviders = (catalog.data ?? []).filter((p) => !p.available);
+  const connectedProviderKeys = new Set(
+    activeConnections.map((c) => c.providerKey),
+  );
+  const availableProviders = (catalog.data ?? []).filter(
+    (p) => p.available && !connectedProviderKeys.has(p.providerKey),
+  );
+  const unavailableProviders = (catalog.data ?? []).filter(
+    (p) => !p.available && !connectedProviderKeys.has(p.providerKey),
+  );
   const nothingToShow =
     catalog.isSuccess &&
     connections.isSuccess &&

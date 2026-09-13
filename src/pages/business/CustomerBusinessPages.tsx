@@ -10,8 +10,10 @@ import BusinessFinancing from "@/pages/business/BusinessFinancing";
 import BusinessPlans from "@/pages/business/BusinessPlans";
 import BusinessImport from "@/pages/business/BusinessImport";
 import BusinessSources from "@/pages/business/BusinessSources";
+import BusinessSourceDetail from "@/pages/business/BusinessSourceDetail";
 import BusinessConnections from "@/pages/business/BusinessConnections";
 import BusinessReview from "@/pages/business/BusinessReview";
+import BusinessPerformance from "@/pages/business/BusinessPerformance";
 
 function withRouteCustomer(
   Page: React.ComponentType<{ customerIdOverride?: string }>
@@ -34,5 +36,11 @@ export const CustomerBusinessFinancing = withRouteCustomer(BusinessFinancing);
 export const CustomerBusinessPlans = withRouteCustomer(BusinessPlans);
 export const CustomerBusinessImport = withRouteCustomer(BusinessImport);
 export const CustomerBusinessSources = withRouteCustomer(BusinessSources);
+export const CustomerBusinessSourceDetail = withRouteCustomer(
+  BusinessSourceDetail,
+);
 export const CustomerBusinessConnections = withRouteCustomer(BusinessConnections);
 export const CustomerBusinessReview = withRouteCustomer(BusinessReview);
+export const CustomerBusinessPerformance = withRouteCustomer(
+  BusinessPerformance,
+);

@@ -25,6 +25,17 @@ function isPublicApiRequest(url?: string, params?: Record<string, unknown>): boo
   );
 }
 
+function safeRequestPath(url?: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    // Absolute or relative — never log query strings (may contain tokens).
+    const path = url.includes('://') ? new URL(url).pathname : url.split('?')[0];
+    return path;
+  } catch {
+    return undefined;
+  }
+}
+
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
   async (requestConfig) => {
@@ -61,21 +72,16 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle specific error codes
     if (error.response) {
-      // Log all error responses for debugging
-      const errorData = error.response.data;
-      console.error('API Error Response:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        url: error.config?.url,
-        method: error.config?.method,
-        message: errorData?.message || errorData?.error || error.message,
-        fullErrorData: errorData,
-      });
-
-      // Also log the full error data as a separate object for easier inspection
-      console.error('Full Backend Error Data:', JSON.stringify(errorData, null, 2));
+      // Never dump response bodies, requestIds, or provider payloads to the console.
+      // Call sites map status/code → operator-facing copy.
+      if (import.meta.env.DEV) {
+        console.error('API request failed', {
+          status: error.response.status,
+          method: originalRequest?.method,
+          path: safeRequestPath(originalRequest?.url),
+        });
+      }
 
       // Handle 401 Unauthorized - token refresh or redirect to login.
       // Never bounce public marketing forms (e.g. /contact) into the login gate.
@@ -86,51 +92,35 @@ apiClient.interceptors.response.use(
       ) {
         originalRequest._retry = true;
 
-        // Try to refresh the token
         try {
           const { auth } = await import('../firebase/config');
           const user = auth.currentUser;
 
           if (user) {
-            // Force token refresh
             const newToken = await user.getIdToken(true);
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            // Retry the original request with new token
             return apiClient(originalRequest);
           }
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
+        } catch {
+          // Token refresh failed — fall through to logout redirect.
         }
 
-        // Token refresh failed or no user - clear auth state and redirect to login
         storageUtils.removeItem('firebaseIdToken');
         storageUtils.removeItem('databaseUserId');
 
-        // Only redirect if we're in a browser environment
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;
           const loginPath = '/login';
-          // Only redirect if not already on login page
           if (currentPath !== loginPath && !currentPath.startsWith('/login')) {
             window.location.href = `${loginPath}?redirect=${encodeURIComponent(currentPath)}`;
           }
         }
       }
-
-      // Handle 500 errors
-      if (error.response.status >= 500) {
-        console.error('Server error (500+) - Full error details logged above');
-      }
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('API Request Error (no response):', {
-        url: error.config?.url,
-        method: error.config?.method,
-        message: error.message,
+    } else if (error.request && import.meta.env.DEV) {
+      console.error('API request failed (no response)', {
+        method: originalRequest?.method,
+        path: safeRequestPath(originalRequest?.url),
       });
-    } else {
-      // Something else happened
-      console.error('API Error (other):', error.message);
     }
 
     return Promise.reject(error);

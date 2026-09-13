@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import React, { useMemo, useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   ChevronDown,
@@ -18,15 +18,16 @@ import {
   Plug,
   Upload,
   FileText,
-} from 'lucide-react';
-import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
-import { useAuth } from '@/contexts/AuthContext';
+  Activity,
+} from "lucide-react";
+import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Collapsible,
   CollapsibleTrigger,
   CollapsibleContent,
-} from '@/components/ui/collapsible';
-import { APP_ROOT, appCustomers, businessWorkspaceBase } from '@/lib/appPaths';
+} from "@/components/ui/collapsible";
+import { APP_ROOT, appCustomers, businessWorkspaceBase } from "@/lib/appPaths";
 
 const SidebarContent = React.forwardRef<
   HTMLDivElement,
@@ -34,10 +35,7 @@ const SidebarContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      "h-full w-full border-r bg-background px-3 py-4",
-      className
-    )}
+    className={cn("h-full w-full border-r bg-background px-3 py-4", className)}
     {...props}
   />
 ));
@@ -92,9 +90,9 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     const path = location.pathname;
     setIsCatalogOpen(
-      path.includes('/banking-products') ||
-        path.includes('/investment-explorer') ||
-        path.includes('/insurance')
+      path.includes("/banking-products") ||
+        path.includes("/investment-explorer") ||
+        path.includes("/insurance"),
     );
   }, [location.pathname]);
 
@@ -111,28 +109,45 @@ const AppSidebar: React.FC = () => {
             <NavLink
               to={APP_ROOT}
               end
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <LayoutDashboard className="h-4 w-4" />
               Home
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/money`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <Wallet className="h-4 w-4" />
               Money
             </NavLink>
             <NavLink
+              to={`${APP_ROOT}/performance`}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
+            >
+              <Activity className="h-4 w-4" />
+              Performance
+            </NavLink>
+            <NavLink
               to={`${APP_ROOT}/plans`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <CalendarDays className="h-4 w-4" />
               Plans
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/review`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <FileText className="h-4 w-4" />
               Review
@@ -147,21 +162,27 @@ const AppSidebar: React.FC = () => {
             </div>
             <NavLink
               to={`${APP_ROOT}/import`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <Upload className="h-4 w-4" />
               Import data
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/connections`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <Plug className="h-4 w-4" />
               Connections
             </NavLink>
             <NavLink
               to={`${APP_ROOT}/sources`}
-              className={({ isActive }) => cn(navInactive, isActive && navActive)}
+              className={({ isActive }) =>
+                cn(navInactive, isActive && navActive)
+              }
             >
               <ClipboardList className="h-4 w-4" />
               Sources
@@ -184,9 +205,7 @@ const AppSidebar: React.FC = () => {
           <NavLink
             to={APP_ROOT}
             end
-            className={({ isActive }) =>
-              cn(navInactive, isActive && navActive)
-            }
+            className={({ isActive }) => cn(navInactive, isActive && navActive)}
           >
             <LayoutDashboard className="h-4 w-4" />
             Home
@@ -194,9 +213,7 @@ const AppSidebar: React.FC = () => {
           <NavLink
             to={appCustomers()}
             end
-            className={({ isActive }) =>
-              cn(navInactive, isActive && navActive)
-            }
+            className={({ isActive }) => cn(navInactive, isActive && navActive)}
           >
             <Users className="h-4 w-4" />
             Customer portfolio
@@ -238,6 +255,15 @@ const AppSidebar: React.FC = () => {
                 >
                   <Wallet className="h-4 w-4" />
                   Money
+                </NavLink>
+                <NavLink
+                  to={`${businessBase}/performance`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Activity className="h-4 w-4" />
+                  Performance
                 </NavLink>
                 <NavLink
                   to={`${businessBase}/plans`}
@@ -341,7 +367,9 @@ const AppSidebar: React.FC = () => {
             </h3>
           </div>
           <Collapsible open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
-            <CollapsibleTrigger className={cn(navInactive, "w-full justify-between")}>
+            <CollapsibleTrigger
+              className={cn(navInactive, "w-full justify-between")}
+            >
               <div className="flex items-center gap-3">
                 <PackageOpen className="h-4 w-4" />
                 <span>Catalog</span>
@@ -360,7 +388,7 @@ const AppSidebar: React.FC = () => {
                     childNav,
                     isActive
                       ? "bg-accent text-accent-foreground border-primary"
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                      : "text-muted-foreground sidebar-nav-inactive border-border",
                   )
                 }
               >
@@ -374,7 +402,7 @@ const AppSidebar: React.FC = () => {
                     childNav,
                     isActive
                       ? "bg-accent text-accent-foreground border-primary"
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                      : "text-muted-foreground sidebar-nav-inactive border-border",
                   )
                 }
               >
@@ -388,7 +416,7 @@ const AppSidebar: React.FC = () => {
                     childNav,
                     isActive
                       ? "bg-accent text-accent-foreground border-primary"
-                      : "text-muted-foreground sidebar-nav-inactive border-border"
+                      : "text-muted-foreground sidebar-nav-inactive border-border",
                   )
                 }
               >
