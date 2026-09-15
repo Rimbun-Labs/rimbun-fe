@@ -18,8 +18,8 @@ const PRESETS: Record<SoftWaitPreset, SoftWaitPhrase[]> = {
     { afterMs: 12000, text: "Taking a bit longer than usual…" },
   ],
   workspace: [
-    { afterMs: 0, text: "Opening your workspace…" },
-    { afterMs: 2500, text: "Gathering business context…" },
+    { afterMs: 0, text: "Getting things ready…" },
+    { afterMs: 2500, text: "Gathering your numbers…" },
     { afterMs: 6000, text: "Almost ready…" },
     { afterMs: 12000, text: "Still loading — hang tight…" },
   ],
