@@ -25,7 +25,7 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
   const [obligations, setObligations] = useState<BusinessObligation[]>([]);
   const [facilities, setFacilities] = useState<FinancingFacility[]>([]);
   const [planEvents, setPlanEvents] = useState<BusinessPlanEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const resolveCustomerId = useCallback(async () => {
@@ -38,7 +38,10 @@ export function useBusinessWorkspace(customerIdOverride?: string) {
   }, [customerIdOverride, operator?.tenantType]);
 
   const refetch = useCallback(async () => {
-    if (!user || !userRegistrationComplete) return;
+    if (!user || !userRegistrationComplete) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError(null);

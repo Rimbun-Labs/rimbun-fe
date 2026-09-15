@@ -33,7 +33,8 @@ export function BusinessWorkspaceShell({
       ) : null}
 
       {workspace.loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" aria-busy="true" aria-live="polite">
+          <p className="text-sm text-muted-foreground">Loading…</p>
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-40 w-full" />
         </div>

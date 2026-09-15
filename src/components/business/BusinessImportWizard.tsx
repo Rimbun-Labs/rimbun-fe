@@ -26,9 +26,11 @@ import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { ImportDataTable } from "@/components/business/ImportDataTable";
 
 const SOURCE_OPTIONS: Array<{
   value: BusinessImportSourceType;
@@ -101,6 +103,21 @@ function payloadPreview(payload: Record<string, unknown> | null): string {
     .join(" · ");
 }
 
+function formatWhen(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 function downloadText(filename: string, text: string) {
   const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -130,6 +147,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
+  const [viewLoadingMore, setViewLoadingMore] = useState(false);
   const [viewDetail, setViewDetail] =
     useState<BusinessImportBatchDetail | null>(null);
   const [viewError, setViewError] = useState<string | null>(null);
@@ -270,7 +288,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
     setViewDetail(null);
     try {
       const detail = await getImportBatch(customerId, batchId, {
-        limit: 50,
+        limit: 100,
         offset: 0,
       });
       setViewDetail(detail);
@@ -280,6 +298,28 @@ export const BusinessImportWizard: React.FC<Props> = ({
       );
     } finally {
       setViewLoading(false);
+    }
+  };
+
+  const onViewMore = async () => {
+    if (!viewDetail || viewLoadingMore || !viewDetail.truncated) return;
+    setViewLoadingMore(true);
+    setViewError(null);
+    try {
+      const next = await getImportBatch(customerId, viewDetail.batch.id, {
+        limit: 100,
+        offset: viewDetail.rows.length,
+      });
+      setViewDetail({
+        ...next,
+        rows: [...viewDetail.rows, ...next.rows],
+      });
+    } catch (err) {
+      setViewError(
+        err instanceof Error ? err.message : "Could not load more rows",
+      );
+    } finally {
+      setViewLoadingMore(false);
     }
   };
 
@@ -293,6 +333,43 @@ export const BusinessImportWizard: React.FC<Props> = ({
       );
     }
   };
+
+  const mapPreviewFields = useMemo(() => {
+    if (!preview) return [] as string[];
+    return preview.mappableFields ?? preview.requiredFields;
+  }, [preview]);
+
+  const mapTableRows = useMemo(() => {
+    if (!preview) return [];
+    return preview.previewRows.map((row) => ({
+      id: `preview-${row.rowNumber}`,
+      rowNumber: row.rowNumber,
+      tone:
+        row.validationState === "invalid"
+          ? ("invalid" as const)
+          : undefined,
+      statusLabel: row.validationState === "invalid" ? "Needs fix" : "OK",
+      cells: mapPreviewFields.map((field) => {
+        const value = row.payload?.[field];
+        return value == null ? "" : String(value);
+      }),
+    }));
+  }, [preview, mapPreviewFields]);
+
+  const viewTableRows = useMemo(() => {
+    if (!viewDetail) return [];
+    const failedNumbers = new Set(
+      viewDetail.failedRows.map((f) => f.rowNumber),
+    );
+    return viewDetail.rows.map((row) => ({
+      id: `view-${row.rowNumber}`,
+      rowNumber: row.rowNumber,
+      cells: row.cells,
+      tone: failedNumbers.has(row.rowNumber)
+        ? ("invalid" as const)
+        : undefined,
+    }));
+  }, [viewDetail]);
 
   return (
     <div className="space-y-4">
@@ -445,40 +522,34 @@ export const BusinessImportWizard: React.FC<Props> = ({
                 )}
               </div>
 
-              <div className="overflow-x-auto rounded-md border">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-muted/40">
-                    <tr>
-                      <th className="px-2 py-1.5">Row</th>
-                      <th className="px-2 py-1.5">State</th>
-                      <th className="px-2 py-1.5">Payload</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {preview.previewRows.map((row) => (
-                      <tr key={row.rowNumber} className="border-t align-top">
-                        <td className="px-2 py-1.5">{row.rowNumber}</td>
-                        <td className="px-2 py-1.5">
-                          <Badge
-                            variant={
-                              row.validationState === "valid"
-                                ? "outline"
-                                : "destructive"
-                            }
-                          >
-                            {row.validationState}
-                          </Badge>
-                        </td>
-                        <td className="px-2 py-1.5 font-mono">
-                          {JSON.stringify(row.payload)}
-                          {row.errorCodes.length > 0
-                            ? ` · ${row.errorCodes.join(",")}`
-                            : ""}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Sample rows · mapped values
+                </p>
+                <ImportDataTable
+                  headers={mapPreviewFields}
+                  rows={mapTableRows}
+                  statusHeader="Check"
+                  maxHeightClassName="max-h-[min(40vh,22rem)]"
+                  emptyMessage="No sample rows yet. Re-validate after mapping."
+                />
+                {preview.previewRows.some(
+                  (r) => r.validationState === "invalid",
+                ) ? (
+                  <ul className="space-y-1 text-xs text-muted-foreground">
+                    {preview.previewRows
+                      .filter((r) => r.validationState === "invalid")
+                      .slice(0, 5)
+                      .map((r) => (
+                        <li key={r.rowNumber}>
+                          Row {r.rowNumber}:{" "}
+                          {(r.errorCodes ?? []).join(", ") ||
+                            r.errorMessage ||
+                            "invalid"}
+                        </li>
+                      ))}
+                  </ul>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -548,8 +619,9 @@ export const BusinessImportWizard: React.FC<Props> = ({
                 <div className="space-y-0.5 text-sm">
                   <div className="font-medium">{batchHeading(b)}</div>
                   <div className="text-xs text-muted-foreground">
-                    {b.status} · {b.createdCount ?? 0} new ·{" "}
-                    {b.skippedCount ?? 0} skipped · {b.errorCount ?? 0} errors
+                    {b.status} · {formatWhen(b.createdAt)} ·{" "}
+                    {b.createdCount ?? 0} new · {b.skippedCount ?? 0} skipped ·{" "}
+                    {b.errorCount ?? 0} errors
                     {b.periodStart
                       ? ` · ${b.periodStart} → ${b.periodEnd ?? b.periodStart}`
                       : ""}
@@ -590,19 +662,36 @@ export const BusinessImportWizard: React.FC<Props> = ({
           if (!open) {
             setViewDetail(null);
             setViewError(null);
+            setViewLoadingMore(false);
           }
         }}
       >
-        <SheetContent className="w-full overflow-y-auto sm:!max-w-3xl lg:!max-w-5xl">
-          <SheetHeader>
+        <SheetContent className="flex h-full w-full flex-col gap-0 overflow-hidden p-0 sm:!max-w-3xl lg:!max-w-5xl">
+          <SheetHeader className="shrink-0 space-y-1 border-b px-6 py-4 text-left">
             <SheetTitle>
               {viewDetail
                 ? batchHeading(viewDetail.batch)
                 : "Imported file"}
             </SheetTitle>
+            <SheetDescription>
+              {viewDetail
+                ? [
+                    viewDetail.batch.status,
+                    formatWhen(viewDetail.batch.createdAt),
+                    viewDetail.totalRows
+                      ? `${viewDetail.totalRows} row${viewDetail.totalRows === 1 ? "" : "s"}`
+                      : null,
+                    viewDetail.batch.periodStart
+                      ? `${viewDetail.batch.periodStart} → ${viewDetail.batch.periodEnd ?? viewDetail.batch.periodStart}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : "What was in the file you uploaded."}
+            </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-4 space-y-4 text-sm">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 py-4 text-sm">
             {viewLoading ? (
               <p className="text-muted-foreground">Loading…</p>
             ) : null}
@@ -613,33 +702,51 @@ export const BusinessImportWizard: React.FC<Props> = ({
               <p className="text-muted-foreground">{viewDetail.message}</p>
             ) : null}
 
-            {viewDetail && viewDetail.batch.hasOriginal !== false ? (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => void onDownloadOriginal(viewDetail.batch.id)}
+            {viewDetail ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline">
+                  {viewDetail.batch.createdCount ?? 0} new
+                </Badge>
+                <Badge variant="outline">
+                  {viewDetail.batch.skippedCount ?? 0} skipped
+                </Badge>
+                <Badge
+                  variant={
+                    (viewDetail.batch.errorCount ?? 0) > 0
+                      ? "destructive"
+                      : "outline"
+                  }
                 >
-                  Download original
-                </Button>
+                  {viewDetail.batch.errorCount ?? 0} errors
+                </Badge>
+                {viewDetail.batch.hasOriginal !== false ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="ml-auto"
+                    onClick={() => void onDownloadOriginal(viewDetail.batch.id)}
+                  >
+                    Download original
+                  </Button>
+                ) : null}
               </div>
             ) : null}
 
             {viewDetail && viewDetail.failedRows.length > 0 ? (
-              <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  Rejected / failed rows ({viewDetail.failedRows.length}
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Rows that need attention ({viewDetail.failedRows.length}
                   {typeof viewDetail.batch.errorCount === "number" &&
                   viewDetail.batch.errorCount > viewDetail.failedRows.length
                     ? ` of ${viewDetail.batch.errorCount}`
                     : ""}
                   )
                 </p>
-                <ul className="max-h-40 space-y-2 overflow-y-auto">
+                <ul className="max-h-36 space-y-2 overflow-y-auto">
                   {viewDetail.failedRows.map((f) => (
                     <li
                       key={f.rowNumber}
-                      className="rounded-md border border-destructive/30 p-2 text-xs"
+                      className="rounded-lg border border-destructive/25 bg-destructive/[0.04] px-3 py-2 text-xs"
                     >
                       <p className="font-medium">Row {f.rowNumber}</p>
                       <p className="text-muted-foreground">
@@ -656,47 +763,34 @@ export const BusinessImportWizard: React.FC<Props> = ({
             ) : null}
 
             {viewDetail && viewDetail.headers.length > 0 ? (
-              <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  File rows
-                  {viewDetail.truncated
-                    ? ` · showing ${viewDetail.rows.length} of ${viewDetail.totalRows}`
-                    : ` · ${viewDetail.totalRows}`}
-                </p>
-                <div className="max-h-[50vh] overflow-auto rounded-md border">
-                  <table className="w-full min-w-[28rem] border-collapse text-left text-xs">
-                    <thead className="sticky top-0 bg-background">
-                      <tr>
-                        <th className="border-b px-2 py-1 font-medium">#</th>
-                        {viewDetail.headers.map((h) => (
-                          <th
-                            key={h}
-                            className="border-b px-2 py-1 font-medium"
-                          >
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {viewDetail.rows.map((row) => (
-                        <tr key={row.rowNumber} className="align-top">
-                          <td className="border-b px-2 py-1 text-muted-foreground">
-                            {row.rowNumber}
-                          </td>
-                          {row.cells.map((cell, i) => (
-                            <td
-                              key={`${row.rowNumber}-${i}`}
-                              className="border-b px-2 py-1 whitespace-pre-wrap"
-                            >
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    File contents
+                    {viewDetail.truncated
+                      ? ` · showing ${viewDetail.rows.length} of ${viewDetail.totalRows}`
+                      : ` · ${viewDetail.totalRows} row${viewDetail.totalRows === 1 ? "" : "s"}`}
+                  </p>
                 </div>
+                <ImportDataTable
+                  headers={viewDetail.headers}
+                  rows={viewTableRows}
+                  emptyMessage="This file has no data rows."
+                  footerExtra={
+                    viewDetail.truncated ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={viewLoadingMore}
+                        onClick={() => void onViewMore()}
+                      >
+                        {viewLoadingMore
+                          ? "Loading…"
+                          : `Load 100 more (${viewDetail.totalRows - viewDetail.rows.length} left)`}
+                      </Button>
+                    ) : null
+                  }
+                />
               </div>
             ) : null}
           </div>
