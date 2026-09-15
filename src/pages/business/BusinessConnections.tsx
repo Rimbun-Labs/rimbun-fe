@@ -17,6 +17,7 @@ import {
   useSyncBusinessConnector,
 } from "@/hooks/useBusinessConnectors";
 import type { BusinessConnectorCatalogItem } from "@/lib/api/businessApi";
+import { SoftWait } from "@/components/ui/SoftWait";
 
 function formatWhen(iso: string | null): string {
   if (!iso) return "Never";
@@ -125,12 +126,12 @@ function ConnectionsBody({ customerId }: { customerId: string }) {
     );
   };
 
+  if (catalog.isLoading || connections.isLoading) {
+    return <SoftWait preset="page" />;
+  }
+
   return (
     <div className="space-y-8">
-      {catalog.isLoading || connections.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : null}
-
       {activeConnections.length > 0 ? (
         <section className="space-y-4">
           <h2 className="text-sm font-medium">Connected</h2>

@@ -2,7 +2,7 @@ import React from "react";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SoftWait } from "@/components/ui/SoftWait";
 import { AlertCircle, Building2 } from "lucide-react";
 import { useBusinessWorkspace } from "@/hooks/useBusinessWorkspace";
 
@@ -33,11 +33,7 @@ export function BusinessWorkspaceShell({
       ) : null}
 
       {workspace.loading ? (
-        <div className="space-y-3" aria-busy="true" aria-live="polite">
-          <p className="text-sm text-muted-foreground">Loading…</p>
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
+        <SoftWait preset="workspace" />
       ) : workspace.error ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

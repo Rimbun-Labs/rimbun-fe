@@ -14,6 +14,7 @@ import {
   residualFundingCopy,
 } from "@/lib/business/claimLabels";
 import { PAGE_HEADER } from "@/lib/constants/spacing";
+import { SoftWait } from "@/components/ui/SoftWait";
 import { cn } from "@/lib/utils";
 
 function money(
@@ -115,7 +116,7 @@ const ReviewBody: React.FC<{ customerId: string }> = ({ customerId }) => {
   );
 
   if (loading && !overview) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return <SoftWait preset="page" />;
   }
   if (error && !overview) {
     return (

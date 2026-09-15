@@ -7,6 +7,7 @@ import {
   type BusinessPerformanceSnapshot,
 } from "@/lib/api/businessApi";
 import { cn } from "@/lib/utils";
+import { SoftWait } from "@/components/ui/SoftWait";
 import {
   Bar,
   BarChart,
@@ -207,9 +208,7 @@ function PerformanceBody({ customerId }: { customerId: string }) {
         ))}
       </div>
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : null}
+      {loading ? <SoftWait preset="page" compact /> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {!loading && data && !data.hasProcessorActivity ? (

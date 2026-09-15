@@ -31,6 +31,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ImportDataTable } from "@/components/business/ImportDataTable";
+import { SoftWait } from "@/components/ui/SoftWait";
 
 const SOURCE_OPTIONS: Array<{
   value: BusinessImportSourceType;
@@ -693,16 +694,20 @@ export const BusinessImportWizard: React.FC<Props> = ({
 
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 py-4 text-sm">
             {viewLoading ? (
-              <p className="text-muted-foreground">Loading…</p>
+              <SoftWait
+                preset="import"
+                compact
+                className="min-h-[min(50vh,22rem)]"
+              />
             ) : null}
-            {viewError ? (
+            {!viewLoading && viewError ? (
               <p className="text-destructive">{viewError}</p>
             ) : null}
-            {viewDetail?.message ? (
+            {!viewLoading && viewDetail?.message ? (
               <p className="text-muted-foreground">{viewDetail.message}</p>
             ) : null}
 
-            {viewDetail ? (
+            {!viewLoading && viewDetail ? (
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline">
                   {viewDetail.batch.createdCount ?? 0} new
@@ -732,7 +737,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
               </div>
             ) : null}
 
-            {viewDetail && viewDetail.failedRows.length > 0 ? (
+            {!viewLoading && viewDetail && viewDetail.failedRows.length > 0 ? (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">
                   Rows that need attention ({viewDetail.failedRows.length}
@@ -762,7 +767,7 @@ export const BusinessImportWizard: React.FC<Props> = ({
               </div>
             ) : null}
 
-            {viewDetail && viewDetail.headers.length > 0 ? (
+            {!viewLoading && viewDetail && viewDetail.headers.length > 0 ? (
               <div className="space-y-2">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-xs font-medium text-muted-foreground">

@@ -1,6 +1,7 @@
 import React from "react";
 import { BusinessWorkspaceShell } from "@/components/business/BusinessWorkspaceShell";
 import { BusinessImportWizard } from "@/components/business/BusinessImportWizard";
+import { SoftWait } from "@/components/ui/SoftWait";
 
 const BusinessImportPage: React.FC<{ customerIdOverride?: string }> = ({
   customerIdOverride,
@@ -18,7 +19,7 @@ const BusinessImportPage: React.FC<{ customerIdOverride?: string }> = ({
             onComplete={() => void ws.refetch()}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">Loading workspace…</p>
+          <SoftWait preset="workspace" compact />
         )}
       </div>
     )}

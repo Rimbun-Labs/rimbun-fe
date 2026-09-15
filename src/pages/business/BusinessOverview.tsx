@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PAGE_HEADER } from "@/lib/constants/spacing";
+import { SoftWait } from "@/components/ui/SoftWait";
 import { ActionDetailSheet } from "@/components/business/ActionDetailSheet";
 import { BusinessWorkspaceShell } from "@/components/business/BusinessWorkspaceShell";
 import {
@@ -314,7 +315,7 @@ const OverviewBody: React.FC<{
             </div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <SoftWait preset="page" />
       </div>
     );
   }

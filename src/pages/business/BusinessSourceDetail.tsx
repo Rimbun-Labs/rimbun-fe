@@ -8,6 +8,7 @@ import {
   useBusinessConnectorRuns,
   useBusinessConnectorSummary,
 } from "@/hooks/useBusinessConnectors";
+import { SoftWait } from "@/components/ui/SoftWait";
 
 function formatWhen(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -86,7 +87,7 @@ function SourceDetailBody({
   }
 
   if (summary.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return <SoftWait preset="page" compact />;
   }
 
   if (summary.isError || !summary.data) {
@@ -135,7 +136,7 @@ function SourceDetailBody({
       <section className="space-y-3">
         <h2 className="text-sm font-medium">Recent activity</h2>
         {activity.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <SoftWait preset="page" compact className="min-h-[10rem]" />
         ) : (activity.data ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No imported activity yet.
