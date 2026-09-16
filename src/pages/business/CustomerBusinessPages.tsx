@@ -14,6 +14,7 @@ import BusinessSourceDetail from "@/pages/business/BusinessSourceDetail";
 import BusinessConnections from "@/pages/business/BusinessConnections";
 import BusinessReview from "@/pages/business/BusinessReview";
 import BusinessPerformance from "@/pages/business/BusinessPerformance";
+import BusinessChat from "@/pages/business/BusinessChat";
 
 function withRouteCustomer(
   Page: React.ComponentType<{ customerIdOverride?: string }>
@@ -44,3 +45,4 @@ export const CustomerBusinessReview = withRouteCustomer(BusinessReview);
 export const CustomerBusinessPerformance = withRouteCustomer(
   BusinessPerformance,
 );
+export const CustomerBusinessChat = withRouteCustomer(BusinessChat);

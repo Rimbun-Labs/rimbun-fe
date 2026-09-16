@@ -6,7 +6,8 @@ import {
   Moon,
   User,
   Menu,
-  LogOut
+  LogOut,
+  MessageCircle,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,6 +21,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/components/ui/use-toast";
 import { Logo } from '@/components/ui/Logo';
 import MobileMenu from './MobileMenu';
+import { useBusinessChatEnabled } from '@/hooks/useBusinessChatEnabled';
+import { useAskRimbun } from '@/contexts/AskRimbunContext';
 
 interface AppHeaderProps {
   showFullNav?: boolean;
@@ -30,8 +33,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
   const { toggleMobileMenu } = useMobileMenu();
   const { signOut, user, operator } = useAuth();
   const { toast } = useToast();
+  const { enabled: chatEnabled } = useBusinessChatEnabled();
+  const { openAsk } = useAskRimbun();
   const appHome = user ? '/app' : '/';
   const tenantLabel = operator?.tenantName?.trim() || null;
+  const showAsk = chatEnabled && operator?.tenantType === "business";
 
   const handleLogout = async () => {
     try {
@@ -49,30 +55,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
     }
   };
 
-  // Notification handlers disabled - backend endpoints not available
-  // const handleMarkAllAsRead = async () => {
-  //   if (unreadCount > 0) {
-  //     await markAllAsRead.mutateAsync();
-  //   }
-  // };
-
-  // const handleNotificationClick = async (notification: typeof notifications[0]) => {
-  //   // Mark as read if unread
-  //   if (!notification.isRead) {
-  //     await markAsRead.mutateAsync(notification.id);
-  //   }
-  //   
-  //   // Navigate if action URL exists
-  //   if (notification.actionUrl) {
-  //     navigate(notification.actionUrl);
-  //   }
-  // };
-
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
-          {/* Left Section: Logo and Brand */}
           <div className="flex items-center gap-4">
             {showFullNav && (
               <div className="md:hidden">
@@ -102,8 +88,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({ showFullNav = true }) => {
             ) : null}
           </div>
           
-          {/* Right Section: Navigation and Actions */}
           <div className="flex items-center gap-2 md:gap-4">
+            {showAsk ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground"
+                onClick={openAsk}
+              >
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Ask</span>
+              </Button>
+            ) : null}
             <Button
               variant="ghost"
               size="icon"

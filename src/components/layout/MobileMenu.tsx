@@ -21,6 +21,7 @@ import {
   Upload,
   FileText,
   Activity,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,8 @@ import {
 } from "@/components/ui/sheet";
 import { Logo } from "@/components/ui/Logo";
 import { APP_ROOT, appCustomers, businessWorkspaceBase } from "@/lib/appPaths";
+import { useAskRimbun } from "@/contexts/AskRimbunContext";
+import { useBusinessChatEnabled } from "@/hooks/useBusinessChatEnabled";
 
 function customerIdFromPath(pathname: string): string | null {
   const match = pathname.match(/^\/app\/customers\/([^/]+)/);
@@ -43,6 +46,8 @@ const MobileMenu: React.FC = () => {
   const { customers } = useSelectedCustomer();
   const { toast } = useToast();
   const location = useLocation();
+  const { enabled: chatEnabled } = useBusinessChatEnabled();
+  const { openAsk } = useAskRimbun();
   const isBusinessTenant = operator?.tenantType === "business";
 
   const routeCustomerId = customerIdFromPath(location.pathname);
@@ -158,6 +163,19 @@ const MobileMenu: React.FC = () => {
                   <FileText className="h-4 w-4" />
                   Review
                 </Link>
+                {chatEnabled && isBusinessTenant ? (
+                  <button
+                    type="button"
+                    className={linkClass(false)}
+                    onClick={() => {
+                      closeMobileMenu();
+                      openAsk();
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    Ask Rimbun
+                  </button>
+                ) : null}
               </div>
               <div className="space-y-2">
                 <h3 className="px-2 text-sm font-semibold text-muted-foreground sidebar-section-header">
@@ -271,6 +289,19 @@ const MobileMenu: React.FC = () => {
                         <FileText className="h-4 w-4" />
                         Review
                       </Link>
+                      {chatEnabled && isBusinessTenant ? (
+                        <button
+                          type="button"
+                          className={linkClass(false)}
+                          onClick={() => {
+                            closeMobileMenu();
+                            openAsk();
+                          }}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Ask Rimbun
+                        </button>
+                      ) : null}
                       <h3 className="px-2 pt-3 text-sm font-semibold text-muted-foreground sidebar-section-header">
                         Data
                       </h3>
