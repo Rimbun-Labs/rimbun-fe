@@ -2,6 +2,7 @@ import { apiClient } from "./client";
 import type {
   BankCustomerListItem,
   BankCustomersResponseDto,
+  BusinessDecisionDto,
   FiDecisionExplainDto,
   FiDecisionInsightsDto,
   FiQueueBucketSummaryDto,
@@ -24,12 +25,16 @@ function withCustomerIdAlias<T extends Record<string, unknown>>(
 export const getBankCustomers = async (
   limit = 50,
   offset = 0,
-  q?: string
+  q?: string,
+  customerType?: "individual" | "business"
 ): Promise<BankCustomerListItem[]> => {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   const trimmed = q != null ? sanitizeCustomerSearchQuery(q) : "";
   if (trimmed.length >= 2) {
     params.set("q", trimmed);
+  }
+  if (customerType) {
+    params.set("customerType", customerType);
   }
   const response = await apiClient.get(`/dashboard/customers?${params.toString()}`);
   const responseData = response.data;
@@ -86,6 +91,13 @@ export const getFiDecisionInsights = async (
   const responseData = response.data;
   if (responseData?.data) return responseData.data as FiDecisionInsightsDto;
   return responseData as FiDecisionInsightsDto;
+};
+
+export const getBusinessDecision = async (customerId: string): Promise<BusinessDecisionDto> => {
+  const response = await apiClient.get(`/dashboard/customers/${customerId}/business-decision`);
+  const responseData = response.data;
+  if (responseData?.data) return responseData.data as BusinessDecisionDto;
+  return responseData as BusinessDecisionDto;
 };
 
 export const getFiDecisionExplain = async (

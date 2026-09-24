@@ -17,7 +17,8 @@ import type {
 
 const DECISION_CACHE_MS = 60000;
 
-export const useFiDecisionInsights = () => {
+export const useFiDecisionInsights = (options?: { loadDecision?: boolean }) => {
+  const loadDecision = options?.loadDecision !== false;
   const { user, userRegistrationComplete } = useAuth();
   const {
     selectedCustomerId,
@@ -132,9 +133,16 @@ export const useFiDecisionInsights = () => {
   useEffect(() => {
     setExplainData(null);
     setExplainError(null);
+    if (!loadDecision) {
+      setLoading(false);
+      setData(null);
+      setError(null);
+      return;
+    }
     fetchDecision(true);
+    // Refetch when auth becomes ready. The lead is on fi-decision, not explain.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCustomerId]);
+  }, [selectedCustomerId, user, userRegistrationComplete, loadDecision]);
 
   return {
     customers,

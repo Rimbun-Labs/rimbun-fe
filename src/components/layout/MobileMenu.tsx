@@ -16,6 +16,7 @@ import {
   Package,
   UserCircle,
   Users,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -34,9 +35,13 @@ const MobileMenu: React.FC = () => {
   const location = useLocation();
 
   const routeCustomerId = customerIdFromPath(location.pathname);
+  const routeCustomer = customers.find((customer) => customer.customerId === routeCustomerId);
+  const isBusinessCustomer =
+    new URLSearchParams(location.search).get("kind") === "business" || routeCustomer?.customerType === "business";
   const customerBase = routeCustomerId
     ? `/dashboard/customers/${routeCustomerId}`
     : null;
+  const overviewTo = customerBase && isBusinessCustomer ? `${customerBase}?kind=business` : customerBase;
 
   const customerLabel = useMemo(() => {
     if (!routeCustomerId) return null;
@@ -106,6 +111,16 @@ const MobileMenu: React.FC = () => {
               <Users className="h-4 w-4" />
               Customers
             </Link>
+            <Link
+              to="/dashboard/consumer/statement"
+              className={linkClass(
+                location.pathname === '/dashboard/consumer/statement'
+              )}
+              onClick={closeMobileMenu}
+            >
+              <FileText className="h-4 w-4" />
+              Individual statement
+            </Link>
           </div>
 
           {customerBase ? (
@@ -117,29 +132,33 @@ const MobileMenu: React.FC = () => {
                 <p className="px-2 text-xs text-muted-foreground truncate">{customerLabel}</p>
               ) : null}
               <Link
-                to={customerBase}
+                to={overviewTo ?? customerBase}
                 className={linkClass(location.pathname === customerBase)}
                 onClick={closeMobileMenu}
               >
                 <UserCircle className="h-4 w-4" />
                 Overview
               </Link>
-              <Link
-                to={`${customerBase}/assessment`}
-                className={linkClass(location.pathname.includes('/assessment'))}
-                onClick={closeMobileMenu}
-              >
-                <ClipboardList className="h-4 w-4" />
-                Assessment
-              </Link>
-              <Link
-                to={`${customerBase}/products`}
-                className={linkClass(location.pathname.includes('/products'))}
-                onClick={closeMobileMenu}
-              >
-                <Package className="h-4 w-4" />
-                Products
-              </Link>
+              {isBusinessCustomer ? null : (
+                <>
+                  <Link
+                    to={`${customerBase}/assessment`}
+                    className={linkClass(location.pathname.includes('/assessment'))}
+                    onClick={closeMobileMenu}
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    Assessment
+                  </Link>
+                  <Link
+                    to={`${customerBase}/products`}
+                    className={linkClass(location.pathname.includes('/products'))}
+                    onClick={closeMobileMenu}
+                  >
+                    <Package className="h-4 w-4" />
+                    Products
+                  </Link>
+                </>
+              )}
             </div>
           ) : null}
 

@@ -14,6 +14,7 @@ import {
   Package,
   UserCircle,
   Users,
+  FileText,
 } from 'lucide-react';
 import { useSelectedCustomer } from '@/contexts/SelectedCustomerContext';
 import {
@@ -54,9 +55,13 @@ const AppSidebar: React.FC = () => {
   const { customers } = useSelectedCustomer();
 
   const routeCustomerId = customerIdFromPath(location.pathname);
+  const routeCustomer = customers.find((customer) => customer.customerId === routeCustomerId);
+  const isBusinessCustomer =
+    new URLSearchParams(location.search).get("kind") === "business" || routeCustomer?.customerType === "business";
   const customerBase = routeCustomerId
     ? `/dashboard/customers/${routeCustomerId}`
     : null;
+  const overviewTo = customerBase && isBusinessCustomer ? `${customerBase}?kind=business` : customerBase;
 
   const customerLabel = useMemo(() => {
     if (!routeCustomerId) return null;
@@ -106,6 +111,15 @@ const AppSidebar: React.FC = () => {
             <Users className="h-4 w-4" />
             Customers
           </NavLink>
+          <NavLink
+            to="/dashboard/consumer/statement"
+            className={({ isActive }) =>
+              cn(navInactive, isActive && navActive)
+            }
+          >
+            <FileText className="h-4 w-4" />
+            Individual statement
+          </NavLink>
         </div>
 
         {customerBase ? (
@@ -124,7 +138,7 @@ const AppSidebar: React.FC = () => {
               ) : null}
             </div>
             <NavLink
-              to={customerBase}
+              to={overviewTo ?? customerBase}
               end
               className={({ isActive }) =>
                 cn(navInactive, isActive && navActive)
@@ -133,24 +147,28 @@ const AppSidebar: React.FC = () => {
               <UserCircle className="h-4 w-4" />
               Overview
             </NavLink>
-            <NavLink
-              to={`${customerBase}/assessment`}
-              className={({ isActive }) =>
-                cn(navInactive, isActive && navActive)
-              }
-            >
-              <ClipboardList className="h-4 w-4" />
-              Assessment
-            </NavLink>
-            <NavLink
-              to={`${customerBase}/products`}
-              className={({ isActive }) =>
-                cn(navInactive, isActive && navActive)
-              }
-            >
-              <Package className="h-4 w-4" />
-              Products
-            </NavLink>
+            {isBusinessCustomer ? null : (
+              <>
+                <NavLink
+                  to={`${customerBase}/assessment`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Assessment
+                </NavLink>
+                <NavLink
+                  to={`${customerBase}/products`}
+                  className={({ isActive }) =>
+                    cn(navInactive, isActive && navActive)
+                  }
+                >
+                  <Package className="h-4 w-4" />
+                  Products
+                </NavLink>
+              </>
+            )}
           </div>
         ) : null}
 

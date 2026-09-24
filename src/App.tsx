@@ -36,6 +36,7 @@ const Assessment = lazy(() => import("./pages/Assessment"));
 const AssessmentResultsPage = lazy(() => import("./pages/AssessmentResults"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Customers = lazy(() => import("./pages/Customers"));
+const IndividualStatement = lazy(() => import("./pages/IndividualStatement"));
 const CustomerOverview = lazy(() => import("./pages/CustomerOverview"));
 const CustomerAssessment = lazy(() => import("./pages/CustomerAssessment"));
 const CustomerProducts = lazy(() => import("./pages/CustomerProducts"));
@@ -183,6 +184,14 @@ const AppRoutes = () => {
           element={
             <Suspense fallback={<LoadingState variant="expanded" />}>
               <Customers />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/dashboard/consumer/statement"
+          element={
+            <Suspense fallback={<LoadingState variant="expanded" />}>
+              <IndividualStatement />
             </Suspense>
           }
         />

@@ -13,6 +13,7 @@ export type TenantCustomerOption = {
   customerId: string;
   externalCustomerId: string;
   displayName: string;
+  customerType?: "individual" | "business";
 };
 
 type SelectedCustomerContextValue = {
@@ -32,10 +33,12 @@ const SelectedCustomerContext = createContext<SelectedCustomerContextValue | und
 function normalizeCustomerRow(row: Record<string, unknown>): TenantCustomerOption | null {
   const customerId = String(row.customerId ?? row.userId ?? "").trim();
   if (!customerId) return null;
+  const customerType = row.customerType === "business" || row.customerType === "individual" ? row.customerType : undefined;
   return {
     customerId,
     externalCustomerId: String(row.externalCustomerId ?? row.email ?? ""),
     displayName: String(row.displayName ?? row.externalCustomerId ?? customerId),
+    customerType,
   };
 }
 

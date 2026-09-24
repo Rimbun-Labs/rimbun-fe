@@ -269,8 +269,88 @@ export interface FiDecisionPropensityAndIntent {
   productPropensity?: Array<{ productType: string; score: number; rationale: string }>;
 }
 
+export interface CustomerLeadTransaction {
+  category: string;
+  amount: number;
+  daysAgo: number;
+  period: string;
+  merchantHint?: string;
+  categoryAverage6m: number;
+  isAnomaly: boolean;
+}
+
+export interface CustomerLead {
+  id: string;
+  pulse: "imminent_risk" | "high_value_upsell" | "watch";
+  archetypeTag: string;
+  oneLiner: string;
+  insights?: Array<{
+    id: string;
+    title: string;
+    shareOfMoneyOut?: number;
+    labels?: string[];
+    monthCount?: number;
+    salary?: number | null;
+    sideIncome?: number | null;
+    months?: Array<{ period: string; moneyIn: number; moneyOut: number; surplus: number }>;
+    series?: Array<{ period: string; amount: number }>;
+  }>;
+  timeline: Array<{
+    daysAgo: number;
+    label: string;
+    iconKey: string;
+  }>;
+  liquidity: {
+    daysOfRunway: number;
+    burnRateCurrent: number;
+    burnRate6mAvg: number;
+    monthsObserved: number;
+    showLiquidityCrunchWarning: boolean;
+  };
+  transactions: CustomerLeadTransaction[];
+  healthMomentum: Array<{
+    monthLabel: string;
+    score: number;
+  }>;
+  supportingIndicators: string[];
+  snapshotHighlights: string[];
+  callScriptBullets: string[];
+  decisionSupport: {
+    reviewTier: "standard" | "enhanced_due_diligence" | "priority_credit_review";
+    reviewTierLabel: string;
+    reasonCodes: string[];
+    underwritingBridge: string;
+  };
+  actionPayload: {
+    strategyLabel: string;
+    whyNow: string;
+  };
+  productRecommendation: {
+    confidenceBand: "high" | "medium" | "low";
+    basedOnSignals: { matched: number; total: number };
+    provenanceChips: string[];
+    options: Array<{ product: string; fitRationale: string; tag: "recommended" | "alternative" }>;
+  };
+  wealthRecommendation: {
+    eligible: boolean;
+    ineligibleReason?: string;
+    options: unknown[];
+  };
+  logicEvidence: {
+    rules: Array<{ code: string; expression: string; plainEnglish: string }>;
+    triggerTransactions: CustomerLeadTransaction[];
+  };
+  propensityScore: number | null;
+  loanBalance: number | null;
+  priorityScore: number | null;
+  merchantClusterId: string | null;
+  needsMoreData: string[];
+}
+
 export interface FiDecisionInsightsDto {
   executiveSummary: string;
+  /** Demo-shaped lead when saved statement months exist. */
+  customerLead?: CustomerLead;
   risk?: {
     liquidityRisk: FiDecisionRiskItem;
     stressRisk: FiDecisionRiskItem;
@@ -307,9 +387,150 @@ export interface BankCustomerListItem {
   email?: string;
   displayName?: string;
   role?: string;
+  customerType?: "individual" | "business";
   queueBucket?: FiQueueBucket;
   queueReason?: string;
   queuePriorityScore?: number;
+}
+
+export interface BusinessInference {
+  code: string;
+  heading: string;
+  finding: string;
+  meaning: string;
+  nextStep: string | null;
+  confidence: "strong" | "likely" | "possible";
+  direction: "risk" | "opportunity" | "context";
+}
+
+export interface BusinessPulseDriver {
+  code: string;
+  side: "risk" | "opportunity";
+  label: string;
+  confidence: "strong" | "likely" | "possible";
+  contribution: number;
+  standaloneContribution?: number;
+  group?: string | null;
+}
+
+export interface BusinessPulseAssessment {
+  pulse: "imminent_risk" | "high_value_upsell" | "watch";
+  reviewTier?: string;
+  reviewTierLabel: string;
+  riskScore: number;
+  opportunityScore: number;
+  coverMonths: number;
+  coverEffect: string;
+  surplusEffect?: string | null;
+  drivers: BusinessPulseDriver[];
+  method: string;
+}
+
+export interface BusinessBuyerChange {
+  name: string;
+  earlierPeriod: string;
+  latestPeriod: string;
+  earlierTotal: number;
+  latestTotal: number;
+  earlierCount: number;
+  latestCount: number;
+  earlierAverage: number;
+  latestAverage: number;
+  earlierGapDays: number | null;
+  latestGapDays: number | null;
+  pattern: string;
+}
+
+export interface BusinessLeadMonth {
+  period: string;
+  monthLabel: string;
+  sales: number;
+  moneyIn: number;
+  moneyOut: number;
+  closingBalance: number;
+}
+
+export interface BusinessLead {
+  id: string;
+  leadKind: "business";
+  readingLens: string[];
+  pulse: "imminent_risk" | "high_value_upsell" | "watch";
+  archetypeTag: string;
+  oneLiner: string;
+  inferences?: BusinessInference[];
+  pulseAssessment?: BusinessPulseAssessment;
+  limits?: string[];
+  buyerChanges?: BusinessBuyerChange[];
+  timeline: Array<{ period?: string; monthLabel?: string; daysAgo: number; label: string; iconKey: string }>;
+  months?: BusinessLeadMonth[];
+  liquidity: {
+    daysOfRunway: number;
+    cashCoverMonths?: number;
+    burnRateCurrent: number;
+    burnRate6mAvg: number;
+    monthsObserved: number;
+    showLiquidityCrunchWarning: boolean;
+  };
+  transactions: Array<{
+    category: string;
+    amount: number;
+    daysAgo: number;
+    categoryAverage6m: number;
+    merchantHint: string;
+    isAnomaly: boolean;
+    period: string;
+  }>;
+  healthMomentum: Array<{ monthLabel: string; score: number; sales?: number }>;
+  healthMomentumBasis: string;
+  balanceTrend: Array<{ weekEnding: string; balance: number }>;
+  decisionSupport?: {
+    reviewTierLabel: string;
+  };
+  actionPayload: { strategyLabel: string; whyNow: string; basedOnInference?: string | null };
+  productRecommendation: {
+    confidenceBand: "high" | "medium" | "low";
+    basedOnSignals: { matched: number; total: number };
+    provenanceChips: string[];
+    options: Array<{ product: string; fitRationale: string; tradeoff?: string; tag: "recommended" | "alternative" }>;
+  };
+  wealthRecommendation: {
+    eligible: boolean;
+    ineligibleReason?: string;
+    options: unknown[];
+  };
+  needsMoreData: string[];
+}
+
+export interface BusinessStatementMonth {
+  period: string;
+  sales: number;
+  moneyIn: number;
+  moneyOut: number;
+  closingBalance: number;
+  staffPay: number;
+  supplies: number;
+}
+
+export interface BusinessStatementLoan {
+  lender: string;
+  typicalAmount: number;
+  cadence: "weekly" | "monthly" | "irregular";
+  latestMonthAmount: number;
+  newInLatestMonth: boolean;
+}
+
+export interface BusinessStatementSlice {
+  months: BusinessStatementMonth[];
+  loans: BusinessStatementLoan[];
+}
+
+export interface BusinessDecisionDto {
+  generatedAt?: string;
+  customerId?: string;
+  leadKind: "business";
+  executiveSummary: string;
+  businessLead: BusinessLead | null;
+  statementReading?: BusinessStatementSlice | null;
 }
 
 export interface BankCustomersResponseDto {

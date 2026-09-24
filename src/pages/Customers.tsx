@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFiDecisionInsights } from "@/hooks/useFiDecisionInsights";
+import { getBankCustomers } from "@/lib/api/fiDecisionApi";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, RefreshCw, AlertCircle, CircleAlert } from "lucide-react";
 import type {
   FiQueueBucket,
@@ -58,6 +60,8 @@ const BUCKET_ORDER: Array<FiQueueBucket | "QUEUE_PENDING"> = [
 
 const Customers: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") === "sme" ? "sme" : "individual";
   const { setSelectedCustomerId } = useSelectedCustomer();
   const {
     customers,
@@ -72,10 +76,21 @@ const Customers: React.FC = () => {
   const [hideNeedsData, setHideNeedsData] = useState(false);
   const [walkInInput, setWalkInInput] = useState("");
   const [walkInResults, setWalkInResults] = useState<
-    Array<{ customerId: string; displayName?: string; email?: string; externalCustomerId?: string }>
+    Array<{
+      customerId: string;
+      displayName?: string;
+      email?: string;
+      externalCustomerId?: string;
+      customerType?: "individual" | "business";
+    }>
   >([]);
   const [walkInLoading, setWalkInLoading] = useState(false);
   const walkInDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [businessCustomers, setBusinessCustomers] = useState<
+    Array<{ customerId: string; displayName?: string; externalCustomerId?: string }>
+  >([]);
+  const [businessLoading, setBusinessLoading] = useState(false);
+  const [businessError, setBusinessError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (walkInDebounceRef.current) clearTimeout(walkInDebounceRef.current);
@@ -95,6 +110,7 @@ const Customers: React.FC = () => {
             displayName: r.displayName,
             email: r.email,
             externalCustomerId: r.externalCustomerId,
+            customerType: r.customerType,
           }))
         );
       } catch {
@@ -144,10 +160,42 @@ const Customers: React.FC = () => {
     })).filter((g) => g.rows.length > 0);
   }, [filtered]);
 
-  const openCustomer = (id: string) => {
+  const loadBusinessCustomers = async () => {
+    try {
+      setBusinessLoading(true);
+      setBusinessError(null);
+      const rows = await getBankCustomers(50, 0, undefined, "business");
+      setBusinessCustomers(
+        rows.map((row) => ({
+          customerId: String(row.customerId ?? row.userId ?? ""),
+          displayName: row.displayName,
+          externalCustomerId: row.externalCustomerId,
+        }))
+      );
+    } catch (err) {
+      setBusinessError(err instanceof Error ? err : new Error("Failed to load business customers"));
+      setBusinessCustomers([]);
+    } finally {
+      setBusinessLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === "sme") void loadBusinessCustomers();
+  }, [tab]);
+
+  const openCustomer = (id: string, customerType?: "individual" | "business") => {
     if (!id) return;
     setSelectedCustomerId(id);
-    navigate(`/dashboard/customers/${id}`);
+    const kind = customerType === "business" ? "?kind=business" : "";
+    navigate(`/dashboard/customers/${id}${kind}`);
+  };
+
+  const onTab = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === "sme") next.set("tab", "sme");
+    else next.delete("tab");
+    setSearchParams(next, { replace: true });
   };
 
   return (
@@ -160,16 +208,21 @@ const Customers: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetchCustomers()}
-            disabled={customersLoading}
+            onClick={() => (tab === "sme" ? void loadBusinessCustomers() : refetchCustomers())}
+            disabled={tab === "sme" ? businessLoading : customersLoading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${customersLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${(tab === "sme" ? businessLoading : customersLoading) ? "animate-spin" : ""}`} />
             Refresh
           </Button>
         }
       />
 
-      <div className="mt-6 space-y-4">
+      <Tabs value={tab} onValueChange={onTab} className="mt-6">
+        <TabsList>
+          <TabsTrigger value="individual">Individual</TabsTrigger>
+          <TabsTrigger value="sme">SME</TabsTrigger>
+        </TabsList>
+        <TabsContent value="individual" className="space-y-4">
         {bookSummary ? <BookSummaryStrip summary={bookSummary} /> : null}
 
         <div className="rounded-md border p-3 space-y-2">
@@ -192,7 +245,7 @@ const Customers: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="h-auto w-full justify-start px-2 py-1.5 text-left text-xs"
-                    onClick={() => openCustomer(row.customerId)}
+                    onClick={() => openCustomer(row.customerId, row.customerType)}
                   >
                     <span className="font-medium">
                       {row.displayName || row.externalCustomerId || row.customerId}
@@ -301,7 +354,47 @@ const Customers: React.FC = () => {
             ))}
           </Accordion>
         )}
-      </div>
+        </TabsContent>
+        <TabsContent value="sme" className="space-y-4">
+          {businessError ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Unable to load businesses</AlertTitle>
+              <AlertDescription>The business customer list could not be loaded.</AlertDescription>
+            </Alert>
+          ) : null}
+          {businessLoading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : businessCustomers.length === 0 ? (
+            <Alert>
+              <CircleAlert className="h-4 w-4" />
+              <AlertTitle>No business customers</AlertTitle>
+              <AlertDescription>No SME customers are in this book yet.</AlertDescription>
+            </Alert>
+          ) : (
+            <div className="space-y-2">
+              {businessCustomers.map((customer) => (
+                <button
+                  key={customer.customerId}
+                  type="button"
+                  onClick={() => openCustomer(customer.customerId, "business")}
+                  className="flex w-full flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors hover:bg-accent/50"
+                >
+                  <div className="min-w-0">
+                    <p className="max-w-[320px] truncate text-sm font-medium">
+                      {customer.displayName || customer.externalCustomerId || customer.customerId}
+                    </p>
+                    {customer.externalCustomerId ? (
+                      <p className="text-xs text-muted-foreground">{customer.externalCustomerId}</p>
+                    ) : null}
+                  </div>
+                  <span className="text-xs font-medium text-primary">Open</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   );
 };

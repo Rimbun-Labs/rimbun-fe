@@ -31,7 +31,12 @@ export const CustomerPicker: React.FC<Props> = ({ className }) => {
       /^\/dashboard\/customers\/[^/]+(\/.*)?$/
     );
     if (match) {
-      navigate(`/dashboard/customers/${id}${match[1] ?? ""}`);
+      const selected = customers.find((customer) => customer.customerId === id);
+      const params = new URLSearchParams(location.search);
+      if (selected?.customerType === "business") params.set("kind", "business");
+      else params.delete("kind");
+      const qs = params.toString();
+      navigate(`/dashboard/customers/${id}${match[1] ?? ""}${qs ? `?${qs}` : ""}`);
     }
   };
 
