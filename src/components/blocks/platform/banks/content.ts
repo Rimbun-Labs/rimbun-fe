@@ -1,234 +1,177 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  User,
-  Shield,
-  TrendingUp,
-  Heart,
-  Gauge,
-  Sparkles,
-  Target,
-  Bell,
-  BarChart3,
-  Server,
-  GitBranch,
-  Layers,
-  Plug,
-  LineChart,
+  UserRound,
+  Building2,
   Zap,
   AlertTriangle,
-  ArrowUpRight,
+  Lightbulb,
   CalendarCheck,
-  FileLock2,
-  ShieldCheck,
+  Monitor,
+  Code2,
+  BarChart3,
+  Users,
+  Database,
+  EyeOff,
   ClipboardList,
-  Lock,
+  ShieldCheck,
 } from "lucide-react";
+
+export type BanksAudienceTab = "retail" | "sme";
 
 export const banksHero = {
   eyebrow: "FOR BANKS",
-  title: "Turn customer financial behavior into clearer decisions and recommendations.",
-  lead: "Rimbun gives banks an intelligence layer on top of existing customer data, helping teams understand financial behavior earlier and act with more confidence.",
+  title: "Turn customer financial behaviour into clearer decisions.",
 };
 
-export const banksValueProps: Array<{
+export const banksAudienceTabs: Array<{
+  id: BanksAudienceTab;
+  label: string;
+  icon: LucideIcon;
+}> = [
+  { id: "retail", label: "Retail banking", icon: UserRound },
+  { id: "sme", label: "SME banking", icon: Building2 },
+];
+
+export const banksHeroByTab: Record<
+  BanksAudienceTab,
+  {
+    name: string;
+    subtitle: string;
+    score: string;
+    scoreLabel: string;
+  }
+> = {
+  retail: {
+    name: "Customer A",
+    subtitle: "Retail customer · 3 years",
+    score: "723",
+    scoreLabel: "Good",
+  },
+  sme: {
+    name: "Business A",
+    subtitle: "SME customer · 5 years",
+    score: "641",
+    scoreLabel: "Fair",
+  },
+};
+
+export const banksHeroMetrics: Array<{
+  count: string;
+  label: string;
+  tone: "green" | "red" | "amber" | "purple";
+  icon: LucideIcon;
+}> = [
+  { count: "4", label: "Actions", tone: "green", icon: Zap },
+  { count: "2", label: "Warnings", tone: "red", icon: AlertTriangle },
+  { count: "3", label: "Opportunities", tone: "amber", icon: Lightbulb },
+  { count: "2", label: "When finance fits", tone: "purple", icon: CalendarCheck },
+];
+
+export const heroMetricStyles: Record<
+  "green" | "red" | "amber" | "purple",
+  { well: string; icon: string; text: string }
+> = {
+  green: {
+    well: "bg-[#dcefe4]",
+    icon: "text-[#1B4D3E]",
+    text: "text-[#1B4D3E]",
+  },
+  red: {
+    well: "bg-[#fde8e8]",
+    icon: "text-[#b42318]",
+    text: "text-[#b42318]",
+  },
+  amber: {
+    well: "bg-[#f8ead8]",
+    icon: "text-[#9a5b1f]",
+    text: "text-[#9a5b1f]",
+  },
+  purple: {
+    well: "bg-[#e8e0f4]",
+    icon: "text-[#5b4578]",
+    text: "text-[#5b4578]",
+  },
+};
+
+export const banksDeliveryModes: Array<{
+  id: "dashboard" | "api";
   title: string;
   description: string;
+  tone: "green" | "blue";
   icon: LucideIcon;
 }> = [
   {
-    title: "Know your customers in real time",
-    description:
-      "Understand how customers actually manage money from how they already transact.",
-    icon: User,
+    id: "dashboard",
+    title: "RM Dashboard",
+    description: "Insights and next best actions for your teams.",
+    tone: "green",
+    icon: Monitor,
   },
   {
-    title: "Act earlier on risk",
-    description:
-      "Spot financial stress and changing behavior earlier with forward-looking signals.",
-    icon: Shield,
-  },
-  {
-    title: "Recommend with confidence",
-    description:
-      "Make product recommendations and advice more timely, relevant and personalized.",
-    icon: TrendingUp,
-  },
-  {
-    title: "Strengthen relationships",
-    description:
-      "Support customers with more relevant guidance at the moments that matter.",
-    icon: Heart,
+    id: "api",
+    title: "API",
+    description: "Embed Rimbun intelligence into your products.",
+    tone: "blue",
+    icon: Code2,
   },
 ];
 
-export const banksUseCases = {
-  retail: [
-    {
-      title: "Financial health monitoring",
-      icon: Gauge,
-      points: [
-        "Track financial health over time",
-        "Understand income stability and cash flow patterns",
-      ],
-    },
-    {
-      title: "Early risk identification",
-      icon: Sparkles,
-      points: [
-        "Detect stress signals early",
-        "Reduce delinquencies and unexpected losses",
-      ],
-    },
-    {
-      title: "Personalized recommendations",
-      icon: Target,
-      points: [
-        "Right product, right time",
-        "Improve conversion and wallet share",
-      ],
-    },
-    {
-      title: "Life event awareness",
-      icon: Bell,
-      points: [
-        "Identify life events that change behavior",
-        "Offer relevant support early",
-      ],
-    },
-    {
-      title: "Portfolio intelligence",
-      icon: BarChart3,
-      points: [
-        "Segment with real behavior, not static profiles",
-        "Make data-led decisions at scale",
-      ],
-    },
-  ],
-  sme: [
-    {
-      title: "Cash flow visibility",
-      icon: Gauge,
-      points: [
-        "See runway and working-capital pressure early",
-        "Spot inflow/outflow shifts before they compound",
-      ],
-    },
-    {
-      title: "Early risk identification",
-      icon: Sparkles,
-      points: [
-        "Flag stress across receivables, payables, and balances",
-        "Give RMs earlier context for intervention",
-      ],
-    },
-    {
-      title: "Fit-for-purpose recommendations",
-      icon: Target,
-      points: [
-        "Surface deposits, facilities, or ops moves when they fit",
-        "Improve relevance without generic product pushes",
-      ],
-    },
-    {
-      title: "Operating moment awareness",
-      icon: Bell,
-      points: [
-        "Catch supplier, stock, and seasonality pressure",
-        "Support clients in the moments that matter",
-      ],
-    },
-    {
-      title: "Portfolio intelligence",
-      icon: BarChart3,
-      points: [
-        "Segment SMEs by real behavior, not static labels",
-        "Prioritize outreach and credit review with evidence",
-      ],
-    },
-  ],
-} as const;
+export const banksPortfolioRows: Array<{
+  name: string;
+  score: string;
+  action: string;
+  actionTone: "green" | "amber" | "blue" | "purple";
+}> = [
+  { name: "Customer A", score: "723", action: "Grow", actionTone: "green" },
+  { name: "Customer B", score: "568", action: "Review", actionTone: "amber" },
+  {
+    name: "Business A",
+    score: "641",
+    action: "Opportunity",
+    actionTone: "blue",
+  },
+  {
+    name: "Business B",
+    score: "482",
+    action: "Monitor",
+    actionTone: "purple",
+  },
+];
 
-export const banksWorkflow: Array<{
+export const actionToneStyles: Record<
+  "green" | "amber" | "blue" | "purple",
+  string
+> = {
+  green: "bg-[#e4f3ea] text-[#1B4D3E]",
+  amber: "bg-[#f8ead8] text-[#9a5b1f]",
+  blue: "bg-[#dde7f5] text-[#2b4f7a]",
+  purple: "bg-[#e8e0f4] text-[#5b4578]",
+};
+
+export const banksCapabilities: Array<{
   title: string;
-  description: string;
+  tone: "green" | "red" | "amber" | "purple";
   icon: LucideIcon;
 }> = [
-  {
-    title: "Secure data access",
-    description:
-      "Connect via API or secure file transfer. Read-only and permission-controlled.",
-    icon: Server,
-  },
-  {
-    title: "Behavioral analysis",
-    description:
-      "Rimbun's models turn transactions into signals and forward-looking insights.",
-    icon: GitBranch,
-  },
-  {
-    title: "Intelligence layer",
-    description:
-      "We generate scores, signals, and recommendations with clear explanations.",
-    icon: Layers,
-  },
-  {
-    title: "Delivered to you",
-    description:
-      "Insights flow into your systems and workflows in real time.",
-    icon: Plug,
-  },
-  {
-    title: "Better outcomes",
-    description:
-      "Earlier action, better advice, stronger relationships, healthier portfolios.",
-    icon: LineChart,
-  },
+  { title: "Financial health", tone: "green", icon: BarChart3 },
+  { title: "Risk signals", tone: "red", icon: AlertTriangle },
+  { title: "Opportunities", tone: "amber", icon: Lightbulb },
+  { title: "Recommendations", tone: "purple", icon: Users },
 ];
 
 export const banksTrustItems: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { label: "Read-only access", icon: FileLock2 },
-  { label: "No PII shared with Rimbun", icon: ShieldCheck },
-  { label: "Designed for PDPO-aligned deployments", icon: Shield },
-  { label: "Audit trails and logs", icon: ClipboardList },
-  { label: "Bank-grade encryption", icon: Lock },
+  { label: "No PII shared", icon: EyeOff },
+  { label: "Audit trails", icon: ClipboardList },
+  { label: "Bank-grade encryption", icon: ShieldCheck },
 ];
 
-export const banksHeroMetrics: Array<{
-  count: string;
-  label: string;
-  detail: string;
-  tone: "blue" | "amber" | "green" | "purple";
-  icon: LucideIcon;
-}> = [
-  {
-    count: "4",
-    label: "Actions",
-    detail: "recommended",
-    tone: "blue",
-    icon: Zap,
-  },
-  {
-    count: "2",
-    label: "Warnings",
-    detail: "to monitor",
-    tone: "amber",
-    icon: AlertTriangle,
-  },
-  {
-    count: "3",
-    label: "Operating moves",
-    detail: "opportunities",
-    tone: "green",
-    icon: ArrowUpRight,
-  },
-  {
-    count: "2",
-    label: "When finance fits",
-    detail: "options",
-    tone: "purple",
-    icon: CalendarCheck,
-  },
-];
+export const banksFlowNodes = {
+  data: { title: "Your customer data", icon: Database },
+  outputs: [
+    { title: "RM Dashboard", icon: Monitor },
+    { title: "API", icon: Code2 },
+  ],
+} as const;

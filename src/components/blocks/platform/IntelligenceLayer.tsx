@@ -35,7 +35,7 @@ export function IntelligenceLayer() {
         <div className="flex flex-1 flex-col items-center rounded-[18px] border border-[#e5e7eb] bg-white px-5 py-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <BarChart3 className="h-6 w-6 text-[#6b7280]" strokeWidth={1.75} />
           <p className="mt-3 text-center text-[13px] font-medium leading-snug text-[#15241f]">
-            Forecasts ù Signals ù Recommendations
+            Forecasts {"\u00B7"} Signals {"\u00B7"} Recommendations
           </p>
         </div>
       </div>
