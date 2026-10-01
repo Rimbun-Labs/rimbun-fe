@@ -12,7 +12,7 @@ import { Logo } from "@/components/ui/Logo";
 const DOCS_API_URL = "https://docs.rimbun.co/api";
 
 const navigation = [
-  { name: "Product", href: "/clients#product" },
+  { name: "Solutions", href: "/#paths" },
   { name: "Talk", href: "/contact" },
   { name: "About", href: "/about" },
 ];
@@ -33,8 +33,8 @@ export const LandingHeader = () => {
   }, []);
 
   const isActive = (href: string) => {
-    if (href.startsWith("/clients")) {
-      return location.pathname === "/clients" || location.pathname === "/";
+    if (href.startsWith("/#") || href === "/") {
+      return location.pathname === "/";
     }
     return location.pathname === href;
   };

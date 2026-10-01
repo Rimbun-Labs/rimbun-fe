@@ -47,7 +47,7 @@ function AudiencePage({ eyebrow, title, lead, points }: AudiencePageProps) {
               Talk to us
             </Link>
             <Link
-              to="/platform"
+              to="/"
               className="text-[15px] font-medium text-[#2563eb] hover:underline dark:text-primary"
             >
               ← All solutions

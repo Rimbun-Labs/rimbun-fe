@@ -16,7 +16,7 @@ type UseCaseTab = "retail" | "sme";
 
 /**
  * Banks audience page — structure/copy match to the banks mockup.
- * Shares platform header/footer with /platform.
+ * Shares platform header/footer with the marketing homepage.
  */
 export default function BanksPage() {
   const [tab, setTab] = useState<UseCaseTab>("retail");
@@ -30,11 +30,11 @@ export default function BanksPage() {
       <section className="px-8 pb-10 pt-[68px] md:pb-12 md:pt-20">
         <div className="mx-auto max-w-[1100px]">
           <nav className="text-[12px] text-[#6b7280]">
-            <Link to="/platform" className="hover:text-foreground">
+            <Link to="/" className="hover:text-foreground">
               Home
             </Link>
             <span className="mx-1.5">/</span>
-            <Link to="/platform#solutions" className="hover:text-foreground">
+            <Link to="/#paths" className="hover:text-foreground">
               Solutions
             </Link>
             <span className="mx-1.5">/</span>

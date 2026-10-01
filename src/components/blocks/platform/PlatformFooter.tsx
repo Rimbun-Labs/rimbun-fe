@@ -5,8 +5,7 @@ const DOCS_API_URL = "https://docs.rimbun.co/api";
 const LINKEDIN_URL = "https://www.linkedin.com/company/rimbunlabs/";
 
 const links = [
-  { label: "Product", to: "/platform" },
-  { label: "Solutions", to: "/platform#solutions" },
+  { label: "Solutions", to: "/#paths" },
   { label: "Talk", to: "/contact" },
   { label: "API", href: DOCS_API_URL },
   { label: "About", to: "/about" },
@@ -14,15 +13,15 @@ const links = [
   { label: "Terms", to: "/terms" },
 ] as const;
 
-/** Footer matching the platform mockup. */
+/** Footer for marketing homepage + audience pages. */
 export function PlatformFooter() {
   return (
-    <footer className="border-t border-[#e8e8ea] bg-white dark:border-border dark:bg-background">
-      <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-8 py-10 md:flex-row md:items-center md:justify-between md:gap-6">
+    <footer className="border-t border-[#e8e8ea] bg-white">
+      <div className="mx-auto flex max-w-[1100px] flex-col gap-8 px-6 py-10 md:flex-row md:items-center md:justify-between md:gap-6 md:px-8">
         <div className="flex flex-col gap-2">
-          <Link to="/platform" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <Logo size="sm" variant="footer" />
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">
+            <span className="text-[15px] font-semibold tracking-tight text-[#15241f]">
               Rimbun
             </span>
           </Link>
@@ -37,7 +36,7 @@ export function PlatformFooter() {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-foreground"
+                className="hover:text-[#15241f]"
               >
                 {link.label}
               </a>
@@ -45,17 +44,17 @@ export function PlatformFooter() {
               <Link
                 key={link.label}
                 to={link.to}
-                className="hover:text-foreground"
+                className="hover:text-[#15241f]"
               >
                 {link.label}
               </Link>
-            )
+            ),
           )}
           <a
             href={LINKEDIN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#e8e8ea] text-[#6b7280] hover:text-foreground dark:border-border"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#e8e8ea] text-[#6b7280] hover:text-[#15241f]"
             aria-label="LinkedIn"
           >
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">

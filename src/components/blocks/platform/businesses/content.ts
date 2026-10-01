@@ -1,188 +1,96 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Landmark,
+  ShoppingCart,
+  UserRound,
+  Coins,
+  TrendingUp,
+  ArrowLeftRight,
   BookOpen,
   Boxes,
-  FileText,
-  Radio,
-  Eye,
-  Zap,
-  ShieldAlert,
+  Layers,
   Lightbulb,
-  UserX,
-  Database,
-  Shield,
-  BadgeCheck,
   AlertTriangle,
-  TrendingUp,
-  ShieldCheck,
-  Share2,
-  MessagesSquare,
+  ListChecks,
 } from "lucide-react";
 
 export const businessesHero = {
   eyebrow: "FOR BUSINESSES",
-  title: "Make clearer money decisions. Run your business with more confidence.",
-  lead: "Rimbun turns your financial and operational data into practical intelligence—so you know what’s coming, what to do, and where to focus next.",
+  title: "Know what your business can afford to do next.",
+  lead: "Rimbun uses the data you already have to give you clear answers and recommendations, so you can move forward with confidence.",
 };
 
-export const businessesDataSources: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    title: "Bank transactions",
-    description: "Accounts, card, payments and receipts",
-    icon: Landmark,
-  },
-  {
-    title: "Accounting data",
-    description: "Sales, purchases, AR/AP, P&L and balance sheet",
-    icon: BookOpen,
-  },
-  {
-    title: "Operational data",
-    description: "Inventory, orders, bookings, projects, customers",
-    icon: Boxes,
-  },
-  {
-    title: "Financing & obligations",
-    description: "Loans, leases, facilities, repayment schedules",
-    icon: FileText,
-  },
-  {
-    title: "External signals",
-    description: "Market, sector and seasonal indicators",
-    icon: Radio,
-  },
-];
-
-export const businessesOutputs = [
-  "Cash flow forecasting",
-  "Working capital insights",
-  "Risk & early warnings",
-  "Recommendations",
-] as const;
-
-export const businessesOutcomes: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    title: "See what’s ahead",
-    description:
-      "Cash flow projections and scenario views so you can plan with confidence.",
-    icon: Eye,
-  },
-  {
-    title: "Act on time",
-    description:
-      "Clear actions to improve cash flow, reduce costs, and strengthen performance.",
-    icon: Zap,
-  },
-  {
-    title: "Reduce risk",
-    description:
-      "Early warnings on cash dips, overdue accounts, margin pressure and stock aging.",
-    icon: ShieldAlert,
-  },
-  {
-    title: "Find opportunities",
-    description:
-      "Spot where to invest, negotiate better terms, and unlock working capital.",
-    icon: Lightbulb,
-  },
-];
-
-export const businessesWorkflow: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    title: "Connect securely",
-    description:
-      "Connect your data securely via API or file upload. You stay in control.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "We analyze",
-    description:
-      "Rimbun connects and analyzes your data using proprietary models.",
-    icon: Share2,
-  },
-  {
-    title: "Get insights",
-    description:
-      "Dashboards, alerts and recommendations tailored to your business.",
-    icon: Lightbulb,
-  },
-  {
-    title: "Take action",
-    description: "Act in your systems and track the impact over time.",
-    icon: MessagesSquare,
-  },
-];
-
-export const businessesTrust: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    title: "No PII required",
-    description:
-      "We don’t need personal identifiers to deliver useful intelligence.",
-    icon: UserX,
-  },
-  {
-    title: "You own your data",
-    description:
-      "Your data stays yours. You decide what we see and for how long.",
-    icon: Database,
-  },
-  {
-    title: "Secure by design",
-    description:
-      "Encryption in transit and at rest. Role-based access and audit logs.",
-    icon: Shield,
-  },
-  {
-    title: "Comply with confidence",
-    description:
-      "Designed for PDPO-aligned deployments and local regulatory requirements.",
-    icon: BadgeCheck,
-  },
-];
-
-export const businessesHeroMetrics: Array<{
-  count: string;
-  label: string;
+export const businessesDecisions: Array<{
+  question: string;
   detail: string;
-  tone: "blue" | "amber" | "green" | "purple";
+  status: "yes" | "review";
+  tone: "green" | "blue" | "amber" | "purple";
   icon: LucideIcon;
 }> = [
   {
-    count: "5",
-    label: "Actions",
-    detail: "recommended",
-    tone: "blue",
-    icon: Zap,
-  },
-  {
-    count: "3",
-    label: "Warnings",
-    detail: "to watch",
-    tone: "amber",
-    icon: AlertTriangle,
-  },
-  {
-    count: "4",
-    label: "Opportunities",
-    detail: "potential upside",
+    question: "Can I buy £60k of stock?",
+    detail: "Yes, without putting your cash buffer at risk.",
+    status: "yes",
     tone: "green",
+    icon: ShoppingCart,
+  },
+  {
+    question: "Can I hire another person?",
+    detail: "From November, based on current commitments.",
+    status: "yes",
+    tone: "blue",
+    icon: UserRound,
+  },
+  {
+    question: "Where can I free up cash?",
+    detail: "£38k tied up in overdue receivables.",
+    status: "review",
+    tone: "amber",
+    icon: Coins,
+  },
+  {
+    question: "Can I invest in new equipment?",
+    detail: "Likely, with manageable impact on cash flow.",
+    status: "yes",
+    tone: "purple",
     icon: TrendingUp,
   },
 ];
+
+export const decisionIconStyles: Record<
+  "green" | "blue" | "amber" | "purple",
+  { well: string; icon: string }
+> = {
+  green: { well: "bg-[#dcefe4]", icon: "text-[#1B4D3E]" },
+  blue: { well: "bg-[#dde7f5]", icon: "text-[#2b4f7a]" },
+  amber: { well: "bg-[#f3e6d4]", icon: "text-[#8a5530]" },
+  purple: { well: "bg-[#e8e0f4]", icon: "text-[#5b4578]" },
+};
+
+export const businessesDataInputs: Array<{
+  title: string;
+  icon: LucideIcon;
+}> = [
+  { title: "Transactions", icon: ArrowLeftRight },
+  { title: "Accounting", icon: BookOpen },
+  { title: "Operational data", icon: Boxes },
+  { title: "Other sources", icon: Layers },
+];
+
+export const businessesAnswers: Array<{
+  title: string;
+  icon: LucideIcon;
+  tone: "blue" | "amber" | "purple";
+}> = [
+  { title: "Opportunities", icon: Lightbulb, tone: "blue" },
+  { title: "Risks", icon: AlertTriangle, tone: "amber" },
+  { title: "Next steps", icon: ListChecks, tone: "purple" },
+];
+
+export const answerIconStyles: Record<
+  "blue" | "amber" | "purple",
+  { well: string; icon: string }
+> = {
+  blue: { well: "bg-[#dde7f5]", icon: "text-[#2b4f7a]" },
+  amber: { well: "bg-[#f8ead8]", icon: "text-[#9a5b1f]" },
+  purple: { well: "bg-[#e8e0f4]", icon: "text-[#5b4578]" },
+};

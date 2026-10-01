@@ -5,17 +5,17 @@ import {
   TrendingUp,
   BarChart3,
   Building2,
-  Store,
   Shield,
   Car,
   Plane,
   ShoppingCart,
   Landmark,
 } from "lucide-react";
+import type { PathTone } from "./PathCard";
 
 export type AccentTone = "blue" | "amber" | "green" | "purple";
 
-/** Soft tinted icon wells — matches mockup. */
+/** Soft tinted icon wells — matches audience mockups. */
 export const accentStyles: Record<
   AccentTone,
   { icon: string; well: string }
@@ -38,39 +38,44 @@ export const accentStyles: Record<
   },
 };
 
+/** Homepage + header Solutions menu — order matches mockup. */
 export const platformAudiences: Array<{
   id: string;
   title: string;
   description: string;
   href: string;
   tone: AccentTone;
+  pathTone: PathTone;
   icon: LucideIcon;
 }> = [
-  {
-    id: "banks",
-    title: "Banks",
-    description:
-      "Serve retail and SME clients with clearer financial intelligence and recommendations.",
-    href: "/banks",
-    tone: "blue",
-    icon: Landmark,
-  },
   {
     id: "businesses",
     title: "Businesses",
     description:
-      "Make clearer money decisions for dealerships, travel, retail, and trading businesses.",
+      "Understand what’s ahead and make better financial decisions.",
     href: "/businesses",
     tone: "green",
-    icon: Store,
+    pathTone: "green",
+    icon: Building2,
+  },
+  {
+    id: "banks",
+    title: "Banks",
+    description:
+      "Understand customer financial behaviour and act earlier.",
+    href: "/banks",
+    tone: "blue",
+    pathTone: "blue",
+    icon: Landmark,
   },
   {
     id: "insurers",
-    title: "Insurers & lenders",
+    title: "Insurance",
     description:
-      "Use behavioral signals for underwriting, risk, and facilities.",
+      "Turn financial signals into better risk and customer decisions.",
     href: "/insurers-lenders",
-    tone: "purple",
+    tone: "amber",
+    pathTone: "amber",
     icon: Shield,
   },
 ];

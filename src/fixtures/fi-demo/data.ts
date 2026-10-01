@@ -422,7 +422,7 @@ const portfolio = {
   ],
 };
 
-/** Canonical synthetic RM workspace dataset for /clients/demo */
+/** Canonical synthetic RM workspace dataset for /banks/demo */
 export const fiDemoFixture: FiDemoFixture = {
   meta: {
     asOf: "2026-04-01",

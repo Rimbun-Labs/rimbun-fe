@@ -1,124 +1,146 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import {
-  AudienceCard,
-  CapabilityCard,
-  IndustryExample,
-  IntelligencePreview,
+  ForecastHeroCard,
+  IntelligenceLayer,
+  PathCard,
   PlatformFooter,
   PlatformHeader,
-  RouteCard,
   platformAudiences,
-  platformCapabilities,
-  platformExamples,
-  platformRoutes,
 } from "@/components/blocks/platform";
 
 /**
- * Trial unified homepage — visual match to the design mockup.
- * Not wired as `/` yet. Review at `/platform`.
+ * Main marketing homepage — hub into Businesses, Banks, Insurance.
  */
 export default function PlatformHome() {
   return (
-    <div className="min-h-screen bg-[#f7f7f8] text-foreground dark:bg-background">
+    <div className="min-h-screen overflow-x-hidden bg-[#fbfcfb] text-[#15241f] font-['Plus_Jakarta_Sans',ui-sans-serif,system-ui,sans-serif]">
       <PlatformHeader />
 
       {/* Hero */}
-      <section className="px-8 pb-8 pt-[68px] md:pb-8 md:pt-20">
-        <div className="mx-auto grid max-w-[1100px] items-center gap-8 lg:grid-cols-2 lg:gap-10">
-          <div>
-            <h1 className="text-[36px] font-semibold leading-[1.08] tracking-tight text-foreground md:text-[48px]">
-              Financial intelligence for banks, businesses, and insurers.
+      <section className="relative px-6 pb-14 pt-[72px] md:px-8 md:pb-20 md:pt-24">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(27,77,62,0.10),_transparent_55%),radial-gradient(ellipse_at_bottom_left,_rgba(232,243,236,0.9),_transparent_50%)]"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-[1100px] items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h1 className="max-w-[14ch] text-[40px] font-semibold leading-[1.05] tracking-tight text-[#15241f] md:text-[52px]">
+              Turn financial data into clearer decisions.
             </h1>
-            <p className="mt-5 max-w-[520px] text-[17px] leading-relaxed text-[#6b7280] dark:text-muted-foreground md:text-[18px]">
-              Rimbun turns transaction and operating data into clear actions,
-              warnings, and fit-for-purpose financial recommendations.
+            <p className="mt-5 max-w-[420px] text-[17px] leading-relaxed text-[#5b6570] md:text-[18px]">
+              Rimbun turns your data into forecasts, signals and
+              recommendations.
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a
+                href="#paths"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1B4D3E] px-6 text-[15px] font-medium text-white hover:bg-[#164235]"
+              >
+                Explore solutions
+                <ArrowRight className="h-4 w-4" />
+              </a>
               <Link
                 to="/contact"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-6 text-[15px] font-medium text-background hover:opacity-90"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-[#d1d5db] bg-white px-6 text-[15px] font-medium text-[#15241f] hover:bg-[#f3f4f6]"
               >
                 Talk to us
               </Link>
-              <a
-                href="#solutions"
-                className="text-[15px] font-medium text-[#2563eb] hover:underline dark:text-primary"
-              >
-                See solutions →
-              </a>
             </div>
-          </div>
-          <IntelligencePreview />
+          </motion.div>
+
+          <ForecastHeroCard />
         </div>
       </section>
 
-      {/* Who — tight vertical gap only between sections */}
-      <section id="solutions" className="scroll-mt-14 px-8 py-6 md:py-7">
+      {/* Choose your path */}
+      <section id="paths" className="scroll-mt-16 px-6 py-14 md:px-8 md:py-16">
         <div className="mx-auto max-w-[1100px]">
-          <h2 className="text-[24px] font-semibold tracking-tight text-foreground md:text-[28px]">
-            Who Rimbun helps
-          </h2>
-          <div className="mt-5 grid gap-5 md:grid-cols-3">
-            {platformAudiences.map((audience) => (
-              <AudienceCard key={audience.id} {...audience} />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45 }}
+            className="text-center"
+          >
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-[#9ca3af]">
+              BUILT FOR DIFFERENT DECISIONS
+            </p>
+            <h2 className="mt-3 text-[28px] font-semibold tracking-tight text-[#15241f] md:text-[34px]">
+              Choose your path
+            </h2>
+          </motion.div>
+
+          <div className="mt-9 grid gap-4 md:grid-cols-3 md:gap-5">
+            {platformAudiences.map((audience, i) => (
+              <motion.div
+                key={audience.id}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+              >
+                <PathCard
+                  title={audience.title}
+                  description={audience.description}
+                  href={audience.href}
+                  tone={audience.pathTone}
+                  icon={audience.icon}
+                />
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Intelligence */}
-      <section className="px-8 py-6 md:py-7">
-        <div className="mx-auto max-w-[1100px]">
-          <h2 className="text-[24px] font-semibold tracking-tight text-foreground md:text-[28px]">
-            What the intelligence looks like
+      {/* Intelligence layer */}
+      <section className="px-6 py-14 md:px-8 md:py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.45 }}
+        >
+          <IntelligenceLayer />
+        </motion.div>
+      </section>
+
+      {/* Closing CTA */}
+      <section className="relative overflow-hidden px-6 py-16 md:px-8 md:py-20">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(27,77,62,0.12),_transparent_60%),linear-gradient(180deg,_transparent,_rgba(232,243,236,0.65))]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 opacity-40"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath fill='%231B4D3E' fill-opacity='0.08' d='M0,64 C240,120 480,0 720,40 C960,80 1200,100 1440,40 L1440,120 L0,120 Z'/%3E%3C/svg%3E\")",
+            backgroundSize: "cover",
+            backgroundPosition: "bottom",
+          }}
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-[720px] text-center">
+          <h2 className="text-[28px] font-semibold tracking-tight text-[#15241f] md:text-[36px]">
+            See what Rimbun could do with your data.
           </h2>
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {platformCapabilities.map((cap) => (
-              <CapabilityCard
-                key={cap.id}
-                title={cap.title}
-                items={cap.items}
-                tone={cap.tone}
-                icon={cap.icon}
-              />
-            ))}
-          </div>
+          <Link
+            to="/contact"
+            className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1B4D3E] px-7 text-[15px] font-medium text-white hover:bg-[#164235]"
+          >
+            Talk to us
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      {/* Examples — mockup: divider columns, no cards */}
-      <section className="px-8 py-6 md:py-7">
-        <div className="mx-auto max-w-[1100px]">
-          <h2 className="text-[24px] font-semibold tracking-tight text-foreground md:text-[28px]">
-            How it shows up
-          </h2>
-          <div className="mt-5 grid gap-8 md:grid-cols-3 md:gap-0">
-            {platformExamples.map((example, i) => (
-              <IndustryExample
-                key={example.id}
-                {...example}
-                divided={i > 0}
-              />
-            ))}
-          </div>
-
-          {/* Content-width rule only — not edge-to-edge */}
-          <div className="mt-8 border-t border-[#e8e8ea] dark:border-border md:mt-10" />
-
-          <h2 className="mt-8 text-[24px] font-semibold tracking-tight text-foreground md:mt-10 md:text-[28px]">
-            Choose your route
-          </h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {platformRoutes.map((route) => (
-              <RouteCard key={route.id} {...route} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="pb-4 md:pb-6">
-        <PlatformFooter />
-      </div>
+      <PlatformFooter />
     </div>
   );
 }

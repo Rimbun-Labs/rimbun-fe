@@ -1,123 +1,85 @@
+import {
+  ChevronDown,
+  ChevronRight,
+  Home,
+  BarChart3,
+  FileText,
+  Settings,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { accentStyles } from "../content";
-import { businessesHeroMetrics } from "./content";
+import { Logo } from "@/components/ui/Logo";
+import { businessesDecisions, decisionIconStyles } from "./content";
 
+/** Hero preview — key decisions with short explanations. */
 export function BusinessesHeroPreview() {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-[#e8e8ea] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:border-border dark:bg-card">
-      <div className="border-b border-[#e8e8ea] p-5 dark:border-border md:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[14px] font-semibold text-foreground">
-              Cash position
+    <div className="overflow-hidden rounded-[22px] border border-[#e8e8ea] bg-white shadow-[0_18px_50px_rgba(11,61,52,0.10)]">
+      <div className="flex min-h-[320px]">
+        {/* Decorative app chrome — not interactive */}
+        <aside
+          className="hidden w-12 shrink-0 flex-col items-center gap-4 border-r border-[#eef0f2] bg-[#f7f8f8] py-4 sm:flex"
+          aria-hidden
+        >
+          <Logo size="sm" variant="header" />
+          <Home className="h-4 w-4 text-[#9ca3af]" strokeWidth={1.75} />
+          <BarChart3 className="h-4 w-4 text-[#9ca3af]" strokeWidth={1.75} />
+          <FileText className="h-4 w-4 text-[#9ca3af]" strokeWidth={1.75} />
+          <Settings className="mt-auto h-4 w-4 text-[#9ca3af]" strokeWidth={1.75} />
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-3 border-b border-[#eef0f2] px-4 py-3.5 sm:px-5">
+            <p className="text-[15px] font-semibold tracking-tight text-[#15241f]">
+              Key decisions
             </p>
-            <p className="mt-3 text-[12px] text-[#6b7280]">
-              Projected cash position
-            </p>
-            <p className="mt-1 text-[28px] font-semibold tracking-tight text-foreground">
-              $128,450
-            </p>
-            <p className="mt-1 text-[12px] font-medium text-[#059669]">
-              ↑ $24,300 · +23%
-            </p>
+            <span className="inline-flex items-center gap-1 rounded-full border border-[#e5e7eb] bg-[#f8f9fa] px-2.5 py-1 text-[12px] text-[#5b6570]">
+              This month
+              <ChevronDown className="h-3.5 w-3.5" />
+            </span>
           </div>
-          <p className="text-[12px] text-[#6b7280]">Next 90 days</p>
-        </div>
 
-        <div className="mt-4 h-[110px] w-full">
-          <svg
-            viewBox="0 0 100 48"
-            className="h-full w-full"
-            preserveAspectRatio="none"
-            aria-hidden
-          >
-            <polyline
-              points="2,30 18,28 34,32 50,24 66,26 82,18 98,20"
-              fill="none"
-              stroke="#2563eb"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
-            <polyline
-              points="2,26 18,22 34,24 50,16 66,14 82,10 98,8"
-              fill="none"
-              stroke="#059669"
-              strokeWidth="1.6"
-              strokeDasharray="3 2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-              opacity="0.85"
-            />
-            <polyline
-              points="2,34 18,36 34,38 50,34 66,36 82,32 98,34"
-              fill="none"
-              stroke="#d97706"
-              strokeWidth="1.6"
-              strokeDasharray="3 2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-              opacity="0.85"
-            />
-          </svg>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#6b7280]">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#2563eb]" />
-            Base case
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#059669]" />
-            Best case
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#d97706]" />
-            Worst case
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4">
-        {businessesHeroMetrics.map((item, i) => {
-          const styles = accentStyles[item.tone];
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.label}
-              className={cn(
-                "px-3 py-3.5 md:px-4",
-                "border-b border-[#e8e8ea] dark:border-border lg:border-b-0",
-                i % 2 === 0 && "border-r border-[#e8e8ea] dark:border-border",
-                i < 2 && "lg:border-r lg:border-[#e8e8ea] dark:lg:border-border"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full",
-                  styles.well
-                )}
-              >
-                <Icon
-                  className={cn("h-3.5 w-3.5", styles.icon)}
-                  strokeWidth={1.75}
-                />
-              </div>
-              <p className="mt-2 text-[13px] font-semibold leading-tight text-foreground">
-                {item.count} {item.label}
-              </p>
-              <p className="mt-0.5 text-[11px] text-[#6b7280]">{item.detail}</p>
-            </div>
-          );
-        })}
-        <div className="border-l-0 px-3 py-3.5 md:px-4 lg:border-l lg:border-[#e8e8ea] dark:lg:border-border">
-          <p className="text-[12px] font-semibold text-foreground">At a glance</p>
-          <ul className="mt-2 space-y-1 text-[11px] leading-snug text-[#6b7280]">
-            <li>Cash dip in late Aug</li>
-            <li>Recovering in Sep</li>
-            <li>Stronger Q4 outlook</li>
+          <ul className="divide-y divide-[#eef0f2]">
+            {businessesDecisions.map((item) => {
+              const Icon = item.icon;
+              const styles = decisionIconStyles[item.tone];
+              return (
+                <li
+                  key={item.question}
+                  className="flex items-center gap-3 px-4 py-3.5 sm:gap-3.5 sm:px-5"
+                >
+                  <div
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                      styles.well,
+                    )}
+                  >
+                    <Icon
+                      className={cn("h-4 w-4", styles.icon)}
+                      strokeWidth={1.75}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-semibold leading-snug text-[#15241f] sm:text-[14px]">
+                      {item.question}
+                    </p>
+                    <p className="mt-0.5 text-[12px] leading-snug text-[#6b7280]">
+                      {item.detail}
+                    </p>
+                  </div>
+                  {item.status === "yes" ? (
+                    <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-[#e4f3ea] py-1 pl-2.5 pr-1.5 text-[12px] font-semibold text-[#1B4D3E]">
+                      Yes
+                      <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-[#f8ead8] py-1 pl-2.5 pr-1.5 text-[12px] font-semibold text-[#9a5b1f]">
+                      Review
+                      <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>

@@ -15,7 +15,6 @@ import { SelectedCustomerProvider } from "./contexts/SelectedCustomerContext";
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 
 // Lightweight pages - keep in main bundle (frequently used, small size)
-import ForBanks from "./pages/ForBanks";
 import ForBusinesses from "./pages/ForBusinesses";
 import ForBanksAudience from "./pages/ForBanksAudience";
 import ForInsurersLenders from "./pages/ForInsurersLenders";
@@ -170,7 +169,7 @@ const RootRedirect = () => {
   if (operator) {
     return <Navigate to="/app" replace />;
   }
-  return <ForBanks />;
+  return <PlatformHome />;
 };
 
 const AppRoutes = () => {
@@ -184,26 +183,18 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/clients" element={<ForBanks />} />
-      {/* Trial IA — unified platform homepage + audience routes (not `/` yet) */}
-      <Route path="/platform" element={<PlatformHome />} />
+      {/* Marketing homepage + audience routes */}
       <Route path="/banks" element={<ForBanksAudience />} />
       <Route path="/businesses" element={<ForBusinesses />} />
       <Route path="/insurers-lenders" element={<ForInsurersLenders />} />
       <Route
-        path="/clients/demo"
+        path="/banks/demo"
         element={
           <Suspense fallback={<LoadingState variant="expanded" />}>
             <ForBanksDemo />
           </Suspense>
         }
       />
-      {/* Legacy paths — keep bookmarks and old links working */}
-      <Route path="/partners" element={<Navigate to="/clients" replace />} />
-      <Route path="/partners/demo" element={<Navigate to="/clients/demo" replace />} />
-      <Route path="/for-banks" element={<Navigate to="/clients" replace />} />
-      <Route path="/for-banks/demo" element={<Navigate to="/clients/demo" replace />} />
-      <Route path="/home" element={<Navigate to="/clients" replace />} />
       <Route path="/for-individuals" element={<ForIndividuals />} />
 
       {/* Public routes with same landing header as For Banks / For Individuals */}
