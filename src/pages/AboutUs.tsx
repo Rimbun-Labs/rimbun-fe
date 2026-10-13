@@ -20,16 +20,16 @@ const AboutUs: React.FC = () => {
       </section>
 
       <section className="bg-card px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-[680px]">
+        <div className="mx-auto max-w-[1100px]">
           <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
             People
           </p>
           <h2 className="mt-4 text-[32px] font-semibold leading-tight tracking-tight text-foreground md:text-[40px]">
-            Founders
+            Leadership
           </h2>
 
-          <div className="mt-12 space-y-14">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-3">
+            <div className="flex flex-col items-start gap-6">
               <img
                 src="/Adrian.JPG"
                 alt="Adrian Koh"
@@ -51,7 +51,7 @@ const AboutUs: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <div className="flex flex-col items-start gap-6">
               <img
                 src="/Jaitun.JPG"
                 alt="Jaitun Shah"
@@ -68,6 +68,28 @@ const AboutUs: React.FC = () => {
                   Jaitun is a product leader and operator. He spent nearly a
                   decade shipping complex programs, including Ford’s autonomous
                   vehicle work. He runs how Rimbun gets built and delivered.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-start gap-6">
+              <img
+                src="/Antonio.png"
+                alt="Antonio Maria Pafundi"
+                className="h-28 w-28 shrink-0 rounded-full object-cover sm:h-32 sm:w-32"
+              />
+              <div>
+                <h3 className="text-[21px] font-semibold tracking-tight text-foreground">
+                  Antonio Maria Pafundi
+                </h3>
+                <p className="mt-1 text-[15px] text-muted-foreground">
+                  Co-Founder & CTO
+                </p>
+                <p className="mt-4 text-[17px] leading-relaxed text-muted-foreground">
+                  Antonio is a software engineering leader with experience at
+                  Barclays and Man Group. He brings expertise in real-time
+                  financial platforms, production systems, and technical
+                  leadership to Rimbun.
                 </p>
               </div>
             </div>
