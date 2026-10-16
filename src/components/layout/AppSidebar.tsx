@@ -218,6 +218,13 @@ const AppSidebar: React.FC = () => {
             <Users className="h-4 w-4" />
             Customer portfolio
           </NavLink>
+          <NavLink
+            to={`${APP_ROOT}/consumer/statement`}
+            className={({ isActive }) => cn(navInactive, isActive && navActive)}
+          >
+            <FileText className="h-4 w-4" />
+            Individual statement
+          </NavLink>
         </div>
 
         {customerBase ? (

@@ -3,6 +3,7 @@ import type {
   BankCustomerListItem,
   BankCustomersResponseDto,
   BusinessPortfolioQueueItem,
+  BusinessDecisionDto,
   FiDecisionExplainDto,
   FiDecisionInsightsDto,
   FiQueueBucketSummaryDto,
@@ -122,6 +123,13 @@ export const getFiDecisionInsights = async (
   const responseData = response.data;
   if (responseData?.data) return responseData.data as FiDecisionInsightsDto;
   return responseData as FiDecisionInsightsDto;
+};
+
+export const getBusinessDecision = async (customerId: string): Promise<BusinessDecisionDto> => {
+  const response = await apiClient.get(`/dashboard/customers/${customerId}/business-decision`);
+  const responseData = response.data;
+  if (responseData?.data) return responseData.data as BusinessDecisionDto;
+  return responseData as BusinessDecisionDto;
 };
 
 export const getFiDecisionExplain = async (

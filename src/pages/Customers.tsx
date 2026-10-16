@@ -21,7 +21,6 @@ import type {
 } from "@/lib/api/types/fiDecision";
 import { useSelectedCustomer } from "@/contexts/SelectedCustomerContext";
 import { getBankCustomers, getBusinessPortfolioQueue } from "@/lib/api/fiDecisionApi";
-import { businessWorkspaceBase } from "@/lib/businessPaths";
 
 type CustomerTypeFilter = "all" | "individual" | "business";
 
@@ -206,7 +205,8 @@ const Customers: React.FC = () => {
     if (!id) return;
     setSelectedCustomerId(id);
     if (customerType === "business" || customerTypeFilter === "business") {
-      navigate(businessWorkspaceBase(id));
+      // Statement-reading SME demo (e.g. Warung Bu Sari) lives on customer overview.
+      navigate(`/app/customers/${id}?kind=business`);
       return;
     }
     navigate(`/app/customers/${id}`);
